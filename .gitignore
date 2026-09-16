@@ -1,0 +1,26 @@
+.ca_secret
+*.env
+*.env.local
+# Local Docker deployment files may contain environment-specific secrets.
+.env.docker
+safes_with_members.json
+test5.json
+node_modules/
+guia.md
+safes_members_findings.md
+cyberark_api.sh
+
+backend/.venv/
+frontend/dist/
+frontend/test-results/
+/test-results/
+__pycache__/
+*.pyc
+.legacy/
+*.xlsx
+*.csv
+
+
+backups/
+
+.claude/settings.local.json

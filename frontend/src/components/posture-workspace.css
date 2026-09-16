@@ -1,0 +1,45 @@
+.posture-surface { overflow: hidden; }
+.posture-filter-row { align-items: end; border-bottom: 1px solid var(--border-soft); display: flex; flex-wrap: wrap; gap: 12px; padding: 14px 18px; }
+.posture-filter-row label, .posture-field { color: var(--text-secondary); display: flex; flex-direction: column; font-size: 11px; font-weight: 700; gap: 6px; }
+.posture-filter-row select, .posture-field select, .posture-field input, .posture-field textarea { background: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-primary); font: inherit; min-height: 34px; padding: 7px 9px; }
+.posture-filter-row select { min-width: 160px; }
+.posture-field textarea { resize: vertical; }
+.posture-filter-note { align-items: center; color: var(--text-muted); display: flex; font-size: 11px; gap: 6px; margin-left: auto; min-height: 34px; }
+.posture-table { min-width: 920px; }
+.posture-row { cursor: pointer; }
+.posture-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.posture-row td { vertical-align: middle; }
+.posture-row td small, .posture-row-link small { color: var(--text-muted); display: block; font-size: 10px; margin-top: 4px; }
+.posture-row-link { background: transparent; border: 0; color: var(--text-primary); cursor: pointer; display: block; font: inherit; font-weight: 700; padding: 0; text-align: left; }
+.posture-row-link:hover { color: var(--accent-strong); }
+.posture-category { color: var(--text-secondary); font-size: 11px; }
+.posture-finding-drawer { max-width: 560px; }
+.posture-badge-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.posture-explanation { color: var(--text-secondary); font-size: 12px; line-height: 1.5; margin: 0 0 18px; }
+.posture-guidance { display: grid; gap: 1px; margin-bottom: 18px; overflow: hidden; border: 1px solid var(--border-soft); }
+.posture-guidance > div { background: var(--bg-subtle); padding: 12px 14px; }
+.posture-guidance span { color: var(--text-muted); display: block; font-size: 10px; font-weight: 750; letter-spacing: .05em; margin-bottom: 4px; text-transform: uppercase; }
+.posture-guidance p { color: var(--text-primary); font-size: 12px; line-height: 1.5; margin: 0; }
+.posture-guidance .posture-guidance-action { border-left: 2px solid var(--accent); }
+.posture-review-action { color: var(--text-secondary); font-size: 11px; line-height: 1.4; }
+.posture-evidence > summary { color: var(--text-primary); cursor: pointer; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.posture-facts, .posture-evidence-list { display: grid; gap: 11px; margin: 0; }
+.posture-facts div, .posture-evidence-list div { border-bottom: 1px solid var(--border-soft); display: flex; gap: 14px; justify-content: space-between; padding-bottom: 9px; }
+.posture-facts dt, .posture-evidence-list dt { color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: capitalize; }
+.posture-facts dd, .posture-evidence-list dd { color: var(--text-primary); font-size: 11px; margin: 0; max-width: 65%; text-align: right; overflow-wrap: anywhere; }
+.posture-context-button { margin-top: 16px; }
+.posture-evidence-heading { margin-bottom: 12px; }
+.posture-evidence-heading h3, .posture-action-section h3 { color: var(--text-primary); font-size: 14px; margin: 0 0 4px; }
+.posture-action-section { display: grid; gap: 12px; }
+.posture-action-section .button { justify-self: start; }
+.metrics-posture-list { border: 1px solid var(--border-soft); }
+.metrics-posture-row { align-items: center; background: var(--bg-panel); border: 0; border-bottom: 1px solid var(--border-soft); color: var(--text-primary); cursor: pointer; display: flex; gap: 16px; justify-content: space-between; padding: 13px 15px; text-align: left; width: 100%; }
+.metrics-posture-row:last-child { border-bottom: 0; }
+.metrics-posture-row:hover { background: var(--bg-hover); }
+.metrics-posture-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.metrics-posture-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.metrics-posture-main strong { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.metrics-posture-main small { color: var(--text-muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.metrics-posture-meta { align-items: center; display: flex; flex: 0 0 auto; gap: 12px; }
+.metrics-posture-meta > span:last-child { color: var(--text-muted); font-size: 10px; }
+@media (max-width: 700px) { .posture-filter-row { align-items: stretch; flex-direction: column; } .posture-filter-row select { width: 100%; } .posture-filter-note { margin-left: 0; } .posture-facts div, .posture-evidence-list div { align-items: flex-start; flex-direction: column; gap: 4px; } .posture-facts dd, .posture-evidence-list dd { max-width: 100%; text-align: left; } }
