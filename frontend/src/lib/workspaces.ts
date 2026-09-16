@@ -1,6 +1,6 @@
-export type WorkspaceView = 'general' | 'posture' | 'graph' | 'safes' | 'roles' | 'platforms' | 'connectors' | 'identityUsers' | 'identityGroups' | 'identityRoles' | 'sia' | 'identity' | 'assets' | 'users' | 'activity' | 'pamHealth' | 'aimApplications' | 'accessAssets' | 'siaConnectors' | 'siaResources' | 'siaDatabaseAccounts' | 'identityFederations';
+export type WorkspaceView = 'general' | 'posture' | 'graph' | 'safes' | 'roles' | 'platforms' | 'connectors' | 'identityUsers' | 'identityGroups' | 'identityRoles' | 'sia' | 'identity' | 'assets' | 'users' | 'activity' | 'pamHealth' | 'aimApplications' | 'accessAssets' | 'siaConnectors' | 'siaResources' | 'siaDatabaseAccounts' | 'identityFederations' | 'netskope';
 
-export const workspaceViews: WorkspaceView[] = ['general', 'posture', 'graph', 'safes', 'roles', 'platforms', 'connectors', 'identityUsers', 'identityGroups', 'identityRoles', 'sia', 'identity', 'assets', 'users', 'activity', 'pamHealth', 'aimApplications', 'accessAssets', 'siaResources', 'siaDatabaseAccounts', 'identityFederations'];
+export const workspaceViews: WorkspaceView[] = ['general', 'posture', 'graph', 'safes', 'roles', 'platforms', 'connectors', 'identityUsers', 'identityGroups', 'identityRoles', 'sia', 'identity', 'assets', 'users', 'activity', 'pamHealth', 'aimApplications', 'accessAssets', 'siaResources', 'siaDatabaseAccounts', 'identityFederations', 'netskope'];
 
 export type WorkspaceCategoryId = 'inventory' | 'pam_access' | 'technical_catalogs' | 'identity_sia' | 'posture' | 'administration';
 
@@ -52,6 +52,7 @@ const WORKSPACE_PATHS: Record<WorkspaceView, string> = {
   siaResources: '/pam/sia/resources',
   siaDatabaseAccounts: '/pam/sia/database-accounts',
   identityFederations: '/pam/identity/federations',
+  netskope: '/netskope',
 };
 
 /* Canonical + legacy paths both resolve so old bookmarks keep working;
@@ -95,6 +96,7 @@ const PATH_WORKSPACES: Record<string, WorkspaceView> = {
   '/pam/sia/resources': 'siaResources',
   '/pam/sia/database-accounts': 'siaDatabaseAccounts',
   '/pam/identity/federations': 'identityFederations',
+  '/netskope': 'netskope',
 };
 
 export function workspacePath(view: WorkspaceView): string {
@@ -107,7 +109,7 @@ export function workspaceFromPath(pathname: string): WorkspaceView | null {
 }
 
 export function workspaceRequiresAccessManage(view: WorkspaceView): boolean {
-  return view === 'users' || view === 'graph' || view === 'platforms' || view === 'connectors' || view === 'activity' || view === 'pamHealth' || view === 'aimApplications' || view === 'accessAssets' || view === 'siaConnectors' || view === 'siaResources' || view === 'siaDatabaseAccounts' || view === 'identityFederations';
+  return view === 'users' || view === 'graph' || view === 'platforms' || view === 'connectors' || view === 'activity' || view === 'pamHealth' || view === 'aimApplications' || view === 'accessAssets' || view === 'siaConnectors' || view === 'siaResources' || view === 'siaDatabaseAccounts' || view === 'identityFederations' || view === 'netskope';
 }
 
 /* Some access:manage-gated workspaces now also accept a narrower,
@@ -126,6 +128,7 @@ const WORKSPACE_ALTERNATE_PERMISSIONS: Partial<Record<WorkspaceView, string>> = 
   siaResources: 'sia:catalogs_read',
   siaDatabaseAccounts: 'sia:catalogs_read',
   identityFederations: 'identity:catalogs_read',
+  netskope: 'netskope:read',
 };
 
 /* Whether the actor's permission set unlocks this workspace: ungated views

@@ -1,9 +1,10 @@
 import type { WorkspaceView } from './workspaces';
 
 /* Top-level product domains. DS Hub is the umbrella; PAM is the CyberArk
-   chain, Admin is platform governance across the tools. DLP / DSPM are
-   declared now so the switcher can show them as "coming soon" without any
-   further layout change once they ship. */
+   chain, Admin is platform governance across the tools. DLP (Netskope) is
+   active as a navigable preparation workspace (migration 049): no external
+   Netskope integration, credentials or data sync exist yet. DSPM (BigID)
+   stays declared as "coming soon" until it ships. */
 export type Domain = 'admin' | 'pam' | 'dlp' | 'dspm';
 
 export type DomainStatus = 'active' | 'coming-soon';
@@ -18,7 +19,7 @@ export type DomainMeta = {
 export const domains: DomainMeta[] = [
   { id: 'admin', label: 'Admin', blurb: 'Gobierno y usuarios de la plataforma', status: 'active' },
   { id: 'pam', label: 'PAM', blurb: 'Accesos privilegiados', status: 'active' },
-  { id: 'dlp', label: 'DLP', blurb: 'Prevención de fuga de datos', status: 'coming-soon' },
+  { id: 'dlp', label: 'DLP', blurb: 'Prevención de fuga de datos', status: 'active' },
   { id: 'dspm', label: 'DSPM', blurb: 'Postura de Seguridad de Datos', status: 'coming-soon' },
 ];
 
@@ -36,7 +37,7 @@ export const domains: DomainMeta[] = [
 const DOMAIN_WORKSPACES: Record<Domain, WorkspaceView[]> = {
   pam: ['general', 'posture', 'graph', 'safes', 'platforms', 'connectors', 'pamHealth', 'identity', 'sia'],
   admin: ['users', 'activity'],
-  dlp: [],
+  dlp: ['netskope'],
   dspm: [],
 };
 
@@ -65,5 +66,5 @@ export function domainAccessible(id: Domain, permissions: string[]): boolean {
   if (id === 'admin' && !canSeeAdminGroup) return false;
   const hasDomainGrants = permissions.some((code) => code.startsWith('domain:'));
   if (!hasDomainGrants) return true;
-  return permissions.includes(`domain:${id}`) || (id === 'admin' && permissions.includes('inventory:read'));
+  return permissions.includes(`domain:${id}`) || (id === 'admin' && permissions.includes('inventory:read')) || (id === 'dlp' && permissions.includes('access:manage'));
 }

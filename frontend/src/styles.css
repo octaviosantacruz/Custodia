@@ -1439,6 +1439,16 @@ tbody tr:focus-visible,
   font-size: 11px;
   padding: 5px 9px;
 }
+.netskope-workspace { display: flex; flex-direction: column; gap: 18px; }
+.netskope-status-card { align-items: flex-start; background: var(--bg-elevated); border: 1px solid var(--border-strong); display: flex; gap: 14px; padding: 22px; }
+.netskope-status-icon { align-items: center; background: var(--bg-subtle); color: var(--accent-strong); display: inline-flex; flex-shrink: 0; height: 42px; justify-content: center; width: 42px; }
+.netskope-status-card h2 { margin: 2px 0 6px; }
+.netskope-status-card p { color: var(--text-secondary); font-size: 13px; margin: 0; max-width: 560px; }
+.netskope-next-steps { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.netskope-next-steps article { background: var(--bg-elevated); border: 1px solid var(--border-soft); display: flex; gap: 10px; padding: 16px; }
+.netskope-next-steps span { align-items: center; background: var(--bg-subtle); color: var(--accent-strong); display: inline-flex; flex-shrink: 0; height: 32px; justify-content: center; width: 32px; }
+.netskope-next-steps h3 { font-size: 13px; margin: 0 0 4px; }
+.netskope-next-steps p { color: var(--text-secondary); font-size: 12px; margin: 0; }
 .notification-wrap { position: relative; }
 .profile-wrap{position:relative}.profile-trigger{align-items:center;background:transparent;border:1px solid var(--border-soft);color:var(--text-secondary);display:inline-flex;gap:8px;min-height:38px;padding:4px 9px 4px 5px}.profile-trigger:hover,.profile-trigger.active{background:var(--bg-hover);border-color:var(--border-strong);color:var(--text-primary)}.profile-avatar{align-items:center;background:color-mix(in srgb,var(--accent) 18%,var(--bg-subtle));color:var(--accent-strong);display:inline-flex;font-size:11px;font-weight:800;height:28px;justify-content:center;width:28px}.profile-trigger-copy{display:flex;flex-direction:column;gap:1px;text-align:left}.profile-trigger-copy strong{color:var(--text-primary);font-size:11px;line-height:1.1}.profile-trigger-copy small{color:var(--text-muted);font-size:10px}.profile-menu{background:var(--bg-elevated);border:1px solid var(--border-strong);box-shadow:var(--shadow-popover);min-width:245px;padding:12px;position:absolute;right:0;top:46px;z-index:80}.profile-menu-heading{align-items:flex-start;color:var(--accent-strong);display:flex;gap:9px;padding:3px 2px 10px}.profile-menu-heading div{display:flex;flex-direction:column;gap:3px;min-width:0}.profile-menu-heading strong{color:var(--text-primary);font-size:12px}.profile-menu-heading span{color:var(--text-muted);font-size:11px;max-width:205px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.profile-menu-divider{border-top:1px solid var(--border-soft);margin:0 -2px 8px}.profile-menu-action{align-items:center;background:transparent;border:0;color:var(--text-secondary);display:flex;font:inherit;font-size:12px;gap:8px;padding:9px 7px;text-align:left;width:100%}.profile-menu-action:hover{background:var(--bg-hover);color:var(--danger-strong)}@media (max-width:760px){.profile-trigger-copy{display:none}.profile-trigger{padding-right:5px}.profile-menu{right:0}}
 .profile-menu { min-width: 285px; }
@@ -1933,7 +1943,7 @@ th,
 .home-visibility-core-admin:focus-visible { box-shadow: 0 0 0 4px var(--bg-app), 0 0 0 6px var(--accent-strong); outline: 0; }
 .home-visibility-core-admin:hover { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 14%, transparent), 0 0 28px color-mix(in srgb, var(--accent) 28%, transparent); transform: translate(-50%, -50%) scale(1.08); }
 .home-visibility-node { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border-strong); border-radius: 50%; color: var(--text-primary); display: flex; height: 72px; justify-content: center; padding: 0; position: absolute; transition: background-color .25s ease, border-color .25s ease, box-shadow .35s ease, transform .35s cubic-bezier(.16, 1, .3, 1); width: 72px; z-index: 2; }
-.home-visibility-node-cyberark { cursor: pointer; }
+.home-visibility-node-cyberark, .home-visibility-node-netskope { cursor: pointer; }
 .home-visibility-node .home-domain-logo { height: 46px; width: 46px; }
 .home-visibility-node .home-domain-logo img { height: 40px; width: 40px; }
 .home-visibility-node-cyberark { left: 12%; top: 21%; }
@@ -1947,6 +1957,9 @@ th,
 .home-visibility[data-active-domain='cyberark'] .home-visibility-line-one { background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent); height: 2px; }
 .home-visibility[data-active-domain='cyberark'] .home-visibility-node-cyberark { background: color-mix(in srgb, var(--accent) 14%, var(--bg-subtle)); border-color: var(--accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 13%, transparent), 0 0 24px color-mix(in srgb, var(--accent) 25%, transparent); transform: scale(1.08); }
 .home-visibility-node-cyberark:hover { background: color-mix(in srgb, var(--accent) 14%, var(--bg-subtle)); border-color: var(--accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 13%, transparent), 0 0 24px color-mix(in srgb, var(--accent) 25%, transparent); transform: scale(1.08); }
+.home-visibility[data-active-domain='netskope'] .home-visibility-line-two { background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent); height: 2px; }
+.home-visibility[data-active-domain='netskope'] .home-visibility-node-netskope,
+.home-visibility-node-netskope:hover { background: color-mix(in srgb, var(--accent) 14%, var(--bg-subtle)); border-color: var(--accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 13%, transparent), 0 0 24px color-mix(in srgb, var(--accent) 25%, transparent); transform: scale(1.08); }
 @media (max-width: 900px) { .home-workspace { gap: 40px; grid-template-columns: minmax(0, 560px) minmax(220px, 280px); } .home-visibility { max-width: 280px; } .home-visibility-node { height: 58px; width: 58px; } .home-visibility-node .home-domain-logo { height: 38px; width: 38px; } .home-visibility-node .home-domain-logo img { height: 32px; width: 32px; } .home-visibility-core { height: 74px; width: 74px; } .home-visibility-core svg { height: 19px; width: 19px; } }
 @media (max-width: 700px) { .home-workspace { display: flex; flex-direction: column; } .home-visibility { max-width: 260px; } }
 
@@ -1965,6 +1978,7 @@ th,
   .home-domain-button:not(.home-domain-button-disabled):hover > svg { transform: translateX(4px); }
   .home-domain-button > svg { transition: transform .25s cubic-bezier(.16, 1, .3, 1); }
   .home-visibility[data-active-domain='cyberark'] .home-visibility-line-one::after { animation: home-signal-travel .8s cubic-bezier(.16, 1, .3, 1) both; }
+  .home-visibility[data-active-domain='netskope'] .home-visibility-line-two::after { animation: home-signal-travel .8s cubic-bezier(.16, 1, .3, 1) both; }
 }
 
 /* Personal dashboard overrides the canonical eight-column metric band. The

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { canonicalWorkspaceList, categorizedWorkspaces, categoryOfWorkspace, canonicalRecentWorkspace, hasWorkspaceAccess, workspaceFromPath, workspacePath, workspaceViews } from '../src/lib/workspaces.ts';
-import { domainOf, domainWorkspaces } from '../src/lib/domains.ts';
+import { domainAccessible, domainMeta, domainOf, domainWorkspaces } from '../src/lib/domains.ts';
 
 test('workspaceViews includes the assets workspace', () => {
   assert.ok(workspaceViews.includes('assets'));
@@ -133,4 +133,31 @@ test('canonicalRecentWorkspace maps every SIA subview to the single sia destinat
 test('canonicalRecentWorkspace leaves unrelated workspaces untouched', () => {
   assert.equal(canonicalRecentWorkspace('safes'), 'safes');
   assert.equal(canonicalRecentWorkspace('platforms'), 'platforms');
+});
+
+test('Netskope DLP is a navigable, non-planned domain gated by access:manage or netskope:read', () => {
+  assert.equal(workspaceViews.includes('netskope'), true);
+  assert.equal(workspacePath('netskope'), '/netskope');
+  assert.equal(workspaceFromPath('/netskope'), 'netskope');
+  assert.deepEqual(domainWorkspaces('dlp'), ['netskope']);
+  assert.equal(domainOf('netskope'), 'dlp');
+  assert.equal(domainMeta('dlp').status, 'active');
+
+  assert.equal(hasWorkspaceAccess('netskope', []), false);
+  assert.equal(hasWorkspaceAccess('netskope', ['access:manage']), true);
+  assert.equal(hasWorkspaceAccess('netskope', ['netskope:read']), true);
+  assert.equal(hasWorkspaceAccess('netskope', ['inventory:read']), false);
+});
+
+test('domainAccessible unlocks Netskope DLP for access:manage or domain:dlp grants', () => {
+  assert.equal(domainAccessible('dlp', []), true);
+  assert.equal(domainAccessible('dlp', ['domain:pam']), false);
+  assert.equal(domainAccessible('dlp', ['domain:dlp']), true);
+  assert.equal(domainAccessible('dlp', ['access:manage']), true);
+});
+
+test('BigID DSPM stays disabled and inaccessible', () => {
+  assert.equal(domainMeta('dspm').status, 'coming-soon');
+  assert.equal(domainAccessible('dspm', ['access:manage']), false);
+  assert.deepEqual(domainWorkspaces('dspm'), []);
 });

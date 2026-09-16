@@ -86,6 +86,37 @@ test('hovering CyberArk syncs the left action and visibility wheel states', asyn
   await expect(cyberArkAction).toHaveClass(/is-active/);
 });
 
+test('Netskope DLP is clickable from home and lands on its preparation workspace', async ({ page }) => {
+  await mockAuthenticatedApp(page);
+  await page.goto('/');
+
+  const netskopeAction = page.locator('.home-domain-button').filter({ hasText: 'Netskope DLP' });
+  const netskopeNode = page.locator('.home-visibility-node-netskope');
+  await expect(netskopeAction).not.toHaveAttribute('aria-disabled', 'true');
+  await expect(netskopeAction).not.toHaveText(/Próximamente/);
+  await netskopeAction.hover();
+  await expect(page.locator('.home-visibility')).toHaveAttribute('data-active-domain', 'netskope');
+  await expect(netskopeAction).toHaveClass(/is-active/);
+
+  await netskopeAction.click();
+  await expect(page).toHaveURL(/\/netskope$/);
+  await expect(page.getByRole('heading', { name: 'Workspace habilitado' })).toBeVisible();
+  await expect(page.getByText(/Todavía no hay una fuente configurada ni datos sincronizados/)).toBeVisible();
+
+  await page.goto('/');
+  await netskopeNode.click();
+  await expect(page).toHaveURL(/\/netskope$/);
+});
+
+test('BigID DSPM stays disabled and unclickable from home', async ({ page }) => {
+  await mockAuthenticatedApp(page);
+  await page.goto('/');
+
+  const bigIdAction = page.locator('.home-domain-button').filter({ hasText: 'BigID DSPM' });
+  await expect(bigIdAction).toHaveAttribute('aria-disabled', 'true');
+  await expect(bigIdAction).toHaveText(/Próximamente/);
+});
+
 test('administration is available from home for authorized users', async ({ page }) => {
   await mockAuthenticatedApp(page);
   await page.goto('/');
@@ -115,7 +146,7 @@ test('top navigation separates tool selection from workspace selection', async (
 
   const tools = page.getByRole('region', { name: 'Herramientas' });
   await expect(tools.getByRole('button', { name: /CyberArk PAM/ })).toBeVisible();
-  await expect(tools.getByRole('button', { name: /Netskope DLP/ })).toBeDisabled();
+  await expect(tools.getByRole('button', { name: /Netskope DLP/ })).toBeEnabled();
   await expect(tools.getByRole('button', { name: /BigID DSPM/ })).toBeDisabled();
   await tools.getByRole('button', { name: /Administración/ }).click();
 

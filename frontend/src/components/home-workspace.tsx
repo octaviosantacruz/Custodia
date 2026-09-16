@@ -37,13 +37,13 @@ function BigIdLogo() {
   </span>;
 }
 
-export function HomeVisibilityGraphic({ monochrome = false, activeDomain = null, showAdmin = false, onCyberArkNavigate, onAdminNavigate, onActiveDomainChange }: { monochrome?: boolean; activeDomain?: 'cyberark' | null; showAdmin?: boolean; onCyberArkNavigate?: () => void; onAdminNavigate?: () => void; onActiveDomainChange?: (domain: 'cyberark' | null) => void }) {
+export function HomeVisibilityGraphic({ monochrome = false, activeDomain = null, showAdmin = false, onCyberArkNavigate, onNetskopeNavigate, onAdminNavigate, onActiveDomainChange }: { monochrome?: boolean; activeDomain?: 'cyberark' | 'netskope' | null; showAdmin?: boolean; onCyberArkNavigate?: () => void; onNetskopeNavigate?: () => void; onAdminNavigate?: () => void; onActiveDomainChange?: (domain: 'cyberark' | 'netskope' | null) => void }) {
   return <aside className={'home-visibility' + (monochrome ? ' home-visibility-monochrome' : '')} data-active-domain={activeDomain || undefined} aria-label="Fuentes de visibilidad de DS Hub">
     <div className="home-visibility-line home-visibility-line-one" />
     <div className="home-visibility-line home-visibility-line-two" />
     <div className="home-visibility-line home-visibility-line-three" />
     <button className="home-visibility-node home-visibility-node-cyberark" type="button" aria-label="Abrir CyberArk PAM" title="Abrir métricas e inventario de CyberArk PAM" onClick={onCyberArkNavigate} onMouseEnter={() => onActiveDomainChange?.('cyberark')} onMouseLeave={() => onActiveDomainChange?.(null)} onFocus={() => onActiveDomainChange?.('cyberark')} onBlur={() => onActiveDomainChange?.(null)}><CyberArkLogo /></button>
-    <div className="home-visibility-node home-visibility-node-netskope"><NetskopeLogo /></div>
+    <button className="home-visibility-node home-visibility-node-netskope" type="button" aria-label="Abrir Netskope DLP" title="Abrir el espacio de preparación de Netskope DLP" onClick={onNetskopeNavigate} onMouseEnter={() => onActiveDomainChange?.('netskope')} onMouseLeave={() => onActiveDomainChange?.(null)} onFocus={() => onActiveDomainChange?.('netskope')} onBlur={() => onActiveDomainChange?.(null)}><NetskopeLogo /></button>
     <div className="home-visibility-node home-visibility-node-bigid"><BigIdLogo /></div>
     {showAdmin && <button className="home-visibility-core home-visibility-core-admin" type="button" aria-label="Abrir Administración" title="Administrar usuarios, roles y permisos de DS Hub" onClick={onAdminNavigate}><span className="home-visibility-core-icon"><SlidersHorizontal size={22} /></span><span>Admin</span></button>}
     {!showAdmin && <div className="home-visibility-core"><DsHubMark /><span>DS Hub</span></div>}
@@ -51,7 +51,7 @@ export function HomeVisibilityGraphic({ monochrome = false, activeDomain = null,
 }
 
 export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
-  const [activeDomain, setActiveDomain] = useState<'cyberark' | null>(null);
+  const [activeDomain, setActiveDomain] = useState<'cyberark' | 'netskope' | null>(null);
   const canManageAccess = authStatus.permissions?.includes('access:manage') === true;
 
   return <main className="home-workspace">
@@ -66,11 +66,11 @@ export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
           <span><strong>CyberArk PAM</strong><small>Inventario y gobierno de accesos</small></span>
           <ArrowRight size={18} />
         </button>
-        <div className="home-domain-button home-domain-button-disabled" aria-disabled="true">
+        <button className={'home-domain-button' + (activeDomain === 'netskope' ? ' is-active' : '')} type="button" title="Abrir el espacio de preparación de Netskope DLP" onClick={() => onNavigate('netskope')} onMouseEnter={() => setActiveDomain('netskope')} onMouseLeave={() => setActiveDomain(null)} onFocus={() => setActiveDomain('netskope')} onBlur={() => setActiveDomain(null)}>
           <span className="home-domain-icon"><NetskopeLogo /></span>
           <span><strong>Netskope DLP</strong><small>Protección y gobierno de datos</small></span>
-          <small className="home-domain-status">Próximamente</small>
-        </div>
+          <ArrowRight size={18} />
+        </button>
         <div className="home-domain-button home-domain-button-disabled" aria-disabled="true">
           <span className="home-domain-icon"><BigIdLogo /></span>
           <span><strong>BigID DSPM</strong><small>Descubrimiento y postura de datos</small></span>
@@ -78,6 +78,6 @@ export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
         </div>
       </div>
     </section>
-    <HomeVisibilityGraphic activeDomain={activeDomain} showAdmin={canManageAccess} onActiveDomainChange={setActiveDomain} onCyberArkNavigate={() => onNavigate('general')} onAdminNavigate={() => onNavigate('users')} />
+    <HomeVisibilityGraphic activeDomain={activeDomain} showAdmin={canManageAccess} onActiveDomainChange={setActiveDomain} onCyberArkNavigate={() => onNavigate('general')} onNetskopeNavigate={() => onNavigate('netskope')} onAdminNavigate={() => onNavigate('users')} />
   </main>;
 }

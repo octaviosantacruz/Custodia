@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import {
-  Activity, Boxes, Database, Fingerprint, History, KeyRound, LayoutGrid, Link2, Network, PlugZap, SearchCode, Server, ShieldAlert, ShieldCheck, UserCog, Users, type LucideIcon,
+  Activity, Boxes, Database, FileLock2, Fingerprint, History, KeyRound, LayoutGrid, Link2, Network, PlugZap, SearchCode, Server, ShieldAlert, ShieldCheck, UserCog, Users, type LucideIcon,
 } from 'lucide-react';
 import type { WorkspaceView } from './workspaces';
 
@@ -32,6 +32,7 @@ export const WORKSPACE_ICONS: Record<WorkspaceView, LucideIcon> = {
   siaResources: Boxes,
   siaDatabaseAccounts: Database,
   identityFederations: Link2,
+  netskope: FileLock2,
 };
 
 export const WORKSPACE_META: Record<WorkspaceView, { label: string; detail: string; icon: ReactNode }> = {
@@ -64,6 +65,7 @@ export const WORKSPACE_META: Record<WorkspaceView, { label: string; detail: stri
   siaResources: { label: 'Recursos SIA', detail: 'Infraestructura VM de Secure Infrastructure Access', icon: <Boxes size={16} /> },
   siaDatabaseAccounts: { label: 'Cuentas fuertes de BD SIA', detail: 'Strong Accounts de base de datos de Secure Infrastructure Access', icon: <Database size={16} /> },
   identityFederations: { label: 'Federaciones', detail: 'Federaciones de Identity Administration', icon: <Link2 size={16} /> },
+  netskope: { label: 'Netskope DLP', detail: 'Preparación de la fuente DLP', icon: <FileLock2 size={16} /> },
 };
 
 export const workspaceLabels: Record<WorkspaceView, string> = Object.fromEntries(
