@@ -5,10 +5,17 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import re
+import sys
 
 import psycopg
 
 ROOT = Path(__file__).resolve().parents[1]
+BACKEND = ROOT / "backend"
+if str(BACKEND) not in sys.path:
+    sys.path.insert(0, str(BACKEND))
+
+from app.cross.services.database_credentials import DatabaseCredentialError, database_url_from_password_file
+
 MIGRATIONS = Path(os.getenv("MIGRATIONS_DIR", ROOT / "migrations"))
 BASELINE = MIGRATIONS / "baseline.sql"
 
@@ -30,7 +37,12 @@ def load_env_file() -> None:
 
 def main() -> None:
     load_env_file()
-    database_url = os.getenv("DATABASE_URL")
+    try:
+        database_url = database_url_from_password_file(
+            os.getenv("DATABASE_URL"), os.getenv("DATABASE_PASSWORD_FILE", "").strip()
+        )
+    except DatabaseCredentialError as exc:
+        raise SystemExit(str(exc)) from exc
     if not database_url:
         raise SystemExit("DATABASE_URL es obligatorio")
     files = sorted(MIGRATIONS.glob("[0-9][0-9][0-9]_*.sql"))

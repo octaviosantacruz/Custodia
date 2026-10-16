@@ -1,0 +1,7 @@
+.detail-drawer.nsk-user-drawer { max-width: 1200px; width: 85vw; }
+.nsk-user-drawer .detail-heading { flex: 1; min-width: 0; }
+.nsk-user-drawer .detail-heading h2 { overflow-wrap: anywhere; }
+.nsk-user-drawer .detail-heading p { color: var(--text-secondary); }
+.nsk-user-confidence p { color: var(--text-secondary); font-size: 12px; line-height: 1.6; margin: 8px 0 0; }
+.nsk-user-confidence-score strong { color: var(--text-primary); font-size: 20px; }
+.nsk-user-drawer .nsk-user-devices, .nsk-user-drawer .nsk-user-anomalies { border-bottom: 1px solid var(--border-soft); padding-bottom: 20px; }

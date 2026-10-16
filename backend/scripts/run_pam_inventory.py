@@ -7,7 +7,7 @@ from uuid import uuid4
 from dotenv import load_dotenv
 
 from app.db import create_pool
-from app.pam_inventory import sync_pam_inventory
+from app.cyberark.pam.pam_inventory import sync_pam_inventory
 
 
 async def main() -> None:

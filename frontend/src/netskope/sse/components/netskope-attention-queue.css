@@ -1,0 +1,16 @@
+.nsk-attention { display: grid; gap: 8px; padding: 14px 24px 12px; }
+.nsk-attention-head { align-items: center; display: flex; gap: 12px; }
+.nsk-attention-head h2 { font-size: 14px; margin: 0; }
+.nsk-attention-user { background: none; border: 0; color: var(--text-primary); cursor: pointer; display: grid; font: inherit; gap: 2px; padding: 0; text-align: left; }
+.nsk-attention-user:hover strong { color: var(--accent-strong); text-decoration: underline; }
+.nsk-attention-user:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.nsk-attention-user small { color: var(--text-secondary); font-size: 11px; font-weight: 400; }
+.nsk-attention-uci { align-items: center; display: inline-flex; gap: 6px; }
+.nsk-attention-empty { color: var(--text-secondary); }
+.nsk-attention td { font-variant-numeric: tabular-nums; }
+.nsk-attention .compact-table-wrap { max-height: 360px; overflow-y: auto; }
+
+.nsk-attention-explanation { color: var(--text-secondary); font-size: 11px; margin: 0; }
+.nsk-attention-scales { display: flex; gap: 24px; }
+.nsk-attention-scales p { color: var(--text-secondary); font-size: 12px; margin: 0; }
+.nsk-attention-reasons { display: grid; gap: 3px; font-size: 12px; }

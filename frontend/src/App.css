@@ -1,0 +1,31 @@
+.app-shell {
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+.workspace-content {
+  max-width: 100%;
+  min-width: 0;
+}
+/* Workspace navigation */
+.workspace-shell {
+  gap: 28px;
+  grid-template-columns: 218px minmax(0, 1fr);
+  margin: 0 auto;
+  padding: 28px 32px 60px;
+}
+@media (max-width: 900px) {
+  .workspace-shell { grid-template-columns: 176px minmax(0, 1fr); gap: 18px; padding-left: 18px; padding-right: 18px; }
+}
+@media (max-width: 700px) {
+  .workspace-shell { display: block; padding: 18px 16px 42px; }
+}
+/* Workspace launcher */
+.workspace-shell {
+  display: block;
+  max-width: 1500px;
+  padding-top: 30px;
+}
+.workspace-content { min-width: 0; }
+@media (max-width: 700px) {
+  .workspace-shell { padding-top: 20px; }
+}

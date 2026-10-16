@@ -1,0 +1,119 @@
+.personal-dashboard { border-top: 1px solid var(--border-soft); padding-top: 22px; }
+.personal-dashboard-heading { align-items: flex-end; display: flex; gap: 20px; justify-content: space-between; margin-bottom: 16px; }
+.personal-dashboard-heading h2 { color: var(--text-primary); font-size: 19px; margin: 5px 0 4px; }
+.personal-dashboard-heading .eyebrow { margin: 0; }
+.personal-dashboard-heading-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-left: auto; }
+.personal-dashboard-content { display: flex; flex-direction: column; gap: 20px; }
+.dashboard-data-section { min-width: 0; }
+.dashboard-data-strip { background: var(--border-soft); border: 1px solid var(--border-soft); display: grid; gap: 1px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* UX-AUD-012: a lone KPI must not leave two thirds of the row empty. */
+.dashboard-data-strip > :only-child { grid-column: 1 / -1; }
+.dashboard-data-item { background: var(--bg-elevated); min-height: 92px; position: relative; }
+.dashboard-data-item[data-status="pending"] .dashboard-data-open small { color: var(--warning); }
+.dashboard-data-open { background: transparent; border: 0; color: inherit; cursor: pointer; display: grid; gap: 2px; grid-template-columns: 1fr auto; min-height: 92px; padding: 13px 64px 12px 15px; text-align: left; width: 100%; }
+.dashboard-data-open:hover { background: var(--bg-hover); }
+.dashboard-data-open.is-static { cursor: default; }
+.dashboard-data-open.is-static:hover { background: transparent; }
+.dashboard-data-open:active { transform: translateY(1px); }
+.dashboard-data-open > span { color: var(--text-secondary); font-size: 9px; font-weight: 700; grid-column: 1 / -1; letter-spacing: .06em; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
+.dashboard-data-open > strong { color: var(--text-primary); font-size: 24px; font-variant-numeric: tabular-nums; font-weight: 640; grid-column: 1 / -1; line-height: 1.05; }
+.dashboard-data-open > small { color: var(--text-secondary); font-size: 10px; grid-column: 1 / -1; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-data-open > svg { color: var(--text-muted); position: absolute; right: 14px; top: 50%; transform: translateY(-50%); transition: color .15s ease, transform .15s ease; }
+.dashboard-data-open:hover > svg { color: var(--accent-strong); transform: translate(2px, -50%); }
+.dashboard-data-help { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border-soft); border-radius: 50%; color: var(--text-secondary); cursor: pointer; display: inline-flex; height: 24px; justify-content: center; padding: 0; position: absolute; right: 35px; top: 12px; transition: background-color .15s ease, border-color .15s ease, color .15s ease; width: 24px; z-index: 2; }
+.dashboard-data-help:hover, .dashboard-data-help.active { background: color-mix(in srgb, var(--accent) 12%, var(--bg-elevated)); border-color: var(--accent); color: var(--accent-strong); }
+.dashboard-data-help:focus-visible, .dashboard-data-open:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.dashboard-data-tooltip { background: var(--bg-elevated); border: 1px solid var(--border-strong); box-shadow: var(--shadow-popover); color: var(--text-secondary); left: 10px; max-width: min(360px, calc(100% - 20px)); padding: 12px; position: absolute; top: 46px; z-index: 20; }
+.dashboard-data-tooltip strong { color: var(--text-primary); display: block; font-size: 11px; margin-bottom: 7px; }
+.dashboard-data-tooltip p { font-size: 10px; line-height: 1.4; margin: 5px 0 0; }
+.dashboard-data-tooltip b { color: var(--text-primary); font-weight: 650; }
+@media (max-width: 760px) {
+  .personal-dashboard-heading { align-items: flex-start; flex-direction: column; }
+  .dashboard-data-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .dashboard-data-strip { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .netskope-data-strip .dashboard-data-item.size-md { grid-column: auto; }
+}
+/* Personal dashboard overrides the canonical eight-column metric band. The
+   editor exposes a compact 3x2 picker, while the rendered dashboard adds
+   rows when saved visual blocks need more than those six zones. */
+.personal-dashboard .personal-dashboard-metrics {
+  align-items: stretch;
+  grid-auto-rows: minmax(190px, auto);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.personal-dashboard .personal-metric-button,
+.personal-dashboard .personal-chart-card,
+.personal-dashboard .personal-metric-button .metric {
+  height: 100%;
+  width: 100%;
+}
+@media (max-width: 1080px) {
+  .personal-dashboard .personal-dashboard-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .personal-dashboard .personal-metric-button,
+  .personal-dashboard .personal-chart-card { grid-column: auto !important; grid-row: auto !important; }
+}
+@media (max-width: 760px) {
+  .personal-dashboard .personal-dashboard-metrics { grid-template-columns: 1fr; }
+  .personal-dashboard .personal-metric-button,
+  .personal-dashboard .personal-chart-card { grid-column: auto !important; grid-row: auto !important; }
+}
+.personal-dashboard.is-editing .dashboard-add-widget { border: 1px dashed var(--border-strong); margin-top: 10px; min-height: 76px; }
+.metric-button {
+  padding: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.metric-button:hover .metric { background: var(--bg-hover); }
+.metric-button[aria-pressed="true"] .metric { background: var(--bg-hover); box-shadow: inset 0 0 0 1px var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-data-item:active { transform: none; }
+  .dashboard-data-item > svg { transition: none; }
+}
+
+/* Metrics standard shared by every tool's board (PAM, Netskope): dense KPI
+   cards, tone-coded values with a topic icon, and one heading scale. Tone is
+   semantic: success = coverage/health, warning = gap or pending work,
+   neutral = plain count. */
+.personal-dashboard { padding-top: 12px; }
+.personal-dashboard .personal-dashboard-heading { margin-bottom: 10px; }
+.personal-dashboard .personal-dashboard-content { gap: 12px; }
+.personal-dashboard.is-editing .personal-dashboard-content { gap: 16px; }
+.personal-dashboard .dashboard-section-heading { margin-bottom: 6px; }
+.personal-dashboard .dashboard-section-heading h2 { color: var(--text-primary); font-size: 13px; margin: 0 0 2px; }
+.personal-dashboard .dashboard-data-item,
+.personal-dashboard .dashboard-data-open { min-height: 76px; }
+.personal-dashboard .dashboard-data-open { padding-bottom: 9px; padding-top: 9px; }
+.personal-dashboard .dashboard-data-open > strong { font-size: 21px; }
+.dashboard-data-title { align-items: center; display: inline-flex; gap: 6px; }
+.dashboard-data-item.tone-success .dashboard-data-title svg { color: var(--success); }
+.dashboard-data-item.tone-warning .dashboard-data-title svg { color: var(--warning); }
+.dashboard-data-item.tone-neutral .dashboard-data-title svg { color: var(--text-muted); }
+.dashboard-data-item.tone-success .dashboard-data-open > strong { color: var(--success); }
+.dashboard-data-item.tone-warning .dashboard-data-open > strong { color: var(--warning); }
+/* One chart-card frame for every tool: same floor height, padding and gap.
+   Chart content (advanced PAM charts, Netskope rankings) stays tool-owned. */
+.personal-dashboard .personal-chart-card { gap: 7px; min-height: 190px; padding: 12px; }
+.dashboard-create-card { align-items: center; background: transparent; border: 1px dashed color-mix(in srgb, var(--accent) 42%, var(--border)); color: var(--text-secondary); cursor: pointer; display: flex; gap: 12px; min-height: 68px; padding: 14px 16px; text-align: left; transition: background-color .15s ease, border-color .15s ease, color .15s ease; width: 100%; }
+.dashboard-create-card:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); border-color: var(--accent); color: var(--text-primary); }
+.dashboard-create-card > span:last-child { display: flex; flex-direction: column; gap: 3px; }
+.dashboard-create-card strong { color: inherit; font-size: 13px; }
+.dashboard-create-card small { color: var(--text-muted); font-size: 10px; }
+.dashboard-create-icon { align-items: center; border: 1px solid var(--accent); color: var(--accent-strong); display: inline-flex; height: 32px; justify-content: center; width: 32px; }
+
+/* Chart cards of every tool: a row shares one height, the chart sits centred
+   in the card, and a wide card spreads its legend over two columns instead of
+   pushing counts to the far edge. */
+.personal-dashboard .personal-chart-card { container-type: inline-size; }
+.personal-dashboard .personal-chart-card > [role="group"] { display: flex; flex: 1; flex-direction: column; justify-content: center; }
+.personal-dashboard .personal-chart-card .pie-chart-legend-wrap { max-width: 460px; }
+@container (min-width: 760px) {
+  .personal-dashboard .personal-chart-card .pie-chart-legend-wrap { max-width: none; }
+  .personal-dashboard .personal-chart-card .pie-chart-legend { column-gap: 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

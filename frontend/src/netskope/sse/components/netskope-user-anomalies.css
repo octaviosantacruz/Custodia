@@ -1,0 +1,8 @@
+.nsk-user-anomalies { display: grid; gap: 8px; padding: 14px 24px 6px; }
+.nsk-user-anomalies-head { align-items: center; display: flex; gap: 12px; }
+.nsk-user-anomalies-head h3 { font-size: 14px; margin: 0; }
+.nsk-user-anomalies-window { color: var(--text-secondary); font-size: 12px; }
+.nsk-user-anomalies-counts { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; margin: 0; padding: 0; }
+.nsk-user-anomalies-counts li { align-items: center; display: inline-flex; gap: 6px; }
+.nsk-user-anomalies-note, .nsk-user-anomalies-empty { color: var(--text-secondary); font-size: 12px; margin: 0; }
+.nsk-user-anomalies td:first-child { white-space: nowrap; }

@@ -6,6 +6,8 @@ from uuid import uuid4
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from app.logging_config import reset_request_id, set_request_id
+
 
 UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
@@ -73,9 +75,21 @@ class ApiSecurityMiddleware:
             await self.app(scope, receive, send)
             return
 
+        # Bound before any early rejection so every log line of this request,
+        # including uvicorn's access line, carries the X-Request-ID it returns.
+        request_id = str(uuid4())
+        request_context = set_request_id(request_id)
+        try:
+            await self._handle_http(scope, receive, send, request_id)
+        finally:
+            reset_request_id(request_context)
+
+    async def _handle_http(self, scope: Scope, receive: Receive, send: Send, request_id: str) -> None:
         headers = {key.lower(): value for key, value in scope.get("headers", [])}
         origin = headers.get(b"origin", b"").decode("latin-1").rstrip("/")
-        request_id = str(uuid4())
+        host = headers.get(b"host", b"").decode("latin-1").strip()
+        same_origin = f"{scope.get('scheme', 'http')}://{host}" if host else ""
+        scope.setdefault("state", {})["request_id"] = request_id
 
         async def secured_send(message: Message) -> None:
             if message["type"] == "http.response.start":
@@ -139,7 +153,7 @@ class ApiSecurityMiddleware:
                 await response(scope, receive, secured_send)
                 return
 
-        if is_api_mutation and origin and origin not in self.allowed_origins:
+        if is_api_mutation and origin and origin not in self.allowed_origins and origin != same_origin:
             response = JSONResponse({"detail": "Origen de solicitud no permitido"}, status_code=403)
             await response(scope, receive, secured_send)
             return

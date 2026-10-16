@@ -7,7 +7,7 @@ from uuid import uuid4
 from dotenv import load_dotenv
 
 from app.db import create_pool
-from app.sia_sync import sync_sia_inventory
+from app.cyberark.sia.sia_sync import sync_sia_inventory
 
 
 async def main() -> None:

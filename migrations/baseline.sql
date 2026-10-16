@@ -1556,8 +1556,74 @@ CREATE INDEX IF NOT EXISTS access_security_events_actor_id_idx
 COMMIT;
 -- END 048_security_events.sql
 
--- BEGIN 049_activate_netskope_dlp.sql
--- Activate the DS Hub Netskope DLP workspace and its role catalog.
+-- BEGIN 049_read_only_api_tokens.sql
+-- Migration 049: short-lived, user-issued API tokens for authenticated reads.
+-- Plaintext tokens are never persisted. OIDC actors intentionally have no
+-- foreign key to access_users because they are represented by role assignments.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.access_api_tokens (
+  token_id UUID PRIMARY KEY,
+  actor_id TEXT NOT NULL,
+  auth_source TEXT NOT NULL CHECK (auth_source IN ('local', 'oidc')),
+  session_version INTEGER,
+  label TEXT NOT NULL CHECK (char_length(label) BETWEEN 1 AND 80),
+  token_hash TEXT NOT NULL CHECK (char_length(token_hash) = 64),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  revoked_at TIMESTAMPTZ,
+  CHECK (
+    (auth_source = 'local' AND session_version IS NOT NULL)
+    OR (auth_source = 'oidc' AND session_version IS NULL)
+  )
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_access_api_tokens_hash
+  ON public.access_api_tokens (token_hash);
+CREATE INDEX IF NOT EXISTS idx_access_api_tokens_actor_created
+  ON public.access_api_tokens (actor_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_access_api_tokens_active_expiry
+  ON public.access_api_tokens (expires_at)
+  WHERE revoked_at IS NULL;
+
+COMMIT;
+-- END 049_read_only_api_tokens.sql
+
+-- BEGIN 050_oidc_user_directory.sql
+-- OIDC identities are visible in the access directory without creating a
+-- local password account. Roles remain authoritative in access_user_roles.
+BEGIN;
+
+CREATE TABLE public.access_oidc_users (
+  actor_id TEXT PRIMARY KEY,
+  issuer TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  email TEXT NOT NULL DEFAULT '',
+  display_name TEXT NOT NULL,
+  first_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_login_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_access_oidc_users_subject UNIQUE (issuer, subject)
+);
+
+COMMIT;
+-- END 050_oidc_user_directory.sql
+
+-- BEGIN 051_cyberark_compliance_snapshot.sql
+-- Aggregate only: no account identifiers, overview payloads or credentials.
+BEGIN;
+
+CREATE TABLE public.cyberark_compliance_snapshot (
+  singleton BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (singleton),
+  total_accounts INTEGER NOT NULL CHECK (total_accounts > 0),
+  compliant_accounts INTEGER NOT NULL CHECK (compliant_accounts >= 0 AND compliant_accounts <= total_accounts),
+  measured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 051_cyberark_compliance_snapshot.sql
+
+-- BEGIN 052_activate_netskope_dlp.sql
+-- Migration 052: activate the DS Hub Netskope DLP workspace and its role catalog.
 -- This enables local navigation and authorization only; it does not configure
 -- a Netskope API client, credentials, endpoints, or data synchronization.
 BEGIN;
@@ -1580,4 +1646,1360 @@ SET lifecycle_status = 'active',
 WHERE role_code IN ('netskope_reader', 'netskope_admin');
 
 COMMIT;
--- END 049_activate_netskope_dlp.sql
+-- END 052_activate_netskope_dlp.sql
+
+-- BEGIN 053_netskope_inventory.sql
+-- Netskope CMDB inventory: isolated users and endpoint devices.
+BEGIN;
+
+ALTER TABLE public.cyberark_inventory_objects
+  DROP CONSTRAINT IF EXISTS cyberark_inventory_objects_object_type_check;
+
+ALTER TABLE public.cyberark_inventory_objects
+  ADD CONSTRAINT cyberark_inventory_objects_object_type_check
+    CHECK (object_type IN (
+      'user', 'role', 'safe', 'platform', 'psm', 'access_policy', 'sia',
+      'component', 'psm_connector', 'aim_application',
+      'platform_dependent', 'platform_group', 'platform_rotational_group',
+      'platform_target', 'access_asset', 'sia_connector', 'sia_resource',
+      'sia_database_account', 'identity_federation', 'device'
+    ));
+
+ALTER TABLE public.cyberark_ingestion_runs
+  DROP CONSTRAINT IF EXISTS cyberark_ingestion_runs_source_system_check;
+
+ALTER TABLE public.cyberark_ingestion_runs
+  ADD CONSTRAINT cyberark_ingestion_runs_source_system_check
+    CHECK (source_system IN ('cyberark', 'identity_administration', 'sia', 'access', 'netskope'));
+
+ALTER TABLE public.cyberark_findings
+  DROP CONSTRAINT IF EXISTS cyberark_findings_source_system_check;
+
+ALTER TABLE public.cyberark_findings
+  ADD CONSTRAINT cyberark_findings_source_system_check
+    CHECK (source_system IN ('cyberark', 'identity_administration', 'sia', 'access', 'netskope'));
+
+COMMIT;
+-- END 053_netskope_inventory.sql
+
+-- BEGIN 054_netskope_dashboard_preferences.sql
+-- Personal Netskope dashboard selection, isolated from the PAM dashboard.
+-- actor_id is intentionally not a foreign key because OIDC identities may
+-- not have a local access_users row.
+BEGIN;
+
+CREATE TABLE public.user_netskope_dashboard_preferences (
+  actor_id TEXT PRIMARY KEY,
+  data_widgets JSONB NOT NULL DEFAULT '[]'::JSONB,
+  chart_widgets JSONB NOT NULL DEFAULT '[]'::JSONB,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT user_netskope_data_widgets_array CHECK (jsonb_typeof(data_widgets) = 'array'),
+  CONSTRAINT user_netskope_chart_widgets_array CHECK (jsonb_typeof(chart_widgets) = 'array'),
+  CONSTRAINT user_netskope_data_widget_limit CHECK (jsonb_array_length(data_widgets) <= 6),
+  CONSTRAINT user_netskope_chart_widget_limit CHECK (jsonb_array_length(chart_widgets) <= 6)
+);
+
+COMMIT;
+-- END 054_netskope_dashboard_preferences.sql
+
+-- BEGIN 055_operational_error_events.sql
+-- Sanitized application failures for the administrator-facing operations log.
+BEGIN;
+
+CREATE TABLE public.operational_error_events (
+    event_id BIGSERIAL PRIMARY KEY,
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    request_id TEXT NOT NULL,
+    method TEXT NOT NULL,
+    path TEXT NOT NULL,
+    error_kind TEXT NOT NULL,
+    status_code SMALLINT NOT NULL DEFAULT 500 CHECK (status_code BETWEEN 500 AND 599),
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX operational_error_events_occurred_at_idx
+    ON public.operational_error_events (occurred_at DESC);
+CREATE INDEX operational_error_events_request_id_idx
+    ON public.operational_error_events (request_id);
+
+COMMIT;
+-- END 055_operational_error_events.sql
+
+-- BEGIN 056_operational_log_events.sql
+-- Structured, sanitized events for the administrator-facing operations log.
+BEGIN;
+
+CREATE TABLE public.operational_log_events (
+    log_id BIGSERIAL PRIMARY KEY,
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    level TEXT NOT NULL CHECK (level IN ('info', 'warning', 'error')),
+    source_system TEXT NOT NULL,
+    event TEXT NOT NULL,
+    message TEXT NOT NULL,
+    run_id UUID NULL,
+    metadata JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX operational_log_events_occurred_at_idx
+    ON public.operational_log_events (occurred_at DESC, log_id DESC);
+CREATE INDEX operational_log_events_source_idx
+    ON public.operational_log_events (source_system, occurred_at DESC);
+CREATE INDEX operational_log_events_run_idx
+    ON public.operational_log_events (run_id);
+
+COMMIT;
+-- END 056_operational_log_events.sql
+
+-- BEGIN 057_activity_events_sync_identity.sql
+-- Link lightweight synchronization events to the exact durable ingestion run.
+--
+-- The event stream is intentionally payload-free, but observers need these
+-- references to request the correct terminal result when sources finish in
+-- parallel.
+BEGIN;
+
+ALTER TABLE public.activity_events
+  ADD COLUMN IF NOT EXISTS run_id UUID NULL,
+  ADD COLUMN IF NOT EXISTS source_system TEXT NULL;
+
+CREATE INDEX IF NOT EXISTS idx_activity_events_run_id
+  ON public.activity_events (run_id)
+  WHERE run_id IS NOT NULL;
+
+COMMIT;
+-- END 057_activity_events_sync_identity.sql
+
+-- BEGIN 058_netskope_device_snapshots.sql
+-- Keep the allowlisted Netskope device state observed in each completed sync.
+-- This is history only; the current CMDB row remains the read-optimized index.
+BEGIN;
+
+CREATE TABLE public.netskope_device_snapshots (
+    snapshot_id BIGSERIAL PRIMARY KEY,
+    source_run_id UUID NOT NULL REFERENCES public.cyberark_ingestion_runs(run_id),
+    device_id TEXT NOT NULL,
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    attributes JSONB NOT NULL,
+    UNIQUE (source_run_id, device_id)
+);
+
+CREATE INDEX netskope_device_snapshots_device_idx
+    ON public.netskope_device_snapshots (device_id, captured_at DESC, snapshot_id DESC);
+
+COMMIT;
+-- END 058_netskope_device_snapshots.sql
+
+-- BEGIN 059_netskope_baselines.sql
+-- NSK-VER-001 / NSK-FLT-001: compliance baselines for the Netskope inventory.
+-- An admin sets them explicitly; they are never inferred from the most common
+-- value or downloaded. Each change is audited in access_audit_log (who, when,
+-- before/after); this table only keeps the current value.
+BEGIN;
+
+CREATE TABLE public.netskope_baselines (
+    baseline_key TEXT PRIMARY KEY
+        CHECK (baseline_key IN ('client_golden_releases', 'os_minimum_versions')),
+    -- client_golden_releases: {"releases": ["141.0.0", "138.1.0", ...]} newest first.
+    -- os_minimum_versions: {"minimums": {"Windows": "10.0.19045", "Mac": "15.0.0"}}.
+    value JSONB NOT NULL,
+    note TEXT CHECK (note IS NULL OR length(note) <= 500),
+    updated_by TEXT NOT NULL,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 059_netskope_baselines.sql
+
+-- BEGIN 060_netskope_alert_aggregates.sql
+-- NSK-ALR-001: count-only Netskope alert snapshots for bounded rolling windows.
+-- No event rows, users, IPs, URLs, filenames or forensic payloads are stored.
+BEGIN;
+
+CREATE TABLE public.netskope_alert_aggregates (
+    aggregate_id BIGSERIAL PRIMARY KEY,
+    source_run_id UUID NOT NULL REFERENCES public.cyberark_ingestion_runs(run_id),
+    window_days SMALLINT NOT NULL CHECK (window_days IN (7, 30, 90)),
+    window_start TIMESTAMPTZ NOT NULL,
+    window_end TIMESTAMPTZ NOT NULL,
+    dimension TEXT NOT NULL CHECK (dimension IN ('total', 'alert_type', 'severity', 'action')),
+    dimension_value TEXT NOT NULL DEFAULT '',
+    alert_count BIGINT NOT NULL CHECK (alert_count >= 0),
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT netskope_alert_aggregate_key UNIQUE (source_run_id, window_days, dimension, dimension_value),
+    CONSTRAINT netskope_alert_aggregate_dimension_value CHECK (
+        (dimension = 'total' AND dimension_value = '')
+        OR (dimension <> 'total' AND dimension_value <> '')
+    ),
+    CONSTRAINT netskope_alert_aggregate_window CHECK (window_start < window_end)
+);
+
+CREATE INDEX netskope_alert_aggregates_latest_idx
+    ON public.netskope_alert_aggregates (window_days, dimension, captured_at DESC, aggregate_id DESC);
+
+COMMIT;
+-- END 060_netskope_alert_aggregates.sql
+
+-- BEGIN 061_netskope_dlp_event_cache.sql
+-- Cache sanitario de eventos DLP recientes para investigación contextual.
+-- No guarda payloads, archivos, IPs, URLs ni campos forenses.
+BEGIN;
+
+CREATE TABLE public.netskope_dlp_event_cache (
+    event_id TEXT PRIMARY KEY,
+    event_timestamp TIMESTAMPTZ NOT NULL,
+    alert_name TEXT NOT NULL DEFAULT '',
+    alert_type TEXT NOT NULL DEFAULT '',
+    app TEXT NOT NULL DEFAULT '',
+    action TEXT NOT NULL DEFAULT '',
+    severity TEXT NOT NULL DEFAULT '',
+    hostname TEXT NOT NULL DEFAULT '',
+    violating_user TEXT NOT NULL DEFAULT '',
+    dlp_incident_id TEXT,
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE public.netskope_dlp_cache_state (
+    cache_key TEXT PRIMARY KEY CHECK (cache_key = 'default'),
+    window_start TIMESTAMPTZ NOT NULL,
+    window_end TIMESTAMPTZ NOT NULL,
+    scanned_events INTEGER NOT NULL CHECK (scanned_events >= 0),
+    scanned_pages INTEGER NOT NULL CHECK (scanned_pages >= 0),
+    partial BOOLEAN NOT NULL DEFAULT false,
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX netskope_dlp_event_cache_time_idx
+    ON public.netskope_dlp_event_cache (event_timestamp DESC, event_id);
+
+CREATE INDEX netskope_dlp_event_cache_user_idx
+    ON public.netskope_dlp_event_cache (lower(violating_user), event_timestamp DESC);
+
+CREATE INDEX netskope_dlp_event_cache_hostname_idx
+    ON public.netskope_dlp_event_cache (hostname, event_timestamp DESC);
+
+COMMIT;
+-- END 061_netskope_dlp_event_cache.sql
+
+-- BEGIN 062_netskope_dlp_cursor_state.sql
+-- Persistent-cursor tracking for the Netskope DLP cache. The iterator was
+-- found to advance roughly one hour of backlog per page and to return empty
+-- pages mid-stream (not only when truly caught up), so a bounded from-scratch
+-- walk every few minutes could never reach recent events. The cache is now
+-- filled by a continuous poller that resumes from the last confirmed point.
+BEGIN;
+
+ALTER TABLE public.netskope_dlp_cache_state
+    ADD COLUMN iterator_index TEXT,
+    ADD COLUMN coverage_start TIMESTAMPTZ,
+    ADD COLUMN coverage_end TIMESTAMPTZ,
+    ADD COLUMN consecutive_empty_polls INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN consecutive_errors INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN last_successful_page_at TIMESTAMPTZ;
+
+COMMIT;
+-- END 062_netskope_dlp_cursor_state.sql
+
+-- BEGIN 063_netskope_dlp_incident_projection.sql
+-- Extiende el cache sanitario con el mínimo contexto operativo del contrato
+-- events/incident. No guarda dlp_match_info, rutas, URLs, IPs ni payloads.
+BEGIN;
+
+ALTER TABLE public.netskope_dlp_event_cache
+    ADD COLUMN site TEXT NOT NULL DEFAULT '',
+    ADD COLUMN user_id TEXT NOT NULL DEFAULT '';
+
+CREATE INDEX netskope_dlp_event_cache_user_id_idx
+    ON public.netskope_dlp_event_cache (user_id, event_timestamp DESC);
+
+COMMIT;
+-- END 063_netskope_dlp_incident_projection.sql
+
+-- BEGIN 064_netskope_dlp_rule_projection.sql
+-- Proyección operativa de la regla que produjo un incidente DLP.
+-- Nunca persiste dlp_match_info ni sus identificadores forenses.
+BEGIN;
+
+ALTER TABLE public.netskope_dlp_event_cache
+    ADD COLUMN dlp_policy TEXT NOT NULL DEFAULT '',
+    ADD COLUMN dlp_profile_name TEXT NOT NULL DEFAULT '',
+    ADD COLUMN dlp_rule_name TEXT NOT NULL DEFAULT '';
+
+CREATE INDEX netskope_dlp_event_cache_rule_idx
+    ON public.netskope_dlp_event_cache (dlp_rule_name, event_timestamp DESC);
+
+COMMIT;
+-- END 064_netskope_dlp_rule_projection.sql
+
+-- BEGIN 065_netskope_dlp_status_projection.sql
+-- Separa la acción DLP de Netskope del estado del incidente.
+-- Ambos son datos operativos allowlisteados; no guarda dlp_match_info.
+BEGIN;
+
+ALTER TABLE public.netskope_dlp_event_cache
+    ADD COLUMN incident_status TEXT NOT NULL DEFAULT '';
+
+CREATE INDEX netskope_dlp_event_cache_status_idx
+    ON public.netskope_dlp_event_cache (incident_status, event_timestamp DESC);
+
+COMMIT;
+-- END 065_netskope_dlp_status_projection.sql
+
+-- BEGIN 066_netskope_dashboard_widget_instances.sql
+-- VIEW-002: Netskope widgets gain size and order (widget instances).
+-- Additive: rows saved before this migration keep loading from the legacy
+-- data_widgets/chart_widgets arrays, and the new column stays nullable so an
+-- older backend can still read and write the table.
+BEGIN;
+
+ALTER TABLE public.user_netskope_dashboard_preferences
+  ADD COLUMN widgets JSONB;
+
+ALTER TABLE public.user_netskope_dashboard_preferences
+  ADD CONSTRAINT user_netskope_widgets_array
+  CHECK (widgets IS NULL OR jsonb_typeof(widgets) = 'array');
+
+ALTER TABLE public.user_netskope_dashboard_preferences
+  ADD CONSTRAINT user_netskope_widgets_limit
+  CHECK (widgets IS NULL OR jsonb_array_length(widgets) <= 12);
+
+COMMIT;
+-- END 066_netskope_dashboard_widget_instances.sql
+
+-- BEGIN 067_netskope_chain_indexes.sql
+-- CHAIN-005: expression indexes for the Netskope chain lookups.
+--
+-- The user <-> device observed match compares lower(btrim(...)) over the
+-- device username and over the user's source_id/email. Without indexes the
+-- worst-case expansion (42 devices for one user) scanned the whole user
+-- catalog per device: 3.4-6.4 s measured read-only on 2026-09-25, far above
+-- the 300 ms acceptance threshold. Search (ILIKE '%..%') stays on a
+-- sequential scan and already runs in 10-128 ms.
+--
+-- Additive and idempotent: only indexes, no data changes.
+BEGIN;
+
+CREATE INDEX IF NOT EXISTS cyberark_inventory_objects_source_id_lower_idx
+  ON public.cyberark_inventory_objects (lower(btrim(source_id)));
+
+CREATE INDEX IF NOT EXISTS cyberark_inventory_objects_email_lower_idx
+  ON public.cyberark_inventory_objects (lower(btrim(attributes->>'email')));
+
+CREATE INDEX IF NOT EXISTS cyberark_inventory_objects_username_lower_idx
+  ON public.cyberark_inventory_objects (lower(btrim(attributes->>'username')));
+
+COMMIT;
+-- END 067_netskope_chain_indexes.sql
+
+-- BEGIN 068_access_admin_permissions.sql
+-- ACCESS-SEG-001: narrow administrative permissions.
+--
+-- Purely additive. access:manage remains the compatibility superpermission;
+-- no existing non-admin role receives new authority in this migration.
+BEGIN;
+
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('access:directory_read', 'platform', 'directory', 'read', 'Consultar personas e identidades locales/OIDC', 'active'),
+  ('access:local_users_manage', 'platform', 'local_users', 'manage', 'Administrar identidades locales y sus credenciales temporales', 'active'),
+  ('access:role_assignments_manage', 'platform', 'role_assignments', 'manage', 'Asignar roles dentro del techo de delegación', 'active'),
+  ('access:roles_read', 'platform', 'roles', 'read', 'Consultar roles, permisos, dominios y niveles', 'active'),
+  ('access:roles_manage', 'platform', 'roles', 'manage', 'Crear y modificar roles dentro del techo de delegación', 'active'),
+  ('access:permissions_manage', 'platform', 'permissions', 'manage', 'Crear permisos internos; reservado al superadministrador', 'active'),
+  ('access:oidc_mappings_read', 'platform', 'oidc_mappings', 'read', 'Consultar mapeos y diagnóstico OIDC no secreto', 'active'),
+  ('audit:read', 'platform', 'audit', 'read', 'Consultar auditoría y registros operativos sanitizados', 'active'),
+  ('security:events_read', 'platform', 'security_events', 'read', 'Consultar eventos de autenticación y seguridad sanitizados', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+COMMIT;
+-- END 068_access_admin_permissions.sql
+
+-- BEGIN 069_netskope_dlp_alerts.sql
+-- NSK-DLP-001: minimal DLP alerts with count-first, per-user drill-down.
+--
+-- Allowlist persisted per alert: opaque incident ID, UTC timestamp, status,
+-- severity, policy, action and the opaque Netskope user ID (used only to
+-- resolve the already-persisted Netskope user inventory by exact equality).
+-- Never stores file/content, file name, hash, URL, IP, event email/name,
+-- dlp_match_info or any forensic payload. Retention is 30 days, enforced by
+-- the capture service after every successful capture.
+--
+-- The capture state row keeps the iterator cursor and honest freshness so the
+-- UI never presents a missing capture as zero alerts.
+BEGIN;
+
+CREATE TABLE public.netskope_dlp_alerts (
+    incident_id TEXT PRIMARY KEY,
+    event_timestamp TIMESTAMPTZ NOT NULL,
+    status TEXT NOT NULL DEFAULT '',
+    severity TEXT NOT NULL DEFAULT '',
+    policy TEXT NOT NULL DEFAULT '',
+    action TEXT NOT NULL DEFAULT '',
+    user_id TEXT NOT NULL DEFAULT '',
+    source_run_id UUID,
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX netskope_dlp_alerts_time_idx
+    ON public.netskope_dlp_alerts (event_timestamp DESC, incident_id);
+CREATE INDEX netskope_dlp_alerts_user_idx
+    ON public.netskope_dlp_alerts (user_id, event_timestamp DESC);
+CREATE INDEX netskope_dlp_alerts_severity_idx
+    ON public.netskope_dlp_alerts (severity, event_timestamp DESC);
+
+CREATE TABLE public.netskope_dlp_capture_state (
+    cache_key TEXT PRIMARY KEY CHECK (cache_key = 'default'),
+    iterator_index TEXT,
+    coverage_start TIMESTAMPTZ,
+    coverage_end TIMESTAMPTZ,
+    partial BOOLEAN NOT NULL DEFAULT true,
+    scanned_events INTEGER NOT NULL DEFAULT 0 CHECK (scanned_events >= 0),
+    captured_alerts INTEGER NOT NULL DEFAULT 0 CHECK (captured_alerts >= 0),
+    captured_at TIMESTAMPTZ,
+    last_run_id UUID
+);
+
+-- Purely additive narrow permission: NSK-DLP-001 is deliberately NOT granted
+-- by widening netskope:read, access:manage or any existing role. An operator
+-- with access:manage keeps the compatible 410 on the revived routes until
+-- this permission is explicitly assigned.
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('netskope:dlp_read', 'dlp', 'dlp_alerts', 'read', 'Consultar alertas DLP mínimas por usuario, sin artefacto sensible', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+COMMIT;
+-- END 069_netskope_dlp_alerts.sql
+
+-- BEGIN 070_netskope_dem_sites.sql
+-- DEM sites share the Netskope source but remain a distinct inventory type.
+BEGIN;
+
+ALTER TABLE public.cyberark_inventory_objects
+  DROP CONSTRAINT IF EXISTS cyberark_inventory_objects_object_type_check;
+
+ALTER TABLE public.cyberark_inventory_objects
+  ADD CONSTRAINT cyberark_inventory_objects_object_type_check
+    CHECK (object_type IN (
+      'user', 'role', 'safe', 'platform', 'psm', 'access_policy', 'sia',
+      'component', 'psm_connector', 'aim_application',
+      'platform_dependent', 'platform_group', 'platform_rotational_group',
+      'platform_target', 'access_asset', 'sia_connector', 'sia_resource',
+      'sia_database_account', 'identity_federation', 'device', 'dem_site'
+    ));
+
+COMMIT;
+-- END 070_netskope_dem_sites.sql
+
+-- BEGIN 071_role_dashboard_templates.sql
+-- VIEW-006: versioned dashboard templates published to access roles.
+-- Publishing only appends a template version; personal preferences are never
+-- updated implicitly and remain owned by each actor.
+BEGIN;
+
+CREATE TABLE public.role_dashboard_templates (
+  role_code TEXT NOT NULL REFERENCES public.access_roles(role_code),
+  dashboard_kind TEXT NOT NULL CHECK (dashboard_kind IN ('cyberark', 'netskope')),
+  version INTEGER NOT NULL CHECK (version > 0),
+  widgets JSONB NOT NULL CHECK (jsonb_typeof(widgets) = 'array' AND jsonb_array_length(widgets) <= 12),
+  published_by TEXT NOT NULL,
+  published_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (role_code, dashboard_kind, version)
+);
+
+CREATE INDEX role_dashboard_templates_latest_idx
+  ON public.role_dashboard_templates (role_code, dashboard_kind, version DESC);
+
+COMMIT;
+-- END 071_role_dashboard_templates.sql
+
+-- BEGIN 072_cyberark_risk_read_permission.sql
+-- RISK-001: read-only access to live CyberArk Risk Management data.
+-- This permission does not grant access:manage and no CyberArk risk payload is persisted.
+BEGIN;
+
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('pam:risk_read', 'pam', 'risk_posture', 'read', 'Consultar postura de riesgo calculada por CyberArk en modo sólo lectura', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+INSERT INTO public.access_role_permissions (role_code, permission_code) VALUES
+  ('reader', 'pam:risk_read'),
+  ('operator', 'pam:risk_read'),
+  ('admin', 'pam:risk_read'),
+  ('cyberark_reader', 'pam:risk_read'),
+  ('cyberark_operator', 'pam:risk_read'),
+  ('cyberark_admin', 'pam:risk_read')
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+COMMIT;
+-- END 072_cyberark_risk_read_permission.sql
+
+-- BEGIN 073_cyberark_risk_entities_read_permission.sql
+-- RISK-ENT-001: reveal only the entity display name on live Risk Management findings.
+-- This permission is separate from general CyberArk risk posture access.
+BEGIN;
+
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('pam:risk_entities_read', 'pam', 'risk_entities', 'read', 'Consultar el nombre de la entidad de los hallazgos de Risk Management', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+INSERT INTO public.access_role_permissions (role_code, permission_code) VALUES
+  ('admin', 'pam:risk_entities_read'),
+  ('cyberark_admin', 'pam:risk_entities_read')
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+COMMIT;
+-- END 073_cyberark_risk_entities_read_permission.sql
+
+-- BEGIN 074_sia_target_sets.sql
+-- SIA target sets remain isolated from other source and object types.
+BEGIN;
+
+ALTER TABLE public.cyberark_inventory_objects
+  DROP CONSTRAINT IF EXISTS cyberark_inventory_objects_object_type_check;
+
+ALTER TABLE public.cyberark_inventory_objects
+  ADD CONSTRAINT cyberark_inventory_objects_object_type_check
+    CHECK (object_type IN (
+      'user', 'role', 'safe', 'platform', 'psm', 'access_policy', 'sia',
+      'component', 'psm_connector', 'aim_application',
+      'platform_dependent', 'platform_group', 'platform_rotational_group',
+      'platform_target', 'access_asset', 'sia_connector', 'sia_resource',
+      'sia_database_account', 'sia_target_set', 'identity_federation',
+      'device', 'dem_site'
+    ));
+
+COMMIT;
+-- END 074_sia_target_sets.sql
+
+-- BEGIN 075_netskope_observed_policies.sql
+-- NSK-POL-001: observed real-time policies. Extends the count-only alert
+-- aggregate allowlist with the `policy` dimension. No event rows, users, IPs,
+-- URLs or forensic payloads are stored; only grouped counts per window.
+BEGIN;
+
+-- Migration 060 declared the dimension CHECK inline, so its constraint name is
+-- PostgreSQL-generated. Locate it by its definition (the only CHECK mentioning
+-- 'alert_type') instead of depending on the generated name.
+DO $$
+DECLARE
+    constraint_name TEXT;
+BEGIN
+    SELECT con.conname
+      INTO constraint_name
+      FROM pg_constraint AS con
+      JOIN pg_class AS rel ON rel.oid = con.conrelid
+      JOIN pg_namespace AS ns ON ns.oid = rel.relnamespace
+     WHERE ns.nspname = 'public'
+       AND rel.relname = 'netskope_alert_aggregates'
+       AND con.contype = 'c'
+       AND pg_get_constraintdef(con.oid) LIKE '%alert_type%';
+    IF constraint_name IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE public.netskope_alert_aggregates DROP CONSTRAINT %I', constraint_name);
+    END IF;
+END $$;
+
+ALTER TABLE public.netskope_alert_aggregates
+  ADD CONSTRAINT netskope_alert_aggregates_dimension_check
+    CHECK (dimension IN ('total', 'alert_type', 'severity', 'action', 'policy'));
+
+COMMIT;
+-- END 075_netskope_observed_policies.sql
+
+-- BEGIN 076_oidc_observed_groups.sql
+-- Only mapped groups received at login; NULL means not observed.
+-- Existing roles never imply group membership.
+BEGIN;
+ALTER TABLE public.access_oidc_users
+  ADD COLUMN observed_groups TEXT[],
+  ADD COLUMN groups_observed_at TIMESTAMPTZ;
+ALTER TABLE public.access_oidc_users
+  ADD CONSTRAINT access_oidc_groups_observation_check
+  CHECK ((observed_groups IS NULL) = (groups_observed_at IS NULL));
+COMMIT;
+-- END 076_oidc_observed_groups.sql
+
+-- BEGIN 077_sync_run_stages.sql
+-- Per-stage outcome of a synchronization run. Operational metadata only:
+-- no payloads, identifiers of upstream objects or exception text.
+BEGIN;
+CREATE TABLE public.sync_run_stages (
+  run_id        UUID NOT NULL REFERENCES public.cyberark_ingestion_runs(run_id) ON DELETE CASCADE,
+  position      SMALLINT NOT NULL CHECK (position >= 0),
+  stage         TEXT NOT NULL CHECK (stage ~ '^[a-z][a-z0-9_]{0,63}$'),
+  required      BOOLEAN NOT NULL,
+  status        TEXT NOT NULL CHECK (status IN ('completed', 'failed', 'skipped')),
+  item_count    INTEGER CHECK (item_count IS NULL OR item_count >= 0),
+  duration_ms   INTEGER NOT NULL CHECK (duration_ms >= 0),
+  error_kind    TEXT CHECK (error_kind IS NULL OR length(error_kind) <= 120),
+  detail        TEXT CHECK (detail IS NULL OR length(detail) <= 200),
+  PRIMARY KEY (run_id, position),
+  CHECK ((status = 'failed') = (error_kind IS NOT NULL))
+);
+COMMIT;
+-- END 077_sync_run_stages.sql
+
+-- BEGIN 078_sync_task_identity.sql
+-- SYNC-TASK-001: scheduler task identity, separate from data ownership.
+-- source_system keeps meaning "whose data is this"; task_key says "which
+-- scheduled job produced the run". Historical runs keep their behavior:
+-- every source maps to itself, except the former combined Netskope run, which
+-- was the inventory job.
+BEGIN;
+
+ALTER TABLE public.cyberark_ingestion_runs ADD COLUMN task_key TEXT;
+
+UPDATE public.cyberark_ingestion_runs
+SET task_key = CASE WHEN source_system = 'netskope' THEN 'netskope_inventory' ELSE source_system END
+WHERE task_key IS NULL;
+
+-- Producers that do not name a task (PAM's pipeline, tests, scripts) default
+-- to their source, which preserves the one-task-per-source semantics.
+CREATE FUNCTION public.default_ingestion_run_task_key() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.task_key IS NULL THEN
+    NEW.task_key := NEW.source_system;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_ingestion_runs_default_task_key
+  BEFORE INSERT ON public.cyberark_ingestion_runs
+  FOR EACH ROW EXECUTE FUNCTION public.default_ingestion_run_task_key();
+
+ALTER TABLE public.cyberark_ingestion_runs
+  ALTER COLUMN task_key SET NOT NULL,
+  ADD CONSTRAINT cyberark_ingestion_runs_task_key_not_blank CHECK (btrim(task_key) <> '');
+
+CREATE INDEX idx_ingestion_runs_task_status_enqueued
+  ON public.cyberark_ingestion_runs (task_key, status, enqueued_at);
+
+COMMIT;
+-- END 078_sync_task_identity.sql
+
+-- BEGIN 079_pam_task_identity.sql
+-- SYNC-TASK-002: PAM's two jobs get their own task identity. Safes and the
+-- isolated PSM catalog refresh shared task_key = 'cyberark' (migration 078),
+-- so they shared cadence, backoff and history. source_system stays 'cyberark'.
+BEGIN;
+
+UPDATE public.cyberark_ingestion_runs
+SET task_key = CASE
+  WHEN source_file = 'cyberark-psm-api' OR run_options->>'psm_only' = 'true' THEN 'pam_psm'
+  ELSE 'pam_safes'
+END
+WHERE source_system = 'cyberark' AND task_key = 'cyberark';
+
+-- Producers that do not name a task (the Safe pipeline's own insert, scripts)
+-- still resolve to a precise PAM task instead of the old shared one.
+CREATE OR REPLACE FUNCTION public.default_ingestion_run_task_key() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.task_key IS NULL THEN
+    NEW.task_key := CASE
+      WHEN NEW.source_system = 'cyberark'
+        THEN CASE
+          WHEN NEW.source_file = 'cyberark-psm-api' OR NEW.run_options->>'psm_only' = 'true' THEN 'pam_psm'
+          ELSE 'pam_safes'
+        END
+      ELSE NEW.source_system
+    END;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+COMMIT;
+-- END 079_pam_task_identity.sql
+
+-- BEGIN 080_sync_schedule_overrides.sql
+-- SYNC-UI-002: administrator-managed cadence overrides per scheduled task.
+BEGIN;
+
+CREATE TABLE public.sync_schedule_overrides (
+  task_key TEXT PRIMARY KEY CHECK (btrim(task_key) <> ''),
+  interval_minutes NUMERIC NOT NULL CHECK (interval_minutes = 0 OR interval_minutes >= 5),
+  updated_by TEXT NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 080_sync_schedule_overrides.sql
+
+-- BEGIN 081_netskope_policy_capture_marker.sql
+-- NSK-POL-002: a window whose `policy` dimension was captured with zero
+-- policies is indistinguishable, in the data, from a capture that predates the
+-- dimension (migration 075): both have no `policy` rows. A count-only marker
+-- row (`policy_capture`, value 'captured', count 0; migration 060 requires a
+-- non-empty value for every dimension but `total`) records that the dimension was
+-- requested and answered, so "no policy fired" and "no capture" stay distinct.
+-- No event, user or payload data is stored.
+BEGIN;
+
+ALTER TABLE public.netskope_alert_aggregates
+  DROP CONSTRAINT netskope_alert_aggregates_dimension_check;
+
+ALTER TABLE public.netskope_alert_aggregates
+  ADD CONSTRAINT netskope_alert_aggregates_dimension_check
+    CHECK (dimension IN ('total', 'alert_type', 'severity', 'action', 'policy', 'policy_capture'));
+
+COMMIT;
+-- END 081_netskope_policy_capture_marker.sql
+
+-- BEGIN 082_netskope_groups.sql
+-- NSK-GRP-001: Netskope groups share the Netskope source but remain a distinct
+-- inventory type; membership is stored as `member_of` relationships.
+BEGIN;
+
+ALTER TABLE public.cyberark_inventory_objects
+  DROP CONSTRAINT IF EXISTS cyberark_inventory_objects_object_type_check;
+
+ALTER TABLE public.cyberark_inventory_objects
+  ADD CONSTRAINT cyberark_inventory_objects_object_type_check
+    CHECK (object_type IN (
+      'user', 'role', 'safe', 'platform', 'psm', 'access_policy', 'sia',
+      'component', 'psm_connector', 'aim_application',
+      'platform_dependent', 'platform_group', 'platform_rotational_group',
+      'platform_target', 'access_asset', 'sia_connector', 'sia_resource',
+      'sia_database_account', 'sia_target_set', 'identity_federation',
+      'device', 'dem_site', 'netskope_group'
+    ));
+
+COMMIT;
+-- END 082_netskope_groups.sql
+
+-- BEGIN 083_netskope_user_uci.sql
+-- NSK-UBA-002: last User Confidence Index (UCI) reading per Netskope user.
+-- Only the latest score, the rating Netskope assigned and, when available, the
+-- score about 7 days earlier are kept: never the series, anomalies or any
+-- behavioral detail. The table is replaced as a whole by a complete read, so a
+-- user that is no longer Poor/Moderate drops out instead of keeping a stale score.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_user_uci (
+    email_key TEXT PRIMARY KEY CHECK (email_key = lower(email_key) AND email_key <> ''),
+    rating TEXT NOT NULL CHECK (rating IN ('Poor', 'Moderate')),
+    score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 1000),
+    previous_score INTEGER CHECK (previous_score BETWEEN 0 AND 1000),
+    scored_at TIMESTAMPTZ NOT NULL,
+    source_run_id UUID,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_netskope_user_uci_rating_score
+    ON public.netskope_user_uci (rating, score);
+
+-- Strict permission: neither netskope:read nor access:manage grants it.
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('netskope:uba_read', 'dlp', 'uba_uci', 'read', 'Consultar el índice de confianza (UCI) de usuarios Netskope', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+COMMIT;
+-- END 083_netskope_user_uci.sql
+
+-- BEGIN 084_netskope_steering_catalog.sql
+-- NSK-IPSEC-001 / NSK-GRE-001: steering POP catalog and tunnel summary.
+-- POPs are Netskope's own catalog of points of presence that accept IPsec/GRE
+-- tunnels (identical for every tenant), so the table keeps only the display
+-- fields: never the gateway or probe IP. Tunnels are kept as counts and limits:
+-- the tenant has none yet, so no tunnel field is mapped before a real one exists.
+-- Both tables are replaced as a whole by a complete read.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_steering_pops (
+    kind TEXT NOT NULL CHECK (kind IN ('ipsec', 'gre')),
+    pop_id TEXT NOT NULL CHECK (pop_id <> ''),
+    name TEXT NOT NULL,
+    region TEXT NOT NULL DEFAULT '',
+    location TEXT NOT NULL DEFAULT '',
+    bandwidth TEXT NOT NULL DEFAULT '',
+    distance_miles INTEGER CHECK (distance_miles IS NULL OR distance_miles >= 0),
+    accepting_tunnels BOOLEAN NOT NULL,
+    release_day TEXT NOT NULL DEFAULT '',
+    source_run_id UUID,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (kind, pop_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_netskope_steering_pops_region
+    ON public.netskope_steering_pops (kind, region, name);
+
+CREATE TABLE IF NOT EXISTS public.netskope_steering_tunnels (
+    kind TEXT PRIMARY KEY CHECK (kind IN ('ipsec', 'gre')),
+    tunnel_count INTEGER NOT NULL CHECK (tunnel_count >= 0),
+    max_sites INTEGER CHECK (max_sites IS NULL OR max_sites >= 0),
+    tunnel_pops INTEGER CHECK (tunnel_pops IS NULL OR tunnel_pops >= 0),
+    source_run_id UUID,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 084_netskope_steering_catalog.sql
+
+-- BEGIN 085_netskope_device_reviews.sql
+-- NSK-DEVREV-001: human classification of Netskope devices without recent events.
+-- The decision lives here, apart from the synchronized inventory: no sync
+-- writes this table, and a device retired by a sync keeps its decision. The
+-- history of every change is the audit log (entity_type 'netskope_device_review').
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_device_reviews (
+    object_id BIGINT PRIMARY KEY
+        REFERENCES public.cyberark_inventory_objects(object_id) ON DELETE RESTRICT,
+    diagnosis TEXT NOT NULL CHECK (diagnosis IN (
+        'undetermined', 'uninstalled_reported', 'replaced', 'decommissioned',
+        'in_use_not_reporting', 'historical_record', 'temporary_exception')),
+    status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'investigating', 'ticket_open', 'resolved')),
+    owner TEXT CHECK (owner IS NULL OR (owner = btrim(owner) AND owner <> '' AND char_length(owner) <= 120)),
+    reference TEXT CHECK (reference IS NULL OR (reference = btrim(reference) AND reference <> '' AND char_length(reference) <= 200)),
+    note TEXT CHECK (note IS NULL OR (note = btrim(note) AND note <> '' AND char_length(note) <= 1000)),
+    exception_expires_at TIMESTAMPTZ,
+    next_review_at DATE,
+    -- What the server observed when the decision was saved; never client input.
+    evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+    decided_by TEXT NOT NULL,
+    decided_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CHECK ((diagnosis = 'temporary_exception') = (exception_expires_at IS NOT NULL)),
+    CHECK (diagnosis <> 'undetermined' OR status IN ('pending', 'investigating')),
+    CHECK (status <> 'ticket_open' OR reference IS NOT NULL),
+    CHECK (diagnosis <> 'decommissioned' OR reference IS NOT NULL)
+);
+
+CREATE INDEX IF NOT EXISTS idx_netskope_device_reviews_diagnosis
+    ON public.netskope_device_reviews (diagnosis, status);
+
+COMMIT;
+-- END 085_netskope_device_reviews.sql
+
+-- BEGIN 086_netskope_reported_counts.sql
+-- NSK-REF-001: the user total Netskope itself reports (users/counts) when an inventory run reads its users.
+-- It is a reference to compare with the identities DS Hub lists from getusers, a different count of the same
+-- tenant; it never feeds a KPI or a reconciliation. One row per run, written only after the inventory landed.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_reported_counts (
+    source_run_id UUID PRIMARY KEY REFERENCES public.cyberark_ingestion_runs(run_id),
+    total_users INTEGER NOT NULL CHECK (total_users >= 0),
+    -- lastModified as Netskope reports it: when its own aggregate was computed.
+    reported_at TIMESTAMPTZ,
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 086_netskope_reported_counts.sql
+
+-- BEGIN 087_reporting_views.sql
+-- Operational read models; no login, grant, API or ingestion changes.
+BEGIN;
+
+CREATE SCHEMA IF NOT EXISTS reporting;
+REVOKE ALL ON SCHEMA reporting FROM PUBLIC;
+
+-- Separate flows: a successful PSM/import run cannot hide a failed inventory run.
+CREATE VIEW reporting.source_sync_status WITH (security_barrier = true) AS
+WITH streams AS (
+    SELECT DISTINCT source_system, source_file FROM public.cyberark_ingestion_runs
+    UNION SELECT 'netskope', 'netskope-api'
+), latest AS (
+    SELECT DISTINCT ON (source_system, source_file)
+        source_system, source_file, run_id, status, started_at, completed_at
+    FROM public.cyberark_ingestion_runs
+    ORDER BY source_system, source_file, started_at DESC, run_id DESC
+)
+SELECT s.source_system, s.source_file, r.run_id, r.status,
+       r.started_at, r.completed_at, statement_timestamp() AS as_of,
+       CASE WHEN s.source_system = 'netskope' AND s.source_file = 'netskope-api'
+            THEN 24 END AS freshness_hours,
+       CASE WHEN s.source_system = 'netskope' AND s.source_file = 'netskope-api'
+            THEN coalesce(r.status = 'completed' AND r.completed_at BETWEEN
+                 statement_timestamp() - interval '24 hours' AND statement_timestamp(), false)
+            END AS source_fresh
+FROM streams s LEFT JOIN latest r
+  ON r.source_system = s.source_system AND r.source_file IS NOT DISTINCT FROM s.source_file
+OFFSET 0;
+
+-- Timestamp validation and company fallback match netskope_shared.py.
+-- Snapshot sync time is not the time of a client event.
+CREATE VIEW reporting.netskope_devices WITH (security_barrier = true) AS
+WITH devices AS (
+    SELECT object_id, source_system, source_id, display_name, lifecycle_status,
+           data_quality_status, first_seen_at, last_seen_at, source_run_id, attributes,
+           CASE WHEN jsonb_typeof(attributes->'last_event_timestamp') = 'number' THEN CASE WHEN (attributes->>'last_event_timestamp')::numeric > 0 AND (attributes->>'last_event_timestamp')::numeric <= extract(epoch FROM statement_timestamp()) THEN (attributes->>'last_event_timestamp')::numeric END END AS event_epoch
+    FROM public.cyberark_inventory_objects
+    WHERE source_system = 'netskope' AND object_type = 'device' AND lifecycle_status = 'active'
+)
+SELECT object_id, source_system, source_id AS device_id, display_name,
+       lifecycle_status, data_quality_status, first_seen_at,
+       last_seen_at AS inventory_observed_at, source_run_id,
+       attributes->>'hostname' AS hostname, attributes->>'username' AS username,
+       coalesce(nullif(attributes->>'company', ''), upper(split_part(split_part(lower(coalesce(nullif(btrim(attributes->>'username'), ''), nullif(btrim(attributes->>'user_key'), ''), '')), '@', 2), '.', 1))) AS company,
+       attributes->>'os' AS os, attributes->>'os_version' AS os_version,
+       attributes->>'client_version' AS client_version,
+       attributes->>'classification_status' AS classification_status,
+       attributes->>'device_make' AS device_make, attributes->>'device_model' AS device_model,
+       attributes->>'last_seen_event' AS last_seen_event,
+       to_timestamp(event_epoch::double precision) AS last_event_at,
+       (extract(epoch FROM statement_timestamp()) - event_epoch) / 86400 AS event_age_days,
+       statement_timestamp() AS as_of
+FROM devices
+OFFSET 0;
+
+-- All active devices, including those without a decision. Retired decisions stay in the base table.
+CREATE VIEW reporting.netskope_device_reviews WITH (security_barrier = true) AS
+SELECT d.object_id, d.device_id, d.display_name, d.hostname, d.username, d.company, d.os,
+       d.last_event_at, d.event_age_days, d.inventory_observed_at,
+       (r.object_id IS NOT NULL) AS review_saved,
+       coalesce(r.diagnosis, 'undetermined') AS diagnosis,
+       r.status AS stored_status, CASE WHEN r.diagnosis = 'temporary_exception' AND r.exception_expires_at <= now()
+    THEN 'pending' ELSE r.status END AS effective_status,
+       coalesce(r.diagnosis = 'temporary_exception' AND r.exception_expires_at <= now(), false) AS exception_expired,
+       r.owner, r.reference, r.note, r.exception_expires_at, r.next_review_at,
+       r.decided_by, r.decided_at, r.updated_at AS review_updated_at, d.as_of
+FROM reporting.netskope_devices d
+LEFT JOIN public.netskope_device_reviews r ON r.object_id = d.object_id
+OFFSET 0;
+
+-- OFFSET prevents automatic updates even if the SELECT is simplified in the future.
+REVOKE ALL ON reporting.source_sync_status, reporting.netskope_devices,
+    reporting.netskope_device_reviews FROM PUBLIC;
+
+COMMENT ON SCHEMA reporting IS 'Explicit operational read models; PostgreSQL grants do not inherit DS Hub permissions.';
+COMMENT ON VIEW reporting.netskope_devices IS 'Active Netskope device projection; no raw payload or heartbeat. Inventory observation is not client activity.';
+COMMENT ON VIEW reporting.netskope_device_reviews IS 'Human decisions on active Netskope devices; notes and references require explicit authorized SQL access.';
+COMMENT ON VIEW reporting.source_sync_status IS 'Latest run per source and flow, including failures; freshness policy exists here only for netskope-api (24 h).';
+
+COMMIT;
+-- END 087_reporting_views.sql
+
+-- BEGIN 088_netskope_reported_account_counts.sql
+-- NSK-USR-001: the rest of the Netskope console header kept beside the user total of migration 086:
+-- enabled and disabled accounts, groups and OUs. Reference only, like the user total; nullable because
+-- an odd value in the payload is dropped instead of stored.
+BEGIN;
+
+ALTER TABLE public.netskope_reported_counts
+    ADD COLUMN IF NOT EXISTS active_accounts INTEGER CHECK (active_accounts >= 0),
+    ADD COLUMN IF NOT EXISTS inactive_accounts INTEGER CHECK (inactive_accounts >= 0),
+    ADD COLUMN IF NOT EXISTS total_groups INTEGER CHECK (total_groups >= 0),
+    ADD COLUMN IF NOT EXISTS total_ous INTEGER CHECK (total_ous >= 0);
+
+COMMIT;
+-- END 088_netskope_reported_account_counts.sql
+
+-- BEGIN 089_safe_workflow_retention_hold.sql
+-- SAFE-RETENTION-001: CyberArk refuses to delete a Safe while its retention
+-- period is running ("Safe ... can not be deleted due to safe retention").
+-- Operations needs a manual workflow state for "baja solicitada, retenida por
+-- CyberArk". It is a human decision like the other workflow states and is
+-- never written by ingestion. The CHECK constraint is replaced by looking up
+-- its generated name, because migration 005 did not name it.
+BEGIN;
+
+DO $$
+DECLARE
+    constraint_name TEXT;
+BEGIN
+    FOR constraint_name IN
+        SELECT c.conname
+        FROM pg_constraint c
+        WHERE c.conrelid = 'public.cyberark_safe_metadata'::regclass
+          AND c.contype = 'c'
+          AND pg_get_constraintdef(c.oid) LIKE '%workflow_status%'
+    LOOP
+        EXECUTE format('ALTER TABLE public.cyberark_safe_metadata DROP CONSTRAINT %I', constraint_name);
+    END LOOP;
+END $$;
+
+ALTER TABLE public.cyberark_safe_metadata
+    ADD CONSTRAINT cyberark_safe_metadata_workflow_status_check
+    CHECK (workflow_status IN ('pending', 'in_progress', 'blocked', 'resolved', 'retired', 'retention_hold'));
+
+COMMIT;
+-- END 089_safe_workflow_retention_hold.sql
+
+-- BEGIN 090_cyberark_accounts_retired_at.sql
+-- SAFE-RETENTION-002: when did a complete sync stop seeing an account?
+-- Accounts only had `updated_at`, which also moves when someone reclassifies a retired
+-- account, so the "retired" date could drift. A dedicated column is set once, at retirement
+-- (like safes and safe_members), and cleared if the account comes back.
+BEGIN;
+
+ALTER TABLE public.cyberark_accounts
+    ADD COLUMN IF NOT EXISTS retired_at TIMESTAMPTZ;
+
+-- Best available value for rows retired before this migration: their last update. Rows edited
+-- after retiring can be later than the real detection; new retirements are exact.
+UPDATE public.cyberark_accounts
+SET retired_at = updated_at
+WHERE lifecycle_status = 'retired' AND retired_at IS NULL;
+
+COMMIT;
+-- END 090_cyberark_accounts_retired_at.sql
+
+-- BEGIN 091_netskope_repeated_user_rows.sql
+-- NSK-REF-001: how many live user rows Netskope's API returned more than once (same id, same content) in the
+-- run that read the reported total. Netskope's "Total Users" counts rows, DS Hub counts distinct ids, so this
+-- is the exact, per-run explanation of the difference. Reference only; null when the run predates the column.
+BEGIN;
+
+ALTER TABLE public.netskope_reported_counts
+    ADD COLUMN IF NOT EXISTS repeated_user_rows INTEGER CHECK (repeated_user_rows >= 0);
+
+COMMIT;
+-- END 091_netskope_repeated_user_rows.sql
+
+-- BEGIN 092_drop_netskope_steering_catalog.sql
+-- Steering view and sync removed (2026-10-10): the POP catalog of 084 is
+-- Netskope's own list, identical for every tenant, and the tenant has no
+-- IPsec/GRE tunnels, so neither table held inventory of this tenant. The
+-- catalog can be read again from the vendor if a tunnel contract returns.
+BEGIN;
+
+DROP TABLE IF EXISTS public.netskope_steering_pops;
+DROP TABLE IF EXISTS public.netskope_steering_tunnels;
+
+COMMIT;
+-- END 092_drop_netskope_steering_catalog.sql
+
+-- BEGIN 093_netskope_uci_company_history.sql
+-- NSK-EXP-UEBA-001: weekly counts of users with a Poor/Moderate UCI per company.
+-- Counts only (company label, users, poor, moderate): never a user, email or score.
+-- One row per company and week; the last UCI sync of the week wins. It feeds the
+-- "vs. semana anterior" column of the per-company view and is purged after 26 weeks.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_uci_company_history (
+    week_start DATE NOT NULL,
+    company TEXT NOT NULL CHECK (company <> ''),
+    users INTEGER NOT NULL CHECK (users >= 0),
+    poor INTEGER NOT NULL CHECK (poor >= 0),
+    moderate INTEGER NOT NULL CHECK (moderate >= 0),
+    captured_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (week_start, company)
+);
+
+COMMIT;
+-- END 093_netskope_uci_company_history.sql
+
+-- BEGIN 094_role_grants_catch_up.sql
+-- ACCESS-ROLES-002 (approved 2026-10-11): bring the seeded roles up to date.
+--
+-- 1. The platform administrator lists explicitly the narrow permissions that
+--    access:manage already reaches through the route fallbacks, so the
+--    catalog shows what the role can actually do. It also gains the strict
+--    ones no role held: netskope:read (AA metrics and their contracts
+--    initiate remote tasks), access:roles_manage (role dashboard templates)
+--    and netskope:admin (client and OS baselines, device diagnosis).
+-- 2. Netskope · Administrador reads the sensitive per-user surfaces: DLP
+--    alerts and UCI. The platform administrator does NOT get them; they stay
+--    out of netskope:read and access:manage.
+BEGIN;
+
+INSERT INTO public.access_role_permissions (role_code, permission_code) VALUES
+  ('admin', 'access:directory_read'),
+  ('admin', 'access:local_users_manage'),
+  ('admin', 'access:role_assignments_manage'),
+  ('admin', 'access:roles_read'),
+  ('admin', 'access:roles_manage'),
+  ('admin', 'access:permissions_manage'),
+  ('admin', 'access:oidc_mappings_read'),
+  ('admin', 'audit:read'),
+  ('admin', 'security:events_read'),
+  ('admin', 'pam:catalogs_read'),
+  ('admin', 'sia:catalogs_read'),
+  ('admin', 'identity:catalogs_read'),
+  ('admin', 'netskope:read'),
+  ('admin', 'netskope:admin'),
+  ('netskope_admin', 'netskope:dlp_read'),
+  ('netskope_admin', 'netskope:uba_read')
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+COMMIT;
+-- END 094_role_grants_catch_up.sql
+
+-- BEGIN 095_access_user_role_source.sql
+-- ACCESS-UI-001 phase 1 (approved 2026-10-11): roles assigned in DS Hub
+-- coexist with the roles an Okta login maps from groups.
+--
+-- Each assignment records where it came from. An OIDC login replaces only
+-- its own 'oidc' rows; a 'manual' row is a human decision that no login
+-- removes. Existing rows written by the OIDC sync carry granted_by = 'oidc'.
+BEGIN;
+
+ALTER TABLE public.access_user_roles
+  ADD COLUMN IF NOT EXISTS assignment_source TEXT NOT NULL DEFAULT 'manual';
+
+UPDATE public.access_user_roles SET assignment_source = 'oidc' WHERE granted_by = 'oidc';
+
+ALTER TABLE public.access_user_roles DROP CONSTRAINT IF EXISTS access_user_roles_assignment_source_check;
+ALTER TABLE public.access_user_roles
+  ADD CONSTRAINT access_user_roles_assignment_source_check CHECK (assignment_source IN ('oidc', 'manual'));
+
+COMMIT;
+-- END 095_access_user_role_source.sql
+
+-- BEGIN 096_oidc_group_roles.sql
+-- ACCESS-UI-001 phase 2 (approved 2026-10-11): the Okta group -> DS Hub role
+-- mapping is edited from the UI instead of OIDC_ROLE_MAP_JSON.
+--
+-- A group may grant several roles. Until the state row exists the login keeps
+-- reading OIDC_ROLE_MAP_JSON; the first save from the UI copies that mapping
+-- here and inserts the state row in the same transaction. From then on this
+-- table is the only source, even when empty.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.access_oidc_group_roles (
+  group_name TEXT NOT NULL CHECK (length(btrim(group_name)) BETWEEN 1 AND 256),
+  role_code TEXT NOT NULL REFERENCES public.access_roles(role_code),
+  granted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  granted_by TEXT NOT NULL,
+  PRIMARY KEY (group_name, role_code)
+);
+
+CREATE TABLE IF NOT EXISTS public.access_oidc_mapping_state (
+  singleton BOOLEAN PRIMARY KEY DEFAULT true CHECK (singleton),
+  managed_since TIMESTAMPTZ NOT NULL DEFAULT now(),
+  managed_by TEXT NOT NULL
+);
+
+COMMIT;
+-- END 096_oidc_group_roles.sql
+
+-- BEGIN 097_access_catalog_readable_copy.sql
+-- ACCESS-UI-001 phase 3 (approved 2026-10-11): the role view shows each
+-- permission's description as the capability, so the catalog says concretely
+-- what it enables. Text only: no code, grant or lifecycle changes.
+--
+-- The `dlp` domain covers all of Netskope SSE (devices, users, DLP), so it is
+-- named Netskope. catalogs:read, catalogs:write and inventory:write are legacy
+-- codes no route enforces; their description says so instead of repeating the
+-- text of catalogs:manage / safes:classify.
+BEGIN;
+
+UPDATE public.access_domains SET display_name = 'Netskope' WHERE domain_code = 'dlp';
+
+UPDATE public.access_roles SET description = 'Administración de Netskope' WHERE role_code = 'netskope_admin';
+UPDATE public.access_roles SET description = 'Lectura de Netskope' WHERE role_code = 'netskope_reader';
+
+UPDATE public.access_permissions AS permission SET description = copy.description
+FROM (VALUES
+  ('domain:dlp', 'Ingresar a Netskope'),
+  ('netskope:read', 'Ver inventario, postura, experiencia y métricas de Netskope'),
+  ('netskope:admin', 'Editar las líneas base del cliente y del SO, y aceptar diagnósticos de equipos'),
+  ('catalogs:read', 'Heredado: ninguna función lo exige'),
+  ('catalogs:write', 'Heredado: ninguna función lo exige'),
+  ('inventory:write', 'Heredado: ninguna función lo exige')
+) AS copy(permission_code, description)
+WHERE permission.permission_code = copy.permission_code;
+
+COMMIT;
+-- END 097_access_catalog_readable_copy.sql
+
+-- BEGIN 098_platform_admin_all_permissions.sql
+-- ACCESS-ROLES-003 (owner decision 2026-10-11): the platform administrator
+-- holds every active permission of the catalog, including the strict
+-- per-user Netskope reads (netskope:dlp_read, netskope:uba_read) that
+-- ACCESS-ROLES-002 had kept for netskope_admin only.
+--
+-- Insert-only and static: a permission added by a later migration must grant
+-- it to `admin` in that same migration. Planned permissions (BigID) stay out
+-- until they are active. access:manage is unchanged and still does not imply
+-- the strict reads by itself; the role lists them explicitly.
+BEGIN;
+
+INSERT INTO public.access_role_permissions (role_code, permission_code)
+SELECT 'admin', permission.permission_code
+FROM public.access_permissions permission
+WHERE permission.lifecycle_status = 'active'
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+COMMIT;
+-- END 098_platform_admin_all_permissions.sql
+
+-- BEGIN 099_netskope_policy_groups.sql
+-- NSK-POLICY-002: Netskope Real-time Protection policy groups share the Netskope source as a distinct inventory type.
+BEGIN;
+
+ALTER TABLE public.cyberark_inventory_objects
+  DROP CONSTRAINT IF EXISTS cyberark_inventory_objects_object_type_check;
+
+ALTER TABLE public.cyberark_inventory_objects
+  ADD CONSTRAINT cyberark_inventory_objects_object_type_check
+    CHECK (object_type IN (
+      'user', 'role', 'safe', 'platform', 'psm', 'access_policy', 'sia',
+      'component', 'psm_connector', 'aim_application',
+      'platform_dependent', 'platform_group', 'platform_rotational_group',
+      'platform_target', 'access_asset', 'sia_connector', 'sia_resource',
+      'sia_database_account', 'sia_target_set', 'identity_federation',
+      'device', 'dem_site', 'netskope_group', 'netskope_policy_group'
+    ));
+
+COMMIT;
+-- END 099_netskope_policy_groups.sql
+
+-- BEGIN 100_netskope_admin_inventory.sql
+-- NSK-RBAC-001: Netskope administrators, admin roles and the API-group page map share the Netskope source as distinct
+-- inventory types, behind a strict permission that neither netskope:read nor access:manage grants.
+BEGIN;
+
+ALTER TABLE public.cyberark_inventory_objects
+  DROP CONSTRAINT IF EXISTS cyberark_inventory_objects_object_type_check;
+
+ALTER TABLE public.cyberark_inventory_objects
+  ADD CONSTRAINT cyberark_inventory_objects_object_type_check
+    CHECK (object_type IN (
+      'user', 'role', 'safe', 'platform', 'psm', 'access_policy', 'sia',
+      'component', 'psm_connector', 'aim_application',
+      'platform_dependent', 'platform_group', 'platform_rotational_group',
+      'platform_target', 'access_asset', 'sia_connector', 'sia_resource',
+      'sia_database_account', 'sia_target_set', 'identity_federation',
+      'device', 'dem_site', 'netskope_group', 'netskope_policy_group',
+      'netskope_role', 'netskope_admin', 'netskope_api_group'
+    ));
+
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('netskope:admin_inventory_read', 'dlp', 'admin_inventory', 'read',
+   'Consultar los administradores de Netskope, sus roles y permisos', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+-- Strict like netskope:uba_read: the Netskope administrator role and the platform administrator (which holds every
+-- active permission, see 098) get it; netskope:read and access:manage do not.
+INSERT INTO public.access_role_permissions (role_code, permission_code)
+VALUES
+  ('netskope_admin', 'netskope:admin_inventory_read'),
+  ('admin', 'netskope:admin_inventory_read')
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+COMMIT;
+-- END 100_netskope_admin_inventory.sql
+
+-- BEGIN 101_safes_and_coverage_permissions.sql
+-- COV-001 (approved 2026-10-14): paired read/manage permissions for Safes and for Cobertura (the destination inventory).
+--
+--   safes:read      replaces inventory:read on the Safe and account read routes.
+--   safes:manage    replaces safes:classify and safes:bulk_classify on every Safe/account classification write.
+--   coverage:read   opens the destination inventory (it was open to any inventory:read holder).
+--   coverage:manage replaces connections:import and also covers editing and exporting the inventory.
+--
+-- Roles hold permissions directly (system and custom), so each new code is granted to every role that already holds
+-- the equivalent one: nobody gains or loses access on the day this runs. inventory:read, inventory:export and the
+-- other codes are unchanged (Safe/account CSV exports still require inventory:export). The old classify/import
+-- codes stay in the catalog as legacy: no route enforces them any more.
+BEGIN;
+
+INSERT INTO public.access_permissions
+  (permission_code, domain_code, resource_code, action_code, description, lifecycle_status)
+VALUES
+  ('safes:read', 'pam', 'safes', 'read', 'Consultar Safes, sus miembros y sus cuentas', 'active'),
+  ('safes:manage', 'pam', 'safes', 'manage', 'Clasificar Safes y cuentas, también en forma masiva', 'active'),
+  ('coverage:read', 'pam', 'coverage', 'read', 'Consultar la cobertura de destinos en Privilege Cloud y SIA', 'active'),
+  ('coverage:manage', 'pam', 'coverage', 'manage', 'Importar, exportar y editar el inventario de destinos y su estado', 'active')
+ON CONFLICT (permission_code) DO NOTHING;
+
+INSERT INTO public.access_role_permissions (role_code, permission_code)
+SELECT DISTINCT grant_row.role_code, mapping.new_code
+FROM (VALUES
+  ('inventory:read', 'safes:read'),
+  ('inventory:read', 'coverage:read'),
+  ('safes:classify', 'safes:manage'),
+  ('safes:bulk_classify', 'safes:manage'),
+  ('connections:import', 'coverage:manage')
+) AS mapping(old_code, new_code)
+JOIN public.access_role_permissions grant_row ON grant_row.permission_code = mapping.old_code
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+-- The platform administrator holds every active permission (see 098).
+INSERT INTO public.access_role_permissions (role_code, permission_code)
+VALUES ('admin', 'safes:read'), ('admin', 'safes:manage'), ('admin', 'coverage:read'), ('admin', 'coverage:manage')
+ON CONFLICT (role_code, permission_code) DO NOTHING;
+
+UPDATE public.access_permissions AS permission SET description = copy.description
+FROM (VALUES
+  ('safes:classify', 'Heredado: lo reemplazó safes:manage'),
+  ('safes:bulk_classify', 'Heredado: lo reemplazó safes:manage'),
+  ('connections:import', 'Heredado: lo reemplazó coverage:manage')
+) AS copy(permission_code, description)
+WHERE permission.permission_code = copy.permission_code;
+
+COMMIT;
+-- END 101_safes_and_coverage_permissions.sql
+
+-- BEGIN 102_connection_inventory_lifecycle.sql
+-- Migration 102: COV-002. The destination inventory import now updates and adds by IP + port; a row missing from the
+-- file is kept as `retired` (never deleted). Every import still writes a full snapshot, so earlier ones stay readable.
+BEGIN;
+
+ALTER TABLE public.connection_inventory
+  ADD COLUMN IF NOT EXISTS lifecycle_status TEXT NOT NULL DEFAULT 'active'
+    CONSTRAINT connection_inventory_lifecycle_check CHECK (lifecycle_status IN ('active', 'retired')),
+  ADD COLUMN IF NOT EXISTS retired_at TIMESTAMPTZ;
+
+ALTER TABLE public.connection_inventory_imports
+  ADD COLUMN IF NOT EXISTS mode TEXT NOT NULL DEFAULT 'replace'
+    CONSTRAINT connection_inventory_imports_mode_check CHECK (mode IN ('replace', 'update')),
+  ADD COLUMN IF NOT EXISTS summary JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+CREATE INDEX IF NOT EXISTS idx_connection_inventory_import_lifecycle
+  ON public.connection_inventory (import_id, lifecycle_status);
+
+COMMIT;
+-- END 102_connection_inventory_lifecycle.sql
+
+-- BEGIN 103_sia_policy_capabilities.sql
+-- Migration 103: COV-003. A person classifies each SIA access policy as Platform, DBA or other so the destination
+-- inventory can compare what the sheet declares per capability with what SIA observes. It references the policy by
+-- its SIA id, so a sync never overwrites it; nothing is inferred from the policy name or rules.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.sia_policy_capabilities (
+  policy_source_id TEXT PRIMARY KEY,
+  capability       TEXT NOT NULL CHECK (capability IN ('platform', 'dba', 'other')),
+  classified_by    TEXT NOT NULL,
+  classified_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 103_sia_policy_capabilities.sql
+
+-- BEGIN 104_connection_work_status.sql
+-- Migration 104: COV-004. Each destination carries a work state, a responsible and a note, set by people. They live
+-- on the inventory row and an import never resets them: only a file that carries the column overrides the value.
+BEGIN;
+
+ALTER TABLE public.connection_inventory
+  ADD COLUMN IF NOT EXISTS work_status TEXT NOT NULL DEFAULT 'pending'
+    CONSTRAINT connection_inventory_work_status_check CHECK (work_status IN ('pending', 'in_progress', 'onboarded', 'blocked', 'not_applicable')),
+  ADD COLUMN IF NOT EXISTS responsible TEXT NOT NULL DEFAULT '',
+  ADD COLUMN IF NOT EXISTS note TEXT NOT NULL DEFAULT '';
+
+COMMIT;
+-- END 104_connection_work_status.sql
+
+-- BEGIN 105_connection_coverage_snapshots.sql
+-- Migration 105: COV-005. One snapshot of the destination-coverage counts per day (the last of the day wins), taken after
+-- a sync that feeds the coverage and after an import, so the weekly trend can be reproduced from what was recorded.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.connection_coverage_snapshots (
+  snapshot_date DATE PRIMARY KEY,
+  captured_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  trigger       TEXT NOT NULL CHECK (trigger IN ('sync', 'import', 'manual')),
+  counts        JSONB NOT NULL
+);
+
+COMMIT;
+-- END 105_connection_coverage_snapshots.sql

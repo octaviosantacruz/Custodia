@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from dotenv import load_dotenv
 
-from app.access_sync import sync_access_inventory
+from app.cyberark.access.access_sync import sync_access_inventory
 from app.db import create_pool
 
 

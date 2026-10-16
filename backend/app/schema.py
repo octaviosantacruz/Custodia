@@ -1,7 +1,7 @@
 """Runtime checks for the database schema required by the API."""
 from __future__ import annotations
 
-from .db import fetch_all
+from app.db import fetch_all
 
 
 # Keep this list deliberately small and focused on tables that are required for
@@ -9,21 +9,40 @@ from .db import fetch_all
 # for creating and evolving the schema.
 REQUIRED_SCHEMA_TABLES = (
     "public.access_users",
+    "public.access_oidc_users",
     "public.safes",
     "public.safe_members",
     "public.cyberark_ingestion_runs",
+    "public.sync_schedule_overrides",
     "public.access_user_roles",
+    "public.access_oidc_group_roles",
+    "public.access_oidc_mapping_state",
     "public.access_permissions",
     "public.access_domains",
     "public.access_domain_levels",
     "public.access_custom_role_levels",
     "public.cyberark_findings",
     "public.user_dashboard_preferences",
+    "public.user_netskope_dashboard_preferences",
+    "public.role_dashboard_templates",
     "public.connection_inventory_imports",
     "public.connection_inventory",
+    "public.sia_policy_capabilities",
+    "public.connection_coverage_snapshots",
     "public.activity_events",
     "public.rate_limit_attempts",
     "public.access_security_events",
+    "public.access_api_tokens",
+    "public.operational_error_events",
+    "public.operational_log_events",
+    "public.netskope_baselines",
+    "public.netskope_device_reviews",
+    "public.netskope_reported_counts",
+    "public.netskope_alert_aggregates",
+    "public.netskope_dlp_event_cache",
+    "public.netskope_dlp_cache_state",
+    "public.netskope_dlp_alerts",
+    "public.netskope_dlp_capture_state",
 )
 
 # Columns introduced by security-sensitive migrations that the application
@@ -32,6 +51,11 @@ REQUIRED_SCHEMA_TABLES = (
 # missing session_version column.
 REQUIRED_SCHEMA_COLUMNS = (
     ("public.access_users", "session_version"),
+    # Activity events drive cross-session refreshes. Their sync identity must
+    # be present at startup so a missed migration cannot degrade polling into
+    # a silent background failure after the API begins serving requests.
+    ("public.activity_events", "run_id"),
+    ("public.activity_events", "source_system"),
 )
 
 

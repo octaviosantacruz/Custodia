@@ -1,37 +1,60 @@
+---
+estado: vigente
+dueño: Octavio Santacruz
+revisado: 2026-10-09
+---
+
 # Documentación de DS Hub
 
-Esta documentación es interna del repositorio y contiene decisiones operativas
-y hallazgos sobre el entorno de CyberArk. No debe incluir secretos, exports ni
-respuestas API reales completas.
+DS Hub reúne inventarios de **CyberArk** y **Netskope** para que el equipo pueda
+revisarlos, clasificarlos y entender sus métricas. Cada plataforma conserva
+sus propios datos y permisos. [AGENTS.md](../AGENTS.md) explica el producto y
+sus reglas.
 
-## Seguimiento
+| Quiero… | Leer |
+|---|---|
+| Saber qué falta y qué sigue | [Trabajo pendiente](tracking/TO_IMPLEMENT.md) |
+| Saber qué ya se hizo | [Trabajo cerrado (índice)](tracking/IMPLEMENTED.md); detalle por periodo en `tracking/done/` |
+| Consultar lo aparcado o descartado | [Trabajo diferido](tracking/BACKLOG_ARCHIVE.md) |
+| Registrar tareas y relacionarlas con Jira | [Guía de seguimiento](tracking/README.md) |
+| Instalar, actualizar u operar el servicio | [Despliegue](operations/deployment.md) |
+| Configurar el acceso (OIDC, tokens, permisos administrativos) | [Autenticación](operations/authentication.md) |
+| Consumir la API con Postman | [Colección y autenticación](operations/postman.md) |
+| Consultar inventario desde PostgreSQL | [Vistas SQL y permisos](operations/reporting-views.md) |
+| Saber qué datos externos podemos consumir | [Contratos de integración](architecture/integration-contracts.md) |
+| Saber qué APIs de Netskope existen y cuáles usamos | [API de Netskope](architecture/netskope-api.md) |
+| Entender las métricas Netskope, AA y la carga | [Métricas Netskope](architecture/netskope-metrics.md) |
+| Entender la clasificación de equipos Netskope sin eventos (NSK-DEVREV-001) | [Revisión operativa de equipos Netskope](architecture/netskope-device-review.md) |
+| Saber dónde pertenece cada parte del código | [Modularidad](architecture/modularity.md) |
+| Ver qué endpoints existen y qué acceso exige cada uno (generado) | [Referencia de la API](architecture/api-reference.md) |
+| Ver qué roles existen y qué permisos reúne cada uno (generado) | [Catálogo de roles y permisos](architecture/access-catalog.md) |
+| Conocer las decisiones sancionadas que limitan el código (con su test) | [Decisiones (ADR)](architecture/decisions/README.md) |
 
-- [Por implementar](TO_IMPLEMENT.md): fuente central del backlog, prioridades,
-  bloqueos y criterios de cierre. Los demás documentos aportan contexto y
-  evidencia, pero no mantienen un estado paralelo.
-- [Implementado](IMPLEMENTED.md): índice de trabajo cerrado, commits y
-  evidencia resumida. No contiene tareas activas.
+El [historial](history/README.md) conserva planes, reuniones y revisiones de su
+fecha; es un archivo local ignorado por Git y puede no existir en otro checkout.
 
-## Arquitectura
+## Frontmatter de cada documento
 
-- [Contratos de integración](architecture/integration-contracts.md): contratos
-  confirmados y límites de PAM, Identity Administration y SIA.
-- [Modularidad](architecture/modularity.md): responsabilidades y límites entre
-  rutas, servicios, repositorios, integraciones y frontend.
+Todo `.md` de `docs/` empieza con un bloque mínimo, comprobado por `npm run docs:check`
+(parte de `npm run verify`):
 
-## Producto
+```yaml
+---
+estado: vigente        # vigente | histórico
+dueño: Nombre Apellido # quién responde por el contenido
+revisado: 2026-10-09   # AAAA-MM-DD de la última revisión del contenido
+---
+```
 
-- [Revisión KR1](product/kr1-safe-review.md): alcance y calidad del inventario
-  de Safes.
+- `vigente`: describe el sistema o el proceso tal como está. Si pasan más de 90 días sin
+  actualizar `revisado`, el chequeo avisa (no falla): revisarlo o marcarlo histórico.
+- `histórico`: registro de una fecha (planes, cierres, handoffs, revisiones). Puede citar rutas e
+  IDs que ya no existen; los agentes lo ignoran salvo que se pida el contexto. Todo lo de
+  `history/` y `tracking/done/` es histórico.
+- `revisado` se actualiza al revisar el contenido, no por cada edición menor.
+  Los valores iniciales salen de la fecha del último cambio en git (o del archivo, en `history/`).
 
-## Métricas
-
-- [Publicación privada con Cloudflare](operations/cloudflare-dshub-meeting.md):
-  referencia histórica de Tunnel + Access para `dshub.itti.digital` (`DEP-001`
-  y `DEP-002` cerrados).
-- [Despliegue](operations/deployment.md): imágenes, migraciones y requisitos
-  del orquestador.
-
-Los documentos históricos redundantes fueron retirados; las decisiones vigentes
-se mantienen en `TO_IMPLEMENT.md`, `IMPLEMENTED.md` y los contratos de
-arquitectura enlazados arriba.
+**Una sola fuente de trabajo activo:** `tracking/TO_IMPLEMENT.md`;
+`tracking/BACKLOG_ARCHIVE.md` conserva lo aparcado y retirado sin duplicar filas
+activas. No mantener listas de pendientes distintas en cada documento. Esta
+documentación es interna: no incluir secretos ni respuestas API completas.

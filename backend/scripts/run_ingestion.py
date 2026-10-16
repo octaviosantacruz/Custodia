@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from psycopg.rows import dict_row
 from psycopg_pool import AsyncConnectionPool
 
-from app.ingestion import IngestionOptions, run_ingestion
+from app.cyberark.pam.ingestion import IngestionOptions, run_ingestion
 
 
 def parse_args() -> argparse.Namespace:

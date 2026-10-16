@@ -1,0 +1,30 @@
+/* Own-account settings stay separate from administrative user management. */
+.profile-account-backdrop { align-items: flex-start; background: var(--overlay-scrim); display: flex; inset: 0; justify-content: center; overflow-y: auto; overscroll-behavior: contain; padding: 56px 18px 24px; position: fixed; z-index: 100; }
+.profile-account-modal { background: var(--bg-elevated); border: 1px solid var(--border-strong); box-shadow: var(--shadow-modal); max-width: 640px; padding: 24px; width: 100%; }
+.profile-account-header { align-items: flex-start; display: flex; gap: 18px; justify-content: space-between; }
+.profile-account-heading { align-items: flex-start; display: flex; gap: 12px; }
+.profile-account-icon { align-items: center; background: color-mix(in srgb, var(--accent) 12%, var(--bg-subtle)); color: var(--accent-strong); display: flex; flex: 0 0 auto; height: 42px; justify-content: center; width: 42px; }
+.profile-account-heading h2 { color: var(--text-primary); font-size: 22px; margin: 4px 0 5px; }
+.profile-account-heading p:not(.eyebrow) { color: var(--text-secondary); font-size: 12px; margin: 0; }
+.profile-account-summary { border-bottom: 1px solid var(--border-soft); border-top: 1px solid var(--border-soft); display: grid; gap: 16px; grid-template-columns: 1fr 160px; margin: 22px 0 18px; padding: 13px 0; }
+.profile-account-summary div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.profile-account-summary span { color: var(--text-muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.profile-account-summary strong { color: var(--text-primary); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-account-sections { display: grid; gap: 14px; }
+.profile-account-section { border: 1px solid var(--border-soft); padding: 16px; }
+.profile-account-section-heading { margin-bottom: 16px; }
+.profile-account-section-heading h3 { color: var(--text-primary); font-size: 15px; margin: 0 0 5px; }
+.profile-account-section-heading p { color: var(--text-secondary); font-size: 11px; margin: 0; }
+.profile-account-field { color: var(--text-secondary); display: flex; flex-direction: column; font-size: 11px; font-weight: 700; gap: 6px; }
+.profile-account-field input { background: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-primary); min-height: 38px; padding: 8px 10px; width: 100%; }
+.profile-account-field input:focus { border-color: var(--accent); box-shadow: var(--focus-ring); outline: 0; }
+.profile-account-password-checks { display: grid; gap: 4px 10px; grid-template-columns: 1fr 1fr; margin-top: 2px; }
+.profile-account-password-checks span { align-items: center; color: var(--text-muted); display: flex; font-size: 10px; font-weight: 400; gap: 3px; }
+.profile-account-password-checks span.valid { color: var(--accent-strong); }
+.profile-account-actions { display: flex; justify-content: flex-end; margin-top: 16px; }
+.profile-account-managed { align-items: flex-start; background: color-mix(in srgb, var(--accent) 8%, var(--bg-subtle)); border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border-soft)); color: var(--accent-strong); display: flex; gap: 10px; padding: 14px; }
+.profile-account-managed div { display: flex; flex-direction: column; gap: 4px; }
+.profile-account-managed strong { color: var(--text-primary); font-size: 12px; }
+.profile-account-managed span { color: var(--text-secondary); font-size: 11px; line-height: 1.4; }
+.profile-account-error { color: var(--danger-strong); font-size: 12px; margin: 14px 0 0; }
+@media (max-width: 600px) { .profile-account-backdrop { padding: 18px 10px; } .profile-account-modal { padding: 18px; } .profile-account-summary { grid-template-columns: 1fr; } .profile-account-password-checks { grid-template-columns: 1fr; } }

@@ -1,0 +1,11 @@
+# Backend linting (TOOL-LINT-001). Development tooling only: runtime
+# dependencies and their hash lock live in backend/requirements*.txt.
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.lint]
+# F (Pyflakes) and B (flake8-bugbear) only, as agreed in TOOL-LINT-001.
+# S608 is deliberately not selected: building SQL fragments from allowlisted,
+# parametrized expressions is this repo's pattern and S608 reports ~96 false
+# positives here.
+select = ["F", "B"]

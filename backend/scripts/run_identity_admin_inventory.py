@@ -7,7 +7,7 @@ from uuid import uuid4
 from dotenv import load_dotenv
 
 from app.db import create_pool
-from app.identity_admin_sync import sync_identity_admin_inventory
+from app.cyberark.identity_administration.identity_admin_sync import sync_identity_admin_inventory
 
 
 async def main() -> None:

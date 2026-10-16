@@ -1,3 +1,10 @@
+"""Resuelve autenticación y permisos efectivos para las rutas de la API.
+
+Distingue sesiones local/OIDC, Bearer personales de lectura y el token técnico
+de escritura. Autenticarse no reemplaza el permiso exigido por cada ruta.
+Las rutas HTTP de login y administración están en cross/api/routes/.
+"""
+
 import hmac
 import os
 import time
@@ -8,13 +15,28 @@ from authlib.integrations.starlette_client import OAuth
 from fastapi import Header, HTTPException, Request
 from starlette.responses import JSONResponse, RedirectResponse
 
-from .repositories.auth_queries import get_actor_permissions, get_session_version, sync_oidc_role_assignments
-from .repositories.security_events import (
-    EVENT_OIDC_ROLE_SYNC, EVENT_SESSION_REJECTED_STALE, EVENT_TECHNICAL_TOKEN_REJECTED,
-    MECHANISM_OIDC, MECHANISM_TOKEN, record_security_event_for_request,
+from app.cross.repositories.api_tokens import resolve_api_token
+from app.cross.repositories.auth_queries import get_actor_permissions, get_session_version, sync_oidc_role_assignments
+from app.cross.repositories.security_events import (
+    EVENT_API_TOKEN_REJECTED, EVENT_OIDC_ROLE_SYNC, EVENT_SESSION_REJECTED_STALE,
+    EVENT_TECHNICAL_TOKEN_REJECTED, MECHANISM_API_TOKEN, MECHANISM_OIDC,
+    MECHANISM_TOKEN, record_security_event_for_request,
 )
-from .services.oidc_mapping import role_map_from_environment, roles_from_claims
-from .services.password_hashing import hash_password, hash_password_async, needs_rehash, rehash_password_async, validate_password, verify_password, verify_password_async
+from app.cross.services.api_tokens import API_TOKEN_PREFIX, digest_api_token
+from app.cross.services.oidc_mapping import effective_role_pairs, observed_mapped_groups, role_map_from_environment, roles_from_claims
+# Re-exported deliberately: routes (auth_session, user_admin) and tests import
+# these from app.auth; the redundant aliases keep the linter from treating
+# them as dead code.
+from app.cross.services.password_hashing import (
+    hash_password as hash_password,
+    hash_password_async as hash_password_async,
+    needs_rehash as needs_rehash,
+    rehash_password_async as rehash_password_async,
+    validate_password as validate_password,
+    verify_password as verify_password,
+    verify_password_async as verify_password_async,
+)
+from app.cross.services.secret_values import secret_from_environment
 
 oauth = OAuth()
 AUTH_MODE = os.environ.get("AUTH_MODE", "local").strip().lower()
@@ -30,7 +52,7 @@ OIDC_ENABLED = AUTH_MODE in {"oidc", "hybrid"}
 SELF_REGISTER_SETUP_ENABLED = os.environ.get("ALLOW_SELF_REGISTER_SETUP", "false").strip().lower() == "true"
 OIDC_ISSUER_URL = os.environ.get("OIDC_ISSUER_URL", "").strip()
 OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID", "").strip()
-OIDC_CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET", "").strip()
+OIDC_CLIENT_SECRET = secret_from_environment("OIDC_CLIENT_SECRET", "OIDC_CLIENT_SECRET_FILE")
 OIDC_CONFIGURED = bool(OIDC_ISSUER_URL and OIDC_CLIENT_ID and OIDC_CLIENT_SECRET)
 
 if OIDC_ENABLED and OIDC_CONFIGURED:
@@ -95,7 +117,7 @@ def start_session(request: Request, user: dict[str, Any]) -> None:
 
 
 def _local_actor(request: Request, x_access_token: str | None) -> str:
-    configured_token = os.environ.get("APP_WRITE_TOKEN", "").strip()
+    configured_token = secret_from_environment("APP_WRITE_TOKEN", "APP_WRITE_TOKEN_FILE")
     if not configured_token:
         raise HTTPException(status_code=503, detail="Las escrituras están deshabilitadas: falta configurar un usuario o APP_WRITE_TOKEN")
     if not x_access_token or not hmac.compare_digest(x_access_token, configured_token):
@@ -134,10 +156,10 @@ def session_actor(request: Request) -> str | None:
 async def _require_session_actor(request: Request) -> str:
     """Session-only actor resolution: resolves and validates the session
     (idle/absolute timeout, PENTEST-004 session_version, PENTEST-002
-    pending password change) but never falls back to X-Access-Token.
-    Shared by require_read_access and the require_*_read permission
-    dependencies below -- none of them are meant to accept the technical
-    token, which is scoped to write automation only (PENTEST-005)."""
+    pending password change) but never falls back to either token type.
+    Used directly by session-only token-management routes and as the browser
+    fallback for read dependencies. X-Access-Token remains scoped to write
+    automation only (PENTEST-005)."""
     actor_id = session_actor(request)
     if not actor_id:
         raise HTTPException(status_code=401, detail="Sesión requerida")
@@ -150,8 +172,61 @@ async def _require_session_actor(request: Request) -> str:
     return actor_id
 
 
-async def require_read_access(request: Request) -> str:
+async def require_session_actor(request: Request) -> str:
+    """Authenticate only with the browser session, never with an API token."""
     actor_id = await _require_session_actor(request)
+    request.state.actor_id = actor_id
+    return actor_id
+
+
+def _authorization_header(request: Request) -> str:
+    headers = getattr(request, "headers", {}) or {}
+    return str(headers.get("Authorization") or headers.get("authorization") or "").strip()
+
+
+async def _require_read_actor(request: Request) -> str:
+    authorization = _authorization_header(request)
+    if not authorization:
+        return await _require_session_actor(request)
+
+    scheme, separator, plaintext = authorization.partition(" ")
+    valid_shape = (
+        separator == " "
+        and scheme.casefold() == "bearer"
+        and plaintext.startswith(API_TOKEN_PREFIX)
+        and len(plaintext) <= 128
+        and not any(character.isspace() for character in plaintext)
+    )
+    token = None
+    if valid_shape and str(getattr(request, "method", "GET")).upper() in {"GET", "HEAD"}:
+        token = await resolve_api_token(request.app.state.db, digest_api_token(plaintext))
+    if token is None:
+        await record_security_event_for_request(
+            request.app.state.db,
+            request=request,
+            event_type=EVENT_API_TOKEN_REJECTED,
+            result="failure",
+            mechanism=MECHANISM_API_TOKEN,
+            metadata={"reason": "invalid_expired_or_read_only"},
+        )
+        raise HTTPException(
+            status_code=401,
+            detail="Token Bearer inválido, vencido o no permitido para este método",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    request.state.authentication_mechanism = MECHANISM_API_TOKEN
+    return str(token["actor_id"])
+
+
+async def require_authenticated_read_access(request: Request) -> str:
+    """Authenticate a GET/HEAD through session or a read-only Bearer token."""
+    actor_id = await _require_read_actor(request)
+    request.state.actor_id = actor_id
+    return actor_id
+
+
+async def require_read_access(request: Request) -> str:
+    actor_id = await _require_read_actor(request)
     if "inventory:read" not in await get_actor_permissions(request.app.state.db, actor_id):
         raise HTTPException(status_code=403, detail="El actor no tiene permiso para consultar el inventario")
     request.state.actor_id = actor_id
@@ -166,6 +241,20 @@ async def require_write_access(request: Request, x_access_token: str | None = He
     if session_id:
         actor_id = session_id
     else:
+        if _authorization_header(request):
+            await record_security_event_for_request(
+                request.app.state.db,
+                request=request,
+                event_type=EVENT_API_TOKEN_REJECTED,
+                result="failure",
+                mechanism=MECHANISM_API_TOKEN,
+                metadata={"reason": "write_method"},
+            )
+            raise HTTPException(
+                status_code=401,
+                detail="Los tokens Bearer personales son de sólo lectura",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         try:
             actor_id = _local_actor(request, x_access_token)
         except HTTPException as exc:
@@ -191,18 +280,12 @@ def require_permission(permission_code: str) -> Callable[..., Awaitable[str]]:
 def require_permission_read(permission_code: str) -> Callable[..., Awaitable[str]]:
     """Like require_permission, but for GET/read endpoints.
 
-    PENTEST-005: X-Access-Token is documented (and meant) as an automation
-    credential for write operations only; it must never authorize reads,
-    including administrative ones (e.g. listing DS Hub users). Built on
-    _require_session_actor, which never has an X-Access-Token branch, so a
-    technical token here 401s exactly like it would with no credential at
-    all. Unlike require_read_access, this does not also require the
-    unrelated baseline inventory:read permission -- it mirrors
-    require_permission's contract (only the requested permission_code),
-    just without the token fallback.
+    X-Access-Token remains write-only. Read endpoints accept a browser session
+    or a short-lived personal Bearer token and still evaluate the requested
+    permission live on every request.
     """
     async def dependency(request: Request) -> str:
-        actor_id = await _require_session_actor(request)
+        actor_id = await _require_read_actor(request)
         if permission_code not in await get_actor_permissions(request.app.state.db, actor_id):
             raise HTTPException(status_code=403, detail=f"El actor no tiene el permiso requerido: {permission_code}")
         request.state.actor_id = actor_id
@@ -211,18 +294,17 @@ def require_permission_read(permission_code: str) -> Callable[..., Awaitable[str
 
 
 def require_any_permission_read(*permission_codes: str) -> Callable[..., Awaitable[str]]:
-    """Read-only counterpart of require_any_permission (see PENTEST-005 note
-    on require_permission_read): session only, never X-Access-Token, and no
-    implicit inventory:read baseline."""
+    """Read-only counterpart accepting session or personal Bearer token."""
     if not permission_codes:
         raise ValueError("require_any_permission_read necesita al menos un permission_code")
 
     async def dependency(request: Request) -> str:
-        actor_id = await _require_session_actor(request)
+        actor_id = await _require_read_actor(request)
         granted = await get_actor_permissions(request.app.state.db, actor_id)
         if not any(code in granted for code in permission_codes):
             raise HTTPException(status_code=403, detail=f"El actor no tiene ninguno de los permisos requeridos: {', '.join(permission_codes)}")
         request.state.actor_id = actor_id
+        request.state.actor_permissions = frozenset(granted)
         return actor_id
     return dependency
 
@@ -244,6 +326,7 @@ def require_any_permission(*permission_codes: str) -> Callable[..., Awaitable[st
         granted = await get_actor_permissions(request.app.state.db, actor_id)
         if not any(code in granted for code in permission_codes):
             raise HTTPException(status_code=403, detail=f"El actor no tiene ninguno de los permisos requeridos: {', '.join(permission_codes)}")
+        request.state.actor_permissions = frozenset(granted)
         return actor_id
     return dependency
 
@@ -267,12 +350,22 @@ async def finish_oidc_login(request: Request):
         raise HTTPException(status_code=503, detail="OIDC está habilitado, pero todavía falta completar la configuración de IAM")
     token = await oauth.idp.authorize_access_token(request)
     user = token.get("userinfo") or await oauth.idp.userinfo(token=token)
-    actor_id = str(user.get("sub") or user.get("email") or "")
+    actor_id = str(user.get("sub") or "").strip()
     if not actor_id:
-        raise HTTPException(status_code=400, detail="El proveedor OIDC no devolvió una identidad")
+        raise HTTPException(status_code=400, detail="El proveedor OIDC no devolvió sub")
+    pairs, _source = await effective_role_pairs(request.app.state.db)
+    roles = oidc_roles(dict(user), pairs)
+    try:
+        await sync_oidc_role_assignments(
+            request.app.state.db, actor_id, roles,
+            issuer=OIDC_ISSUER_URL,
+            email=str(user.get("email") or "").strip(),
+            display_name=str(user.get("name") or "").strip() or str(user.get("email") or "").strip() or actor_id,
+            mapped_groups=observed_mapped_groups(dict(user), pairs),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     start_session(request, {"actor_id": actor_id, "name": user.get("name"), "email": user.get("email"), "auth_source": "oidc"})
-    roles = oidc_roles(dict(user))
-    await sync_oidc_role_assignments(request.app.state.db, actor_id, roles)
     await record_security_event_for_request(request.app.state.db, request=request, event_type=EVENT_OIDC_ROLE_SYNC, result="success", actor_id=actor_id, mechanism=MECHANISM_OIDC, email=user.get("email"), metadata={"roles_count": len(roles)})
     return RedirectResponse(url=os.environ.get("WEB_ORIGIN", "/"))
 

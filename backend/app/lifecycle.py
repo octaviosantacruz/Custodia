@@ -1,90 +1,143 @@
+"""Administra el arranque y cierre de recursos compartidos de la API.
+
+Abre el pool PostgreSQL, valida el esquema y mantiene las tareas de cola y
+planificación. La recuperación de credenciales se conecta aquí; los clientes
+y sincronizadores concretos se obtienen del registro de fuentes.
+"""
+
 from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime
 from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import FastAPI
 
-from .config import AppSettings
-from .db import create_pool
-from .integrations.access import AccessNotConfigured, AccessSettings
-from .integrations.identity_admin import IdentityAdminNotConfigured, IdentityAdminSettings
-from .integrations.sia import SiaNotConfigured, SiaSettings
-from .repositories.rate_limiting import purge_expired_attempts
-from .repositories.sync_queue import enqueue_sync_runs
-from .schema import assert_schema_ready
-from .services.oidc_mapping import warn_if_default_role_is_unscoped
-from .sync_coordinator import ACCESS_SOURCE, IDENTITY_SOURCE, PAM_SOURCE, SIA_SOURCE, SyncCoordinator
+from app.config import AppSettings
+from app.db import create_pool
+from app.cross.repositories.rate_limiting import purge_expired_attempts
+from app.cross.repositories.ingestion import source_run_history
+from app.cross.repositories.ingestion import list_sync_schedule_overrides
+from app.cross.services.sync_schedule import SourceRunHistory, effective_task_interval_minutes, next_attempt_delay_seconds
+from app.cross.repositories.sync_queue import enqueue_sync_runs, scheduler_cycle_lock
+from app.schema import assert_schema_ready
+from app.cross.services.database_credentials import DatabaseCredentialProvider
+from app.cross.services.oidc_mapping import warn_if_default_role_is_unscoped
+from app.sources import SOURCES_BY_SYSTEM, TASKS, scheduled_source_jobs, task_policy
+from app.sync_coordinator import SyncCoordinator
 
 
 LOGGER = logging.getLogger(__name__)
 
 
-def configured_optional_source_jobs() -> list[tuple[str, str, dict[str, object]]]:
-    """Return (source_system, source_file, options) only for sources whose
-    contract is actually configured -- shared by the scheduler and by the
-    manual 'sync all sources' endpoint so both honor the same rule: an
-    unconfigured source is never enqueued, instead of enqueueing a job that
-    is doomed to fail against a missing contract.
+# The scheduler re-reads run history at least this often so a failure's
+# backoff, a finished run or a changed policy is noticed without a restart.
+SCHEDULER_MAX_SLEEP_SECONDS = 60
+
+
+def source_interval_minutes(
+    settings: AppSettings, task_key: str, admin_overrides: dict[str, dict] | None = None,
+) -> float:
+    """Cadence of one scheduled task; a source's single task is named after it.
+
+    ``SYNC_SOURCE_INTERVALS`` may name a task or, for every task of a source,
+    the source; the task entry wins.
     """
-    jobs: list[tuple[str, str, dict[str, object]]] = []
-    optional_sources = (
-        (IDENTITY_SOURCE, "identity-administration-scim", IdentityAdminSettings.from_environment, IdentityAdminNotConfigured),
-        (SIA_SOURCE, "sia-api", SiaSettings.from_environment, SiaNotConfigured),
-        (ACCESS_SOURCE, "access-api", AccessSettings.from_environment, AccessNotConfigured),
-    )
-    for source_system, source_file, load_settings, not_configured in optional_sources:
-        try:
-            load_settings()
-        except not_configured:
-            LOGGER.info("Fuente %s omitida: contrato no configurado", source_system)
+    source_system = TASKS[task_key][0].source_system
+    return effective_task_interval_minutes(
+        task_key=task_key, source_system=source_system, policy=task_policy(task_key),
+        global_default=settings.ingestion_interval_minutes,
+        environment_overrides=settings.sync_source_intervals, admin_overrides=admin_overrides,
+    )[0]
+
+
+def validate_sync_settings(settings: AppSettings) -> None:
+    unknown = sorted(set(settings.sync_source_intervals) - set(SOURCES_BY_SYSTEM) - set(TASKS))
+    if unknown:
+        raise RuntimeError(f"SYNC_SOURCE_INTERVALS contiene fuentes o tareas no registradas: {', '.join(unknown)}")
+
+
+def due_sources(
+    source_systems: set[str], history: dict[str, SourceRunHistory], settings: AppSettings,
+    *, now: datetime | None = None, admin_overrides: dict[str, dict] | None = None,
+) -> tuple[set[str], float | None]:
+    """Task keys (a source's own name when it has one task) due now and the wait until the next deadline (None: nothing scheduled).
+
+    A source with a queued or running run is busy, never due; it is
+    reconsidered on the next short pass.
+    """
+    admin_overrides = admin_overrides or {}
+    due: set[str] = set()
+    waits: list[float] = []
+    for source in source_systems:
+        record = history.get(source, SourceRunHistory())
+        delay = next_attempt_delay_seconds(
+            record, source_interval_minutes(settings, source, admin_overrides), task_policy(source), now=now,
+        )
+        if delay is None:
             continue
-        jobs.append((source_system, source_file, {}))
-    return jobs
-
-
-def scheduled_source_jobs() -> list[tuple[str, str, dict[str, object]]]:
-    """Return only configured source jobs for one scheduled sync cycle."""
-    jobs: list[tuple[str, str, dict[str, object]]] = [
-        (
-            PAM_SOURCE,
-            "cyberark-api",
-            {
-                "page_size": 100,
-                "member_delay_seconds": 0.3,
-                "reconcile_complete": True,
-            },
-        ),
-        (PAM_SOURCE, "cyberark-psm-api", {"psm_only": True, "page_size": 100}),
-    ]
-    jobs.extend(configured_optional_source_jobs())
-    return jobs
+        if record.active:
+            waits.append(SCHEDULER_MAX_SLEEP_SECONDS)
+        elif delay == 0:
+            due.add(source)
+        else:
+            waits.append(delay)
+    return due, (min(waits) if waits else None)
 
 
 async def scheduled_ingestion_loop(app: FastAPI, settings: AppSettings) -> None:
-    interval_seconds = settings.ingestion_interval_minutes * 60
+    """Enqueue configured sources by their own policy: cadence from the last
+    success, exponential backoff after failures (SYNC-POLICY-001)."""
     while True:
-        await asyncio.sleep(interval_seconds)
         try:
-            jobs = [
-                {
-                    "run_id": uuid4(),
-                    "source_system": source_system,
-                    "source_file": source_file,
-                    "options": options,
-                }
-                for source_system, source_file, options in scheduled_source_jobs()
-            ]
-            await enqueue_sync_runs(
-                app.state.db, jobs, triggered_by="system:scheduler"
+            source_jobs = scheduled_source_jobs()
+            task_keys = {task_key for _source, _file, _options, task_key in source_jobs}
+            due, wait = due_sources(
+                task_keys, await source_run_history(app.state.db), settings,
+                admin_overrides=await list_sync_schedule_overrides(app.state.db),
             )
-            app.state.sync_coordinator.wake()
+            if not due:
+                await asyncio.sleep(min(wait, SCHEDULER_MAX_SLEEP_SECONDS) if wait is not None else SCHEDULER_MAX_SLEEP_SECONDS)
+                continue
+            async with scheduler_cycle_lock(app.state.db) as acquired:
+                if not acquired:
+                    await asyncio.sleep(1)
+                    continue
+                # Re-check every source inside the shared lock: another
+                # process may have admitted one while this process waited.
+                source_jobs = scheduled_source_jobs()
+                task_keys = {task_key for _source, _file, _options, task_key in source_jobs}
+                due, _wait = due_sources(
+                    task_keys, await source_run_history(app.state.db), settings,
+                    admin_overrides=await list_sync_schedule_overrides(app.state.db),
+                )
+                if not due:
+                    continue
+                jobs = [
+                    {
+                        "run_id": uuid4(),
+                        "source_system": source_system,
+                        "source_file": source_file,
+                        "options": options,
+                        "task_key": task_key,
+                    }
+                    for source_system, source_file, options, task_key in source_jobs
+                    if task_key in due
+                ]
+                rows = await enqueue_sync_runs(
+                    app.state.db, jobs, triggered_by="system:scheduler", skip_active_sources=True,
+                )
+                if rows:
+                    app.state.sync_coordinator.wake()
+                else:
+                    await asyncio.sleep(SCHEDULER_MAX_SLEEP_SECONDS)
         except asyncio.CancelledError:
             raise
         except Exception:
             LOGGER.exception("No se pudo encolar la ingesta programada")
+            await asyncio.sleep(SCHEDULER_MAX_SLEEP_SECONDS)
 
 
 RATE_LIMIT_PURGE_INTERVAL_SECONDS = 60 * 60
@@ -114,7 +167,25 @@ def build_lifespan(settings: AppSettings, oidc_enabled: bool):
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        pool = create_pool(settings.database_url)
+        # Routes expose the configured cadence as operational read-only state.
+        # Keep the setting on the composition root rather than re-reading the
+        # environment on every request.
+        app.state.settings = settings
+        # A callable conninfo (instead of a fixed string) lets the pool pick
+        # up a rotated RDS password without a process restart: psycopg_pool
+        # calls it fresh on every new connection attempt, and
+        # `on_reconnect_failed` fires the same guarded AWS Secrets Manager
+        # fallback that `run_with_database_secret.py` runs at startup.
+        credential_provider = DatabaseCredentialProvider(
+            settings.database_url,
+            settings.database_secret_id,
+            region=settings.database_secret_region,
+        )
+        app.state.database_credential_provider = credential_provider
+        pool = create_pool(
+            credential_provider,
+            reconnect_failed=credential_provider.on_reconnect_failed,
+        )
         await pool.open()
         await pool.wait()
         try:
@@ -126,19 +197,26 @@ def build_lifespan(settings: AppSettings, oidc_enabled: bool):
         app.state.oidc_enabled = oidc_enabled
         if oidc_enabled:
             warn_if_default_role_is_unscoped()
-        coordinator = SyncCoordinator(pool)
+        validate_sync_settings(settings)
+        coordinator = SyncCoordinator(pool, max_concurrent_sources=settings.sync_max_concurrent_sources)
         app.state.sync_coordinator = coordinator
         coordinator.start()
         app.state.ingestion_tasks = set()
-        if settings.ingestion_interval_minutes > 0:
-            scheduler_task = asyncio.create_task(
-                scheduled_ingestion_loop(app, settings), name="scheduled-cyberark-ingestion"
-            )
-            app.state.ingestion_tasks.add(scheduler_task)
-            scheduler_task.add_done_callback(app.state.ingestion_tasks.discard)
+        # Persistent administrator overrides can enable scheduling even when
+        # all environment/global intervals are zero, so the loop must always
+        # poll durable overrides (it sleeps when no task is enabled).
+        scheduler_task = asyncio.create_task(
+            scheduled_ingestion_loop(app, settings), name="scheduled-cyberark-ingestion"
+        )
+        app.state.ingestion_tasks.add(scheduler_task)
+        scheduler_task.add_done_callback(app.state.ingestion_tasks.discard)
         purge_task = asyncio.create_task(rate_limit_purge_loop(app), name="rate-limit-attempts-purge")
         app.state.ingestion_tasks.add(purge_task)
         purge_task.add_done_callback(app.state.ingestion_tasks.discard)
+        # NSK-DLP-001: minimal DLP alerts are captured inside each Netskope
+        # sync run (bounded, allowlisted, 30-day retention); there is no
+        # separate cache poller here. Only the per-device summary stays
+        # retired and answers 410.
         yield
         await coordinator.close()
         tasks = list(app.state.ingestion_tasks)

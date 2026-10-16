@@ -1,0 +1,46 @@
+.identity-membership { padding: 16px 20px; }
+.membership-header { display: flex; justify-content: space-between; align-items: baseline; gap: 24px; margin-bottom: 14px; }
+.membership-header h2 { margin: 0; font-size: 15px; }
+.membership-header p, .membership-total { color: var(--text-secondary); font-size: 12px; }
+.membership-header p { margin: 5px 0 0; }
+.membership-view { display: flex; gap: 4px; margin-bottom: 16px; }
+.membership-view button { padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.membership-view button[aria-pressed="true"] { color: var(--accent-strong); background: var(--bg-muted); border-color: var(--accent-strong); }
+.membership-tree, .membership-layer ul, .membership-results { list-style: none; margin: 0; padding: 0; }
+.membership-branch > summary { display: flex; align-items: center; gap: 10px; padding: 10px 4px; cursor: pointer; list-style: none; }
+.membership-branch > summary::-webkit-details-marker { display: none; }
+.membership-branch > summary > svg:not(.membership-chevron) { color: var(--accent-strong); flex-shrink: 0; }
+.membership-branch > summary strong, .membership-person span { font-size: 13px; overflow-wrap: anywhere; }
+.membership-branch small, .membership-person small, .membership-cycle small { display: block; color: var(--text-secondary); font-size: 11px; margin-top: 3px; }
+.membership-branch[open] > summary .membership-chevron { transform: rotate(90deg); }
+.membership-count { margin-left: auto; color: var(--text-secondary); font-size: 11px; white-space: nowrap; }
+.membership-layer { margin: 0 0 10px 21px; padding-left: 18px; border-left: 1px solid var(--border); }
+.membership-layer h3 { color: var(--text-secondary); font-size: 11px; margin: 10px 0 4px; text-transform: uppercase; letter-spacing: .05em; }
+.membership-layer h3 span { margin-left: 6px; color: var(--accent-strong); }
+.membership-person, .membership-cycle { display: flex; align-items: center; gap: 10px; padding: 7px 4px; }
+.membership-person svg { color: var(--text-secondary); flex-shrink: 0; }
+.membership-note { color: var(--text-secondary); font-size: 12px; padding: 8px 12px; border-left: 2px solid var(--accent); margin: 8px 0 12px; }
+.membership-empty { color: var(--text-secondary); font-size: 12px; padding-left: 25px; }
+.membership-cycle { color: var(--text-secondary); font-size: 12px; }
+.membership-search { margin-bottom: 14px; }
+.membership-results > li { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.membership-results > li > div { display: flex; align-items: center; gap: 10px; }
+.membership-results > li > div > span { color: var(--text-secondary); margin-left: auto; font-size: 11px; }
+.membership-results details { margin: 8px 0 0 26px; color: var(--text-secondary); font-size: 12px; }
+.membership-results summary { cursor: pointer; color: var(--accent-strong); }
+.membership-results p { overflow-wrap: anywhere; }
+
+.identity-role-list .compact-table-wrap { max-height: none; overflow: visible; }
+.membership-tree { padding-right: 12px; }
+.membership-view button:focus-visible, .membership-branch > summary:focus-visible, .membership-results summary:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 3px; }
+
+.membership-pending { background: var(--bg-muted); border-radius: 4px; }
+
+/* Roles y grupos: type chip beside the name, wide name column, numeric column aligned to the right. */
+.identity-role-list .compact-table th:nth-child(2) { width: 46%; }
+.identity-role-name { align-items: center; display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.identity-role-list .identity-role-numeric { text-align: right; }
+.identity-role-list th.identity-role-numeric .sortable-header { justify-content: flex-end; }
+.identity-kind-chip { background: none; border: 0; border-radius: 999px; cursor: pointer; font: inherit; padding: 0; }
+.identity-kind-chip.active { box-shadow: 0 0 0 1px var(--accent-strong); }
+.identity-kind-chip:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }

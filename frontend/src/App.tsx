@@ -1,99 +1,99 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
-import { SafeDetailDrawer } from './components/safe-detail-drawer';
-import { AuthProvider } from './context/auth-context';
-import { NotificationProvider } from './context/notification-context';
-import { StateBlock } from './components/state-block';
-import { useAuth } from './hooks/use-auth';
-import { AppHeader } from './components/app-header';
-import { AuthView } from './components/auth-view';
-import { useDashboard } from './hooks/use-dashboard';
-import { useIngestion } from './hooks/use-ingestion';
-import { useSafeActions } from './hooks/use-safe-actions';
-import { useCatalogForm } from './hooks/use-catalog-form';
-import { SafesWorkspace } from './components/safes-workspace';
-import { PamInfraSubnav } from './components/pam-infra-subnav';
-import { GeneralWorkspace } from './components/general-workspace';
-import { CatalogModal } from './components/catalog-modal';
-import { WorkspaceIntro } from './components/workspace-intro';
-import { HomeWorkspace } from './components/home-workspace';
-import { AppNotifications } from './components/app-notifications';
-import { SyncToast } from './components/sync-toast';
-import { useSafeTableConfig } from './hooks/use-safe-table-config';
-import { useSafeFilters } from './hooks/use-safe-filters';
-import { nextActionOptions } from './lib/format';
-import { canonicalRecentWorkspace, firstAuthorizedSiaResourceWorkspace, hasWorkspaceAccess } from './lib/workspaces';
-import { workspaceLabels } from './lib/workspace-meta';
-import { SyncPreview } from './components/sync-preview';
+/**
+ * Compone la sesión, navegación, preferencias y sincronización de la aplicación.
+ * Delega los workspaces al router registrado y pasa su contexto explícitamente.
+ * Las consultas y pantallas de cada herramienta pertenecen a su propio módulo.
+ */
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { AuthProvider } from './cross/context/auth-context';
+import { NotificationProvider } from './cross/context/notification-context';
+import { useAuth } from './cross/hooks/use-auth';
+import { AppHeader } from './cross/components/app-header';
+import { AuthView } from './cross/components/auth-view';
+import { useIngestion } from './cross/hooks/use-ingestion';
+import { WorkspaceIntro } from './cross/components/workspace-intro';
+import { StaleDataBanner } from './cross/components/stale-data-banner';
+import { useSyncFreshness } from './cross/hooks/use-sync-freshness';
+import { staleTasksForSources } from './cross/lib/sync-freshness';
+import { HomeWorkspace } from './cross/components/home-workspace';
+import { usePresence } from './cross/hooks/use-presence';
+import { AppNotifications, TOAST_EXIT_MS } from './cross/components/app-notifications';
+import { SyncToast } from './cross/components/sync-toast';
+import { canonicalRecentWorkspace, firstAuthorizedSiaResourceWorkspace, hasWorkspaceAccess } from './cross/lib/workspaces';
+import { firstAccessibleDomainWorkspace } from './cross/lib/domains';
+import { CATALOG_BY_ID } from './cross/lib/workspace-catalog';
+import { areaOf, domainOf } from './cross/lib/domains';
+import { workspaceLabels } from './cross/lib/workspace-meta';
+import { WORKSPACE_DESCRIPTIONS } from './cross/lib/workspace-registry';
 
-/* Route-based code splitting: every workspace below is only rendered once
-   the operator navigates to it (or, for the access:manage-gated ones, only
-   if they even hold that permission), so none of them belongs in the
-   initial bundle. GeneralWorkspace and SafesWorkspace stay eager -- they're
-   the default landing view and the most-visited one, so lazy-loading them
-   would trade a flash-of-fallback on first paint for a bundle win nobody
-   would notice. */
-const UsersWorkspace = lazy(() => import('./components/users-workspace').then((m) => ({ default: m.UsersWorkspace })));
-const ActivityWorkspace = lazy(() => import('./components/activity-workspace').then((m) => ({ default: m.ActivityWorkspace })));
-const SiaHubWorkspace = lazy(() => import('./components/sia-hub-workspace').then((m) => ({ default: m.SiaHubWorkspace })));
-const IdentityWorkspace = lazy(() => import('./components/identity-workspace').then((m) => ({ default: m.IdentityWorkspace })));
-const PamChainWorkspace = lazy(() => import('./components/pam-chain-workspace').then((m) => ({ default: m.PamChainWorkspace })));
-const PamPlatformsWorkspace = lazy(() => import('./components/pam-platforms-workspace').then((m) => ({ default: m.PamPlatformsWorkspace })));
-const PamConnectorsWorkspace = lazy(() => import('./components/pam-platforms-workspace').then((m) => ({ default: m.PamConnectorsWorkspace })));
-const PamSystemHealthWorkspace = lazy(() => import('./components/pam-system-health').then((m) => ({ default: m.PamSystemHealthWorkspace })));
-const PamAimApplicationsWorkspace = lazy(() => import('./components/pam-aim-applications').then((m) => ({ default: m.PamAimApplicationsWorkspace })));
-const PostureWorkspace = lazy(() => import('./components/posture-workspace').then((m) => ({ default: m.PostureWorkspace })));
-const NetskopeWorkspace = lazy(() => import('./components/netskope-workspace').then((m) => ({ default: m.NetskopeWorkspace })));
-import { useWorkspaceRoute } from './hooks/use-workspace-route';
-import { useTheme } from './hooks/use-theme';
-import { useActivityEvents } from './hooks/use-activity-events';
-import { useWorkspacePreferences } from './hooks/use-workspace-preferences';
-import type { CommandCenterCommand } from './lib/command-center';
-import type { ConnectionCoverageFilter } from './types/connection';
-import type { SearchResult } from './lib/search-api';
-import { navigateFromWidget, selectSearchResult } from './lib/widget-navigation';
+import { RegisteredWorkspaceRouter } from './cross/routers/registered-workspace-router';
+import { REGISTERED_RUNTIMES, manualSyncForArea } from './sources.ts';
+import { useWorkspaceRoute } from './cross/hooks/use-workspace-route';
+import { useWorkspaceTransition } from './cross/hooks/use-workspace-transition';
+import { useTheme } from './cross/hooks/use-theme';
+import { useActivityEvents } from './cross/hooks/use-activity-events';
+import { useWorkspacePreferences } from './cross/hooks/use-workspace-preferences';
+import { guideCommands, navigationCommands, type CommandCenterCommand } from './cross/lib/command-center';
+import type { SearchResult } from './cross/lib/search-api';
+import { selectSearchResult } from './cyberark/pam/lib/widget-navigation';
+import { fetchIngestionRun } from './cross/lib/ingestion-api';
+import { automaticSyncBatchNotice, refreshKeyForVisibleWorkspace, refreshVisibleWorkspaceForSources, syncSourceForArea } from './cross/lib/sync-source';
+import type { ActivityEvent } from './cross/lib/activity-events-api';
+import type { IngestionRun } from './cross/types/ingestion';
 
-const PAGE_SIZE = 50;
-import type { WorkspaceView } from './lib/workspaces';
+import type { WorkspaceView } from './cross/lib/workspaces';
+import './App.css';
+
+// Stable fallback: a fresh `[]` each render would recreate `hasAccess` and re-run its effects.
+const NO_PERMISSIONS: string[] = [];
 
 
 export function App() {
+  const queryClient = useQueryClient();
   const { theme, toggleTheme } = useTheme();
   const { workspaceView, navigateWorkspace, navigateHome, isHome } = useWorkspaceRoute();
-  const {
-    search, workflowFilter, classificationFilter, accountTypeFilter, inventoryScopeFilter,
-    qualityFilter, scopeHintFilter, healthFilter, nextActionFilter, businessUnitFilter,
-    responsibleFilter, accountPlatformStatus, page, setSearch, setWorkflowFilter,
-    setClassificationFilter, setAccountTypeFilter, setInventoryScopeFilter, setQualityFilter,
-    setScopeHintFilter, setHealthFilter, setNextActionFilter, setBusinessUnitFilter,
-    setResponsibleFilter, setAccountPlatformStatus, setPage, apply: applySafeFilters, reset: resetSafeFilters,
-  } = useSafeFilters();
-  const [siaSeed, setSiaSeed] = useState('');
-  const [identitySeed, setIdentitySeed] = useState('');
-  const [identitySectionSeed, setIdentitySectionSeed] = useState<'users' | 'cyberarkRoles'>('users');
-  const [pamGraphSeed, setPamGraphSeed] = useState('');
-  const [pamRoleSeed, setPamRoleSeed] = useState('');
-  const [pamPlatformSeed, setPamPlatformSeed] = useState('');
-  const [pamConnectorSeed, setPamConnectorSeed] = useState('');
-  const [assetsSeed, setAssetsSeed] = useState<{ search: string; environment: string; coverage: ConnectionCoverageFilter | '' }>({ search: '', environment: '', coverage: '' });
+  const workspaceTransitionClass = useWorkspaceTransition(workspaceView);
+  const workspaceViewRef = useRef(workspaceView);
+  workspaceViewRef.current = workspaceView;
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
-  const [catalogManagerOpen, setCatalogManagerOpen] = useState(false);
-  const [workspaceRefreshKey, setWorkspaceRefreshKey] = useState(0);
-  const [includeInternalMetrics, setIncludeInternalMetrics] = useState(() => {
-    try { return window.localStorage.getItem('dshub.include-internal-metrics') !== 'false'; } catch { return true; }
-  });
-  const changeInternalMetricScope = useCallback((value: boolean) => {
-    setIncludeInternalMetrics(value);
-    try { window.localStorage.setItem('dshub.include-internal-metrics', String(value)); } catch { /* storage unavailable */ }
-  }, []);
+  const [notice, setNoticeText] = useState('');
+  const [noticeSource, setNoticeSource] = useState<string | null>(null);
+  /* A notice raised by a CyberArk or Netskope workspace carries that tool's logo even when its text names none;
+     DS Hub-level notices (account, activity, administration) keep the neutral mark. */
+  const areaSourceRef = useRef<string | null>(null);
+  areaSourceRef.current = isHome ? null : syncSourceForArea(areaOf(workspaceView));
+  const setNotice = useCallback((message: string) => { setNoticeSource(null); setNoticeText(message); }, []);
+  const setWorkspaceNotice = useCallback((message: string) => { setNoticeSource(message ? areaSourceRef.current : null); setNoticeText(message); }, []);
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
+  const [catalogOpenRequest, setCatalogOpenRequest] = useState(0);
+  /* DOCS-PORTAL-001: the section Command-K asked the guide to open; the
+     workspace restores it from the URL on deep links too. */
+  const [guideSection, setGuideSection] = useState<string | null>(null);
+  const [latestRun, setLatestRun] = useState<IngestionRun | null>(null);
+  const [domainRefreshKeys, setDomainRefreshKeys] = useState<Record<string, number>>(() => Object.fromEntries(REGISTERED_RUNTIMES.flatMap((runtime) => runtime.refreshDomain ? [[runtime.refreshDomain, 0]] : [])));
+  /* The "Incluir internos" switch was removed from the user menu: the scope is fixed to the
+     historical default (internal Safes included) and any stored preference is ignored. */
+  const includeInternalMetrics = true;
 
   const auth = useAuth({ onError: setError, onNotice: setNotice, onSessionExpired: navigateHome });
   const {
     authStatus, setAuthStatus, authChecked,
   } = auth;
   const isAuthenticated = Boolean(authStatus?.authenticated);
-  const actorPermissions = authStatus?.permissions ?? [];
-  const canManageAccess = actorPermissions.includes('access:manage');
+  const actorId = authStatus?.user?.actor_id ?? null;
+  const previousActorId = useRef<string | null>(actorId);
+  useLayoutEffect(() => {
+    if (previousActorId.current === actorId) return;
+    // Query data belongs to an authenticated operator. Do not let a new
+    // session reuse cached inventory, even briefly, from the prior account.
+    // Clear before query subscriptions start, so authentication does not
+    // cancel the first reads and force every observer to request them again.
+    queryClient.clear();
+    previousActorId.current = actorId;
+  }, [actorId, queryClient]);
+  const actorPermissions = authStatus?.permissions ?? NO_PERMISSIONS;
+  const syncSchedules = useSyncFreshness(isAuthenticated);
+  const staleTasks = staleTasksForSources(syncSchedules, CATALOG_BY_ID[workspaceView]?.refreshSources);
   const hasAccess = useCallback((view: WorkspaceView) => hasWorkspaceAccess(view, actorPermissions), [actorPermissions]);
 
   const handleLoggedOut = useCallback(() => {
@@ -123,59 +123,71 @@ export function App() {
   useEffect(() => {
     if (isAuthenticated && !workspacePreferencesLoading && workspaceView !== 'general') recordRecent(canonicalRecentWorkspace(workspaceView));
   }, [isAuthenticated, recordRecent, workspacePreferencesLoading, workspaceView]);
-  const { summary, catalogs, analytics, accountPlatformCoverage, safes, safeTotal, loading, setSafes, loadDashboard } = useDashboard({
-    authChecked, authStatus, search, workflowFilter, classificationFilter, accountTypeFilter,
-    inventoryScopeFilter, qualityFilter, scopeHintFilter, healthFilter, nextActionFilter, businessUnitFilter, responsibleFilter, page,
-    loadFiltered: workspaceView === 'safes',
-    includeInternal: includeInternalMetrics,
-    onUnauthorized,
+  const dashboardLoadRef = useRef<(options?: { refreshStatic?: boolean }) => Promise<void>>(async () => {});
+  const setPamDashboardLoad = useCallback((load: ((options?: { refreshStatic?: boolean }) => Promise<void>) | null) => {
+    dashboardLoadRef.current = load || (async () => {});
+  }, []);
+  const { syncBusy, ingestionBusy, syncToast, syncElapsedSeconds, formatElapsed, requestRefresh, requestSourceRefresh } = useIngestion({
+    loadDashboard: (options) => dashboardLoadRef.current(options),
     onError: setError,
+    onCompleted: (domain) => setDomainRefreshKeys((current) => ({ ...current, [domain]: current[domain] + 1 })),
   });
-  const { syncPreview, setSyncPreview, previewBusy, ingestionBusy, syncToast, setSyncToast, syncElapsedSeconds, formatElapsed, applyIngestion, startIngestion } = useIngestion({
-    loadDashboard,
-    onError: setError,
-    onNotice: setNotice,
-    onCompleted: () => setWorkspaceRefreshKey((current) => current + 1),
-  });
-  const { detail, setDetail, form, setForm, saving, savingSafeNumber, savedSafeNumber, selectSafe, exportSafes, exportAccounts, quickUpdate, saveAssignment, bulkSaveAssignment, saveMetadata } = useSafeActions({
-    catalogs, search, workflowFilter, classificationFilter, accountTypeFilter, inventoryScopeFilter,
-    qualityFilter, scopeHintFilter, healthFilter, nextActionFilter, businessUnitFilter, responsibleFilter, accountPlatformStatus, setSafes, loadDashboard, onError: setError, onNotice: setNotice,
-  });
-  const { catalogModal, setCatalogModal, catalogDraft, setCatalogDraft, catalogBusy, openCatalogModal, saveCatalogEntry } = useCatalogForm({ loadDashboard, onError: setError, onNotice: setNotice });
-  const handleExternalEvents = useCallback((events: { actor_name: string }[]) => {
+  const manualSync = manualSyncForArea(isHome ? 'admin' : areaOf(workspaceView));
+  const refreshCurrentTool = () => manualSync.kind === 'direct'
+    ? requestSourceRefresh(manualSync)
+    : requestRefresh(manualSync.scope);
+  const syncToastPresence = usePresence(syncToast, TOAST_EXIT_MS);
+  const handleExternalEvents = useCallback(async (events: ActivityEvent[]) => {
     const latest = events[events.length - 1];
-    setNotice(`Datos actualizados por ${latest.actor_name}`);
-    void loadDashboard({ refreshStatic: true });
-    setWorkspaceRefreshKey((current) => current + 1);
-  }, [loadDashboard]);
+    const automaticSyncEvents = events.filter((event) => event.actor_id === 'system:scheduler' && event.kind === 'sync');
+    const latestAutomaticSync = automaticSyncEvents[automaticSyncEvents.length - 1];
+    if (latestAutomaticSync) {
+      const runIds = [...new Set(automaticSyncEvents.map((event) => event.run_id).filter((runId): runId is string => Boolean(runId)))];
+      const runs = (await Promise.all(runIds.map((runId) => fetchIngestionRun(runId).catch(() => null)))).filter((run): run is IngestionRun => Boolean(run));
+      const fallbackRuns = runs.length ? runs : (latestAutomaticSync.source_system ? [{ source_system: latestAutomaticSync.source_system, status: 'completed' } as IngestionRun] : []);
+      // Do not show a generic DS Hub toast when the event has no source and
+      // its run cannot be loaded. It has no useful identity or result, and
+      // was the source of the logo-less "Sincronización automática finalizada"
+      // notification. The activity menu still retains the event.
+      const notice = automaticSyncBatchNotice(fallbackRuns);
+      if (notice) setNotice(notice);
+      const eventSources = automaticSyncEvents.map((event) => event.source_system);
+      const activeDomain = refreshVisibleWorkspaceForSources(workspaceViewRef.current, eventSources)
+        ? refreshKeyForVisibleWorkspace(workspaceViewRef.current, eventSources)
+        : null;
+      if (activeDomain) {
+        setDomainRefreshKeys((current) => ({ ...current, [activeDomain]: current[activeDomain] + 1 }));
+      }
+    } else {
+      const isScheduler = latest.actor_id === 'system:scheduler';
+      setNotice(isScheduler ? 'Nueva actividad automática registrada' : `Nueva actividad registrada por ${latest.actor_name}`);
+      // Non-sync events (classification, catalog changes) carry no source to
+      // scope by, so the visible PAM dashboard still reloads its static data.
+      if (domainOf(workspaceViewRef.current) === 'pam') await dashboardLoadRef.current({ refreshStatic: true });
+    }
+  }, [setNotice]);
   const { unreadCount, latestEvent, markEventsSeen } = useActivityEvents({
     authenticated: isAuthenticated,
     currentActorId: authStatus?.user?.actor_id,
     onExternalEvents: handleExternalEvents,
   });
 
-
-
   useEffect(() => {
     if (!authChecked || !isAuthenticated || hasAccess(workspaceView)) return;
-    // IDENTITY_SIA_CONSOLIDATION_PLAN_2026-09-12.md §6: a direct link to
-    // Federaciones without identity:catalogs_read/access:manage should
-    // land the actor on the first authorized Identidades tab, not bounce
-    // them out of Identidades entirely -- they may well have plain
-    // Usuarios/Grupos/Roles access (those never require access:manage).
+    if (domainOf(workspaceView) === 'dlp') {
+      const fallback = firstAccessibleDomainWorkspace('dlp', actorPermissions);
+      setNotice('No tenés acceso a esta vista. Te llevamos a una sección de Netskope disponible para tu perfil.');
+      navigateWorkspace(fallback ?? 'general', { replace: true });
+      return;
+    }
     if (workspaceView === 'identityFederations' && hasAccess('identity')) {
       navigateWorkspace('identity', { replace: true });
       return;
     }
-    // Same rule for the SIA hub's Recursos sub-views: a direct link to a
-    // specific resource kind the actor can't see (each keeps its own
-    // narrow permission -- §6) lands them on whichever *other* resource
-    // kind they do hold (if any), not unconditionally on Políticas.
-    if (workspaceView === 'siaResources' || workspaceView === 'siaDatabaseAccounts' || workspaceView === 'accessAssets') {
-      const permissions = authStatus?.permissions || [];
-      const fallbackResourceView = firstAuthorizedSiaResourceWorkspace(permissions);
-      if (fallbackResourceView) {
-        navigateWorkspace(fallbackResourceView, { replace: true });
+    if (workspaceView === 'siaResources' || workspaceView === 'siaDatabaseAccounts') {
+      const fallback = firstAuthorizedSiaResourceWorkspace(actorPermissions);
+      if (fallback) {
+        navigateWorkspace(fallback, { replace: true });
         return;
       }
       if (hasAccess('sia')) {
@@ -184,24 +196,10 @@ export function App() {
       }
     }
     navigateWorkspace('general', { replace: true });
-  }, [authChecked, authStatus, hasAccess, isAuthenticated, navigateWorkspace, workspaceView]);
+  }, [actorPermissions, authChecked, hasAccess, isAuthenticated, navigateWorkspace, setNotice, workspaceView]);
 
 
-  const safeTableProps = useSafeTableConfig({
-    safes, loading, total: safeTotal, page, pageSize: PAGE_SIZE, search, workflowFilter,
-    classificationFilter, accountTypeFilter, inventoryScopeFilter, qualityFilter, scopeHintFilter, healthFilter, nextActionFilter, businessUnitFilter, responsibleFilter,
-    analytics, catalogs, savingSafeNumber, savedSafeNumber, selectedSafeNumber: detail?.safe.safe_number || null,
-    selectSafe, setSearch, setPage, setWorkflowFilter, setClassificationFilter,
-    setAccountTypeFilter, setInventoryScopeFilter, setQualityFilter, setScopeHintFilter, setHealthFilter, setNextActionFilter, setBusinessUnitFilter, setResponsibleFilter, accountPlatformStatus, setAccountPlatformStatus,
-    quickUpdate, saveAssignment, bulkSaveAssignment, openCatalogModal,
-    canExport: Boolean(authStatus?.permissions?.includes('inventory:export')), exportSafes, exportAccounts,
-    canManage: Boolean(authStatus?.permissions?.includes('safes:classify')), onError: setError,
-    setSafes,
-    onNotice: setNotice,
-  });
 
-
-  const latestRun = summary?.latest_run;
   // IF-019: memoized above the `!authStatus` early return below (not after
   // it, where these used to sit as plain object literals) -- React hooks
   // must run in the same order on every render, and a plain conditional
@@ -215,103 +213,71 @@ export function App() {
   const authContextValue = useMemo(() => ({ authStatus: authStatus!, onLoggedOut: handleLoggedOut, onProfileUpdated: handleProfileUpdated }), [authStatus, handleLoggedOut, handleProfileUpdated]);
   const notificationContextValue = useMemo(() => ({
     latestRun: latestRun || null, latestEvent, unreadEventCount: unreadCount, onEventsSeen: markEventsSeen, onError: setError, onNotice: setNotice,
-  }), [latestRun, latestEvent, unreadCount, markEventsSeen]);
+  }), [latestRun, latestEvent, unreadCount, markEventsSeen, setNotice]);
 
   if (!authChecked || !authStatus || auth.authError || !authStatus.authenticated || authStatus.user?.must_change_password) {
     return <AuthView auth={auth} error={error} />;
   }
-  const selectWorkspace = (view: WorkspaceView, options: { preserveAssetsSeed?: boolean } = {}) => {
+  const selectWorkspace = (view: WorkspaceView) => {
     const canonicalView = view === 'siaConnectors' ? 'connectors' : view;
     if (!hasAccess(canonicalView)) return;
     navigateWorkspace(canonicalView);
     setError('');
     setNotice('');
-    setDetail(null);
-    setCatalogManagerOpen(false);
-    if (canonicalView === 'safes') setPage(0);
-    if (canonicalView === 'assets' && !options.preserveAssetsSeed) setAssetsSeed({ search: '', environment: '', coverage: '' });
-  };
-
-  // Cross-domain jump from the Identity drawer: seed the target workspace's
-  // search, then navigate. No data join — the match is by name only.
-  const navigateFromIdentity = (view: WorkspaceView, query?: string) => {
-    if (view === 'safes' && query !== undefined) setSearch(query);
-    if (view === 'sia' && query !== undefined) setSiaSeed(query);
-    if (view === 'platforms' && query !== undefined) setPamPlatformSeed(query);
-    if (view === 'connectors' && query !== undefined) setPamConnectorSeed(query);
-    if ((view === 'identity' || view === 'identityUsers' || view === 'identityGroups' || view === 'identityRoles') && query !== undefined) setIdentitySeed(query);
-    if (view === 'roles' && query !== undefined) setPamRoleSeed(query);
-    selectWorkspace(view);
   };
 
   const handleSearchResult = (result: SearchResult) => {
     setError('');
     setNotice('');
     const navigation = selectSearchResult(result);
-    if (navigation.workspace === 'safes') {
-      resetSafeFilters();
-      applySafeFilters(navigation.filters);
-    } else if (navigation.workspace === 'sia') setSiaSeed(navigation.query);
-    else if (navigation.workspace === 'graph') setPamGraphSeed(navigation.query);
-    else if (navigation.workspace === 'roles') setPamRoleSeed(navigation.query);
-    else if (navigation.workspace === 'identity') {
-      setIdentitySectionSeed(navigation.identitySection === 'roles' ? 'cyberarkRoles' : 'users');
-      setIdentitySeed(navigation.query);
-    } else if (navigation.workspace === 'assets') {
-      setAssetsSeed(navigation.assetsSeed);
-      selectWorkspace(navigation.workspace, { preserveAssetsSeed: true });
-      return;
-    }
     selectWorkspace(navigation.workspace);
+    setSearchResult(domainOf(navigation.workspace) === 'pam' ? result : null);
   };
 
+  /* UX-SEARCH-001: navigable commands derive from the workspace catalog and
+     its explicit Command-K metadata; only the imperative actions stay here,
+     each with the same kind/platform metadata so filters and ranking apply.
+     Widget commands are loaded lazily by GlobalSearch itself (bundle-size
+     follow-up): the PAM/Netskope widget catalogs never need to be in the
+     entry bundle just because the command center might search them.
+     DOCS-PORTAL-001: guide sections come from the editorial index and open
+     the help workspace at their stable section deep link. */
   const commandCenterCommands: CommandCenterCommand[] = [
-    ...workspacePreferences.recent_workspaces
-      .filter((view) => hasAccess(view))
-      .map((view) => ({ id: `recent-${view}`, group: 'recent' as const, label: workspaceLabels[view], detail: 'Abierto recientemente', keywords: [view], workspace: view, run: () => selectWorkspace(view) })),
-    { id: 'tool-metrics', group: 'tools', label: 'Abrir Métricas', detail: 'Cobertura y decisiones pendientes', keywords: ['inicio', 'dashboard'], permission: 'inventory:read', workspace: 'general' as const, run: () => selectWorkspace('general') },
-    { id: 'tool-safes', group: 'tools', label: 'Abrir Safes', detail: 'Inventario y clasificación de Safes', keywords: ['inventario', 'pam', 'safe'], permission: 'inventory:read', workspace: 'safes' as const, run: () => selectWorkspace('safes') },
-    { id: 'tool-posture', group: 'tools', label: 'Abrir Postura', detail: 'Hallazgos y evidencia accionable', keywords: ['findings', 'riesgo'], permission: 'inventory:read', workspace: 'posture' as const, run: () => selectWorkspace('posture') },
-    { id: 'tool-chains', group: 'tools', label: 'Abrir Cadenas', detail: 'Explorador visual de acceso PAM', keywords: ['pam', 'roles', 'acceso', 'grafo'], permission: 'access:manage', workspace: 'graph' as const, run: () => selectWorkspace('graph') },
-    { id: 'tool-platforms', group: 'tools', label: 'Abrir Plataformas', detail: 'Safes y cuentas por plataforma PAM', keywords: ['pam', 'plataformas', 'cuentas'], permission: ['access:manage', 'pam:catalogs_read'], workspace: 'platforms' as const, run: () => selectWorkspace('platforms') },
-    { id: 'tool-connectors', group: 'tools', label: 'Abrir Conectores PSM y SIA', detail: 'Inventarios PSM y SIA en un único workspace', keywords: ['pam', 'psm', 'sia', 'conectores'], permission: ['access:manage', 'pam:catalogs_read'], workspace: 'connectors' as const, run: () => selectWorkspace('connectors') },
-    { id: 'tool-pam-roles', group: 'tools', label: 'Abrir Roles CyberArk', detail: 'Roles nativos y su alcance', keywords: ['pam', 'grupos'], permission: 'inventory:read', workspace: 'roles' as const, run: () => selectWorkspace('roles') },
-    { id: 'tool-sia', group: 'tools', label: 'Abrir SIA', detail: 'Políticas, recursos y cobertura de Secure Infrastructure Access', keywords: ['políticas', 'access policy', 'ip', 'activos', 'conexiones', 'coverage', 'recursos', 'vm', 'strong accounts', 'base de datos', 'access', 'assets'], permission: 'inventory:read', workspace: 'sia' as const, run: () => selectWorkspace('sia') },
-    { id: 'tool-identity', group: 'tools', label: 'Abrir Identidades', detail: 'Directorio, grupos, roles y federaciones de Identity Administration', keywords: ['usuarios', 'roles', 'scim', 'grupos', 'federaciones', 'saml', 'sso', 'okta'], permission: 'inventory:read', workspace: 'identity' as const, run: () => selectWorkspace('identity') },
-    { id: 'tool-access', group: 'tools', label: 'Administrar acceso', detail: 'Personas, roles y permisos de DS Hub', keywords: ['usuarios', 'roles custom', 'permisos'], permission: 'access:manage', workspace: 'users' as const, run: () => selectWorkspace('users') },
-    { id: 'tool-activity', group: 'tools', label: 'Abrir Actividad', detail: 'Bitácora administrativa', keywords: ['auditoría', 'cambios'], permission: 'access:manage', workspace: 'activity' as const, run: () => selectWorkspace('activity') },
-    { id: 'tool-pam-health', group: 'tools', label: 'Abrir Salud PAM', detail: 'Conectividad de Portal, CPM y PSM', keywords: ['salud', 'componentes', 'conectividad'], permission: ['access:manage', 'pam:catalogs_read'], workspace: 'pamHealth' as const, run: () => selectWorkspace('pamHealth') },
-    { id: 'action-sync', group: 'actions', label: 'Sincronizar datos', detail: 'Compara Safes y, al confirmar, actualiza PAM/PSM, Identity Administration, SIA y Access space', keywords: ['sync', 'ingesta', 'datos', 'safes', 'psm', 'sia', 'identity', 'access'], permission: 'ingestion:run', run: () => void startIngestion() },
-    { id: 'action-catalogs', group: 'actions', label: 'Administrar catálogos', detail: 'Unidades y responsables operativos', keywords: ['unidades', 'responsables'], permission: 'catalogs:manage', run: () => { selectWorkspace('safes'); setCatalogManagerOpen(true); } },
+    ...navigationCommands(actorPermissions),
+    ...guideCommands().map((command) => ({
+      ...command,
+      run: () => { setGuideSection(command.sectionId ?? null); navigateWorkspace('help'); },
+    })),
+    {
+      id: 'action-sync', kind: 'action', platform: 'dshub',
+      label: manualSync.label,
+      detail: manualSync.detail,
+      aliases: ['sync', 'sincronizar', 'ingesta', 'datos', 'actualizar'], priority: 40,
+      permission: 'ingestion:run', run: () => void refreshCurrentTool(),
+    },
+    {
+      id: 'action-catalogs', kind: 'action', platform: 'cyberark',
+      label: 'Administrar catálogos', detail: 'Unidades y responsables operativos',
+      aliases: ['catalogos', 'unidades', 'responsables'], priority: 41,
+      permission: 'catalogs:manage',
+      run: () => { selectWorkspace('safes'); setCatalogOpenRequest((current) => current + 1); },
+    },
   ];
-
-  const handleWidgetNavigation = (widget: Parameters<typeof navigateFromWidget>[0], bucket?: Parameters<typeof navigateFromWidget>[1]) => {
-    const navigation = navigateFromWidget(widget, bucket);
-    if (!navigation) return;
-    if (navigation.workspace === 'safes') {
-      if (navigation.reset !== false) resetSafeFilters();
-      applySafeFilters(navigation.filters);
-    } else if (navigation.workspace === 'assets') {
-      setAssetsSeed(navigation.assetsSeed);
-      selectWorkspace(navigation.workspace, { preserveAssetsSeed: true });
-      return;
-    }
-    selectWorkspace(navigation.workspace);
-  };
-
 
   if (isHome) return <div className="app-shell"><AuthProvider value={authContextValue}><NotificationProvider value={notificationContextValue}><AppHeader
     isHome
     theme={theme} onThemeChange={toggleTheme} workspaceView={workspaceView} onWorkspaceChange={selectWorkspace}
     onHome={navigateHome}
-    previewBusy={previewBusy} ingestionBusy={ingestionBusy}
-    onStartIngestion={() => void startIngestion()}
-    includeInternalMetrics={includeInternalMetrics} onIncludeInternalMetricsChange={changeInternalMetricScope}
+    syncBusy={syncBusy} ingestionBusy={ingestionBusy}
+    onRefreshData={() => void refreshCurrentTool()}
+    includeInternalMetrics={includeInternalMetrics}
       onSearchSelect={handleSearchResult}
     commandCenterCommands={commandCenterCommands}
     workspacePreferences={workspacePreferences}
     onWorkspacePreferencesChange={saveWorkspacePreferences}
-  /></NotificationProvider></AuthProvider><HomeWorkspace authStatus={authStatus} onNavigate={selectWorkspace} /></div>;
+  /></NotificationProvider></AuthProvider><HomeWorkspace authStatus={authStatus} onNavigate={selectWorkspace} />
+    {syncToastPresence.current && <SyncToast state={syncToastPresence.current} leaving={syncToastPresence.leaving} elapsedSeconds={syncElapsedSeconds} formatElapsed={formatElapsed} onOpenActivity={() => navigateWorkspace('activity')} />}
+  </div>;
 
   return <div className="app-shell">
     <AuthProvider value={authContextValue}><NotificationProvider value={notificationContextValue}><AppHeader
@@ -320,106 +286,53 @@ export function App() {
       workspaceView={workspaceView}
       onWorkspaceChange={selectWorkspace}
       onHome={navigateHome}
-      previewBusy={previewBusy}
+      syncBusy={syncBusy}
       ingestionBusy={ingestionBusy}
-      onStartIngestion={() => void startIngestion()}
+      onRefreshData={() => void refreshCurrentTool()}
       includeInternalMetrics={includeInternalMetrics}
-      onIncludeInternalMetricsChange={changeInternalMetricScope}
-    onSearchSelect={handleSearchResult}
+      onSearchSelect={handleSearchResult}
       commandCenterCommands={commandCenterCommands}
       workspacePreferences={workspacePreferences}
       onWorkspacePreferencesChange={saveWorkspacePreferences}
     /></NotificationProvider></AuthProvider>
-    <main key={`${workspaceView}:${workspaceRefreshKey}`} className="workspace-shell">
-      <div className="workspace-content">
+    <main className="workspace-shell">
+      <div className={'workspace-content' + workspaceTransitionClass}>
         <WorkspaceIntro
-          title={workspaceView === 'general' && authStatus.user?.name ? `Bienvenido, ${authStatus.user.name}` : workspaceLabels[workspaceView]}
-          description={workspaceView === 'general' ? 'Tu selección personal de señales PAM.' : workspaceView === 'posture' ? 'Revisá señales verificables del inventario y convertí cada hallazgo en una decisión.' : workspaceView === 'graph' ? 'Explorá relaciones PAM verificadas desde una identidad hasta el conector PSM.' : workspaceView === 'platforms' ? 'Inventario de plataformas PAM, Safes y cuentas asociadas.' : workspaceView === 'connectors' ? 'Inventario unificado de conectores PSM y SIA. Usá “Sincronizar datos” para actualizar todas las fuentes.' : workspaceView === 'pamHealth' ? 'Conectividad y versión de Portal, CPM y PSM observadas por CyberArk.' : workspaceView === 'aimApplications' ? 'Catálogo de aplicaciones registradas para Application Identity Manager.' : workspaceView === 'accessAssets' ? 'Catálogo de assets accesibles vía Access space. La relación con plataformas PAM sólo se muestra cuando el ID coincide exactamente.' : workspaceView === 'siaConnectors' ? 'Catálogo de conectores de Secure Infrastructure Access. Nunca incluye dirección/host ni red del conector.' : workspaceView === 'siaResources' ? 'Infraestructura VM de Secure Infrastructure Access. Nunca incluye IP, FQDN ni nombre de red.' : workspaceView === 'siaDatabaseAccounts' ? 'Strong Accounts de base de datos de Secure Infrastructure Access. Nunca incluye dirección/host ni usuario de la cuenta.' : workspaceView === 'identityFederations' ? 'Federaciones de Identity Administration. Sólo campos núcleo; nunca certificados SAML/SSO ni dominios/apps federados.' : workspaceView === 'netskope' ? 'Espacio habilitado para Netskope DLP. Todavía no hay una fuente configurada ni datos sincronizados.' : workspaceView === 'safes' ? 'Revisá Safes, miembros, cuentas y asignaciones.' : workspaceView === 'assets' ? 'Buscá un activo o conexión importada y revisá su cobertura observada en PAM y SIA.' : workspaceView === 'roles' ? 'Explorá los roles nativos de CyberArk y su acceso sobre usuarios, Safes y cuentas.' : workspaceView === 'identityUsers' ? 'Identidades PAM reconocidas por correo electrónico; revisá sus cadenas de acceso.' : workspaceView === 'identityGroups' ? 'Grupos federados de Okta reconocidos por el prefijo sg_; revisá su alcance efectivo.' : workspaceView === 'identityRoles' ? 'Roles actuales de Identity Administration.' : workspaceView === 'sia' ? 'Políticas de acceso y objetos administrados por Secure Infrastructure Access.' : workspaceView === 'identity' ? 'Directorio SCIM de Identity Administration, sincronizado como fuente independiente de PAM.' : workspaceView === 'users' ? 'Gestioná el acceso de las personas a DS Hub.' : workspaceView === 'activity' ? 'Registro de cambios administrativos del sistema.' : 'Administración de unidades y responsables del inventario.'}
+          key={workspaceView}
+          title={workspaceLabels[workspaceView]}
+          description={WORKSPACE_DESCRIPTIONS[workspaceView]}
+          help={CATALOG_BY_ID[workspaceView].introHelp}
           latestRun={latestRun || null}
           showRunSummary={workspaceView === 'safes'}
         />
-        <AppNotifications error={error} notice={notice} onDismissError={() => setError('')} onDismissNotice={() => setNotice('')} />
+        <StaleDataBanner tasks={staleTasks} onOpenActivity={workspaceView === 'activity' ? undefined : () => navigateWorkspace('activity')} />
+        <AppNotifications error={error} notice={notice} noticeSource={noticeSource} onDismissError={() => setError('')} onDismissNotice={() => setNotice('')} />
 
-        {(workspaceView === 'safes' || workspaceView === 'platforms' || workspaceView === 'connectors' || workspaceView === 'pamHealth') && <PamInfraSubnav activeView={workspaceView} permissions={authStatus?.permissions || []} onNavigate={navigateFromIdentity} />}
-
-        {workspaceView === 'general' && <GeneralWorkspace onWidgetNavigate={handleWidgetNavigation} onUnauthorized={onUnauthorized} onError={setError} onNotice={setNotice} includeInternal={includeInternalMetrics} />}
-        <Suspense fallback={<StateBlock variant="loading" title="Cargando workspace…" />}>
-        {workspaceView === 'posture' && <PostureWorkspace
+        <RegisteredWorkspaceRouter
+          workspaceView={workspaceView}
+          refreshKey={domainRefreshKeys[domainOf(workspaceView)] ?? 0}
           authChecked={authChecked}
           authenticated={isAuthenticated}
+          authStatus={authStatus}
+          permissions={actorPermissions}
           includeInternal={includeInternalMetrics}
-          canManage={Boolean(authStatus?.permissions?.includes('findings:manage'))}
+          searchResult={searchResult}
+          onSearchHandled={() => setSearchResult(null)}
+          catalogOpenRequest={catalogOpenRequest}
+          onNavigate={selectWorkspace}
           onUnauthorized={onUnauthorized}
           onError={setError}
-          onNotice={setNotice}
-          onNavigate={navigateFromIdentity}
-        />}
-
-        {workspaceView === 'graph' && canManageAccess && <PamChainWorkspace authChecked={authChecked} authenticated={isAuthenticated} onUnauthorized={onUnauthorized} onError={setError} onNavigate={navigateFromIdentity} includeInternal={includeInternalMetrics} initialQuery={pamGraphSeed} />}
-        {workspaceView === 'platforms' && hasAccess('platforms') && <PamPlatformsWorkspace key={pamPlatformSeed} authChecked={authChecked} authenticated={isAuthenticated} onUnauthorized={onUnauthorized} onError={setError} onNavigate={navigateFromIdentity} onOpenConnectors={(query) => navigateFromIdentity('connectors', query)} initialQuery={pamPlatformSeed} />}
-        {workspaceView === 'connectors' && hasAccess('connectors') && <PamConnectorsWorkspace key={pamConnectorSeed} authChecked={authChecked} authenticated={isAuthenticated} onUnauthorized={onUnauthorized} onError={setError} onOpenPlatforms={(query) => navigateFromIdentity('platforms', query)} initialQuery={pamConnectorSeed} />}
-        {workspaceView === 'pamHealth' && hasAccess('pamHealth') && <PamSystemHealthWorkspace authChecked={authChecked} authenticated={isAuthenticated} onUnauthorized={onUnauthorized} onError={setError} />}
-        {workspaceView === 'aimApplications' && hasAccess('aimApplications') && <PamAimApplicationsWorkspace authChecked={authChecked} authenticated={isAuthenticated} onUnauthorized={onUnauthorized} onError={setError} />}
-        </Suspense>
-
-        {workspaceView === 'safes' && <SafesWorkspace
-          catalogs={catalogs}
-          catalogManagerOpen={catalogManagerOpen}
-          onOpenCatalogManager={() => setCatalogManagerOpen(true)}
-          onCloseCatalogManager={() => setCatalogManagerOpen(false)}
-          onCatalogChanged={() => loadDashboard({ refreshStatic: true })}
-          onNotice={setNotice}
-          onError={setError}
-          tableProps={safeTableProps}
-          canManageCatalogs={Boolean(authStatus?.permissions?.includes('catalogs:manage'))}
-          summary={summary}
-          healthFilter={healthFilter}
-          onHealthChange={(value) => { setHealthFilter(value); setPage(0); }}
-          accountPlatformCoverage={accountPlatformCoverage}
-        />}
-
-        <Suspense fallback={<StateBlock variant="loading" title="Cargando workspace…" />}>
-        {(workspaceView === 'sia' || workspaceView === 'siaResources' || workspaceView === 'siaDatabaseAccounts' || workspaceView === 'accessAssets' || workspaceView === 'assets') && <SiaHubWorkspace
-          key={`${assetsSeed.search}:${assetsSeed.environment}:${assetsSeed.coverage}`}
-          authChecked={authChecked}
-          authenticated={isAuthenticated}
-          permissions={authStatus?.permissions || []}
-          includeInternal={includeInternalMetrics}
-          canManageAssets={Boolean(authStatus?.permissions?.includes('connections:import'))}
-          onUnauthorized={onUnauthorized}
-          onError={setError}
-          onNotice={setNotice}
-          onNavigate={navigateFromIdentity}
-          initialSection={workspaceView === 'assets' ? 'coverage' : workspaceView === 'siaResources' || workspaceView === 'siaDatabaseAccounts' || workspaceView === 'accessAssets' ? 'resources' : 'policies'}
-          initialResourceKind={workspaceView === 'siaDatabaseAccounts' ? 'databaseAccounts' : workspaceView === 'accessAssets' ? 'accessAssets' : 'resources'}
-          initialQuery={siaSeed}
-          assetsSeed={assetsSeed}
-        />}
-
-        {(workspaceView === 'identity' || workspaceView === 'identityUsers' || workspaceView === 'identityGroups' || workspaceView === 'identityRoles' || workspaceView === 'identityFederations' || workspaceView === 'roles') && <IdentityWorkspace
-          authChecked={authChecked}
-          authenticated={isAuthenticated}
-          permissions={authStatus?.permissions || []}
-          onUnauthorized={onUnauthorized}
-          onError={setError}
-          onNavigate={navigateFromIdentity}
-          includeInternal={includeInternalMetrics}
-          initialSection={workspaceView === 'roles' || workspaceView === 'identityRoles' ? 'cyberarkRoles' : workspaceView === 'identityGroups' ? 'groups' : workspaceView === 'identityUsers' ? 'users' : workspaceView === 'identityFederations' ? 'federations' : identitySectionSeed}
-          initialQuery={workspaceView === 'roles' ? pamRoleSeed : identitySeed}
-        />}
-
-        {workspaceView === 'users' && canManageAccess && <UsersWorkspace currentActorId={authStatus?.user?.actor_id} currentUserEmail={authStatus?.user?.email} onNotice={(message) => { setError(''); setNotice(message); }} onError={(message) => { setNotice(''); setError(message); }} />}
-
-        {workspaceView === 'activity' && canManageAccess && <ActivityWorkspace />}
-
-        {workspaceView === 'netskope' && hasAccess('netskope') && <NetskopeWorkspace />}
-        </Suspense>
-
-        {syncPreview && <SyncPreview preview={syncPreview} busy={previewBusy} onConfirm={() => void applyIngestion()} onCancel={() => { setSyncPreview(null); setSyncToast(null); }} />}
-        {catalogModal && <CatalogModal kind={catalogModal} draft={catalogDraft} busy={catalogBusy} onDraftChange={(updates) => setCatalogDraft((current) => ({ ...current, ...updates }))} onSubmit={saveCatalogEntry} onClose={() => setCatalogModal(null)} />}
-        {detail && <SafeDetailDrawer detail={detail} accounts={detail.accounts} catalogs={catalogs} form={form} saving={saving} audit={detail.audit} onClose={() => setDetail(null)} onFormChange={(updates) => setForm((current) => ({ ...current, ...updates }))} actionOptions={nextActionOptions} onNavigate={navigateFromIdentity} onSave={saveMetadata} onAddBusinessUnit={() => openCatalogModal('unit')} onAddResponsible={() => openCatalogModal('responsible')} />}
+          onNotice={setWorkspaceNotice}
+          onDashboardLoad={setPamDashboardLoad}
+          onLatestRun={setLatestRun}
+          authMode={authStatus?.mode}
+          currentActorId={authStatus?.user?.actor_id}
+          currentUserEmail={authStatus?.user?.email}
+          apiDocsEnabled={authStatus?.api_docs_enabled === true}
+          guideSection={guideSection}
+        />
       </div>
     </main>
-    {syncToast && <SyncToast state={syncToast} elapsedSeconds={syncElapsedSeconds} formatElapsed={formatElapsed} />}
+    {syncToastPresence.current && <SyncToast state={syncToastPresence.current} leaving={syncToastPresence.leaving} elapsedSeconds={syncElapsedSeconds} formatElapsed={formatElapsed} onOpenActivity={() => navigateWorkspace('activity')} />}
   </div>;
 }

@@ -1,0 +1,9 @@
+.access-review-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 18px 0; }
+.access-review-filter { align-items: baseline; background: var(--bg-panel); border: 1px solid var(--border-soft); color: var(--text-secondary); cursor: pointer; display: flex; font: inherit; gap: 8px; padding: 6px 12px; }
+.access-review-filter:hover { background: var(--bg-hover); color: var(--text-primary); }
+.access-review-filter.is-active { background: var(--bg-muted); border-color: var(--border-strong); color: var(--accent-strong); }
+.access-review-filter:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.access-review-filter strong { color: inherit; font-size: 14px; }
+.access-review-filter span { font-size: 11px; }
+.access-review-note { font-size: 11px; margin: 0; padding: 8px 18px 4px; }
+.access-review-flags { display: flex; flex-wrap: wrap; gap: 4px; }

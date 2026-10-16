@@ -1,4 +1,5 @@
 .ca_secret
+.secrets/
 *.env
 *.env.local
 # Local Docker deployment files may contain environment-specific secrets.
@@ -16,11 +17,23 @@ frontend/test-results/
 /test-results/
 __pycache__/
 *.pyc
+# Hypothesis example database written by the property tests (TEST-PROP-001).
+.hypothesis/
 .legacy/
 *.xlsx
 *.csv
 
 
 backups/
+docs/history/
 
 .claude/settings.local.json
+
+itr_report_itti_demo.html
+TO_CODEX.md
+TO_CLAUDE.md
+.playwright-mcp/
+.tmp-verify/
+
+# Informes del piloto automático (efímeros)
+.opencode/runs/

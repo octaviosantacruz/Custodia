@@ -1,4 +1,23 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git diff --stat)",
+      "Bash(git diff --name-only)",
+      "Bash(git diff --cached)",
+      "Bash(git diff --cached --stat)",
+      "Bash(git log)",
+      "Bash(git log --oneline)",
+      "Bash(git log --oneline -10)",
+      "Bash(git branch)",
+      "Bash(git branch --list *)",
+      "Bash(git branch --show-current)",
+      "Bash(npm run harness:check)",
+      "Bash(npm run harness:test)"
+    ]
+  },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true,
     "code-review@claude-plugins-official": true

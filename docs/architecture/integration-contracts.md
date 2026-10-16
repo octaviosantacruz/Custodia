@@ -1,8 +1,18 @@
-# Contratos de integración CyberArk
+---
+estado: vigente
+dueño: Octavio Santacruz
+revisado: 2026-10-09
+---
 
-## Estado actual
+# Contratos de integración
 
-La cadena PAM fue verificada contra API real e ingerida en la capa normalizada:
+Qué datos externos consume DS Hub y bajo qué reglas. Este documento cubre **CyberArk** (PAM, Identity Administration, SIA, Access space, Risk Management), los **puentes entre fuentes** y la capa de **Conexiones**. Los contratos de Netskope, su evidencia y sus allowlists están en [`netskope-api.md`](netskope-api.md). El trabajo pendiente vive en [`TO_IMPLEMENT.md`](../tracking/TO_IMPLEMENT.md).
+
+Reglas generales: ninguna fuente se habilita porque exista una URL; los clientes no tienen endpoints por defecto y una configuración parcial hace fallar la sincronización con un mensaje claro; no se inventan endpoints, scopes, payloads ni relaciones; cada fuente conserva su `source_system` y ninguna corrida reconcilia objetos de otra; los objetos ausentes sólo se retiran tras una corrida completa y exitosa. Los probes versionados (`scripts/probe_cyberark_endpoint.sh`, `probe_sia_endpoint.sh`, `probe_cyberark_risk_contract.sh`) leen los secretos de `.env.local`, `.ca_secret` o un archivo, usan HTTPS, limitan las URLs a la base configurada y sólo muestran metadatos JSON; un probe observa y no autoriza persistencia (`PROBE_RAW=1` / `SIA_PROBE_RAW=1` quedan para inspección local controlada).
+
+## PAM
+
+La cadena verificada contra la API real y persistida en la capa normalizada:
 
 ```text
 users -> roles -> safes -> platforms -> psm
@@ -10,480 +20,130 @@ users -> roles -> safes -> platforms -> psm
 
 | Fuente | Contrato verificado | Uso normalizado |
 |---|---|---|
-| `/API/Users` | `Users[]`; algunos registros no incluyen `UUID`, todos los observados tienen `username` | `user`; UUID cuando existe, `username` como fallback documentado |
+| `/API/Users` | `Users[]`; algunos registros sin `UUID`, todos con `username` | `user` (UUID si existe, `username` como fallback) |
 | `/API/UserGroups` | listado paginado; `id` numérico y `groupName` | `role` |
-| `/API/UserGroups/{id}` | `members[]` con `id` y `username` | `user_has_role` cuando el usuario existe en `/API/Users` |
-| `/API/Safes/{safeName}/Members` | miembros `Group` coinciden por `memberName` con `groupName` | `role_grants_access` hacia Safe |
-| `/API/Accounts` | `id`, `name`, `userName`, `address`, `safeName` y `platformId` cuando están presentes | cuentas no sensibles en `cyberark_accounts`; relación `safe_uses_platform` cuando la evidencia es completa |
-| `/API/Platforms` | `Platforms[]`, `general.id`, `general.name`, `general.active`, `general.systemType`, `sessionManagement.PSMServerID` | `platform`, `psm`, `platform_uses_psm` |
-| `/API/Platforms/{id}` | `PlatformID`, `Active`, `Details.AllowedSafes` (texto) | sólo `allowed_safes_pattern` de plataforma; se excluyen políticas, reglas de contraseña, notificaciones y demás campos de `Details` |
+| `/API/UserGroups/{id}` | `members[]` con `id` y `username` | `user_has_role` si el usuario existe en `/API/Users` |
+| `/API/Safes/{safeName}/Members` | miembros `Group` coinciden por `memberName` con `groupName` | `role_grants_access` hacia el Safe |
+| `/API/Accounts` | `id`, `name`, `userName`, `address`, `safeName`, `platformId` | cuentas no sensibles en `cyberark_accounts`; `safe_uses_platform` si la evidencia es completa |
+| `/API/Platforms` | `Platforms[]`, `general.{id,name,active,systemType}`, `sessionManagement.PSMServerID` | `platform`, `psm`, `platform_uses_psm` |
+| `/API/Platforms/{id}` | `PlatformID`, `Active`, `Details.AllowedSafes` | sólo `allowed_safes_pattern`; se excluyen políticas, reglas de contraseña y notificaciones |
 
-El explorador visual `/pam/graph` presenta las relaciones PAM verificadas por identidad. Sus inventarios de detalle están separados: `/pam/platforms` usa `GET /api/cmdb/pam-platforms` para plataformas activas y el workspace unificado `/pam/connectors` usa `GET /api/cmdb/pam-connectors` para objetos `psm` activos y `GET /api/cmdb/sia-connectors` para objetos SIA (`source_system = sia`), con un toggle de vista que no mezcla sus filas. Ninguna fuente atribuye CPU, RAM o capacidad sin un contrato explícito.
+La última sincronización dejó 95 usuarios, 78 roles, 465 Safes, 75 plataformas y 3 PSM (las cifras salen siempre de la base, no de este texto). Siete membresías de grupo no tienen contraparte en `/API/Users`: se omiten y quedan como gap de fuente, sin crear identidades. De las cuentas se guardan sólo nombre, username, dirección, Safe y plataforma, **nunca** contraseñas, secretos ni payloads completos; las ausentes de una corrida completa pasan a `retired` y una corrida con registros no identificables no reconcilia bajas. El PSM referenciado por una plataforma puede diferir del catálogo sólo en mayúsculas (`PSMServer_UE-CYBERARK03` frente a `..._ue-cyberark03`) y puede faltar en él (`PSMServer_FO-CYBERARK-SRV`): la ingesta resuelve sin distinguir mayúsculas; si el catálogo trajera dos IDs que difieren sólo así no se emite la arista y se cuenta la omisión; un ID ausente conserva un objeto mínimo con `attributes.catalog_missing = true` mientras una plataforma lo referencie.
 
-La última sincronización normalizada dejó 95 usuarios, 78 roles, 465 Safes,
-75 plataformas, 3 PSM y relaciones verificadas de usuario a rol, rol a Safe,
-Safe a plataforma y plataforma a PSM. Siete membresías de grupo no tienen
-contraparte en `/API/Users`; se omiten del vínculo y quedan como gap de fuente,
-sin crear identidades inventadas.
+`/pam/graph` presenta las relaciones verificadas por identidad; los inventarios de detalle están separados (`/api/cmdb/pam-platforms`, `pam-connectors` para `psm` y `sia-connectors` para SIA) y ninguna fuente atribuye CPU, RAM o capacidad sin contrato. En `GET /api/safes`, `q` busca por nombre y Safe URL ID; `include_accounts=true` (opt-in) agrega coincidencias por nombre, usuario, dirección o plataforma de cuentas activas con un `EXISTS` parametrizado, compartido por la lista, las facetas y la exportación, sin añadir campos de cuenta.
 
-Se almacenan únicamente identificadores y atributos operativos no sensibles de
-las cuentas en `cyberark_accounts`: nombre, username, dirección, Safe y
-plataforma. Nunca se almacenan contraseñas, secretos ni payloads completos de
-`/API/Accounts`. Las cuentas ausentes de una corrida completa se marcan como
-`retired`; una corrida con registros no identificables no reconcilia bajas.
+**Alcance de la sincronización PAM.** `POST /api/ingestion/preview` compara sólo Safes y nunca aplica cambios. `POST /api/ingestion/all/runs` encola una corrida PAM completa y una corrida aislada del catálogo PSM (`cyberark-psm-api`); además encola Identity Administration, SIA y Access sólo si su contrato está configurado (`configured_optional_source_jobs()` en `lifecycle.py`, compartida con el scheduler). La corrida `cyberark` siempre reconcilia Safes y miembros y llama a `sync_pam_inventory` (plataformas, `platform_target/dependent/group/rotational_group`, `psm_connector` y `component`) sólo con un snapshot completo (`max_safes = 0`) y sin errores; un snapshot parcial o con Safes fallidos deja esos catálogos intactos. Identity, SIA y Access son fuentes independientes que nunca se infieren como efecto de la corrida PAM.
 
-**Alcance real de la sincronización PAM.** `POST /api/ingestion/preview`
-compara únicamente Safes (`compare_inventory`); nunca aplica cambios. Al
-confirmar, `POST /api/ingestion/all/runs` encola una corrida PAM completa y una
-corrida aislada de catálogo PSM (`cyberark-psm-api`) en la misma acción. Para
-cada fuente cuyo contrato esté configurado también encola Identity
-Administration, SIA y/o Access como corridas aisladas (`configured_optional_source_jobs()` en
-`backend/app/lifecycle.py`, compartida con el scheduler programado desde
-2026-09-11 — antes esta ruta encolaba las cuatro corridas incondicionalmente,
-inconsistente con el copy del frontend que ya decía "se encola sólo si el
-contrato está configurado"). La corrida
-`cyberark` (`run_ingestion`, `backend/app/ingestion.py`) siempre reconcilia
-Safes/miembros y, además, llama a `sync_pam_inventory`
-(`backend/app/pam_inventory.py`) — que refresca plataformas,
-`platform_target`/`platform_dependent`/`platform_group`/
-`platform_rotational_group`, `psm_connector`, `component` (Salud PAM) y
-`aim_application` — sólo cuando `should_sync_pam(options, errors)` es `true`:
-un snapshot completo de Safes (`max_safes = 0`) y sin errores. Un snapshot
-parcial o con algún Safe fallido deja esos catálogos técnicos sin tocar (evita
-retiros falsos por datos incompletos); el mismo criterio aplica a la corrida
-programada del scheduler. Identity Administration, SIA y Access son fuentes
-independientes: nunca se infieren ni se sincronizan como efecto de la corrida
-PAM, y SIA no se relaciona con PAM por nombre/IP salvo las excepciones
-sancionadas ya documentadas (join exacto de `platformId` en `ACCESS-001`, IP
-literal en la cadena SIA).
+La política por fuente y por tarea (intervalo, timeout, reintentos, backoff, prioridad, `SYNC_SOURCE_INTERVALS`, `SYNC_MAX_CONCURRENT_SOURCES`) está en [`deployment.md`](../operations/deployment.md).
 
-## Cadena SIA
+### Endpoints PAM documentados y sus límites
 
-**Contrato confirmado el 2026-08-16** contra el tenant real:
+Candidatos de lectura; no autorizan persistencia ni revelan el permiso efectivo del cliente.
 
-- URL base: `https://itti.dpa.cyberark.cloud`; usa el tenant `itti`, el mismo
-  identificador de `CA_PVWA_URL`, no el subdominio de Identity Administration.
-- Autenticación: OAuth `client_credentials`, con el mismo cliente autorizado
-  para PVWA/Identity Administration y permisos SIA/DPA en el tenant.
-- Listado: `GET /api/access-policies` con `{totalCount, items[]}`; cada política
-  observada incluye `policyId`, `policyName`, `status`, `description`,
-  `platforms` y `ruleNames`.
-- Detalle: `GET /api/access-policies/{policyId}`; agrega `userAccessRules`,
-  grantees por usuario/grupo/rol y `providersData`. En el tenant validado,
-  `providersData.OnPrem` contiene `ipRules`, `fqdnRules` y `logicalNames`,
-  que se conservan como destinos/assets operativos de la política.
+- `ComponentsMonitoringSummary` y `ComponentsMonitoringDetails/{ComponentID}` (Portal, CPM, PSM/SSH, AIM): `ComponentSpecificStat` está documentado como `-1` y no se usa como métrica. `PSM/Servers` y `PSM/Connectors` listan ID, nombre y dirección; ninguno aporta CPU, RAM, capacidad ni salud.
+- **Excluidos de cualquier persistencia** hasta aprobar allowlist y retención: `Accounts/{id}/Activities` (`User`, `MoreInfo`, `Reason`), `LiveSessions` y recordings (usuario, cuenta, dirección, `RawProperties`; privacidad/RBAC), `Users/{id}` (`personalDetails`, `internet`, `phones`), `DiscoveredAccounts` (propiedades de plataforma, fingerprints, AWS key IDs), mutaciones, secret versions, SSH MFA caching keys, ticketing y Server Verify. Las reglas de onboarding automático, los grupos/dependientes de cuentas y los directorios LDAP son configuración o relaciones de lectura que requieren probe antes de persistir (sin secretos de bind).
+- `Platforms/*`, `platforms/targets|dependents|groups|rotationalGroups` y `Platforms/{id}/Safes` son catálogos; sus `properties` describen campos, no valores, y no se interpretan como rotación. `Users?ExtendedDetails=true` agrega `enabled`, `suspended`, `groupsMembership` y `vaultAuthorization`.
+- `IncomingRequests` se validó el 2026-10-01 (`200`, cola vacía) y se aparcó por decisión de producto (`REQ-001`): sin `Reason` ni confirmar/rechazar desde DS Hub; si hay uso real, la allowlist se fija contra una respuesta real.
+- `Accounts` documenta `savedFilter` (`PolicyFailures`, `FailedChange`, `FailedVerify`, `FailedReconcile`, `ScheduledFor*`), útil como hallazgo sólo tras la allowlist de `secretManagement`.
+- **`secretManagement` allowlist** (`cyberark_accounts.attributes`, sin migración): `automaticManagementEnabled`, `status` (`success`, `failure`, `in_process`) y `lastModifiedTime` (epoch en segundos convertido a UTC). Se excluyen el secreto, `platformAccountProperties`, `manualManagementReason`, `lastModifiedBy`, `secretType` y el payload.
 
-La implementación usa un cliente separado en `backend/app/integrations/sia.py`,
-una sincronización en `backend/app/sia_sync.py` y persiste políticas como
-`source_system = 'sia'`, `object_type = 'access_policy'`. Los grantees se
-conservan como atributos hasta confirmar que sus IDs cruzan de forma estable
-con Identity Administration; no se fabrican relaciones. Los destinos permanecen
-dentro de los atributos de `access_policy`; no se crean relaciones hacia PAM ni
-objetos de destino independientes sin un contrato adicional.
+### Rotación de credenciales: bloqueada por decisión
 
-**Conectores (`SIA-CONN-001`) y recursos VM (`SIA-RES-001`) confirmados e
-implementados el 2026-09-11**, mismo cliente y credenciales:
+`GET /api/analytics/freshness` reporta sólo antigüedad de `last_modification_time` de Safes en tramos (30 d, 90 d, 1 año, más de 1 año, sin dato), Safes activas sin cuentas activas y cuentas activas, retiradas y «sin ver» hace más de 30 días: es **frescura operativa**, no rotación, y la UI lo rotula así. El probe del 2026-10-02 (100 cuentas) vio `secretManagement` en 100/100: `automaticManagementEnabled` booleano, `lastModifiedTime` entero de 10 dígitos, `status` sólo en 3/100 (`success`, `failure`), `manualManagementReason` texto libre en 65/100 (siempre excluido) y **`lastReconciledTime` / `lastVerifiedTime` ausentes**, que no se persisten ni se presentan. `lastModifiedTime` es cuándo se creó la cuenta o se modificó el secreto: la UI lo rotula «Último cambio de secreto o alta (según CyberArk)» y no permite inferir rotación. No existe KPI de rotación ni de antigüedad de verificación o reconciliación; los campos ausentes o inválidos quedan como desconocidos, nunca `false`, cero ni estados inventados.
 
-- `GET /api/connectors` → `{continuationToken, count, items[]}`, persistido
-  como `object_type = 'sia_connector'`. Excluye `hostIp`/`hostName`/
-  `hostNetwork`/`hostSubnet`/`hostInstanceId` (host/red) y `proxySettings`
-  (shape nunca observado con un valor). `activeSessionsCount`/`status`/
-  `version`/`region`/`workspaceId` se conservan.
-- `GET /api/infrastructure/virtual-machines` → `{items[], nextToken,
-  totalCount}`, persistido como `object_type = 'sia_resource'` con
-  `attributes.resource_type = 'virtual_machine'` (deja espacio para un futuro
-  catálogo Database sin nueva migración). Excluye `ip`/`fqdn`/`networkName`.
-- **Ambos catálogos son opcionales**: `CA_SIA_CONNECTORS_PATH` y
-  `CA_SIA_VM_INFRASTRUCTURE_PATH` no forman parte del contrato requerido de
-  `SiaSettings.from_environment()` — una instalación que sólo configuró
-  políticas sigue sincronizando sin cambios. `sync_sia_inventory` sólo pide y
-  reconcilia estos tipos cuando su path está configurado, para no retirar
-  filas de un catálogo que una corrida determinada nunca pidió.
-- **Cadencia programada por fuente configurada**: cada ciclo de
-  `INGESTION_INTERVAL_MINUTES` encola PAM y, cuando sus contratos están
-  configurados, Identity Administration, SIA y Access como corridas
-  independientes. La cola y el lock por `source_system` mantienen aisladas
-  las fallas y reconciliaciones de cada fuente; una integración sin variables
-  aprobadas no genera una corrida fallida.
-- **Paginación no confirmada, resuelta de forma defensiva**: `continuationToken`/
-  `nextToken` fueron observados truthy incluso con la colección completa
-  (`count`/`totalCount` ya satisfecho). El cliente corta por `count`/
-  `totalCount`, no por la sola presencia del token, y sólo falla ruidoso si
-  la página es más corta que su propio total reportado — ahí sí haría falta
-  confirmar el parámetro real de cursor, cosa que cuatro nombres candidatos
-  (`nextToken`/`cursor`/`pageToken`/`continuationToken`) no lograron
-  distinguir en un tenant sin exceso de datos para paginar de verdad.
-- `Strong accounts` (`SIA-STRONG-001`) implementado 2026-09-11: `GET
-  /api/database-strong-accounts` → `{items[], nextCursor, totalCount}`,
-  persistido como `object_type = 'sia_database_account'` (propio, no
-  compartido con `sia_resource`: la reconciliación opera por `object_type` y
-  una instalación que sólo configura uno de los dos catálogos no debe retirar
-  las filas del otro). Sólo se mapean los campos confirmados: `storeType`/
-  `createdAt`/`modifiedAt` a nivel raíz y `accountProperties.{platform,port,
-  database}`; `accountProperties.address`/`.username` se excluyen (host/
-  credencial-adyacente). Opcional (`CA_SIA_DB_STRONG_ACCOUNTS_PATH`), mismo
-  patrón que conectores/VM arriba. `Database resources` separado de Strong
-  accounts sigue sin implementar: no se encontró un endpoint distinto.
+## SIA
 
-### Validaciones pendientes
+Contrato confirmado el 2026-08-16: base `https://itti.dpa.cyberark.cloud` (el tenant de `CA_PVWA_URL`, no el subdominio de Identity), OAuth `client_credentials` con el mismo cliente que PVWA/Identity y permisos SIA/DPA. `GET /api/access-policies` devuelve `{totalCount, items[]}` (`policyId`, `policyName`, `status`, `description`, `platforms`, `ruleNames`) y `GET /api/access-policies/{policyId}` agrega `userAccessRules`, grantees por usuario/grupo/rol y `providersData` (en el tenant, `OnPrem` con `ipRules`, `fqdnRules` y `logicalNames`, que se conservan como destinos de la política). Cliente en `cyberark/sia/integrations/sia.py`, sync en `sia_sync.py`; las políticas son `source_system = 'sia'`, `object_type = 'access_policy'`. Los grantees y destinos quedan como atributos: no se fabrican relaciones hacia PAM ni objetos de destino sin otro contrato, y los grupos y roles SIA no exponen IDs estables.
 
-- **Paginación de `/api/access-policies` confirmada e implementada (2026-09-10):**
-  el cliente pagina con `limit`/`offset` hasta agotar `totalCount` (o hasta una
-  página corta cuando el tenant no lo devuelve), con un tope de seguridad de
-  20 000 objetos y detección de `totalCount` inconsistente entre páginas.
-  Ver `backend/app/integrations/sia.py::SiaClient.get_policies` y
-  `backend/tests/test_sia.py`.
-- **Probe de throttling 2026-09-11 (inconcluso):** 40 requests secuenciales a
-  `/api/access-policies` (~2.5 req/s sostenido durante ~16s) devolvieron `200`
-  en las 40, sin ningún header `Retry-After`/`X-RateLimit-*` expuesto ni en
-  éxito. No se observó `429`. Esto no confirma que el tenant nunca throttlee,
-  sólo que este umbral bajo no lo dispara ni expone métricas de rate limit;
-  una ráfaga concurrente o de mayor volumen se acerca a un test de stress real
-  contra producción y requiere autorización explícita adicional antes de
-  intentarse. El cliente ya reintenta con backoff ante `429`/5xx (`get_json`)
-  como diseño defensivo, independientemente de este resultado.
-- Falta confirmar el espacio de IDs de grupos y roles SIA para relaciones
-  normalizadas futuras.
-- La UI del tenant muestra políticas recurrentes, recursos Database/VM,
-  Strong accounts, conectores y diagnósticos de sesiones. `SIA-RES-001` (VM),
-  `SIA-CONN-001` y `SIA-STRONG-001` (Database strong accounts) ya tienen
-  contrato API confirmado e implementado (ver arriba); `SIA-DIAG-001` sigue
-  sin ningún endpoint público encontrado.
-- Recursos, Strong accounts y conectores SIA permanecen
-  `source_system = 'sia'`. No se unen a las plataformas/PSM PAM ni a cuentas
-  PAM por nombre, dirección, servicio, dominio o cualquier heurística.
-- Session diagnostics requiere decisión de RBAC, retención y allowlist. Por
-  defecto quedan excluidos usuario, target/IP, Session ID, texto libre,
-  certificados y recordings.
+| Catálogo | Endpoint | `object_type` | Forma y exclusiones |
+|---|---|---|---|
+| Conectores (`SIA-CONN-001`) | `GET /api/connectors` → `{continuationToken, count, items[]}` | `sia_connector` | Excluye `hostIp`, `hostName`, `hostNetwork`, `hostSubnet`, `hostInstanceId` y `proxySettings`; conserva `activeSessionsCount`, `status`, `version`, `region`, `workspaceId` |
+| VM (`SIA-RES-001`) | `GET /api/infrastructure/virtual-machines` → `{items[], nextToken, totalCount}` | `sia_resource` con `resource_type = 'virtual_machine'` | Excluye `ip`, `fqdn`, `networkName` |
+| Strong accounts (`SIA-STRONG-001`) | `GET /api/database-strong-accounts` → `{items[], nextCursor, totalCount}` | `sia_database_account` (propio, para no retirar filas del otro catálogo) | Sólo `storeType`, `createdAt`, `modifiedAt` y `accountProperties.{platform,port,database}`; se excluyen `address` y `username` |
+| Target sets (`SIA-TGT-001`) | `GET /api/targetsets` → `target_sets` y cursor `b64_last_evaluated_key` | `sia_target_set` | Forma confirmada el 2026-10-02 (`name`, `type`, `description`, `provision_format`, `enable_certificate_validation`, `secret_id`, `secret_type`); sólo la allowlist de presentación (guardada como `provisioning_format`); `secret_id`, `secret_type`, entradas y targets no se mapean; el dueño habilitó `CA_SIA_TARGET_SETS_PATH` el 2026-10-02; la primera sincronización persistida aún está por confirmar |
 
-## Access space (ACCESS-001)
+Los catálogos son **opcionales**: sus paths no integran el contrato requerido de `SiaSettings.from_environment()` y `sync_sia_inventory` sólo pide y reconcilia un tipo cuando su path está configurado, para no retirar filas de un catálogo que esa corrida no pidió. «Database resources» separado de Strong accounts no se implementó (no hay un endpoint distinto) y los diagnósticos de sesiones (`SIA-DIAG-001`) usan Audit and Reports con allowlist agregada, sin usuario, target/IP, Session ID ni texto libre. Recursos, strong accounts y conectores SIA no se unen a plataformas, PSM ni cuentas PAM por nombre, dirección, servicio ni dominio.
 
-**Contrato confirmado el 2026-09-11** contra el tenant real, implementado
-end-to-end:
+**Paginación.** `/api/access-policies` pagina con `limit`/`offset` hasta agotar `totalCount` (o una página corta), con tope de 20.000 objetos y detección de `totalCount` inconsistente (`SiaClient.get_policies`). En los demás catálogos `continuationToken`/`nextToken` aparecieron truthy incluso con la colección completa, así que el cliente corta por `count`/`totalCount` y sólo falla si la página es más corta que su propio total; el parámetro real de cursor no se pudo distinguir (cuatro nombres candidatos) y, en target sets, sólo hay una fila y el cliente falla ante un cursor repetido.
 
-- URL base: `https://{tenant}-userportal.cyberark.cloud` (subdominio propio
-  del Access space, distinto del de PVWA y del de SIA).
-- Autenticación: reusa el mismo flujo OAuth `client_credentials` /
-  `oauth2/platformtoken` y el mismo client id/secret ya autorizados para
-  PVWA — confirmado en vivo, no hizo falta habilitar nada nuevo en el tenant.
-- Listado: `GET /api/assets` con `{assets:[...], diagnostics, nextToken, size}`.
-  Cada asset observado incluye `accessMethod`, `address`, `assetCategory`,
-  `assetId`, `assetType`, `connectionComponents`, `customProperties`
-  (`{port, logon_domain}`), `fileCategories` (casi siempre `{}`),
-  `isFavorite`, `platformId`, `platformSubtype`, `platformType`, `protocol`,
-  `username`, `workflowStatus`.
-- Paginación **no confirmada**: todas las respuestas observadas (7 assets)
-  tuvieron `nextToken: null`. El cliente (`integrations/access.py`) falla
-  ruidosamente si alguna vez llega un `nextToken` no nulo, en vez de adivinar
-  el parámetro de cursor — mismo criterio que `sia.py` aplicó a `get_policies`
-  antes de que su paginación se confirmara.
+**Throttling.** Probe del 2026-09-11 (40 requests secuenciales, ≈2,5 req/s): todas `200`, sin headers de rate limit. Probe del 2026-10-01 (autorizado por el dueño del tenant): ráfagas de 10, 25, 50 y 100 concurrentes repetidas dos veces, 388 requests, todas `200`, sin `429` ni headers de rate limit ni errores de red, pico ≈83 req/s; una latencia transitoria inicial de ≈10 s no se reprodujo. Se conserva el backoff defensivo ante `429`/`5xx` (`get_json`) y no se hacen más pruebas de carga.
 
-La implementación usa un cliente separado en `backend/app/integrations/access.py`,
-una sincronización independiente en `backend/app/access_sync.py` y persiste
-assets como `source_system = 'access'`, `object_type = 'access_asset'`
-(migración `040`). El historial de corridas (`cyberark_ingestion_runs`) y
-`cyberark_findings` ampliaron el mismo valor en la migración `042`: el CHECK
-de `025` no incluía `access`, y `POST /api/ingestion/all/runs` fallaba al
-encolar esa fuente. Excluidos del mapeo: `address` (host/IP),
-`username` (credencial-adyacente), `customProperties.logon_domain` y
-`fileCategories.LogonDomain` (dominio AD, mismo criterio que host/infra).
+## Access space (`ACCESS-001`)
 
-**`platformId`: excepción sancionada, segundo puente cross-source.**
-`platformId` cruza exactamente con el `PlatformID` de PAM (los 2 valores
-distintos observados en 7 assets coincidieron con un `PlatformID` ya
-ingerido; confirmado también en la corrida real: 7/7 assets resolvieron
-`platform_name`). A diferencia de `PLAT-002` (donde la mayoría de los IDs
-*no* cruzaban), acá el espacio de IDs sí es compartido. Aun así, **no se
-persiste como relación** en `cyberark_inventory_relationships`: esa tabla
-tiene una sola columna `source_system` y no puede representar un edge entre
-un objeto `access` y uno `cyberark`. Se resuelve con un join de sólo lectura
-en `backend/app/repositories/access_queries.py` — mismo patrón que el puente
-Identity Administration -> PAM (`identity_pam_bridge.py`) y el join SIA -> Safes
-por IP (`sia_queries.py::_safe_links_by_ip`): sólo por igualdad exacta de ID,
-nunca por nombre, y un asset sin match sigue listándose normalmente con
-`platform_name = null`.
+Confirmado el 2026-09-11 contra el tenant real: base `https://{tenant}-userportal.cyberark.cloud`; mismo flujo OAuth `oauth2/platformtoken` y mismo cliente que PVWA (sin habilitar nada nuevo); `GET /api/assets` → `{assets:[...], diagnostics, nextToken, size}` (cada asset trae `accessMethod`, `address`, `assetCategory`, `assetId`, `assetType`, `connectionComponents`, `customProperties` `{port, logon_domain}`, `fileCategories`, `isFavorite`, `platformId`, `platformSubtype`, `platformType`, `protocol`, `username`, `workflowStatus`). La paginación no está confirmada (los 7 assets traían `nextToken: null`): el cliente (`cyberark/access/integrations/access.py`) falla si llega un `nextToken` no nulo en vez de adivinar el parámetro. Se persiste como `source_system = 'access'`, `object_type = 'access_asset'` (migración `040`; el historial de corridas y `cyberark_findings` ampliaron el valor en la `042`). Se excluyen `address`, `username`, `customProperties.logon_domain` y `fileCategories.LogonDomain`.
 
-## Contrato confirmado de Identity Administration
+**`platformId`: puente cross-source de sólo lectura.** Cruza exactamente con el `PlatformID` de PAM (7/7 assets resolvieron `platform_name`). No se persiste como arista porque `cyberark_inventory_relationships` tiene una sola columna `source_system`; se resuelve con un join de lectura en `access_queries.py`, sólo por igualdad exacta de ID, y un asset sin match se lista con `platform_name = null`. Es el mismo patrón que Identity→PAM y SIA→Safes por IP (`sia_queries.py::_safe_links_by_ip`).
 
-Contrato confirmado el 2026-08-16 contra el tenant real mediante los probes
-versionados (ver `docs/reference/identity-administration-sample.json` para
-la forma completa, anonimizada):
+## Identity Administration
 
-- URL base del tenant: la misma que `CA_IDENTITY_URL` (no un host nuevo).
-- Endpoint OAuth: `{CA_IDENTITY_URL}/oauth2/platformtoken`, mismo flujo
-  `client_credentials` que ya usa PVWA.
-- Autenticación: el mismo `CA_CLIENT_ID`/secreto que ya usan para Safes
-  alcanzó (rol `System Admin` asignado sobre ese usuario de servicio); no
-  hizo falta un cliente OAuth nuevo.
-- Protocolo: SCIM 2.0 (RFC 7644), no el shape `value`/`nextLink` que se
-  había asumido especulativamente antes de confirmar el contrato.
-- Endpoint de usuarios: `GET /scim/v2/Users` (id, userName, displayName,
-  active, emails, groups embebidos, meta.lastModified).
-- Endpoint de roles: `GET /scim/v2/Groups` (id, displayName, members
-  embebidos, meta.lastModified).
-- Paginación: `startIndex`/`count` (estándar SCIM), sin `nextLink`.
-- **Bugs conocidos de esta API** (no del cliente): `totalResults` en
-  `/scim/v2/Users` es poco confiable — reportó 79 cuando el conteo real era
-  100. `meta.created`/`meta.lastModified` de cada usuario a veces coincide
-  con el instante exacto del pedido en vez de una fecha histórica real. Una
-  misma página puede repetir el mismo `id` dos veces, a veces idéntico, a
-  veces con campos distintos entre ambas copias. El cliente no usa
-  `totalResults` para decidir cuándo parar de paginar (usa el criterio de
-  página corta) y colapsa `id` repetidos dentro de una página (se queda con
-  la primera aparición) antes de que lleguen a la validación de duplicados
-  conflictivos del CMDB normalizado.
-- **Dato tranquilizador**: dos corridas consecutivas contra el tenant real
-  devolvieron el mismo conjunto de 79 usuarios / 64 roles y la segunda no
-  retiró ningún objeto — el universo de identidades es estable entre
-  corridas aunque los metadatos puntuales (timestamps, `totalResults`,
-  duplicados intra-página) no lo sean.
-- Pendiente operativo: comportamiento exacto ante `429` y límites de rate
-  limit del tenant; el cliente reintenta, pero todavía no se validó el límite
-  real del tenant.
+Contrato confirmado el 2026-08-16 con los probes versionados (la forma completa anonimizada no se versiona en el repositorio): misma base que `CA_IDENTITY_URL`, `{CA_IDENTITY_URL}/oauth2/platformtoken` con `client_credentials` y el mismo `CA_CLIENT_ID` (rol `System Admin` sobre el usuario de servicio). Protocolo **SCIM 2.0** (RFC 7644): `GET /scim/v2/Users` (id, userName, displayName, active, emails, groups embebidos, `meta.lastModified`) y `GET /scim/v2/Groups` (id, displayName, members embebidos), paginados con `startIndex`/`count` y sin `nextLink`.
 
-## Mapeo esperado
+**Defectos de la API (no del cliente):** `totalResults` de `/Users` es poco confiable (79 cuando el real era 100); `meta.created`/`meta.lastModified` a veces coinciden con el instante del pedido; una página puede repetir el mismo `id`, a veces con campos distintos. El cliente no usa `totalResults` (corta por página corta) y colapsa los `id` repetidos de una página (se queda con la primera) antes de la validación de duplicados conflictivos. Dos corridas consecutivas devolvieron los mismos 79 usuarios y 64 roles y la segunda no retiró nada: el universo es estable aunque los metadatos puntuales no lo sean. Sin probe de carga propio de Identity (el del SIA es la referencia) y con reintentos defensivos.
+
+**Usuarios omitidos por SCIM (2026-10-03).** Contrato probado: `POST /Redrock/query` (selección de `ID, Username, DisplayName` de `User` por el ID exacto citado en `Groups.members`) y luego `POST /UserMgmt/GetUserAttributes` con `{ID}`; mismo host y OAuth, sin permisos PAM. El SDK oficial ([idsec-sdk-golang v0.10.0](https://github.com/cyberark/idsec-sdk-golang/blob/v0.10.0/pkg/services/identity/users/idsec_identity_users_service.go)) clasifica un usuario como técnico cuando `InEverybodyRole` es false. Se preservan sólo ID, nombre, clasificación técnica y `OauthClient`, con procedencia `record_source=identity_directory` y `service_user_basis=sdk_in_everybody_role`; estado, correo y fechas quedan sin dato si no se informan. Las consultas son secuenciales, una por ID ausente único y escapado como literal (nunca por nombre); una respuesta vacía deja la referencia pendiente y cualquier error de transporte, formato, clasificación o ID aborta antes de persistir y reconciliar. El sync exige `members[]` en todos los roles; SCIM conserva prioridad.
+
+**Membresía directa y roles anidados (2026-10-03).** `/scim/v2/Groups` expone `members[]` con `value`, `type` (`User`/`Group`), `display` y `$ref` (el catálogo observado tiene 78 roles y 26 vínculos rol→rol; los conteos son evidencia, no valores de producto). Se conserva `identity_member_of` desde el miembro (usuario o rol) hacia el rol contenedor por ID exacto, sólo dentro de `identity_administration`; `user_has_role` sigue siendo el listado `Users.groups` y no se usa para membresía directa. `display` y `$ref` no se usan para joins (`$ref` no se persiste). Los miembros sin ficha se guardan como `source_id`, `display_name` y tipo en `attributes.unresolved_members` del rol («Sin ficha de usuario»; nunca cuentas ni relaciones, y fuera del conteo de usuarios confirmados). Cada ID SCIM conserva su cuenta aunque comparta correo (se eliminó la fusión por correo). Los roles agregan `membership_status` (`complete`/`not_reported`), `direct_member_count` y `unresolved_member_count`; un `members` ausente (SCIM omite los multivaluados vacíos) se normaliza a lista vacía y cuenta como `complete` con cero, mientras que uno presente con otra forma, un miembro sin ID o un payload inválido abortan antes de escribir. El prefijo literal `sg_cyberark` clasifica un nodo como grupo de Okta (convención operativa aprobada; los demás se presentan como roles, sin crear relaciones).
+
+`GET /api/cmdb/identity-roles/{id}/membership` (permiso de lectura del directorio; 404 para roles retirados) publica un snapshot consistente, limitado a 2.000 nodos con truncamiento declarado; la UI agrupa usuarios directos, roles de CyberArk y grupos de Okta, corta ciclos y no interpreta membresía como permisos efectivos. `GET /api/cmdb/identity-roles/member-matches` expone coincidencias de miembros (IDs de roles, recorridos, conteos, completitud y última corrida; no devuelve IDs de cuentas ni correos) y requiere `inventory:read` más `access:manage` o `identity:catalogs_read`: no prueba permisos iguales ni autoriza retirar roles. Cada expansión relee el grafo activo completo de Identity sin `LIMIT` (truncarlo daría falsos «sin coincidencia») aislado por `source_system`. `scripts/review_identity_role_memberships.py` usa sólo este contrato en lectura (cierre transitivo con una visita por rol; excluye conjuntos vacíos y ramas no informadas; devuelve `permissions_status = not_collected`); la ampliación por derechos está en `ID-ROLE-PERM-001` / `ID-ROLE-REVIEW-001`.
+
+**Federaciones (`ID-001`).** `GET /Federation/GetFederations` → `{Result:[...], ErrorCode, success}` (no es SCIM ni pagina). Se persiste como `identity_federation` sólo `FederationUuid`, `FederationName`, `FederationType`, `Active`, `Role` y `Usage`; se excluyen `Config` (metadata SAML/SSO y certificados) y `Domains[]`, `Apps[]`, `CyberarkServices[]`. Es opcional (`CA_IDENTITY_ADMIN_FEDERATIONS_PATH`): `identity_federation` sólo entra a la reconciliación con el path configurado. `Roles/GetRole` no está confirmado.
+
+**Capas de sincronización (`SYNC-STAGES-001`).** Cada fuente ejecuta sus capas con `StageRecorder` (`cross/services/sync_stages.py`) y guarda el resultado en `public.sync_run_stages` (capa, obligatoria u opcional, estado, filas, duración, clase de error; sin payloads ni texto de excepción). Una capa **obligatoria** caída aborta la corrida sin escribir; una **opcional** caída la deja `partial` y la fuente excluye de la reconciliación lo que esa capa gobierna. En Identity, `users` y `roles` son obligatorias y `members_directory` (cuentas de servicio que SCIM no lista) y `federations` son opcionales. `GET /api/ingestion/runs/{run_id}/stages` expone el detalle, `.../sources/{source}/stages/latest` la frescura por capa y `.../stages/history` la duración y filas de las últimas corridas.
+
+## Mapeo y reglas
 
 | Fuente | `object_type` | `source_id` | Relaciones |
 |---|---|---|---|
-| Identity Administration user | `user` | ID estable del usuario | `user_has_role` |
-| Identity Administration role/group | `role` | ID estable del rol | `role_grants_access` |
-| Safes actual | `safe` | `safe_number` o `safe_url_id` | `safe_uses_platform` |
-| Plataforma | `platform` | ID/nombre estable | `platform_uses_psm` |
-| PSM | `psm` | ID/nombre estable | n/a |
-| Política SIA | `access_policy` | ID estable | `policy_grants_sia` |
-| SIA | `sia` | ID estable | n/a |
+| Identity user | `user` | ID estable | `user_has_role` |
+| Identity role/group | `role` | ID estable | `role_grants_access` |
+| Safes | `safe` | `safe_number` o `safe_url_id` | `safe_uses_platform` |
+| Plataforma / PSM | `platform` / `psm` | ID o nombre estable | `platform_uses_psm` / — |
+| Política SIA / SIA | `access_policy` / `sia` | ID estable | `policy_grants_sia` / — |
 
-## Reglas
+- No usar `safe_members` como sustituto de usuarios de Identity. La relación rol→Safe PAM se admite sólo cuando un miembro `Group` de Safe coincide con un `groupName` único observado en `/API/UserGroups`; el rol persistido sigue siendo el `id` de CyberArk. Los nombres no son identificadores estables fuera de esa evidencia.
+- Identity reconcilia una corrida SCIM completa de forma aislada (usuarios y roles ausentes pasan a `retired` dentro de `identity_administration`; nunca retira objetos PAM o SIA). Las relaciones PAM se retiran sólo cuando su fuente no tiene gaps de mapeo: hoy se reconcilian `role_grants_access` y `platform_uses_psm`; `user_has_role` y `safe_uses_platform` esperan resolver sus registros no mapeables. Cada ingesta guarda `source_run_id`, `first_seen_at` y `last_seen_at`.
 
-- No usar `safe_members` como sustituto de usuarios de Identity Administration.
-- La relación rol→Safe PAM se admite únicamente cuando un miembro `Group` de
-  Safe coincide con un `groupName` único observado en `/API/UserGroups`; el
-  identificador persistido del rol sigue siendo el `id` de CyberArk.
-- No tratar nombres como identificadores estables fuera de esa evidencia de
-  unión documentada.
-- Para la presentación del directorio SCIM, `displayName` con prefijo
-  `sg_cyberark` identifica un grupo Okta según la convención operativa
-  confirmada. Los demás objetos de `/scim/v2/Groups` se presentan como roles;
-  esta clasificación no crea relaciones ni cruza fuentes.
-- Identity Administration reconcilia una corrida SCIM completa de forma aislada:
-  usuarios y roles ausentes se marcan `retired` dentro de
-  `source_system = 'identity_administration'`. Nunca retira objetos PAM o SIA.
-- Las relaciones PAM se conservan y pasan a `retired` solo cuando su fuente no
-  tiene gaps de mapeo. Actualmente se reconcilian `role_grants_access` y
-  `platform_uses_psm`; `user_has_role` y `safe_uses_platform` esperan resolver
-  sus registros no mapeables.
-- Cada ingesta debe guardar `source_run_id`, `first_seen_at` y `last_seen_at`.
+## Excepciones sancionadas entre fuentes
 
-**Federaciones (`ID-001`) confirmadas e implementadas el 2026-09-11**, mismo
-cliente y credenciales, sin variables nuevas requeridas:
+Todas son de sólo lectura, **nunca** persisten aristas entre fuentes, no alimentan `/api/cmdb/coverage` ni KPIs y las verifican `backend/tests/cross/test_identity_admin_isolation.py` y `test_tool_module_boundaries.py`.
 
-- `GET /Federation/GetFederations` → `{Result:[...], ErrorCode, success}` —
-  no es una colección SCIM, no pagina con `startIndex`/`count`.
-- Persistido como `object_type = 'identity_federation'`, sólo con los campos
-  núcleo: `FederationUuid` (source_id), `FederationName` (display_name),
-  `FederationType`, `Active`, `Role`, `Usage`.
-- **Excluido explícitamente**: `Config` (metadata SAML/SSO, certificados IDP/
-  SP — nunca certificados, misma regla que en todo el proyecto) y
-  `Domains[]`/`Apps[]`/`CyberarkServices[]` (topología de apps/dominios
-  federados sin necesidad de negocio confirmada para exponerla en el CMDB).
-  Si esa necesidad aparece, se agregan como campos explícitos propios, nunca
-  como passthrough de los objetos originales.
-- **Opcional**: `CA_IDENTITY_ADMIN_FEDERATIONS_PATH` no está en el contrato
-  requerido de `IdentityAdminSettings.from_environment()` — una instalación
-  que sólo sincroniza usuarios/roles sigue funcionando sin cambios;
-  `identity_federation` sólo entra en la reconciliación cuando ese path está
-  configurado.
-- `Roles/GetRole` (API separada `user-mgmt-api`) sigue sin confirmar (no hay
-  un ID de rol real para probar su shape); no forma parte de este contrato.
+**1. Identity → cadena PAM por UUID o correo (aprobada 2026-08-29).** `cross/repositories/identity_pam_bridge.py` vincula un usuario `identity_administration` con uno `cyberark` sólo cuando `source_id` es exactamente igual (el UUID de CyberArk Identity) o por correo exacto 1 a 1; nunca por `display_name`, `user_name`, prefijos ni similitud. Medición del 2026-09-25: 0 de 77 usuarios de Identity tienen contraparte PAM por UUID (los `source_id` de PAM son usernames), por lo que el correo es la vía de vínculo; el drawer dice «sin equivalencia en la cadena PAM» cuando no hay match. Los roles de Identity no comparten `source_id` con los de PAM (0 coincidencias) y SIA no expone el UUID de sus grantees: no hay puente para ellos. Se expone en `GET /api/cmdb/identity-users/{object_id}/pam-chain` (que delega en el recorrido single-source de `pam_chain_queries.py`: `user_has_role`, `role_grants_access`, `safe_uses_platform`, `platform_uses_psm`) y anota `standard_seat_reconciled` en la lista y el detalle de usuarios. `identity_admin_queries.py` permanece estrictamente single-source. En `/pam/graph` la persona de Identity y su cuenta PAM son **un solo nodo** (columna «Identidad»: conserva el `object_id` PAM y suma `identity` con nombre, correo y base del vínculo, sin mostrar el UUID); la búsqueda también encuentra al usuario PAM por el nombre o correo de su persona vinculada (nunca por UUID); el vínculo (`identity_links_for_pam_users`, gemelo set-based con la misma regla y orden) sólo se resuelve con `access:manage` o `identity:catalogs_read` y, sin ese permiso, la columna es «Usuario PAM» y no hay campo `identity`. Las personas de Identity sin cuenta PAM no son nodos; los roles y la federación no forman parte de la cadena; los endpoints `/api/chains/identity/*` se retiraron.
 
-## Excepción sancionada: puente Identity Administration -> cadena PAM
+**2. Vínculo de personas por correo (aprobada 2026-09-25).** Única implementación: `cross/services/person_email_matching.py` (ninguna otra consulta reimplementa el predicado). Igualdad exacta de `lower(btrim(valor))` sobre la dirección completa (`person_email_sql`: un único `@`, parte local y dominio no vacíos y al menos un punto en el dominio); nunca sólo el dominio, prefijos, similitud ni `ILIKE`. **Sólo 1 a 1:** si el correo resuelve a más de un objeto activo en cualquier lado el estado es `ambiguous` y no se dibuja el vínculo (`resolve_unique`). **Sólo usuarios humanos del lado PAM** (`pam_human_user_sql`): allowlist `user_type IN ('EPVUser', 'ExtUser')`, `component_user <> 'true'`, forma de correo y dominio fuera de `cyberark.cloud.*` (quedan excluidos `CyberArkServiceUser`, `Install`, `SaaSSRV`, `SaasSRVUI`, `PSM`, `CPM`, `PVWA`, `Built-InAdmins`, `ENE`, `Telemetry` y cualquier valor nuevo). La UI lo etiqueta siempre «vinculado por correo», nunca como identidad confirmada. Medición del 2026-09-25 (sólo conteos): 45 usuarios PAM elegibles; match exacto 1 a 1 Identity↔Netskope 64 de 77, PAM↔Identity 42, PAM↔Netskope 42, sin correos duplicados dentro de Identity ni de Netskope. El asiento Standard (`standard_seat_sql`, `list_standard_seat_emails`, `annotate_identity_standard_seats`) conserva su propia elegibilidad y sólo usa las primitivas de normalización.
 
-Aprobada 2026-08-29 por el dueño de producto. La lectura cross-source
-permitida vive en `identity_pam_bridge.py` (drawer de Identidad y anotación
-de asiento Standard en Usuarios), y sólo bajo estas condiciones:
+**3. SIA grantees → Identity/PAM por correo (`REL-001`).** La lista y el detalle de políticas SIA resuelven cada `attributes.granted_users` por correo exacto 1 a 1, de forma independiente contra `identity_administration/user` activos (no `service_user`) y `cyberark/user` humanos (`pam_human_user_sql`); cero candidatos es `unmatched`, más de uno por lado es `ambiguous` y un valor que no es correo queda `unmatched` (las coincidencias por nombre siguen siendo referencias visuales). La lectura SIA conserva `inventory:read`; el lado Identity requiere `identity:catalogs_read` o `access:manage` y el PAM `pam:catalogs_read` o `access:manage`: un lado no autorizado no se consulta ni aparece. Es set-based por página y devuelve el valor original, el estado y, con match único, `object_id` y `display_name`.
 
-- **Sólo por identificador determinístico.** Se vincula un usuario de
-  `source_system = 'identity_administration'` con un usuario de
-  `source_system = 'cyberark'` **únicamente** cuando `source_id` es
-  exactamente igual (el mismo UUID de CyberArk Identity). Nunca por
-  `display_name`, email, `user_name`, `ILIKE` ni ninguna heurística.
-- **Cobertura parcial y explícita.** En la corrida observada, 49 de 77
-  usuarios de Identity Administration tienen contraparte PAM por UUID; los
-  usuarios PAM con `attributes.identity_key = 'username'` no participan. El
-  drawer muestra "sin equivalencia en la cadena PAM" cuando no hay match.
-  Las cifras exactas salen siempre de la base, no de este texto.
-- **Roles y SIA quedan fuera.** Los roles de Identity Administration no
-  comparten `source_id` con los roles PAM (0 coincidencias observadas), así
-  que no hay puente para roles. SIA no expone el UUID en sus grantees; su
-  vínculo sigue siendo navegación por nombre desde el drawer, señalada como
-  tal en la UI.
-- **Sólo lectura y aislada de las métricas.** La consulta vive en
-  `backend/app/repositories/identity_pam_bridge.py`. Se expone en
-  `GET /api/cmdb/identity-users/{object_id}/pam-chain` y, con el mismo
-  criterio de UUID, anota `standard_seat_reconciled` en
-  `GET /api/cmdb/identity-users` y el detalle. No escribe nada y no alimenta
-  `/api/cmdb/coverage` ni ningún KPI. La evidencia del asiento Standard sigue
-  siendo PAM (`EPVUser` ∩ roles Privilege Cloud); Identity sólo muestra el
-  badge si el `source_id` coincide. La regresión
-  `backend/tests/test_identity_admin_isolation.py` verifica que el puente
-  sólo une por igualdad de `source_id`. Una vez resuelto el usuario PAM, delega
-  al recorrido single-source de `pam_chain_queries.py`: `user_has_role`,
-  `role_grants_access`, `safe_uses_platform` y `platform_uses_psm`.
-- `backend/app/repositories/identity_admin_queries.py` permanece
-  estrictamente single-source; el puente es un módulo aparte.
-- El workspace `/pam/graph` consulta usuarios PAM directamente por
-  `object_id`; no es una segunda excepción cross-source y no incorpora SIA.
+**4. Cobertura de cliente Netskope por persona: `CONN-001/v1` (aprobada 2026-09-30).** Ver «Conexiones» abajo. Requiere conjuntamente `identity:catalogs_read` y `netskope:read` (o `access:manage`); el backend deniega antes de consultar si falta cualquiera.
 
-## Configuración explícita
+**5. Acceso a PAM a través de roles de Identity por nombre exacto (aprobada 2026-10-05, `CONN-SPACE-001`).** `cross/repositories/person_role_access.py`, usado sólo por la vista Personas (`person_chain_queries.py`). Cuando una persona no tiene usuario PAM propio (`pam` `unmatched`) y su usuario Identity está vinculado por correo, cada rol Identity del usuario (`user_has_role`) se vincula con un rol PAM sólo si el `display_name` es **exactamente igual y único en ambos lados** (1 a 1); un nombre repetido en cualquiera de los dos lados cuenta como ambiguo y nunca suma. Los Safes alcanzados son los destinos activos de `role_grants_access` de los roles vinculados. No hay identificador común (Identity usa UUID y PAM ids numéricos), por eso la UI lo rotula como acceso por rol con referencia por nombre, no como vínculo confirmado. Requiere poder leer PAM e Identity; no corre para un usuario PAM ambiguo; no persiste aristas ni alimenta KPIs. Lo verifica `test_person_role_access_isolation.py`.
 
-Los clientes no tienen endpoints por defecto. Para activarlos se deben
-configurar explícitamente las variables aprobadas por el tenant:
+*Extensión a SIA (aprobada 2026-10-05).* Las políticas de SIA nombran a quién dan acceso por nombre de usuario (`granted_users`) y por nombre de rol de Identity (`granted_roles`); SIA no tiene objeto de usuario. `sia_access_for_person` (mismo módulo) cuenta una política para la persona cuando una entrada de `granted_users` es **exactamente** su `user_name` de Identity (único entre usuarios Identity activos) o el nombre de su usuario PAM vinculado por correo, o cuando una entrada de `granted_roles` es **exactamente** uno de sus roles de Identity cuyo nombre es único entre los roles Identity activos; un rol repetido cuenta como ambiguo y no suma, y `granted_groups` no participa. Ya no exige usuario PAM propio: basta un usuario Identity legible y vinculado por correo (o el usuario PAM, como antes). Requiere `sia:catalogs_read`; los roles y el `user_name` sólo se consultan si además se puede leer Identity. La vista Personas lo muestra dentro de CyberArk (SIA da acceso a servidores a demanda) como referencia por nombre, con el desglose por usuario y por rol. No hay dato de ZSP por persona: ZSP sólo existe como marca por servidor en el inventario de conexiones.
 
-```dotenv
-CA_IDENTITY_ADMIN_URL=
-CA_IDENTITY_ADMIN_TOKEN_URL=
-CA_IDENTITY_ADMIN_CLIENT_ID=
-CA_IDENTITY_ADMIN_CLIENT_SECRET=
-CA_IDENTITY_ADMIN_USERS_PATH=
-CA_IDENTITY_ADMIN_ROLES_PATH=
+## Conexiones: correlación transversal entre herramientas
 
-CA_SIA_URL=
-CA_SIA_TOKEN_URL=
-CA_SIA_CLIENT_ID=
-CA_SIA_CLIENT_SECRET=
-CA_SIA_POLICIES_PATH=
-```
+`Conexiones` es la capacidad transversal de DS Hub para combinar evidencia de herramientas aisladas; el nombre describe el cruce de información, no una conexión de red ni una relación persistida entre proveedores. Agrupa tres preguntas: **Personas** (dónde aparece una persona y qué herramientas, dispositivos o accesos tiene), **Cobertura** (qué parte de una población esperada está observada, protegida o escaneada) y **Riesgos** (hallazgos verificables con la evidencia de cada fuente). Hoy sólo está publicada Personas (`/chains/person` con sus deep links y permisos, sin desbloquear Usuarios y permisos ni Actividad), y la cobertura `CONN-001/v1` vive dentro de esa vista; no hay un workspace Cobertura ni se anuncia Riesgos como destino operativo. Personas es una capacidad neutral de DS Hub (marca DS Hub, área `admin`), distinta de «Usuarios de DS Hub» (directorio local/OIDC en `/admin/access`). La superficie histórica «Activos y conexiones» se llama «Inventario de infraestructura» (`/pam/assets`, `/pam/ip-inventory`, ID `assets`) y los textos que cuentan filas del CSV las identifican como conexiones migradas.
 
-Para cualquiera de los secretos se puede usar el archivo equivalente
-`CA_IDENTITY_ADMIN_SECRET_FILE` o `CA_SIA_SECRET_FILE`. Las variables de URL,
-cliente o path por sí solas indican configuración parcial; el cliente rechaza
-la sincronización si falta una parte del contrato.
+**Tres conceptos que no se mezclan:** *inventario* (población que debería existir), *cobertura* (controles que observan o protegen cada entidad) y *riesgo* (hallazgos verificables). Una entidad cubierta puede tener riesgo alto y una sin hallazgos puede estar fuera del alcance de todos los scanners: `0 findings` nunca es `sin riesgo`.
 
-## Inspección segura del contrato
+**Contrato mínimo de una métrica de cobertura:** pregunta, tipo de sujeto (`person`, `device`, `asset`, `repository`), fuente autoritativa del denominador, elegibilidad y exclusiones, observación que satisface el numerador, ventana de frescura, estados `covered`/`partial`/`gap`/`unknown`/`not_applicable`, fuentes y corridas usadas y versión de la definición. `cobertura = sujetos elegibles con observación vigente / sujetos elegibles`, publicando numerador, denominador y desconocidos junto al porcentaje; sin denominador o con una fuente incompleta el estado es `Sin datos` o `Parcial`, nunca un `0 %` inventado. Cada resultado debe poder responder «cómo se calculó».
 
-Para validar cambios de contrato o endpoints adicionales se pueden usar los
-probes versionados. Los probes leen los secretos desde `.env.local`,
-`.ca_secret` o un archivo explícito y muestran únicamente metadatos JSON por
-defecto:
+**`CONN-001/v1`: cliente Netskope activo y observado recientemente.** Pregunta: «¿Qué parte de la población humana activa de Identity Administration tiene cliente Netskope activo observado recientemente?». No afirma política DLP aplicada, login, sesión ni conexión en vivo (`Cobertura DLP` sólo podría publicarse con un contrato que aporte esa evidencia).
 
-```bash
-scripts/probe_cyberark_endpoint.sh /API/Safes
-```
+- **Población:** cada objeto `user` de `identity_administration` con `lifecycle_status = active`, `attributes.active = true`, `service_user != true`, correo válido (helper) y fuera del dominio técnico `cyberark.cloud.*`. Los duplicados de correo no se fusionan y quedan desconocidos. Excluye deshabilitados, retirados, de servicio, sin correo válido o del dominio técnico; no agrega PAM, SIA, nombres, `user_key`, hostname ni similitud.
+- **Vínculo:** correo normalizado exacto y único por lado; una Identity sin contraparte Netskope conserva su lugar en el denominador y queda `unknown`. Los dispositivos se atribuyen sólo cuando su `username` resuelve a un único usuario Netskope activo con el contrato intra-Netskope (`source_id` o correo exactos; `user_key` no participa).
+- **Evidencia y ventanas:** un dispositivo es reciente si su `last_event_timestamp` numérico, positivo y no posterior a la consulta cae en los últimos 7 días (`RECENT_DEVICE_CONDITION`; desde `NSK-HB-001` un timestamp futuro deja de contar como reciente); todo dispositivo activo atribuible que no cumpla (incluidos timestamps ausentes o no numéricos, cuya edad se desconoce y que la UI agrupa como «no recientes / sin fecha») es no reciente. La última corrida de `identity-administration-scim` y de `netskope-api` debe ser `completed`, tener `completed_at` y no superar 24 h; una corrida posterior `running`, `partial` o `failed` invalida la vigencia.
+- **Estados por persona:** `covered` (vínculo único, ≥1 dispositivo reciente y ninguno no reciente), `partial` (≥1 reciente y ≥1 no reciente), `gap` (vínculo único sin dispositivo reciente, incluso cero dispositivos), `unknown` (ambigüedad, sin contraparte Netskope o cualquiera de las dos fuentes ausente, incompleta o fuera de 24 h) y `not_applicable` (correo fuera de la población elegible, sólo con ambas fuentes vigentes).
+- **Salida:** personas cubiertas / objetos Identity elegibles y dispositivos recientes / dispositivos activos atribuibles (una persona con tres dispositivos y uno vigente no está completamente cubierta), con todos los estados, ambos denominadores, desconocidos, porcentajes (`null` sin denominador o evidencia vigente), versión `CONN-001/v1`, IDs, estados y fechas de las corridas y las ventanas; la condición de fuente vigente aplica también al detalle. Endpoints de lectura bajo `/api/chains/person/coverage` (agregado y detalle); `/api/chains/person` y `/search` no cambian. No filtra conteos ni consulta a quien tiene permiso de una sola fuente.
+- **Sin migración ni persistencia:** deriva la evidencia de los objetos normalizados y del historial de corridas, leídos en una transacción read-only `REPEATABLE READ`. El esquema no ofrece una snapshot transversal inmutable: la corrida determina frescura y completitud de la fuente, no la atribución histórica fila por fila.
 
-Para inspecciones SIA se usa un probe separado. El script admite un header
-específico porque también sirve para contratos de tenants que no usan OAuth;
-la implementación actual de SIA usa el OAuth documentado arriba y no debe
-copiar secretos a archivos de probe:
+**Infraestructura, repositorios y riesgo (diseño, sin fuentes aprobadas).** Antes de medir cobertura de infraestructura o repositorios hace falta una fuente autoritativa del universo esperado (CMDB corporativa, inventario cloud, SCM u otra aprobada); Wiz, Tenable o Cortex pueden aportar observaciones pero no definen el denominador y hoy **no son fuentes aprobadas** (este documento no autoriza endpoints, credenciales, payloads, workspaces ni afirmaciones de cobertura para ellos). Las claves de correlación son identificadores estables y contractuales (ID CMDB, ID cloud/ARN, ID de agente, repositorio más organización); hostname e IP sólo con semántica aprobada. Una entidad (repositorio o servidor) y no la herramienta es la fila principal. Los findings no se suman entre herramientas: Riesgos mostraría por entidad findings por severidad y fuente, antigüedad, cobertura de las fuentes esperadas, evidencia navegable según permisos y duplicados sólo con una clave verificable (sujeto, control o CVE, componente y ubicación), conservando los valores originales; una puntuación agregada exige una fórmula acordada, visible y versionada. `cyberark_inventory_objects` no se convierte en un almacén universal; si el piloto prueba la necesidad de persistencia transversal, el diseño candidato es una capa neutral (`coverage_subjects`, `coverage_subject_keys`, `coverage_observations`, `coverage_metric_snapshots`) que no se crea antes de justificar historia, rendimiento o explicabilidad. Un cruce nunca filtra información de una fuente que el actor no puede leer (permisos en el backend antes de calcular; se evaluará un `coverage:read` propio antes de generalizar).
 
-```bash
-SIA_PROBE_BASE_URL=https://URL_APROBADA \
-SIA_PROBE_HEADER_NAME=HEADER_APROBADO \
-SIA_PROBE_TOKEN_FILE=.sia_api_token \
-  scripts/probe_sia_endpoint.sh /RUTA_APROBADA
-```
+## Risk Management (`RISK-001`)
 
-Ambos probes exigen `curl` y `jq`, usan HTTPS, limitan las URLs absolutas a la
-base configurada y no imprimen el token ni el payload completo por defecto.
-`PROBE_RAW=1` y `SIA_PROBE_RAW=1` quedan reservados para una inspección local
-controlada. Un probe sirve para observar o validar un endpoint; no reemplaza
-la aprobación del contrato ni habilita una nueva persistencia por sí solo.
+DS Hub consulta `https://{subdominio}.compass.cyberark.cloud` (subdominio derivado de `CA_PVWA_URL`, token OAuth del plano compartido). `cyberark/risk_management/integrations/risk_management.py` publica sólo GET para `summary`, `risk-types`, `findings`, `remediations` y la serie `secure-standing-privilege/progress`; no implementa snooze ni acciones remotas. La postura se lee en vivo y **no se persiste**. La vista agrupada usa `GET /api/cyberark-risk/findings/all`, que recorre las mismas páginas de `/risks/findings` con el mismo allowlist hasta 2.000 hallazgos; si CyberArk informa más responde 422 y la UI conserva la lectura paginada. Allowlist pública: fuente fija; IDs opacos de hallazgo, tipo y entidad; entidad categórica, severidad, estado y fechas de detección; conteos del resumen; metadatos de catálogo de tipos; texto del catálogo de remediaciones; puntos numéricos de progreso. El único nombre de entidad permitido es `entityDisplayName`, proyectado como `entity_name` (hasta 300 caracteres) sólo con `pam:risk_entities_read` (asignado a `admin` y `cyberark_admin`; sin él, `entity_name: null`); atributos de identidad, cuenta o app, payloads de entidad, campos desconocidos, errores remotos y respuestas crudas siguen excluidos y no se invoca `/entities/{id}`. Las lecturas requieren `pam:risk_read` y la auditoría registra como booleano si incluyeron nombres. El probe confirmó `200` para summary, risk-types, findings, remediations y ambos endpoints de postura; `/recommendations` sin filtros respondió `400` y `/recommendations/{type}/by-tags` `403`, por eso no se invocan: las recomendaciones son las opciones tipadas que CyberArk incluye en cada `riskType`, vinculadas al catálogo de remediaciones cuando coincide el tipo.
 
-## Próximos pasos
+## Registro y configuración
 
-El estado de ejecución se mantiene en
-[`docs/TO_IMPLEMENT.md`](../TO_IMPLEMENT.md), tareas `INT-002`, `CPM-001`,
-`REL-001` y el barrido REST de Privilege Cloud Standard. `INT-001` quedó
-cerrado: las corridas completas de Identity Administration y SIA ya se
-validaron en el ambiente operativo.
+Cada herramienta declara su `SourceSpec` y routers en `backend/app/<plataforma>/<herramienta>/source.py:register()`; `backend/app/sources.py` es el único registro estático y los consumidores iteran sus definiciones. Risk Management registra rutas sin sincronización ni contrato nuevo, y el cambio de propiedad no modifica locks por fuente, retiros, reconciliación ni ingesta.
 
-- Paginación de `/api/access-policies` ya resuelta (`SiaClient.get_policies`).
-  Sigue pendiente confirmar `429`/`Retry-After` reales y el espacio de IDs de
-  grupos/roles SIA antes de agregar relaciones nuevas o automatizar
-  reconciliaciones más amplias.
-
-## Endpoints PAM documentados pendientes de validar
-
-La documentación oficial de Privilege Cloud Standard segmenta los siguientes
-endpoints PAM. Son candidatos de lectura; no autorizan por sí mismos nuevas
-persistencias ni revelan el permiso efectivo del cliente del tenant.
-
-- `GET /PasswordVault/API/ComponentsMonitoringSummary/` devuelve el resumen de
-  Portal, CPM, PSM/SSH y AIM: identificador/nombre, instancias conectadas,
-  totales y un contador específico de cada componente.
-- `GET /PasswordVault/API/ComponentsMonitoringDetails/{ComponentID}/` agrega
-  IP, usuario de componente, versión, conectividad y último logon para `PVWA`,
-  `SessionManagement`, `CPM` y `AIM`. El campo
-  `ComponentSpecificStat` del detalle está documentado como `-1`; no se usa
-  como métrica.
-- `GET /PasswordVault/API/PSM/Servers/` lista `Id`, `Name` y `Address`; y
-  `GET /PasswordVault/API/PSM/Connectors/` lista `Id` y `DisplayName`. Ninguno
-  aporta CPU, RAM, capacidad o salud de host.
-- `GET /PasswordVault/API/Accounts/{AccountID}/Activities/` documenta
-  actividades de cuenta. `User`, `MoreInfo` y `Reason` pueden contener datos
-  personales o texto sensible: quedan fuera de cualquier persistencia hasta
-  aprobar una allowlist y retención.
-- `GET /PasswordVault/API/LiveSessions` entrega sesiones activas con campos de
-  usuario, cuenta, dirección y `RawProperties`. No se persiste ni muestra ese
-  detalle sin una decisión explícita de privacidad y RBAC.
-- `GET /PasswordVault/API/Platforms/` (ya ingestado de forma delgada) y
-  `GET /PasswordVault/API/Platforms/{id}` / `GET /PasswordVault/API/platforms/targets/`
-  documentan política CPM, workflows de dual control y `PSMServerID`.
-  `properties` de plataforma describe nombres de campos de cuenta, no valores.
-- `GET /PasswordVault/API/platforms/dependents/`, `/groups/` y
-  `/rotationalGroups/` listan catálogos adicionales (incl. `GracePeriod` en
-  rotational). No se interpretan como rotación de secretos de cuenta.
-- `GET /PasswordVault/API/Platforms/{PlatformID}/Safes/` devuelve nombres de
-  Safe por plataforma.
-- `GET /PasswordVault/API/Users?ExtendedDetails=true` agrega `enabled`,
-  `suspended`, `groupsMembership` y `vaultAuthorization`. `personalDetails`,
-  `internet` y `phones` de `GET /API/Users/{UserID}` quedan fuera.
-- `GET /PasswordVault/API/DiscoveredAccounts/` es la cola Pending; exige Vault
-  Admins. `platformTypeAccountProperties`, fingerprints y AWS key IDs no se
-  persisten.
-- `GET /PasswordVault/API/AutomaticOnboardingRules/` lista reglas (Vault Admins).
-  `TargetSafeName` puede ser nulo si el caller no es owner del Safe.
-- Incoming requests (landing `confirmrequests.htm`) y recordings
-  (`GET /PasswordVault/API/recordings`) quedan bloqueados por privacidad/RBAC
-  igual que `LiveSessions`. No se usa Play recording.
-- AIM Gen1 `GET /PasswordVault/WebServices/PIMServices.svc/Applications/` es
-  catálogo de `AppID`. Los métodos
-  `.../Applications/{AppID}/Authentications/` incluyen `AuthValue` (hash, path,
-  OS user, IP) y no se persisten.
-- Account groups, linked accounts y
-  `GET /API/accounts/{account_id}/account-dependents/` son relaciones PAM de
-  sólo lectura; probe antes de persistir.
-- `GET /PasswordVault/API/Accounts` documenta `savedFilter` (`PolicyFailures`,
-  `FailedChange`, `FailedVerify`, `FailedReconcile`, `ScheduledFor*`). Útil
-  como hallazgo sólo después de la allowlist de `secretManagement`.
-- LDAP directories/mappings son configuración del Vault, no Identity
-  Administration SCIM. Sin secretos de bind.
-- Mutaciones, secret versions, SSH MFA caching keys, ticketing custom y
-  Server Verify no son candidatos de inventario.
-
-Para el detalle de cuenta, los únicos candidatos de estado de rotación no
-secreto son `secretManagement.automaticManagementEnabled`, `status`,
-`lastModifiedTime`, `lastReconciledTime` y `lastVerifiedTime`. Quedan excluidos
-el secreto, `platformAccountProperties`, `manualManagementReason` y el payload
-completo. La implementación debe validar los nombres y formato con respuestas
-anonimizadas del tenant antes de una migración.
-
-## Métricas de rotación de credenciales: bloqueadas por decisión
-
-`GET /api/analytics/freshness` (`repositories/analytics.py::get_inventory_freshness`)
-reporta únicamente:
-
-- antigüedad de `safes.last_modification_time` en tramos (30 d / 90 d / 1 año / +1 año / sin dato);
-- Safes activas sin cuentas activas;
-- cuentas activas, retiradas y "sin ver" hace más de 30 días (`last_seen_at`).
-
-Es una vista de **frescura operativa**, no de rotación de credenciales, y la UI
-debe rotularla así.
-
-Un KPI real de rotación (`% rotadas en 90 días`, gestión automática
-deshabilitada, antigüedad de la última verificación) exige una decisión de
-producto para persistir una lista blanca angosta de timestamps **no secretos**
-de `secretManagement` (p. ej. `lastModifiedTime`, `lastReconciledTime`,
-`lastVerifiedTime`). Eso implica: nueva migración, mapeo en la ingesta de
-cuentas, una nota en este archivo y un test de regresión. Hasta esa decisión,
-no se persiste ningún atributo de `secretManagement` y no se debe inferir
-rotación de otros campos.
+Los clientes de Identity Administration y SIA no tienen endpoints por defecto; se activan con las variables aprobadas del tenant (`CA_IDENTITY_ADMIN_{URL,TOKEN_URL,CLIENT_ID,CLIENT_SECRET,USERS_PATH,ROLES_PATH}`, `CA_SIA_{URL,TOKEN_URL,CLIENT_ID,CLIENT_SECRET,POLICIES_PATH}` y los paths opcionales de cada catálogo). El secreto puede venir de `CA_IDENTITY_ADMIN_SECRET_FILE` o `CA_SIA_SECRET_FILE`; las variables de URL, cliente o path por sí solas son configuración parcial y el cliente rechaza la sincronización si falta una parte. Ver `.env.example` y [`deployment.md`](../operations/deployment.md).

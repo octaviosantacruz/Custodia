@@ -1,0 +1,40 @@
+/* DOCS-PORTAL-001: authenticated product guide. Desktop density, no cards;
+   a dense side navigation plus a readable article using existing tokens. */
+
+.help-workspace {
+  align-items: start;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(190px, 220px) minmax(0, 1fr);
+  max-width: 1180px;
+}
+
+.help-nav { border-right: 1px solid var(--border-soft); padding-right: 18px; position: sticky; top: 84px; }
+.help-nav .eyebrow { margin: 0 0 10px; }
+.help-nav ul { display: grid; gap: 2px; list-style: none; margin: 0; padding: 0; }
+.help-nav-link {
+  border-left: 2px solid transparent;
+  color: var(--text-secondary);
+  display: grid;
+  font-size: 12px;
+  gap: 1px;
+  padding: 5px 8px;
+  text-decoration: none;
+}
+.help-nav-link small { color: var(--text-muted); font-size: 9px; letter-spacing: .05em; text-transform: uppercase; }
+.help-nav-link:hover { background: var(--bg-subtle); color: var(--text-primary); }
+.help-nav-link:focus-visible { box-shadow: 0 0 0 3px var(--bg-app), 0 0 0 5px var(--accent-strong); outline: 0; }
+.help-nav-link.is-active { background: var(--bg-subtle); border-left-color: var(--accent); color: var(--text-primary); }
+
+.help-content { max-width: 760px; }
+.help-content .eyebrow { margin: 0 0 4px; }
+.help-content h3 { color: var(--text-primary); font-size: 20px; margin: 0 0 6px; }
+.help-content p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin: 0 0 12px; }
+.help-content ol,
+.help-content ul { color: var(--text-secondary); display: grid; font-size: 13px; gap: 6px; line-height: 1.55; margin: 0 0 14px; padding-left: 20px; }
+.help-summary { color: var(--text-primary) !important; font-size: 14px !important; }
+.help-owner { border-bottom: 1px solid var(--border-soft); color: var(--text-muted) !important; font-size: 11px !important; padding-bottom: 10px; }
+.help-note { background: var(--bg-subtle); border-left: 2px solid var(--border-strong); padding: 8px 10px; }
+.help-api-link a { color: var(--accent-strong); font-weight: 600; }
+.help-links { align-items: baseline; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.help-links a { color: var(--accent-strong); font-size: 12px; }
