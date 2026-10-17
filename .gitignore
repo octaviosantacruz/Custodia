@@ -37,3 +37,4 @@ TO_CLAUDE.md
 
 # Informes del piloto automático (efímeros)
 .opencode/runs/
+.local/
