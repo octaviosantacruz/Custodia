@@ -211,7 +211,7 @@ async def capture_netskope_dlp_alerts(
             # Reinitialize at the original epoch; replay is idempotent.
             operation = str(int(coverage_start.timestamp()))
     else:
-        index = f"dshub-dlp-{uuid4()}"
+        index = f"custodia-dlp-{uuid4()}"
         coverage_start = max(
             state.get("coverage_end") if state and state.get("coverage_end") else captured_at - timedelta(days=DLP_RETENTION_DAYS),
             captured_at - timedelta(days=DLP_RETENTION_DAYS),

@@ -49,7 +49,7 @@ async def sync_oidc_role_assignments(
 
     Full replace (delete then insert), not a diff: OIDC claims are the
     single source of truth for the 'oidc' assignments, so a role removed
-    upstream must not linger locally. ACCESS-UI-001: a role assigned in DS Hub
+    upstream must not linger locally. ACCESS-UI-001: a role assigned in Custodia
     ('manual') is a human decision and survives every login; when the groups
     also grant it, the manual row is kept as is.
     """
@@ -205,7 +205,7 @@ async def create_first_local_admin(pool: Any, actor_id: str, display_name: str, 
     async with pool.connection() as conn:
         async with conn.transaction():
             async with conn.cursor() as cursor:
-                await cursor.execute("SELECT pg_advisory_xact_lock(hashtext('dshub-first-user'))")
+                await cursor.execute("SELECT pg_advisory_xact_lock(hashtext('custodia-first-user'))")
                 await cursor.execute("SELECT count(*) AS count FROM public.access_users")
                 count = await cursor.fetchone()
                 if count["count"] > 0:

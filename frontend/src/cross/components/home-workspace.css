@@ -1,9 +1,9 @@
-.auth-logo .ds-hub-mark { height: 36px; width: 36px; }
-.ds-hub-mark-surface { fill: #0d1712; }
-.ds-hub-mark-branch { fill: none; stroke: #83e6a8; stroke-linecap: round; stroke-width: 1.7; }
-.ds-hub-mark-node { transform-box: fill-box; transform-origin: center; }
-.ds-hub-mark-node-core { fill: #83e6a8; }
-.ds-hub-mark-node-outer { fill: #f2f4f5; }
+.auth-logo .custodia-mark { height: 36px; width: 36px; }
+.custodia-mark-surface { fill: #0d1712; }
+.custodia-mark-branch { fill: none; stroke: #83e6a8; stroke-linecap: round; stroke-width: 1.7; }
+.custodia-mark-node { transform-box: fill-box; transform-origin: center; }
+.custodia-mark-node-core { fill: #83e6a8; }
+.custodia-mark-node-outer { fill: #f2f4f5; }
 
 .home-workspace { align-items: center; display: grid; gap: clamp(48px, 9vw, 150px); grid-template-columns: minmax(0, 560px) minmax(280px, 440px); justify-content: center; min-height: calc(100dvh - 68px); padding: 48px 24px; }
 .home-content { max-width: 560px; width: 100%; }
@@ -12,7 +12,7 @@
 .home-actions { border-top: 1px solid var(--border-soft); max-width: 480px; }
 .home-actions-group + .home-actions-group { margin-top: 4px; }
 .home-actions-section { color: var(--text-muted); font-size: 10px; font-weight: 750; letter-spacing: .14em; margin: 0; padding: 16px 0 2px; text-transform: uppercase; }
-.home-domain-icon .ds-hub-mark { height: 22px; width: 22px; }
+.home-domain-icon .custodia-mark { height: 22px; width: 22px; }
 .home-domain-entry { display: block; }
 .home-domain-button { align-items: center; background: transparent; border: 0; border-bottom: 1px solid var(--border-soft); color: var(--text-primary); display: flex; gap: 14px; min-height: 82px; padding: 14px 12px 14px 0; position: relative; text-align: left; width: 100%; }
 .home-domain-button:not(.home-domain-button-disabled)::before { background: var(--accent); content: ""; height: 100%; left: -12px; position: absolute; transform: scaleY(0); transform-origin: center; transition: transform .25s cubic-bezier(.16, 1, .3, 1); width: 3px; }
@@ -45,7 +45,7 @@
 .home-visibility-ring { border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border-soft)); border-radius: 50%; box-shadow: 0 0 28px color-mix(in srgb, var(--accent) 7%, transparent), inset 0 0 38px color-mix(in srgb, var(--accent) 6%, transparent); height: 96%; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 96%; z-index: 1; }
 .home-visibility-orbit { background: color-mix(in srgb, var(--bg-app) 90%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 62%, var(--border-strong)); border-radius: 50%; box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 11%, transparent); height: 54%; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 54%; z-index: 1; }
 .home-visibility-core { align-items: center; background: var(--accent); border: 0; border-radius: 50%; color: #08110d; display: flex; flex-direction: column; gap: 4px; height: 94px; justify-content: center; left: 50%; padding: 0; position: absolute; top: 50%; transform: translate(-50%, -50%); transition: box-shadow var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out); width: 94px; z-index: 6; }
-.home-visibility-core .ds-hub-mark { height: 30px; width: 30px; }
+.home-visibility-core .custodia-mark { height: 30px; width: 30px; }
 .home-visibility-core span { font-size: 11px; font-weight: 750; letter-spacing: .02em; }
 .home-visibility-core > span:last-child { color: #08110d; }
 .home-visibility-node { align-items: center; background: var(--bg-subtle); border: 1px solid color-mix(in srgb, var(--border-strong) 82%, var(--accent)); border-radius: 50%; box-shadow: 0 8px 20px color-mix(in srgb, #000 22%, transparent); color: var(--text-primary); display: flex; font: inherit; height: var(--home-node-size, 84px); justify-content: center; padding: 0; position: absolute; transform: translate(-50%, -50%); transition: background-color var(--motion-base) var(--motion-ease-out), border-color var(--motion-base) var(--motion-ease-out), box-shadow var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out); width: var(--home-node-size, 84px); z-index: 4; }
@@ -78,13 +78,13 @@ button.home-visibility-node:focus-visible { box-shadow: 0 0 0 4px var(--bg-app),
 @media (max-width: 700px) { .home-workspace { display: flex; flex-direction: column; } .home-visibility { max-width: 260px; } }
 
 @media (prefers-reduced-motion: no-preference) {
-  .auth-logo .ds-hub-mark-branch { animation: ds-hub-mark-draw .68s var(--motion-ease-out) var(--ds-branch-delay, .12s) both; stroke-dasharray: 1; }
-  .auth-logo .ds-hub-mark-branch-right { --ds-branch-delay: .2s; }
-  .auth-logo .ds-hub-mark-branch-bottom { --ds-branch-delay: .28s; }
-  .auth-logo .ds-hub-mark-node { animation: ds-hub-mark-node-arrive .42s var(--motion-ease-out) var(--ds-node-delay, .68s) both; }
-  .auth-logo .ds-hub-mark-node-outer:nth-of-type(2) { --ds-node-delay: .82s; }
-  .auth-logo .ds-hub-mark-node-outer:nth-of-type(3) { --ds-node-delay: .9s; }
-  .auth-logo .ds-hub-mark-node-outer:nth-of-type(4) { --ds-node-delay: .98s; }
+  .auth-logo .custodia-mark-branch { animation: custodia-mark-draw .68s var(--motion-ease-out) var(--ds-branch-delay, .12s) both; stroke-dasharray: 1; }
+  .auth-logo .custodia-mark-branch-right { --ds-branch-delay: .2s; }
+  .auth-logo .custodia-mark-branch-bottom { --ds-branch-delay: .28s; }
+  .auth-logo .custodia-mark-node { animation: custodia-mark-node-arrive .42s var(--motion-ease-out) var(--ds-node-delay, .68s) both; }
+  .auth-logo .custodia-mark-node-outer:nth-of-type(2) { --ds-node-delay: .82s; }
+  .auth-logo .custodia-mark-node-outer:nth-of-type(3) { --ds-node-delay: .9s; }
+  .auth-logo .custodia-mark-node-outer:nth-of-type(4) { --ds-node-delay: .98s; }
   .home-visibility-ring { animation: home-wheel-circle-arrive var(--motion-panel) var(--motion-ease-out) backwards; }
   .home-visibility-orbit { animation: home-wheel-circle-arrive var(--motion-panel) var(--motion-ease-out) 40ms backwards; }
   .home-visibility-core { animation: home-wheel-node-arrive var(--motion-base) var(--motion-ease-out) 60ms backwards; }
@@ -108,11 +108,11 @@ button.home-visibility-node:focus-visible { box-shadow: 0 0 0 4px var(--bg-app),
 @keyframes home-title-arrive { from { opacity: 0; transform: translateX(-34px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes home-greeting-reveal { from { clip-path: inset(0 100% 0 0); opacity: 0; transform: translateY(7px); } to { clip-path: inset(0); opacity: 1; transform: translateY(0); } }
 @keyframes home-greeting-accent-arrive { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
-@keyframes ds-hub-mark-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes ds-hub-mark-node-arrive { 0% { opacity: 0; transform: scale(.35); } 70% { opacity: 1; transform: scale(1.25); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes custodia-mark-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes custodia-mark-node-arrive { 0% { opacity: 0; transform: scale(.35); } 70% { opacity: 1; transform: scale(1.25); } 100% { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) {
-  .auth-logo .ds-hub-mark-branch,
-  .auth-logo .ds-hub-mark-node,
+  .auth-logo .custodia-mark-branch,
+  .auth-logo .custodia-mark-node,
   .home-greeting-text,
   .home-greeting-accent { animation: none; }
   .home-visibility-node,

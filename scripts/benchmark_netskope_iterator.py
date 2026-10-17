@@ -27,7 +27,7 @@ PAGES = 3
 
 
 async def sample(client_class, settings, start, now, *, retain):
-    index = f"dshub-bench-{uuid4()}"
+    index = f"custodia-bench-{uuid4()}"
     operation = str(int(start.timestamp()))
     ids = set()
     retained = {}
@@ -86,7 +86,7 @@ async def main():
     now = datetime.now(timezone.utc)
     start = now - timedelta(hours=24)
     results = []
-    with tempfile.TemporaryDirectory(prefix="dshub-benchmark-") as directory:
+    with tempfile.TemporaryDirectory(prefix="custodia-benchmark-") as directory:
         path = Path(directory) / "baseline_client.py"
         path.write_text(baseline)
         spec = importlib.util.spec_from_file_location("benchmark_baseline_client", path)

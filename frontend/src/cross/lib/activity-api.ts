@@ -27,5 +27,5 @@ export function exportActivity(filters: Pick<ActivityFilters, 'action' | 'entity
   const query = '/activity/export.csv?action=' + encodeURIComponent(filters.action)
     + '&entity_type=' + encodeURIComponent(filters.entityType)
     + '&q=' + encodeURIComponent(filters.q);
-  return download(query, 'dshub-actividad.csv');
+  return download(query, 'custodia-actividad.csv');
 }

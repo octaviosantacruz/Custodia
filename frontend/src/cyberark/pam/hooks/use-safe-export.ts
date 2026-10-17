@@ -37,7 +37,7 @@ export function useSafeExport({
     });
     if (includeAccounts) params.set('include_accounts', 'true');
     try {
-      await download('/safes/export.csv?' + params.toString(), 'dshub-safes.csv');
+      await download('/safes/export.csv?' + params.toString(), 'custodia-safes.csv');
       onNotice('CSV descargado');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'No se pudo exportar el inventario');
@@ -47,7 +47,7 @@ export function useSafeExport({
   const exportAccounts = async (search: string, platformStatus: AccountPlatformStatus = accountPlatformStatus) => {
     onError('');
     try {
-      await download('/accounts/export.csv?q=' + encodeURIComponent(search) + '&platform_status=' + encodeURIComponent(platformStatus), 'dshub-accounts.csv');
+      await download('/accounts/export.csv?q=' + encodeURIComponent(search) + '&platform_status=' + encodeURIComponent(platformStatus), 'custodia-accounts.csv');
       onNotice('CSV de cuentas descargado');
     } catch (error) {
       onError(error instanceof Error ? error.message : 'No se pudo exportar las cuentas');

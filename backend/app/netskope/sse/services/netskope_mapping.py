@@ -82,7 +82,7 @@ def onprem_fields(device: dict[str, Any]) -> dict[str, str]:
     """NSK-EXP-ONPREM-001: Netskope's own On-Premises Detection result and the configurations applied.
 
     Only categories are kept. The public/private IP, `match_ip` (the egress address that matched) and
-    every other network field stay out: DS Hub never needs them to say where a device is.
+    every other network field stay out: Custodia never needs them to say where a device is.
     """
     onprem = device.get("onprem_status")
     status = _category(onprem.get("status")) if isinstance(onprem, dict) else _category(onprem)

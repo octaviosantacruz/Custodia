@@ -59,7 +59,7 @@ export function App() {
   const [notice, setNoticeText] = useState('');
   const [noticeSource, setNoticeSource] = useState<string | null>(null);
   /* A notice raised by a CyberArk or Netskope workspace carries that tool's logo even when its text names none;
-     DS Hub-level notices (account, activity, administration) keep the neutral mark. */
+     Custodia-level notices (account, activity, administration) keep the neutral mark. */
   const areaSourceRef = useRef<string | null>(null);
   areaSourceRef.current = isHome ? null : syncSourceForArea(areaOf(workspaceView));
   const setNotice = useCallback((message: string) => { setNoticeSource(null); setNoticeText(message); }, []);
@@ -145,7 +145,7 @@ export function App() {
       const runIds = [...new Set(automaticSyncEvents.map((event) => event.run_id).filter((runId): runId is string => Boolean(runId)))];
       const runs = (await Promise.all(runIds.map((runId) => fetchIngestionRun(runId).catch(() => null)))).filter((run): run is IngestionRun => Boolean(run));
       const fallbackRuns = runs.length ? runs : (latestAutomaticSync.source_system ? [{ source_system: latestAutomaticSync.source_system, status: 'completed' } as IngestionRun] : []);
-      // Do not show a generic DS Hub toast when the event has no source and
+      // Do not show a generic Custodia toast when the event has no source and
       // its run cannot be loaded. It has no useful identity or result, and
       // was the source of the logo-less "Sincronización automática finalizada"
       // notification. The activity menu still retains the event.
@@ -249,7 +249,7 @@ export function App() {
       run: () => { setGuideSection(command.sectionId ?? null); navigateWorkspace('help'); },
     })),
     {
-      id: 'action-sync', kind: 'action', platform: 'dshub',
+      id: 'action-sync', kind: 'action', platform: 'custodia',
       label: manualSync.label,
       detail: manualSync.detail,
       aliases: ['sync', 'sincronizar', 'ingesta', 'datos', 'actualizar'], priority: 40,

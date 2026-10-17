@@ -20,7 +20,7 @@ class AdvancedAnalyticsTests(unittest.IsolatedAsyncioTestCase):
             settings = AdvancedAnalyticsSettings.from_environment()
             self.assertEqual(settings.base_url, "https://tenant.example")
             self.assertNotIn("test-only-token", repr(settings))
-        with patch.dict(os.environ, {"NETSKOPE_URL": "https://tenant.example", "NETSKOPE_API_TOKEN_FILE": "/tmp/dshub-aa-nonexistent-secret"}, clear=True):
+        with patch.dict(os.environ, {"NETSKOPE_URL": "https://tenant.example", "NETSKOPE_API_TOKEN_FILE": "/tmp/custodia-aa-nonexistent-secret"}, clear=True):
             with self.assertRaises(AdvancedAnalyticsError):
                 AdvancedAnalyticsSettings.from_environment()
 

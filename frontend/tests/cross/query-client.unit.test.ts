@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { describe, it } from 'node:test';
 import { createQueryClient, QUERY_STALE_TIME_MS } from '../../src/cross/lib/query-client.ts';
 
-describe('DS Hub query client', () => {
+describe('Custodia query client', () => {
   it('keeps shared read data fresh briefly and leaves retries to the explicit UI action', async () => {
     const client = createQueryClient();
     assert.equal(client.defaultQueryOptions({ queryKey: ['netskope', 'devices'] }).staleTime, QUERY_STALE_TIME_MS);

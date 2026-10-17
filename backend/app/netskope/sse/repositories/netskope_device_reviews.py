@@ -19,7 +19,7 @@ DIAGNOSES = (
     "in_use_not_reporting", "historical_record", "temporary_exception",
 )
 STATUSES = ("pending", "investigating", "ticket_open", "resolved")
-# NSK-DEVREV-002: the diagnoses DS Hub can suggest from its own evidence. Everything else is a human decision.
+# NSK-DEVREV-002: the diagnoses Custodia can suggest from its own evidence. Everything else is a human decision.
 SUGGESTIONS = ("uninstalled_reported", "replaced", "historical_record")
 HISTORICAL_DAYS = 180
 ATTENTIONS = ("open_incident", "expired_exception", "reported_again")
@@ -40,7 +40,7 @@ def _unclassified(object_ref: str) -> str:
 
 
 def suggestion_sql(object_ref: str = "cyberark_inventory_objects.object_id") -> str:
-    """The diagnosis DS Hub suggests for a device, or NULL. Needs the source_evidence CTE.
+    """The diagnosis Custodia suggests for a device, or NULL. Needs the source_evidence CTE.
 
     A suggestion is an evaluation, so it exists only with a complete, recent sync, only for a device
     nobody classified, and only from evidence Netskope reported. Precedence: an uninstall or disable

@@ -6,7 +6,7 @@ revisado: 2026-10-13
 
 # Revisión adicional de interfaz — FE-AUD-009
 
-Revisión de lectura en DS Hub local (`:5173`), con datos reales del tenant y
+Revisión de lectura en Custodia local (`:5173`), con datos reales del tenant y
 sesión autenticada, escritorio 1440×900. Complementa el barrido de 28 rutas
 con fixtures del 2026-10-11; no lo presenta como una medición con datos reales.
 La revisión adicional terminó; sus hallazgos pendientes conservan IDs propios.
@@ -41,7 +41,7 @@ recorrido. No se guardaron formularios, modificaron roles, exportaron datos
 ni iniciaron sincronizaciones.
 
 Las capturas, snapshots y resultados JSON permanecen fuera del repositorio,
-en `/tmp/dshub-fe-aud-009/` (directorio privado), porque contienen inventario e
+en `/tmp/custodia-fe-aud-009/` (directorio privado), porque contienen inventario e
 identidades reales. `sweep-results.json` registra el primer barrido y
 `sweep-recheck-results.json` la reproducción de las cinco superficies detectadas.
 Cada ruta tiene su captura en `screenshots/` y su resultado Axe. Estos
@@ -53,12 +53,12 @@ autenticado en el repositorio.
 
 | Hallazgo | Evidencia antes del arreglo | Cambio y regresión |
 |---|---|---|
-| Filtro activo de Command-K en claro | Texto `#167a4b` sobre `#d8ece2`, 11 px: 4,34:1, mínimo 4,5:1. Captura `command-light-issue.png` y dos resultados Axe de reproducción. | Texto con `--text-primary`, conservando fondo y borde verdes. La prueba existente en `frontend/tests/e2e/cross/auth.spec.ts` ahora selecciona y comprueba el tema almacenado de DS Hub: falla en claro antes del arreglo y pasa en ambos temas después. |
-| Insignia «Cuenta de Okta» en el drawer de acceso | Texto `#167a4b` sobre `#dee9e2`, 11 px en negrita: 4,30:1. `real-user-access-light-axe.json` y `real-user-access-light-recheck-axe.json`. | Texto con `--text-primary`. La prueba existente del drawer Okta fija el tema de DS Hub y falla antes del arreglo; pasa en ambos temas después. |
+| Filtro activo de Command-K en claro | Texto `#167a4b` sobre `#d8ece2`, 11 px: 4,34:1, mínimo 4,5:1. Captura `command-light-issue.png` y dos resultados Axe de reproducción. | Texto con `--text-primary`, conservando fondo y borde verdes. La prueba existente en `frontend/tests/e2e/cross/auth.spec.ts` ahora selecciona y comprueba el tema almacenado de Custodia: falla en claro antes del arreglo y pasa en ambos temas después. |
+| Insignia «Cuenta de Okta» en el drawer de acceso | Texto `#167a4b` sobre `#dee9e2`, 11 px en negrita: 4,30:1. `real-user-access-light-axe.json` y `real-user-access-light-recheck-axe.json`. | Texto con `--text-primary`. La prueba existente del drawer Okta fija el tema de Custodia y falla antes del arreglo; pasa en ambos temas después. |
 | Título de Depuración | `/pam/cleanup` mostraba la pestaña Depuración y el h1 Limpieza PAM; `screenshots/real-cleanup-title.png`. | El registro PAM usa Depuración. La regresión existente de Postura comprueba el h1; falla antes del cambio y pasa después. |
 
 La preferencia de color del navegador no seleccionaba por sí sola el tema de
-DS Hub: las dos pruebas de Axe podían ejecutarse bajo el proyecto claro y
+Custodia: las dos pruebas de Axe podían ejecutarse bajo el proyecto claro y
 seguir viendo el tema oscuro predeterminado. La corrección de esas pruebas
 cubre el comportamiento observable y evita duplicar sus escenarios.
 

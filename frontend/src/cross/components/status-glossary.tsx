@@ -14,7 +14,7 @@ const GROUPS: GlossaryGroup[] = [
     entries: [
       { label: 'Pendiente', description: 'Todavía no se revisó ni se le asignó unidad/responsable.' },
       { label: 'En curso', description: 'La revisión o remediación está en marcha.' },
-      { label: 'Baja retenida', description: 'Se pidió la baja pero CyberArk no permite borrar la Safe mientras dure su retención. Puede marcarse manualmente o cuando una sync completa retira sus cuentas y la baja estaba pendiente. DS Hub no calcula cuándo se podrá borrar.' },
+      { label: 'Baja retenida', description: 'Se pidió la baja pero CyberArk no permite borrar la Safe mientras dure su retención. Puede marcarse manualmente o cuando una sync completa retira sus cuentas y la baja estaba pendiente. Custodia no calcula cuándo se podrá borrar.' },
       { label: 'Resuelto', description: 'La revisión operativa quedó completa.' },
     ],
   },

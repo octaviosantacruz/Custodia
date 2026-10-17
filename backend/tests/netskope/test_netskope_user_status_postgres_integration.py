@@ -37,7 +37,7 @@ class NetskopeUserStatusPostgresTests(PostgresIntegrationTestCase):
         unknown, unknown_total = await self._listed(account_status="unknown")
         self.assertEqual((enabled, disabled), ({"on1", "on2"}, {"off1"}))
         self.assertEqual((enabled_total, disabled_total), (metrics["users_enabled"], metrics["users_disabled"]))
-        # Rows whose accounts[] was never read, or hold a value DS Hub does not know, stay visible as unknown.
+        # Rows whose accounts[] was never read, or hold a value Custodia does not know, stay visible as unknown.
         self.assertEqual(unknown, {"old1", "weird"})
         self.assertEqual(enabled_total + disabled_total + unknown_total, metrics["users_total"])
         # A retired user never counts, whatever its stored status.

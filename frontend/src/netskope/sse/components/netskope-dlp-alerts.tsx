@@ -129,7 +129,7 @@ export function NetskopeDlpWorkspace({ refreshKey, authChecked, authenticated, o
         </table></div>
         {data.unnamed_alerts ? <p className="database-caption netskope-dlp-unnamed">{formatNumber(data.unnamed_alerts)} {data.unnamed_alerts === 1 ? 'alerta sin nombre de política no aparece' : 'alertas sin nombre de política no aparecen'} en la tabla.</p> : null}
       </section>
-      <p className="database-caption netskope-boundary-note"><FileLock2 size={14} aria-hidden="true" /> DS Hub no guarda archivo, contenido, hash, URL, IP ni el usuario del evento.</p>
+      <p className="database-caption netskope-boundary-note"><FileLock2 size={14} aria-hidden="true" /> Custodia no guarda archivo, contenido, hash, URL, IP ni el usuario del evento.</p>
     </>}
   </section>;
 }

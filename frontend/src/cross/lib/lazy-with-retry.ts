@@ -7,7 +7,7 @@ type Importer<T extends ComponentType<any>> = () => Promise<{ default: T }>;
 /** Reloads once when a deployed code split is stale, then surfaces the error. */
 export function lazyWithRetry<T extends ComponentType<any>>(importer: Importer<T>, retryKey: string): LazyExoticComponent<T> {
   return lazy(() => {
-    const storageKey = `dshub:chunk-retry:${retryKey}`;
+    const storageKey = `custodia:chunk-retry:${retryKey}`;
     const storage = typeof window === 'undefined' ? null : window.sessionStorage;
     return importer()
       .then((module) => {

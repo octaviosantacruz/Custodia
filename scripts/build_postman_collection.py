@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a credential-free Postman v2.1 collection from DS Hub OpenAPI."""
+"""Generate a credential-free Postman v2.1 collection from Custodia OpenAPI."""
 
 from __future__ import annotations
 
@@ -112,7 +112,7 @@ def build_collection(schema: dict) -> dict:
             tag = operation.get("tags", ["General"])[0]
             groups[lane].setdefault(tag, []).append({"name": f"{method.upper()} {path}", "request": request, "response": []})
     return {
-        "info": {"name": "DS Hub API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json", "description": "Generada desde OpenAPI. Ver docs/operations/postman.md. Los cuerpos son plantillas editables; no ejecutar la carpeta Escritura como lote. Bearer personal sólo para lectura; escrituras con sesión o token técnico autorizado."},
+        "info": {"name": "Custodia API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json", "description": "Generada desde OpenAPI. Ver docs/operations/postman.md. Los cuerpos son plantillas editables; no ejecutar la carpeta Escritura como lote. Bearer personal sólo para lectura; escrituras con sesión o token técnico autorizado."},
         "variable": [{"key": "base_url", "value": "http://localhost:8000", "type": "string"}],
         "item": [{"name": lane, "item": [{"name": tag, "item": items} for tag, items in sorted(tags.items())]} for lane, tags in groups.items()],
     }
@@ -120,7 +120,7 @@ def build_collection(schema: dict) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", default=str(ROOT / "api/postman/DSHub.postman_collection.json"))
+    parser.add_argument("--output", default=str(ROOT / "api/postman/Custodia.postman_collection.json"))
     parser.add_argument("--check", action="store_true", help="Fail if the committed collection is out of date.")
     args = parser.parse_args()
     schema = json.loads(subprocess.check_output([sys.executable, str(ROOT / "scripts/dump_openapi.py")], text=True))

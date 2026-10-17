@@ -1,6 +1,6 @@
 """PAM-GRP-001 query behavior against opt-in disposable PostgreSQL.
 
-The shared base only accepts DSHUB_TEST_DATABASE_URL; it never falls back to
+The shared base only accepts CUSTODIA_TEST_DATABASE_URL; it never falls back to
 DATABASE_URL or reads repository secret files.
 """
 

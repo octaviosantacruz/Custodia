@@ -295,7 +295,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
           : 'Total del último inventario; no implica actividad reciente'].filter(Boolean).join(' · ')
         : widgetId === 'users_recent_activity' ? activityAvailable
           ? `${percent(numericValue, widgetMetrics.users_total)} de ${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'} en inventario · al menos un dispositivo con evento`
-          : 'Métrica no disponible en esta versión de DS Hub'
+          : 'Métrica no disponible en esta versión de Custodia'
         : widgetId === 'devices_total' ? `Endpoints con evento en los últimos 7 días${heartbeatSuffix(widgetMetrics)}${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}`
         : 'Referencia textual informada';
     // Keep the scan line short; the existing help retains the complete
@@ -482,7 +482,7 @@ function UserActivityCells({ activity }: { activity?: NetskopeRow['device_activi
   </>;
 }
 
-/* One cell for "when did it last report" and "what does DS Hub make of it": the colour dot carries the state, the
+/* One cell for "when did it last report" and "what does Custodia make of it": the colour dot carries the state, the
    relative time is the lead and the exact moment stays in the tooltip. */
 function SignalCell({ evidence }: { evidence?: NetskopeRow['device_evidence'] }) {
   const state = evidence?.state ?? 'unknown';

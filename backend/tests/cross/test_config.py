@@ -12,9 +12,9 @@ TEST_SESSION_SECRET = "test-session-secret-with-at-least-32-bytes"
 
 class AppSettingsTests(unittest.TestCase):
     def test_cors_origins_only_include_the_explicit_web_origin(self):
-        self.assertEqual(allowed_web_origins("https://dshub.example"), ["https://dshub.example"])
-        self.assertNotIn("http://localhost:5173", allowed_web_origins("https://dshub.example"))
-        self.assertNotIn("http://127.0.0.1:5173", allowed_web_origins("https://dshub.example"))
+        self.assertEqual(allowed_web_origins("https://custodia.example"), ["https://custodia.example"])
+        self.assertNotIn("http://localhost:5173", allowed_web_origins("https://custodia.example"))
+        self.assertNotIn("http://127.0.0.1:5173", allowed_web_origins("https://custodia.example"))
 
     def test_cors_origins_are_empty_when_web_origin_is_not_configured(self):
         self.assertEqual(allowed_web_origins(None), [])
@@ -22,11 +22,11 @@ class AppSettingsTests(unittest.TestCase):
     def test_cors_origins_accept_explicit_additional_local_origins(self):
         self.assertEqual(
             allowed_web_origins(
-                "http://dshub.itti.digital:5173",
+                "http://custodia.itti.digital:5173",
                 "http://localhost:5173, http://127.0.0.1:5173",
             ),
             [
-                "http://dshub.itti.digital:5173",
+                "http://custodia.itti.digital:5173",
                 "http://localhost:5173",
                 "http://127.0.0.1:5173",
             ],
@@ -163,10 +163,10 @@ class AppSettingsTests(unittest.TestCase):
                 "SESSION_IDLE_TIMEOUT_SECONDS": "1200",
                 "AUTH_MODE": "hybrid",
                 "SESSION_HTTPS_ONLY": "true",
-                "WEB_ORIGIN": "https://dshub.example",
+                "WEB_ORIGIN": "https://custodia.example",
                 "API_MAX_BODY_BYTES": "1048576",
                 "EXPOSE_API_DOCS": "false",
-                "DATABASE_SECRET_ID": "dshub/database",
+                "DATABASE_SECRET_ID": "custodia/database",
                 "DATABASE_SECRET_REGION": "us-east-1",
             },
             clear=True,
@@ -178,10 +178,10 @@ class AppSettingsTests(unittest.TestCase):
         self.assertEqual(settings.session_idle_timeout_seconds, 1200)
         self.assertEqual(settings.auth_mode, "hybrid")
         self.assertTrue(settings.session_https_only)
-        self.assertEqual(settings.web_origin, "https://dshub.example")
+        self.assertEqual(settings.web_origin, "https://custodia.example")
         self.assertEqual(settings.api_max_body_bytes, 1048576)
         self.assertFalse(settings.expose_api_docs)
-        self.assertEqual(settings.database_secret_id, "dshub/database")
+        self.assertEqual(settings.database_secret_id, "custodia/database")
         self.assertEqual(settings.database_secret_region, "us-east-1")
 
     def test_rejects_missing_database_url(self):

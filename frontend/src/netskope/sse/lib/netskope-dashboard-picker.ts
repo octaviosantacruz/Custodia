@@ -33,7 +33,7 @@ const GROUPS: ReadonlyArray<Omit<NetskopeMetricPickerGroup, 'options'>> = [
   {
     id: 'analytics',
     title: 'Advanced Analytics',
-    description: 'Gráficos de Netskope declarados para este tenant; DS Hub no guarda sus resultados.',
+    description: 'Gráficos de Netskope declarados para este tenant; Custodia no guarda sus resultados.',
   },
 ];
 

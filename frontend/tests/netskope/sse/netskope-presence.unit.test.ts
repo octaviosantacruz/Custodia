@@ -11,7 +11,7 @@ test('NSK-EXP-ONPREM-001: a record without the field is "Sin dato", and no data 
 });
 
 test('NSK-EXP-ONPREM-001: an office drill reaches the inventory with exactly its filters and a removable chip', () => {
-  const url = new URL('/netskope/inventory?onprem_status=off-prem&client_config=Default+tenant+config', 'http://dshub.test');
+  const url = new URL('/netskope/inventory?onprem_status=off-prem&client_config=Default+tenant+config', 'http://custodia.test');
   assert.equal(url.pathname, '/netskope/inventory');
   const location = netskopeInventoryLocation(url.search, url.pathname);
   assert.equal(location.query.filters.onprem_status, 'off-prem');

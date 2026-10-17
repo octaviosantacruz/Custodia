@@ -135,7 +135,7 @@ async def set_sync_schedule_override(
     async with pool.connection() as conn:
         async with conn.transaction():
             await conn.execute(
-                "SELECT pg_advisory_xact_lock(hashtextextended('dshub:sync-schedule:' || %s, 0))",
+                "SELECT pg_advisory_xact_lock(hashtextextended('custodia:sync-schedule:' || %s, 0))",
                 (task_key,),
             )
             cursor = await conn.execute(

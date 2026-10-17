@@ -27,7 +27,7 @@ def environment_role_pairs() -> list[tuple[str, str]]:
 
 
 async def effective_role_pairs(pool: Any) -> tuple[list[tuple[str, str]], Literal["database", "environment"]]:
-    """ACCESS-UI-001: the mapping managed in DS Hub once adopted; until then, the environment."""
+    """ACCESS-UI-001: the mapping managed in Custodia once adopted; until then, the environment."""
     stored = await stored_group_role_pairs(pool)
     if stored is not None:
         return stored, "database"

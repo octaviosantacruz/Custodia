@@ -53,7 +53,7 @@ request() {
     --get "$base_url$path" "$@"
 }
 
-index="dshub-dlp-incidents-contract-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+index="custodia-dlp-incidents-contract-$(date -u +%Y%m%dT%H%M%SZ)-$$"
 status="$(request "$body" \
   --data-urlencode "operation=$(date -u -d '24 hours ago' +%s)" \
   --data-urlencode "index=$index")"

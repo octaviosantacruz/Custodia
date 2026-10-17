@@ -428,7 +428,7 @@ th {
 .responsible-select { border-color: color-mix(in srgb, #8a92a8 32%, var(--border-soft)); }
 .action-select { background: var(--bg-subtle); border-color: var(--border); color: var(--text-primary); }
 .catalog-admin { background: var(--bg-elevated); border: 1px solid var(--border-strong); }
-.ds-hub-mark { display: block; height: 32px; object-fit: contain; width: 32px; }
+.custodia-mark { display: block; height: 32px; object-fit: contain; width: 32px; }
 .advanced-chart { height: 100%; min-height: 180px; width: 100%; }
 .advanced-chart-empty { color: var(--text-muted); font-size: 11px; margin: auto; padding: 28px 16px; text-align: center; }
 .dashboard-empty-state { background: var(--bg-elevated); border: 1px dashed var(--border-strong); border-radius: var(--radius-lg); display: grid; gap: 14px; margin-top: 12px; padding: 24px; }

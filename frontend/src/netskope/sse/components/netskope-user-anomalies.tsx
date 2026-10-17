@@ -31,7 +31,7 @@ export function NetskopeUserAnomalies({ userId, refreshKey = 0, onUnauthorized }
     <div className="nsk-user-anomalies-head">
       <h3>Anomalías</h3>
       <span className="nsk-user-anomalies-window">{data.window_days} días</span>
-      <HelpHint label="Anomalías"><p>Detecciones UEBA de Netskope para este usuario. Netskope entrega hasta 30 días y 1000 filas; no se guardan en DS Hub.</p></HelpHint>
+      <HelpHint label="Anomalías"><p>Detecciones UEBA de Netskope para este usuario. Netskope entrega hasta 30 días y 1000 filas; no se guardan en Custodia.</p></HelpHint>
     </div>
     {data.total === 0 ? <p className="nsk-user-anomalies-empty">Sin anomalías en {data.window_days} días.</p> : <>
       <ul className="nsk-user-anomalies-counts" aria-label="Anomalías por severidad">

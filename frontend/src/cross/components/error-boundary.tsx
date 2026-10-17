@@ -19,7 +19,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!this.state.hasError) return this.props.children;
     return <main className="app-error-state">
       <div role="alert">
-        <p className="eyebrow">DS HUB</p>
+        <p className="eyebrow">CUSTODIA</p>
         <h1>Ocurrió un error inesperado</h1>
         <p>La vista no pudo cargarse. Podés reintentar sin perder los datos guardados.</p>
         <button className="button primary" type="button" onClick={() => window.location.reload()}>Reintentar</button>

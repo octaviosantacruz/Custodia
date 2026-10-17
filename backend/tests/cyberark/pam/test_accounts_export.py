@@ -77,7 +77,7 @@ class AccountExportTests(unittest.TestCase):
 
         export.assert_awaited_once_with(request.app.state.db, 'ca_as400', '')
         self.assertEqual(response.media_type, 'text/csv; charset=utf-8')
-        self.assertIn('dshub-accounts.csv', response.headers['content-disposition'])
+        self.assertIn('custodia-accounts.csv', response.headers['content-disposition'])
 
 
 if __name__ == '__main__':

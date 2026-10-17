@@ -1,4 +1,4 @@
-# DS Hub
+# Custodia
 
 **Creado por Octavio Santacruz.**
 
@@ -6,13 +6,13 @@ Para mantener el proyecto sin contexto previo, empezá por
 [MAINTAINING.md](MAINTAINING.md): explica los puntos de entrada, las capas,
 el recorrido de los datos y cómo verificar un cambio.
 
-DS Hub es una CMDB operativa para inventario y gobierno de acceso
+Custodia es una CMDB operativa para inventario y gobierno de acceso
 privilegiado. Consolida información de CyberArk PAM, Identity Administration,
 SIA, Access space y Netskope en un único espacio de trabajo, manteniendo separadas las
 fuentes de origen para que una sincronización parcial no mezcle ni borre datos
 de otro sistema.
 
-CyberArk sigue siendo la fuente de verdad de lo observado. DS Hub conserva el
+CyberArk sigue siendo la fuente de verdad de lo observado. Custodia conserva el
 historial de sincronizaciones y los metadatos de operación —responsables,
 clasificación, estado y próximas acciones— sin sobrescribir decisiones humanas
 cuando llega una nueva actualización.
@@ -77,7 +77,7 @@ npm ci && npm ci --prefix frontend
 # Configuración local (completar los valores del template)
 cp .env.example .env.local
 
-# API en :8000 y frontend en :5173
+# API en :8000 y frontend en :5174
 npm run web
 ```
 

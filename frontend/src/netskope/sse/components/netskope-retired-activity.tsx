@@ -4,7 +4,7 @@ import { fetchNetskopeRetiredActivity } from '../lib/netskope-api';
 import { formatNumber, relativeTime } from '../../../cross/lib/format';
 
 /* The console counts a user as active when any reporting device carries their name, even if every
-   account was deleted in Netskope. DS Hub retires those identities, so they sit outside the card;
+   account was deleted in Netskope. Custodia retires those identities, so they sit outside the card;
    this note keeps the gap visible and lists who they are (exact source_id/email match only). */
 export function NetskopeRetiredActivity({ days, enabled, refreshKey, onUnauthorized }: { days: 7 | 14 | 30; enabled: boolean; refreshKey?: number; onUnauthorized: () => void }) {
   const [open, setOpen] = useState(false);

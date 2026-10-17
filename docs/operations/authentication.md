@@ -12,7 +12,7 @@ repositorio.
 
 ## OIDC con Okta
 
-DS Hub soporta `local`, `hybrid` y `oidc`. Para una prueba, usar `hybrid` hasta
+Custodia soporta `local`, `hybrid` y `oidc`. Para una prueba, usar `hybrid` hasta
 validar el flujo: conserva el login local mientras Okta es la autoridad de
 identidad.
 
@@ -95,8 +95,8 @@ La cuenta permanece **desactivada** salvo durante una sesión de QA y nadie
 conoce su contraseña:
 
 ```bash
-npm run agent-access -- open --email admin@itti.digital    # activa y guarda el perfil «dshub»
-agent-browser auth login dshub                              # entra por /login/local
+npm run agent-access -- open --email admin@itti.digital    # activa y guarda el perfil «custodia»
+agent-browser auth login custodia                              # entra por /login/local
 npm run agent-access -- close --email admin@itti.digital   # desactiva y elimina el perfil
 ```
 
@@ -120,7 +120,7 @@ acceso a la base de datos.
 1. Con una sesión de administrador, crear `admin@itti.digital` en
    Administración → Usuarios y permisos, con rol `admin`. No anotar la
    contraseña temporal.
-2. Ejecutar `open` y comprobar `agent-browser auth login dshub`.
+2. Ejecutar `open` y comprobar `agent-browser auth login custodia`.
 3. Entrar por Okta y confirmar que la identidad tiene `admin` por
    `sg_ds-hub_admins`.
 4. Desde esa sesión de Okta, eliminar la cuenta local personal.
@@ -195,7 +195,7 @@ frontend nunca reemplaza la autorización del backend.
 | `GET /api/auth/access-review` | `access:manage` | `access:directory_read` | `ACCESS-REVIEW-001`: una fila por rol asignado con origen, fecha y autor de la asignación manual, último ingreso de la identidad Okta y señales de revisión (cuenta local inactiva con roles, asignación manual antigua, Okta sin ingreso). Sólo lectura. Las cuentas locales no registran ingreso y los roles de Okta se reescriben en cada login: esos datos van en `null`, no se infieren. |
 | `POST /api/auth/users` | `access:manage` | `access:local_users_manage` + `access:role_assignments_manage` | El rol inicial debe respetar el techo de delegación. |
 | `PATCH /api/auth/users/{user_id}` | `access:manage` | Según campos: `access:local_users_manage`; sumar `access:role_assignments_manage` si cambia `role_code` | No permite auto-desactivación ni autoescalamiento; tampoco puede asignar a un tercero un rol que exceda el techo de delegación del actor (`ACCESS-CEILING-001`). |
-| `POST /api/auth/users/{user_id}/roles` | — | `access:role_assignments_manage` | `ACCESS-UI-001`: suma un rol asignado en DS Hub (`manual`) a una identidad local u Okta; ningún login lo quita. Techo de delegación; nadie cambia sus propios roles. |
+| `POST /api/auth/users/{user_id}/roles` | — | `access:role_assignments_manage` | `ACCESS-UI-001`: suma un rol asignado en Custodia (`manual`) a una identidad local u Okta; ningún login lo quita. Techo de delegación; nadie cambia sus propios roles. |
 | `DELETE /api/auth/users/{user_id}/roles/{role_code}` | — | `access:role_assignments_manage` | Sólo roles `manual`: un rol mapeado desde un grupo de Okta responde `409` y se cambia en Okta. Techo de delegación y último administrador. |
 | `POST /api/auth/users/{user_id}/reissue-temp-password` | `access:manage` | `access:local_users_manage` | Sólo identidad local; secreto visible una vez y acción auditada. |
 | `DELETE /api/auth/users/{user_id}` | `access:manage` | `access:local_users_manage` | Conserva el invariante de último administrador y no elimina identidades OIDC. |
@@ -257,7 +257,7 @@ en su misma migración; `test_access_catalog.py` lo exige.
 
 `ACCESS-UI-001` (2026-10-11, migración 095): cada asignación guarda su origen
 (`assignment_source`): `oidc` la escribe el login a partir de los grupos y la
-reemplaza en cada login; `manual` la asigna un administrador en DS Hub, también
+reemplaza en cada login; `manual` la asigna un administrador en Custodia, también
 a una identidad Okta, y ningún login la quita. Si los grupos pasan a otorgar un
 rol que ya era manual, la fila sigue siendo manual. Una identidad Okta dada de
 baja en Okta ya no inicia sesión, pero conserva sus filas manuales hasta que un

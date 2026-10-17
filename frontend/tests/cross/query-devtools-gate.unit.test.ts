@@ -27,7 +27,7 @@ function bundleText(outDir: string): string {
 }
 
 test('the production bundle does not include the TanStack Query Devtools panel', async () => {
-  const outDir = mkdtempSync(join(tmpdir(), 'dshub-prod-bundle-'));
+  const outDir = mkdtempSync(join(tmpdir(), 'custodia-prod-bundle-'));
   try {
     await build({
       root: FRONTEND_ROOT,
@@ -46,7 +46,7 @@ test('the production bundle does not include the TanStack Query Devtools panel',
 });
 
 test('a development build keeps the Devtools panel behind the DEV gate', async () => {
-  const outDir = mkdtempSync(join(tmpdir(), 'dshub-dev-bundle-'));
+  const outDir = mkdtempSync(join(tmpdir(), 'custodia-dev-bundle-'));
   const previousNodeEnv = process.env.NODE_ENV;
   try {
     process.env.NODE_ENV = 'development';

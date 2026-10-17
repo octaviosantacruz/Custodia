@@ -14,7 +14,7 @@ type ToolSwitcherProps = {
   onHome: () => void;
 };
 
-/* Vendor tools show their own mark (one image per theme); DS Hub's own views keep an icon. */
+/* Vendor tools show their own mark (one image per theme); Custodia's own views keep an icon. */
 type ToolLogo = { dark: string; selectedDark?: string; light: string };
 type ToolMeta = { label: string; detail: string } & ({ icon: LucideIcon; logo?: never } | { logo: ToolLogo; icon?: never });
 
@@ -85,7 +85,7 @@ export function ToolSwitcher({ isHome = false, workspaceView, permissions, onWor
         onClick={goHome}
       >
         <span className="tool-menu-icon"><Home size={18} aria-hidden /></span>
-        <span className="tool-menu-copy"><strong>Inicio</strong><small>Resumen general de DS Hub</small></span>
+        <span className="tool-menu-copy"><strong>Inicio</strong><small>Resumen general de Custodia</small></span>
       </button>
       <div className="tool-menu-grid">
         {visibleDomains.map((domain) => {

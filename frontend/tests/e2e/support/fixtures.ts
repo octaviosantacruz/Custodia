@@ -731,7 +731,7 @@ export const test = base.extend({
   page: async ({ page }, use, testInfo) => {
     if (testInfo.title.includes('UX-AUD2-')) {
       const theme = testInfo.project.use.colorScheme === 'light' ? 'light' : 'dark';
-      await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+      await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
     }
     await use(page);
   },

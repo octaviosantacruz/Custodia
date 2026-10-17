@@ -18,7 +18,7 @@ from pydantic import BaseModel, ConfigDict
 
 class RoleAssignment(BaseModel):
     """ACCESS-UI-001: 'oidc' roles come from the identity's groups at login;
-    'manual' roles were assigned in DS Hub and no login removes them."""
+    'manual' roles were assigned in Custodia and no login removes them."""
 
     role_code: str
     source: Literal['oidc', 'manual']
@@ -114,7 +114,7 @@ class ObservedOidcGroup(BaseModel):
 
 class ObservedOidcGroupsResponse(BaseModel):
     rows: list[ObservedOidcGroup]
-    # ACCESS-UI-001: 'environment' until the first edit from DS Hub adopts OIDC_ROLE_MAP_JSON.
+    # ACCESS-UI-001: 'environment' until the first edit from Custodia adopts OIDC_ROLE_MAP_JSON.
     source: Literal['database', 'environment']
     observed_identities: int
     unobserved_identities: int

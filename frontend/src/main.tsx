@@ -9,7 +9,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { App } from './App';
 import { ErrorBoundary } from './cross/components/error-boundary';
-import { dshubQueryClient } from './cross/lib/query-client';
+import { custodiaQueryClient } from './cross/lib/query-client';
 import '@fontsource-variable/caveat';
 import '@fontsource-variable/geist';
 import '@fontsource-variable/geist-mono';
@@ -29,7 +29,7 @@ import './cross/components/app-notifications.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={dshubQueryClient}>
+    <QueryClientProvider client={custodiaQueryClient}>
       <ErrorBoundary><App /></ErrorBoundary>
       {/* FE-DEVTOOLS-001: panel de sólo desarrollo; el build productivo no lo incluye. */}
       {import.meta.env.DEV ? <ReactQueryDevtools initialIsOpen={false} /> : null}

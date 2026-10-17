@@ -90,7 +90,7 @@ export function AccountProfileModal({ authStatus, onClose, onNotice, onProfileUp
       <div className="profile-account-summary"><div><span>Email</span><strong>{user?.email || 'Sin email disponible'}</strong></div><div><span>Rol</span><strong>{primaryRoleLabel(authStatus)}</strong></div></div>
       {!isLocal ? <div className="profile-account-managed"><LockKeyhole size={17} /><div><strong>Cuenta administrada por tu identidad corporativa</strong><span>El nombre, email y contraseña se modifican en el proveedor de identidad.</span></div></div> : <div className="profile-account-sections">
         <form className="profile-account-section" onSubmit={saveName}>
-          <div className="profile-account-section-heading"><div><h3>Nombre visible</h3><p>Es el nombre que verán otros usuarios en DS Hub.</p></div></div>
+          <div className="profile-account-section-heading"><div><h3>Nombre visible</h3><p>Es el nombre que verán otros usuarios en Custodia.</p></div></div>
           <label className="profile-account-field">Nombre<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} maxLength={160} autoComplete="name" /></label>
           <div className="profile-account-actions"><button className="button primary" type="submit" disabled={nameBusy || !displayName.trim() || displayName.trim() === (user?.name || '').trim()}><Save size={14} /> {nameBusy ? 'Guardando...' : 'Guardar nombre'}</button></div>
         </form>

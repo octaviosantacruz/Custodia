@@ -1,4 +1,4 @@
-# Mantener DS Hub
+# Mantener Custodia
 
 **Creado por Octavio Santacruz.**
 
@@ -9,7 +9,7 @@ Las instrucciones de trabajo vigentes están en [AGENTS.md](AGENTS.md).
 
 ## Qué problema resuelve
 
-DS Hub es una CMDB operativa para CyberArk y Netskope. Combina inventario
+Custodia es una CMDB operativa para CyberArk y Netskope. Combina inventario
 observado con decisiones locales de operación: responsables, unidad,
 clasificación y acciones pendientes. Una sincronización actualiza lo observado
 sin sobrescribir esas decisiones. Cada herramienta conserva su `source_system`.

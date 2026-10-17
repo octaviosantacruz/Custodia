@@ -17,7 +17,7 @@ async def get_safe_accounts(
     """Return the non-secret account inventory for one Safe.
 
     ``lifecycle="retired"`` lists accounts a complete sync no longer saw: CyberArk may still hold them
-    during the Safe's retention. ``retired_detected_at`` is when DS Hub noticed the absence (the sync
+    during the Safe's retention. ``retired_detected_at`` is when Custodia noticed the absence (the sync
     that retired the row, ``retired_at``), not the moment the account was deleted in CyberArk.
     """
     lifecycle = "retired" if lifecycle == "retired" else "active"

@@ -12,7 +12,7 @@ export function createQueryClient() {
       queries: {
         staleTime: QUERY_STALE_TIME_MS,
         gcTime: 5 * 60_000,
-        // Existing DS Hub screens expose a deliberate “Reintentar” control.
+        // Existing Custodia screens expose a deliberate “Reintentar” control.
         // Preserve that visible contract while centralizing cache/cancellation;
         // automatic retries can be introduced per resource only when an API
         // contract defines a safe retry policy.
@@ -23,4 +23,4 @@ export function createQueryClient() {
   });
 }
 
-export const dshubQueryClient = createQueryClient();
+export const custodiaQueryClient = createQueryClient();

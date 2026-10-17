@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "DS Hub API",
+    "name": "Custodia API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Generada desde OpenAPI. Ver docs/operations/postman.md. Los cuerpos son plantillas editables; no ejecutar la carpeta Escritura como lote. Bearer personal sólo para lectura; escrituras con sesión o token técnico autorizado."
   },
@@ -110,7 +110,7 @@
                     }
                   ]
                 },
-                "description": "Devuelve el catálogo de permisos internos de DS Hub.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+                "description": "Devuelve el catálogo de permisos internos de Custodia.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
               },
               "response": []
             },
@@ -1412,7 +1412,7 @@
                 "auth": {
                   "type": "noauth"
                 },
-                "description": "Completa el callback del proveedor OIDC y crea la sesión de DS Hub.\n\nAutenticación OpenAPI: pública"
+                "description": "Completa el callback del proveedor OIDC y crea la sesión de Custodia.\n\nAutenticación OpenAPI: pública"
               },
               "response": []
             },
@@ -7056,7 +7056,7 @@
                     }
                   ]
                 },
-                "description": "ACCESS-UI-001: reemplaza los roles de DS Hub que otorga un grupo de Okta; una lista vacía quita el grupo. La primera edición adopta OIDC_ROLE_MAP_JSON y desde entonces el login sólo lee este mapeo. Rige en el próximo login de cada miembro. Aplica el techo de delegación a cada rol que agrega o quita. Auditada.\n\nAutenticación OpenAPI: sessionCookie, accessToken",
+                "description": "ACCESS-UI-001: reemplaza los roles de Custodia que otorga un grupo de Okta; una lista vacía quita el grupo. La primera edición adopta OIDC_ROLE_MAP_JSON y desde entonces el login sólo lee este mapeo. Rige en el próximo login de cada miembro. Aplica el techo de delegación a cada rol que agrega o quita. Auditada.\n\nAutenticación OpenAPI: sessionCookie, accessToken",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"group\": \"REEMPLAZAR\",\n  \"role_codes\": []\n}",
@@ -10207,7 +10207,7 @@
                     }
                   ]
                 },
-                "description": "Suma un rol asignado en DS Hub a una identidad local u Okta; convive con los roles que mapean sus grupos y ningún login lo quita. Aplica el techo de delegación; nadie cambia sus propios roles. Auditada.\n\nAutenticación OpenAPI: sessionCookie, accessToken",
+                "description": "Suma un rol asignado en Custodia a una identidad local u Okta; convive con los roles que mapean sus grupos y ningún login lo quita. Aplica el techo de delegación; nadie cambia sus propios roles. Auditada.\n\nAutenticación OpenAPI: sessionCookie, accessToken",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"role_code\": \"REEMPLAZAR\"\n}",
@@ -10272,7 +10272,7 @@
                     }
                   ]
                 },
-                "description": "Quita un rol asignado en DS Hub. Un rol que viene de un grupo de Okta responde 409: se cambia en Okta. Aplica el techo de delegación y nunca deja a DS Hub sin administrador activo. Auditada.\n\nAutenticación OpenAPI: sessionCookie, accessToken"
+                "description": "Quita un rol asignado en Custodia. Un rol que viene de un grupo de Okta responde 409: se cambia en Okta. Aplica el techo de delegación y nunca deja a Custodia sin administrador activo. Auditada.\n\nAutenticación OpenAPI: sessionCookie, accessToken"
               },
               "response": []
             }

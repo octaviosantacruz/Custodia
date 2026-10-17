@@ -6,7 +6,7 @@ revisado: 2026-10-06
 
 # Métricas Netskope: registro, carga, AA e iterator
 
-Documento único de las métricas de Netskope en DS Hub. El trabajo pendiente vive en [`TO_IMPLEMENT.md`](../tracking/TO_IMPLEMENT.md) (`NSK-METRICS-001` y sus fases, `NSK-AA-001`, `NSK-PERF-001`, `NSK-E2E-TIME-001`); aquí quedan las decisiones, los contratos y la evidencia que las sostiene. Las APIs permitidas están en [`netskope-api.md`](netskope-api.md) e [`integration-contracts.md`](integration-contracts.md).
+Documento único de las métricas de Netskope en Custodia. El trabajo pendiente vive en [`TO_IMPLEMENT.md`](../tracking/TO_IMPLEMENT.md) (`NSK-METRICS-001` y sus fases, `NSK-AA-001`, `NSK-PERF-001`, `NSK-E2E-TIME-001`); aquí quedan las decisiones, los contratos y la evidencia que las sostiene. Las APIs permitidas están en [`netskope-api.md`](netskope-api.md) e [`integration-contracts.md`](integration-contracts.md).
 
 ## Qué mostramos y qué buscamos
 
@@ -81,7 +81,7 @@ Comparación local de consultas SQL de inventario: dispositivos totales 11 → 1
 
 **Catálogo sin consola.** `backend/.venv/bin/python scripts/catalog_netskope_aa.py --output <archivo nuevo>` hace sólo GET secuenciales (reportes accesibles, widgets globales y por reporte), reutiliza HTTPS y límites del cliente AA y guarda IDs, categorías y relaciones, sin resultados ni títulos. Indexa `reports`, `widgets` y `metric_candidates[severity|policies|applications|traffic]`, clasificados por título (`unverified`); `metric_bindings` queda vacío hasta tener un contrato aprobado. Barrido del 2026-10-02: 66 reportes, 159 widgets globales y 998 referenciados (1.157 IDs distintos); 11 candidatos de severidad, 74 de políticas, 252 de aplicaciones y 150 de tráfico. Una falla deja el reporte `unavailable`; el barrido falla ante exceso (100 reportes, 1.000 entradas) en vez de truncar.
 
-**Contrato y aprobación.** `NETSKOPE_AA_SEVERITY_CONTRACT_JSON` (vacío por defecto) tiene exactamente: `report_id`, `widget_id`, `severity_column`, `count_column`, `window_days` (1–365), `timezone` (IANA), `scope` (`all_alerts` o `dlp`) y `unit` (`events` o `incidents`). Describen lo verificado por el operador, no parámetros que DS Hub imponga (la API no aplica nuestros filtros ni da evidencia para verificarlos); se recomienda un widget compartido dedicado a DS Hub, y no se infieren período ni unidad del título ni se elige por posición. `NETSKOPE_AA_SEVERITY_APPROVAL_JSON` lleva `version` (entero positivo), `contract_sha256` (SHA-256 del contrato JSON con claves ordenadas y separadores `,` `:`, UTF-8) y `definition_sha256` (hash de la evidencia sanitizada revisada: población, medida, grano, exclusividad, filtros, ventana, zona).
+**Contrato y aprobación.** `NETSKOPE_AA_SEVERITY_CONTRACT_JSON` (vacío por defecto) tiene exactamente: `report_id`, `widget_id`, `severity_column`, `count_column`, `window_days` (1–365), `timezone` (IANA), `scope` (`all_alerts` o `dlp`) y `unit` (`events` o `incidents`). Describen lo verificado por el operador, no parámetros que Custodia imponga (la API no aplica nuestros filtros ni da evidencia para verificarlos); se recomienda un widget compartido dedicado a Custodia, y no se infieren período ni unidad del título ni se elige por posición. `NETSKOPE_AA_SEVERITY_APPROVAL_JSON` lleva `version` (entero positivo), `contract_sha256` (SHA-256 del contrato JSON con claves ordenadas y separadores `,` `:`, UTF-8) y `definition_sha256` (hash de la evidencia sanitizada revisada: población, medida, grano, exclusividad, filtros, ventana, zona).
 
 | Condición | Resultado |
 |---|---|
@@ -100,7 +100,7 @@ Comparación local de consultas SQL de inventario: dispositivos totales 11 → 1
 
 **Bloqueo externo.** El reporte DLP inspeccionado (19 widgets) devuelve cuatro columnas (índice técnico, conteo de incidentes y otras dimensiones), así que no se habilitó con una suma adivinada. Falta elegir o preparar en AA un agregado de dos columnas y confirmar ventana, zona y grano; después, configurar el binding aprobado y verificar la ruta autenticada y el gráfico con esos metadatos. No se modificaron reportes remotos, configuración del tenant ni `.env.local`. La reducción de requests y de persistencia no demuestra aún menor latencia con datos grandes: eso exige un widget equivalente y consultas frías y calientes, sin comparar eventos con incidentes.
 
-Candidatos de AA para el futuro (propuestas, no widgets contratados): tráfico total por período, aplicaciones por bytes y alertas por severidad/tipo; un reporte compartido de DS Hub debería fijar período, unidad, denominador y dimensiones permitidas. La API documenta async → status → resultado, límite de 10.000 filas y sin paginación; las muestras previas incluyeron CSV aunque se pidió JSON, y un `500`. Ver [Reporting AA v2](https://docs.netskope.com/en/rest-api-v2-reporting-endpoints-for-advanced-analytics).
+Candidatos de AA para el futuro (propuestas, no widgets contratados): tráfico total por período, aplicaciones por bytes y alertas por severidad/tipo; un reporte compartido de Custodia debería fijar período, unidad, denominador y dimensiones permitidas. La API documenta async → status → resultado, límite de 10.000 filas y sin paginación; las muestras previas incluyeron CSV aunque se pidió JSON, y un `500`. Ver [Reporting AA v2](https://docs.netskope.com/en/rest-api-v2-reporting-endpoints-for-advanced-analytics).
 
 ## Gráficos AA por mapa del tenant (`NSK-AA-CHARTS-001`, 2026-10-12)
 
@@ -126,31 +126,31 @@ El trace histórico de `NSK-POSTURE-UX-001` vence por el **presupuesto acumulado
 
 ## Diferencias esperadas con la consola de Netskope (`NSK-REF-001`, `NSK-USR-001`, 2026-10-06)
 
-Guía para responder «¿por qué DS Hub no muestra el mismo número que la consola?». Se comparó el 2026-10-05 22:30 con las pantallas
+Guía para responder «¿por qué Custodia no muestra el mismo número que la consola?». Se comparó el 2026-10-05 22:30 con las pantallas
 `Devices` (Last 7 Days) y `User Management`; la medición completa y los endpoints están en
 [netskope-api.md](netskope-api.md#conciliación-de-totales-con-la-consola-nsk-ref-001-nsk-usr-001). Cada diferencia de abajo tiene causa
 conocida y **no se corrige a propósito**: igualarla obligaría a mostrar un dato menos correcto. Con la misma medición, esta fue la lectura
 al 2026-10-05 23:40 (hora de Asunción):
 
-| Cifra | Consola | DS Hub | Diferencia y causa | ¿Se iguala? |
+| Cifra | Consola | Custodia | Diferencia y causa | ¿Se iguala? |
 |---|---|---|---|---|
-| Usuarios | `Total Users` 8.859 | «Usuarios en inventario» 8.855 | −4. Netskope repite 4 filas al paginar `getusers` y la consola las cuenta dos veces; DS Hub las une por id. La tarjeta lo muestra como «Netskope informa 8.859 · DS Hub lista −4». | No: sería contar dos veces a los mismos usuarios. |
+| Usuarios | `Total Users` 8.859 | «Usuarios en inventario» 8.855 | −4. Netskope repite 4 filas al paginar `getusers` y la consola las cuenta dos veces; Custodia las une por id. La tarjeta lo muestra como «Netskope informa 8.859 · Custodia lista −4». | No: sería contar dos veces a los mismos usuarios. |
 | Dispositivos con evento en 7 días | 4.578 | «Dispositivos» 4.576 | −2. La ventana de 7 días se mide contra la hora de la consulta y los datos solo cambian con cada sync (cada 30 min); un equipo sale de la ventana cada pocos minutos. La tarjeta indica la hora del inventario. | No: aun congelando la ventana en el sync, la consola usa su propio reloj. |
-| Usuarios en esos equipos | `users` 4.454 | «Usuarios con actividad reciente» 4.440 | −14. La consola cuenta **nombres de usuario vistos** en los equipos, incluidos los de usuarios borrados (12 con equipo reciente); DS Hub cuenta identidades vigentes con un equipo resuelto. 4.454 − 12 = 4.442; los 2 restantes son la ventana móvil. | No: volvería a atribuir actividad a personas dadas de baja. |
-| Cuentas habilitadas / deshabilitadas | 10.209 / 1.987 | referencia guardada de `users/counts` | Coinciden. DS Hub muestra el estado por usuario, no por cuenta: 7.618 habilitados y 1.237 deshabilitados (la consola informa 7.619 con `Status = Enabled`: ±1 por una fila repetida). | — |
+| Usuarios en esos equipos | `users` 4.454 | «Usuarios con actividad reciente» 4.440 | −14. La consola cuenta **nombres de usuario vistos** en los equipos, incluidos los de usuarios borrados (12 con equipo reciente); Custodia cuenta identidades vigentes con un equipo resuelto. 4.454 − 12 = 4.442; los 2 restantes son la ventana móvil. | No: volvería a atribuir actividad a personas dadas de baja. |
+| Cuentas habilitadas / deshabilitadas | 10.209 / 1.987 | referencia guardada de `users/counts` | Coinciden. Custodia muestra el estado por usuario, no por cuenta: 7.618 habilitados y 1.237 deshabilitados (la consola informa 7.619 con `Status = Enabled`: ±1 por una fila repetida). | — |
 | Grupos / OUs | 718 / 141 | referencia guardada de `users/counts` | Coinciden. Los grupos no están habilitados en la sincronización (`NETSKOPE_GROUPS_PATH`). | — |
 
 **Qué es «borrado».** Netskope marca `deleted: true` en cada cuenta; un usuario con todas sus cuentas borradas no cuenta como usuario en la
-consola y DS Hub lo retira del inventario. No prueba que la persona haya dejado la empresa. Los equipos que reportaban con ese usuario pasan
+consola y Custodia lo retira del inventario. No prueba que la persona haya dejado la empresa. Los equipos que reportaban con ese usuario pasan
 a «sin usuario resuelto» (efecto en las tarjetas: 0 → 14 equipos recientes; detalle y revisión en netskope-api.md).
 
 **Cómo reproducirlo si hay una consulta.**
 
 1. Mismo instante: comparar contra la hora de «Device List Last updated» y «Results As Of» de la consola, no contra el momento en que se abre
-   DS Hub. Una diferencia de 1 a 3 equipos en 7 días es la ventana móvil.
+   Custodia. Una diferencia de 1 a 3 equipos en 7 días es la ventana móvil.
 2. Usuarios: la diferencia esperada es de unos pocos usuarios (filas repetidas). Una diferencia de decenas indica que cambió el estado de las
    cuentas en Netskope (por ejemplo, usuarios dados de baja), y se confirma con la corrida siguiente.
-3. Actividad: sumar al número de DS Hub los usuarios borrados con equipo reciente (el drill «Sin usuario resuelto» los lista) y debe acercarse
+3. Actividad: sumar al número de Custodia los usuarios borrados con equipo reciente (el drill «Sin usuario resuelto» los lista) y debe acercarse
    al `users` de la consola.
 4. Si una diferencia no se explica con lo anterior, no ajustar el cálculo: registrar la hora, las dos cifras y la corrida de sincronización.
 

@@ -79,7 +79,7 @@ test('COV-002: exporting downloads the destinations CSV', async ({ page }) => {
   await page.goto('/pam/assets');
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar CSV' }).click();
-  expect((await download).suggestedFilename()).toBe('dshub-destinos.csv');
+  expect((await download).suggestedFilename()).toBe('custodia-destinos.csv');
   // The notice carries the tool's logo, not the generic check, because it was raised from a CyberArk workspace.
   const notice = page.locator('.app-toast-notice');
   await expect(notice).toContainText('CyberArk · ACTUALIZACIÓN');

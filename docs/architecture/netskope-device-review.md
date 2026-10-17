@@ -17,7 +17,7 @@ revisado: 2026-10-13
 
 Fecha: 2026-10-05 (revisada). **Estado: aprobado por el dueño; Fases 1 y 2 implementadas (2026-10-05/06)** (`NSK-DEVREV-001`, ver [tracker](../tracking/TO_IMPLEMENT.md#revisión-de-equipos-sin-eventos--nsk-devrev-001-aprobado-2026-10-05)). El permiso dedicado queda para después; la Fase 1 escribe con `netskope:admin`.
 
-Antes de la Fase 1, DS Hub muestra la antigüedad y el estado `review` de cada equipo, pero no
+Antes de la Fase 1, Custodia muestra la antigüedad y el estado `review` de cada equipo, pero no
 hay forma de clasificarlos, asignarlos ni registrar qué se decidió. Este
 documento define esa clasificación (`NSK-DEVREV-001`) para dar granularidad al
 grupo de equipos sin eventos.
@@ -217,7 +217,7 @@ en curso la evaluación de "Sin clasificar" queda no disponible, como en
   sugerencia.
 - Una baja confirmada con actividad posterior muestra una inconsistencia; no se
   revierte la decisión.
-- Resolver un caso no da de baja nada en Netskope desde DS Hub.
+- Resolver un caso no da de baja nada en Netskope desde Custodia.
 
 ## Entrega por fases
 
@@ -259,7 +259,7 @@ en curso la evaluación de "Sin clasificar" queda no disponible, como en
 
 ## Qué se puede estudiar con lo actual
 
-DS Hub ya conserva último evento y timestamp, hostname, usuario informado,
+Custodia ya conserva último evento y timestamp, hostname, usuario informado,
 clasificación, `guid` (único por registro, ver desglose), capturas e
 identificadores Netskope. El inventario ya permite abrir cada grupo por
 antigüedad y por último evento con los filtros de dispositivos existentes

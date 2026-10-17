@@ -19,7 +19,7 @@ export type WidgetCommandSources = {
    label text. Imperative actions stay in App.tsx with the same metadata. */
 
 export type CommandKind = 'view' | 'action' | 'widget' | 'inventory';
-export type CommandPlatform = 'cyberark' | 'netskope' | 'dshub';
+export type CommandPlatform = 'cyberark' | 'netskope' | 'custodia';
 
 export type CommandCenterCommand = {
   id: string;
@@ -70,7 +70,7 @@ export function guideCommands(): CommandCenterCommand[] {
   return GUIDE_SECTIONS.map((section) => ({
     id: `guide-${section.id}`,
     kind: 'view' as const,
-    platform: 'dshub' as const,
+    platform: 'custodia' as const,
     label: section.title,
     detail: section.summary,
     aliases: [...section.aliases],
@@ -216,7 +216,7 @@ export function matchesCommandFilters(
   return true;
 }
 
-export const COMMAND_PLATFORM_ORDER: readonly CommandPlatform[] = ['cyberark', 'netskope', 'dshub'];
+export const COMMAND_PLATFORM_ORDER: readonly CommandPlatform[] = ['cyberark', 'netskope', 'custodia'];
 
 export type CommandPlatformGroup = { platform: CommandPlatform; commands: CommandCenterCommand[] };
 export type CommandEmptySection = { id: 'quick' | 'recent' | 'more'; label: string; groups: CommandPlatformGroup[] };
@@ -237,7 +237,7 @@ function uniqueViews(views: readonly WorkspaceView[]): WorkspaceView[] {
 }
 
 /* Empty query: quick access and recents grouped by platform (CyberArk →
-   Netskope → DS Hub), then the remaining authorized views and actions.
+   Netskope → Custodia), then the remaining authorized views and actions.
    Widgets are searchable shortcuts, not browsing destinations, so they stay
    out of the empty state; every returned section has at least one group. */
 export function emptyStateSections(

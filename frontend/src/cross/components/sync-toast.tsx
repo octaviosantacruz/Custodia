@@ -29,7 +29,7 @@ function SourceIdentity({ source }: { source: string }) {
 
 function SourceSummary({ sources }: { sources: string[] }) {
   const tools = syncToolsForSources(sources);
-  if (!tools.length) return <span className="sync-toast-source-summary">DS Hub · Sincronización</span>;
+  if (!tools.length) return <span className="sync-toast-source-summary">Custodia · Sincronización</span>;
   return <div className="sync-toast-source-list" role="group" aria-label="Herramientas de la sincronización">
     {tools.map((tool) => <SourceIdentity key={tool} source={tool} />)}
   </div>;

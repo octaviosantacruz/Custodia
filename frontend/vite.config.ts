@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react';
 
 const HOST_CONFIG = {
   host: '0.0.0.0' as const,
-  port: 5173,
-  allowedHosts: ['dshub.itti.digital'],
+  port: 5174,
+  strictPort: true,
+  allowedHosts: ['custodia.itti.digital'],
   proxy: {
     '/api': { target: 'http://127.0.0.1:8000', changeOrigin: true },
   },

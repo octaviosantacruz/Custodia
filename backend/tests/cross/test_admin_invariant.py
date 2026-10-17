@@ -29,7 +29,7 @@ class AdminInvariantHelperTests(unittest.TestCase):
         asyncio.run(lock_admin_invariant(cursor))
         query, params = cursor.execute_calls[0]
         self.assertIn("pg_advisory_xact_lock", query)
-        self.assertEqual(params, ("dshub-effective-admin",))
+        self.assertEqual(params, ("custodia-effective-admin",))
 
     def test_raises_when_no_active_admin_would_remain(self):
         cursor = _FakeCursor([{"has_admin": False}])

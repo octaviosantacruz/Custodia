@@ -101,7 +101,7 @@ for (const scenario of DESKTOP_SCENARIOS) {
     await installLongPersonRoutes(page);
     await page.setViewportSize({ width: scenario.width, height: scenario.height });
     await page.goto('/chains/person');
-    await page.evaluate((theme) => window.localStorage.setItem('dshub-theme:v1', theme), scenario.theme);
+    await page.evaluate((theme) => window.localStorage.setItem('custodia-theme:v1', theme), scenario.theme);
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', scenario.theme);
     // The population summary has its own view; the person view carries none of it.

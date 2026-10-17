@@ -996,7 +996,7 @@ test('UX-AUD2-022: Hallazgos readers see contextual help and a compact empty res
   await page.route('**/api/findings?*', (route) => route.fulfill({ json: { rows: [], total: 0, limit: 50, offset: 0 } }));
   await page.goto('/pam/posture');
   await expect(page.locator('html')).toHaveAttribute('data-theme', testInfo.project.name.includes('light') ? 'light' : 'dark');
-  const empty = page.getByText('DS Hub: no hay hallazgos para estos filtros', { exact: true });
+  const empty = page.getByText('Custodia: no hay hallazgos para estos filtros', { exact: true });
   await expect(empty).toBeVisible();
   expect((await empty.locator('..').boundingBox())!.height).toBeLessThan(65);
   await expect(page.locator('.posture-toolbar')).toHaveCount(0);
@@ -1038,12 +1038,12 @@ test('UX-AUD2-022: Hallazgos keeps authorized actions and compact Risk Managemen
   } : { source: 'cyberark_risk_management', fetched_at: '2026-10-08T00:00:00Z', rows: [], limit: 50, offset: 0, is_last_page: true, entity_names_visible: false } }));
   await page.goto('/pam/posture');
   await expect(page.locator('html')).toHaveAttribute('data-theme', testInfo.project.name.includes('light') ? 'light' : 'dark');
-  await expect(page.getByRole('button', { name: 'Actualizar reglas DS Hub' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Actualizar reglas Custodia' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Actualizar lectura' })).toBeVisible();
   await page.getByRole('button', { name: 'Hallazgos', exact: true }).click();
   await page.getByRole('button', { name: 'Filtrar hallazgos por severidad' }).click();
   await page.getByRole('option', { name: 'Alta', exact: true }).click();
-  await page.getByRole('button', { name: 'Limpiar filtros DS Hub' }).click();
+  await page.getByRole('button', { name: 'Limpiar filtros Custodia' }).click();
   await expect(page.getByRole('button', { name: 'Filtrar hallazgos por severidad' })).toContainText('Todas las severidades');
   for (const view of [{ button: 'Tipos de riesgo (0)', empty: 'Sin tipos de riesgo informados' }, { button: 'Resumen', empty: 'Sin evolución informada' }]) {
     await page.getByRole('button', { name: view.button, exact: true }).click();

@@ -12,7 +12,7 @@ type Props = { roleCode: string; roleName: string; count: number; canAssign: boo
 const PAGE_SIZE = 20;
 const accountLabel = (user: User) => user.auth_source === 'oidc' ? 'Okta' : user.is_active ? 'Local' : 'Local desactivado';
 
-/** ACCESS-UI-001: "Miembros (N)" opens a side panel listing who has the role; DS Hub assignments are added and removed there. */
+/** ACCESS-UI-001: "Miembros (N)" opens a side panel listing who has the role; Custodia assignments are added and removed there. */
 export function RoleMembers(props: Props) {
   const [open, setOpen] = useState(false);
   return <>

@@ -43,15 +43,15 @@ test('NSK-POSTURE-001: one list — findings first (most severe, then largest), 
 test('NSK-POSTURE-001: a device drill opens the inventory with the check filters over the whole inventory', () => {
   const stale = postureDrill(check({ query: { event_age: 'gt_30d', review_diagnosis: 'undetermined' } }));
   assert.equal(stale.view, 'netskopeInventory');
-  const url = new URL(stale.path, 'http://dshub.test');
+  const url = new URL(stale.path, 'http://custodia.test');
   assert.equal(url.pathname, '/netskope/inventory');
   const location = netskopeInventoryLocation(url.search, url.pathname);
   assert.equal(location.query.freshness, 'all');
   assert.equal(location.query.eventAge, 'gt_30d');
   assert.equal(location.query.reviewDiagnosis, 'undetermined');
-  const coverage = netskopeInventoryLocation(new URL(postureDrill(check({})).path, 'http://dshub.test').search, '/netskope/inventory');
+  const coverage = netskopeInventoryLocation(new URL(postureDrill(check({})).path, 'http://custodia.test').search, '/netskope/inventory');
   assert.equal(coverage.query.coverageRisk, '1');
-  const compliance = netskopeInventoryLocation(new URL(postureDrill(check({ query: { client_compliance: 'two_plus_behind' } })).path, 'http://dshub.test').search, '/netskope/inventory');
+  const compliance = netskopeInventoryLocation(new URL(postureDrill(check({ query: { client_compliance: 'two_plus_behind' } })).path, 'http://custodia.test').search, '/netskope/inventory');
   assert.equal(compliance.query.clientCompliance, 'two_plus_behind');
   assert.deepEqual(postureDrill(check({ entity: 'user', query: { rating: 'Poor' } })), { view: 'netskopeUci', path: '/netskope/uci' });
 });

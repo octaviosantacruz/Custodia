@@ -6,7 +6,7 @@ this repository — Claude Code, Codex, or others. There is no separate
 
 ## What this is
 
-DS Hub: a CMDB-style inventory tool for two security platforms, each with
+Custodia: a CMDB-style inventory tool for two security platforms, each with
 multiple tools, all isolated by `source_system`:
 
 - **CyberArk**: Privilege Cloud/PAM (`cyberark` — Safes, members, accounts,
@@ -36,7 +36,7 @@ backend/.venv/bin/pip install --require-hashes -r backend/requirements.lock.txt
 backend/.venv/bin/pip install -r backend/requirements-dev.txt
 npm ci && npm ci --prefix frontend
 
-# Run both backend (:8000) and frontend (:5173)
+# Run both backend (:8000) and frontend (:5174)
 npm run web
 
 # Backend tests (all)
@@ -56,7 +56,7 @@ npm --prefix frontend run test:e2e:cross      # shell, dashboard, Personas, etc.
 
 # Full pre-commit verification (includes an ephemeral local PostgreSQL cluster
 # for backend integration tests, then compile, probes, frontend tests/build and
-# git diff check; DSHUB_SKIP_PG=1 is an explicit local escape)
+# git diff check; CUSTODIA_SKIP_PG=1 is an explicit local escape)
 npm run verify   # == scripts/verify.sh
 # verify + Playwright e2e + supply-chain audit
 npm run verify:full
@@ -295,7 +295,7 @@ explicit repository-owner decision.
 
 ## Product context and non-negotiable data rules
 
-The product is **DS Hub**, an operational CMDB for two platforms: **CyberArk**
+The product is **Custodia**, an operational CMDB for two platforms: **CyberArk**
 (Privilege Cloud/PAM, Identity Administration, SIA, Access space) and
 **Netskope** (SSE). It is not a generic demo, spreadsheet replacement, or
 graph experiment. The useful output is a trustworthy inventory that lets
@@ -497,7 +497,7 @@ Keep the Safe table useful for scanning 465+ rows: stable columns, sticky or
 clear identity context, pagination, account search, explicit empty/loading/error
 states, and a detail drawer for members, accounts and technical metadata.
 
-**Desktop-form-factor web product:** DS Hub remains a browser-based web
+**Desktop-form-factor web product:** Custodia remains a browser-based web
 application; “desktop” describes the supported browser form factor on staffed
 workstations, not a native desktop application. Phones and touch-first use are
 explicitly out of scope. Do not add responsive mobile layouts, mobile-only
@@ -514,7 +514,7 @@ moving a view, read `docs/architecture/view-design.md` (checklist included).
 
 Use custom controls already present in the design system (`CompactSelect` and
 related components) instead of browser `alert`, `prompt`, or raw selects for
-new interactions. Keep dark mode as the default, use the green DS Hub accent
+new interactions. Keep dark mode as the default, use the green Custodia accent
 with restrained semantic colors, and ensure status, account type, unit and
 responsible selectors remain legible in both themes. Avoid card nesting,
 marketing copy, and visual changes that reduce data density.

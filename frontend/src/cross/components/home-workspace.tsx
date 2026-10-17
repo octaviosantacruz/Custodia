@@ -14,16 +14,16 @@ function firstName(name: string | null | undefined): string {
   return name?.trim().split(/\s+/)[0] || 'ahí';
 }
 
-export function DsHubMark({ size }: { size?: number } = {}) {
-  return <svg className="ds-hub-mark" width={size} height={size} style={size ? { width: size, height: size } : undefined} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-    <rect className="ds-hub-mark-surface" width="32" height="32" rx="7" />
-    <path className="ds-hub-mark-branch ds-hub-mark-branch-left" pathLength="1" d="M16 16 8.5 8.5" />
-    <path className="ds-hub-mark-branch ds-hub-mark-branch-right" pathLength="1" d="M16 16 23.5 8.5" />
-    <path className="ds-hub-mark-branch ds-hub-mark-branch-bottom" pathLength="1" d="M16 16v9" />
-    <circle className="ds-hub-mark-node ds-hub-mark-node-core" cx="16" cy="16" r="4.2" />
-    <circle className="ds-hub-mark-node ds-hub-mark-node-outer" cx="8" cy="8" r="2.8" />
-    <circle className="ds-hub-mark-node ds-hub-mark-node-outer" cx="24" cy="8" r="2.8" />
-    <circle className="ds-hub-mark-node ds-hub-mark-node-outer" cx="16" cy="25" r="2.8" />
+export function CustodiaMark({ size }: { size?: number } = {}) {
+  return <svg className="custodia-mark" width={size} height={size} style={size ? { width: size, height: size } : undefined} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <rect className="custodia-mark-surface" width="32" height="32" rx="7" />
+    <path className="custodia-mark-branch custodia-mark-branch-left" pathLength="1" d="M16 16 8.5 8.5" />
+    <path className="custodia-mark-branch custodia-mark-branch-right" pathLength="1" d="M16 16 23.5 8.5" />
+    <path className="custodia-mark-branch custodia-mark-branch-bottom" pathLength="1" d="M16 16v9" />
+    <circle className="custodia-mark-node custodia-mark-node-core" cx="16" cy="16" r="4.2" />
+    <circle className="custodia-mark-node custodia-mark-node-outer" cx="8" cy="8" r="2.8" />
+    <circle className="custodia-mark-node custodia-mark-node-outer" cx="24" cy="8" r="2.8" />
+    <circle className="custodia-mark-node custodia-mark-node-outer" cx="16" cy="25" r="2.8" />
   </svg>;
 }
 
@@ -62,7 +62,7 @@ type HomeFocus = HomeToolId | null;
 
 type HomeTool = {
   id: HomeToolId;
-  /* `transversal` entries are neutral DS Hub capabilities (the wheel core);
+  /* `transversal` entries are neutral Custodia capabilities (the wheel core);
      `platform` entries are the product tools drawn on the wheel and listed
      under "Plataformas". */
   section: HomeSection;
@@ -82,7 +82,7 @@ export const HOME_SECTIONS: readonly { id: HomeSection; label: string }[] = [
    (platform nodes plus the transversal core); a tool without a `view` is
    shown as coming soon. Adding a tool here places it on both. */
 export const HOME_TOOLS: readonly HomeTool[] = [
-  { id: 'people', section: 'transversal', label: 'Conexiones', detail: 'Vista del alcance de cada persona en las herramientas', title: 'Abrir Conexiones para ver el alcance de cada persona en las herramientas, sus registros relacionados y la cobertura de cliente Netskope', logo: DsHubMark, view: 'person' },
+  { id: 'people', section: 'transversal', label: 'Conexiones', detail: 'Vista del alcance de cada persona en las herramientas', title: 'Abrir Conexiones para ver el alcance de cada persona en las herramientas, sus registros relacionados y la cobertura de cliente Netskope', logo: CustodiaMark, view: 'person' },
   { id: 'cyberark', section: 'platform', label: 'CyberArk', detail: 'Gestión de accesos privilegiados', title: 'Abrir el tablero, inventario y accesos de CyberArk', logo: CyberArkLogo, view: 'general' },
   { id: 'netskope', section: 'platform', label: 'Netskope', detail: 'Visibilidad de equipos, usuarios y alertas de fuga de datos', title: 'Abrir el resumen y el inventario de Netskope', logo: NetskopeLogo, view: 'netskope' },
   { id: 'bigid', section: 'platform', label: 'BigID DSPM', detail: 'Descubrimiento y postura de seguridad de datos', title: 'BigID DSPM · Próximamente', logo: BigIdLogo },
@@ -134,7 +134,7 @@ export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPe
   const platformTools = homeToolsForSection('platform');
   const peopleTool = HOME_TOOLS.find((tool) => tool.id === 'people');
   const peopleView = peopleTool?.view;
-  return <aside className={'home-visibility' + (monochrome ? ' home-visibility-monochrome' : '')} data-active-domain={focus || undefined} data-tools={platformTools.length} aria-label="Fuentes de visibilidad de DS Hub">
+  return <aside className={'home-visibility' + (monochrome ? ' home-visibility-monochrome' : '')} data-active-domain={focus || undefined} data-tools={platformTools.length} aria-label="Fuentes de visibilidad de Custodia">
     <div className="home-visibility-ring" aria-hidden="true" />
     <div className="home-visibility-orbit" aria-hidden="true" />
     {/* One edge per platform tool, drawn only while it is lit (hover or focus on the tool, or on the
@@ -196,7 +196,7 @@ export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPe
     ><span className="home-visibility-core-icon"><Waypoints size={22} /></span><span>{peopleTool.label}</span></button>
     <HomeWheelLabel tool={peopleTool} active={focus === 'people'} />
     </>
-      : <div className="home-visibility-core"><DsHubMark /><span>DS Hub</span></div>}
+      : <div className="home-visibility-core"><CustodiaMark /><span>Custodia</span></div>}
   </aside>;
 }
 

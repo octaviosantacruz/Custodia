@@ -4,7 +4,7 @@ import { expect, mockAuthenticatedApp, test } from '../support/fixtures';
 for (const theme of ['dark', 'light'] as const) {
   test(`UX-SYNC-001 tool-cycle queue and notice remain clear and accessible in ${theme} theme`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.addInitScript((value) => window.localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => window.localStorage.setItem('custodia-theme:v1', value), theme);
     await mockAuthenticatedApp(page, {
       latestRun: {
         run_id: 'sia-failed', source_system: 'sia', status: 'failed',

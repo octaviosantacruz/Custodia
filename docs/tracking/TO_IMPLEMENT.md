@@ -4,7 +4,7 @@ dueño: Octavio Santacruz
 revisado: 2026-10-15
 ---
 
-# Por implementar en DS Hub
+# Por implementar en Custodia
 
 **Última revisión:** 2026-10-08 (auditoría integral UI/UX, ruido y rendimiento: `UX-AUD2-001`…`026`). Anterior 2026-10-04 (cierre operativo `SYNC-TASK-001`/`002`: migraciones 078/079 aplicadas y scheduler observado con las tres tareas Netskope y las dos PAM completadas; detalle en `IMPLEMENTED.md`). El contraste transversal y cierre de `DOCS-TRACK-001` del 2026-10-01 se conserva en `IMPLEMENTED.md`.
 **Barrido anterior:** 2026-09-29 (DEM, Conexiones y navegación; el historial conserva los barridos anteriores de seguridad).
@@ -122,7 +122,7 @@ La existencia de widgets/presets/alertas no cumple esos criterios por sí sola.
    `403`). Un `2xx` promueve automáticamente su consumidor a **Listo**;
    `401/403` lo vuelve **Externo** y `404` lo **Aparca** con evidencia.
 5. Las tareas de la API de Okta están aparcadas (ver
-   [BACKLOG_ARCHIVE.md](BACKLOG_ARCHIVE.md)): hoy DS Hub sólo usa Okta como
+   [BACKLOG_ARCHIVE.md](BACKLOG_ARCHIVE.md)): hoy Custodia sólo usa Okta como
    proveedor OIDC.
 6. Implementar inventarios/métricas Netskope sólo para familias confirmadas
    por los probes. Las mutaciones remotas continúan fuera de alcance.
@@ -146,7 +146,7 @@ frescura, desconocidos y versión; riesgo no es la suma directa de findings.
 ## Cobertura de destinos — inventario centralizado de Privilege Cloud y SIA (aprobado 2026-10-14)
 
 Alcance fijado por el dueño: el inventario de destinos es el lugar centralizado de **Privilege Cloud y SIA** y sirve
-para **seguir cómo avanza la implementación de SIA**. DS Hub pasa a ser la fuente de verdad del inventario; la
+para **seguir cómo avanza la implementación de SIA**. Custodia pasa a ser la fuente de verdad del inventario; la
 planilla es un formato de entrada y salida. Capacidades: acceso Platform por SIA, acceso DBA por SIA, ZSP (acceso
 passwordless, todavía no habilitado: sólo declarado) y Acceso (`Tengo llegada`). No hay rotación. En SIA,
 `CA_SIA` es el acceso Platform y `CA_DBA` el acceso DBA (política que conecta como el usuario SYS). La población
@@ -165,15 +165,15 @@ una IP en PAM o SIA que no está en el inventario se lista aparte como «Sin inv
 
 ### Decisiones de producto comunes a los cuatro batches
 
-- **Personas es una capacidad transversal de DS Hub**, no un workspace de
-  CyberArk PAM. Su marca es neutral (favicon/marca DS Hub), aunque sus datos
-  provengan de CyberArk o Netskope. Moverla visualmente al área `admin`/DS Hub
+- **Personas es una capacidad transversal de Custodia**, no un workspace de
+  CyberArk PAM. Su marca es neutral (favicon/marca Custodia), aunque sus datos
+  provengan de CyberArk o Netskope. Moverla visualmente al área `admin`/Custodia
   no la convierte en una función administrativa ni amplía/restringe permisos.
 - Hay dos conceptos que hoy pueden confundirse: **Personas** es la correlación
-  read-only entre herramientas de `CHAIN-010`; **Usuarios de DS Hub** es el
+  read-only entre herramientas de `CHAIN-010`; **Usuarios de Custodia** es el
   directorio local/OIDC, roles y permisos que hoy vive en `/admin/access`.
   Esos nombres deben permanecer distintos en navegación, búsqueda y ayuda.
-- El orden editorial común es **CyberArk → Netskope → DS Hub** cuando se
+- El orden editorial común es **CyberArk → Netskope → Custodia** cuando se
   enumeran plataformas. La excepción deliberada es el Inicio: la entrada
   transversal **Personas** aparece primero, separada bajo “Vista transversal”,
   y debajo se muestran las plataformas en ese orden. BigID continúa último,
@@ -214,7 +214,7 @@ frontend) y `pip-audit` (backend): 0 vulnerabilidades de dependencias.
 
 | ID | Estado | Hallazgo validado | Próxima acción | Criterio de cierre |
 |---|---|---|---|---|
-| `PENTEST-003` | Riesgo operativo aceptado transitoriamente — secreto de sesión endurecido en código (2026-09-12); retiro del modo híbrido programado tras el pentest (2026-10-01) | MFA, HTTPS forzado, cookies `Secure`, rotación de `APP_WRITE_TOKEN`/`AUTH_BOOTSTRAP_TOKEN` y aislamiento de Postgres/puerto 8000 no se pueden verificar sólo leyendo el repositorio. La condición crítica de secreto de sesión débil sí quedó mitigada: `AppSettings` rechaza valores menores a 32 bytes y placeholders conocidos; `.env.example` ya no proporciona un valor copiable. **Decisión del responsable de producto:** MFA y HTTPS/HSTS quedan delegados a Okta Access Enterprise (OIDC) una vez que esté en producción; el ambiente usa hoy `AUTH_MODE=hybrid`, riesgo aceptado durante la migración. **Actualización 2026-10-01 (dueño de producto):** Okta ya está implementado y en uso; el login local se conserva a propósito mientras corre el pentest externo (es parte de lo que se prueba). Al cerrar el pentest — estimado máximo 2 semanas — se retira el login local y el acceso queda sólo por Okta. | No implementar MFA/HTTPS propios en DS Hub. Al cierre del pentest: confirmar la fecha, pasar a `AUTH_MODE=oidc` puro y mantener el checklist operativo: secreto aleatorio real, rotación de tokens técnicos, Postgres y `:8000` no expuestos. Rotar `SESSION_SECRET` al desplegar este hardening si existe cualquier duda sobre su valor actual; esto invalida sesiones existentes. | Reevaluar al cierre del pentest, cuando se pueda retirar el modo híbrido; hasta entonces sigue como riesgo operativo aceptado. |
+| `PENTEST-003` | Riesgo operativo aceptado transitoriamente — secreto de sesión endurecido en código (2026-09-12); retiro del modo híbrido programado tras el pentest (2026-10-01) | MFA, HTTPS forzado, cookies `Secure`, rotación de `APP_WRITE_TOKEN`/`AUTH_BOOTSTRAP_TOKEN` y aislamiento de Postgres/puerto 8000 no se pueden verificar sólo leyendo el repositorio. La condición crítica de secreto de sesión débil sí quedó mitigada: `AppSettings` rechaza valores menores a 32 bytes y placeholders conocidos; `.env.example` ya no proporciona un valor copiable. **Decisión del responsable de producto:** MFA y HTTPS/HSTS quedan delegados a Okta Access Enterprise (OIDC) una vez que esté en producción; el ambiente usa hoy `AUTH_MODE=hybrid`, riesgo aceptado durante la migración. **Actualización 2026-10-01 (dueño de producto):** Okta ya está implementado y en uso; el login local se conserva a propósito mientras corre el pentest externo (es parte de lo que se prueba). Al cerrar el pentest — estimado máximo 2 semanas — se retira el login local y el acceso queda sólo por Okta. | No implementar MFA/HTTPS propios en Custodia. Al cierre del pentest: confirmar la fecha, pasar a `AUTH_MODE=oidc` puro y mantener el checklist operativo: secreto aleatorio real, rotación de tokens técnicos, Postgres y `:8000` no expuestos. Rotar `SESSION_SECRET` al desplegar este hardening si existe cualquier duda sobre su valor actual; esto invalida sesiones existentes. | Reevaluar al cierre del pentest, cuando se pueda retirar el modo híbrido; hasta entonces sigue como riesgo operativo aceptado. |
 
 ### P1 — corregir antes del pentest
 
@@ -461,7 +461,7 @@ esa comparación debe seguir rotulando «observadas en eventos», nunca
 | `SIA-SET-001` | Candidato, sin priorizar | **Configuración de SIA (settings).** Catálogo read-only de los flags del servicio (grabaciones RDP/SSH, MFA caching, validación de certificado, etc.). | Probe 2026-10-01: `GET /api/settings` responde `200` con ~25 claves. Fijar alcance de exhibición como postura antes de implementar. | Vista read-only con fuente y fecha; sin secretos; tests de exclusión. |
 | `SIA-DIAG-001` | Listo | Diagnóstico de sesiones SIA (errores de usuario/sistema, warnings y sesiones) | **Reactivado 2026-10-01:** fuente oficial encontrada (monitoreo de sesiones de Audit and Reports, filtro por aplicación SIA) y acceso de lectura confirmado con la credencial existente (probe read-only `200`, con sesiones SIA visibles). Alcance agregado y sin PII, igual que `SESS-001`: sólo estados, códigos y fechas. | Vista read-only de conteos por estado/código con denominador, ventana y frescura; tests de exclusión de campos personales. |
 | `ACC-FAIL-001` | Externo — falta aprobación de los campos específicos (`SECOPS26-916`) | Cuentas con fallo de política/CPM vía `savedFilter` | `GET /API/Accounts?savedFilter=` documenta `PolicyFailures`, `FailedChange`, `FailedVerify`, `FailedReconcile`, `ScheduledFor*`; la dependencia de gestión de cuentas (`CPM-001`) ya está implementada. La aprobación de campos para estos hallazgos es una subtarea distinta. | Hallazgos con denominador y filtro al inventario; no secretos ni `platformAccountProperties` | [contratos](../architecture/integration-contracts.md) |
-| `RISK-REC-001` | Externo — falta contrato de filtros y permiso del lado de CyberArk | **Recomendaciones detalladas y progreso de discovery de Risk Management.** Completar lo que `RISK-001` dejó fuera por contrato: (1) `GET /recommendations` y (2) `GET /recommendations/{type}/by-tags`, y (3) `GET /risk-posture/secure-standing-privilege/discovery`. La vista actual muestra como recomendaciones sólo las opciones tipadas que CyberArk incluye en cada `riskType`, vinculadas al catálogo de remediaciones. | Probe de implementación 2026-10-01: `/recommendations` sin el contrato de filtros respondió `400` y `/recommendations/{type}/by-tags` respondió `403` (el usuario de servicio no tiene ese permiso); `discovery` nunca se probó. Pedir a CyberArk/IAM el contrato de filtros y el permiso exacto de sólo lectura; después ejecutar un probe read-only con `scripts/probe_cyberark_risk_contract.sh` (sólo status, forma, claves y conteos) antes de implementar. DS Hub no adivina parámetros. `/entities/{id}` queda excluido: trae atributos de identidades, cuentas y apps (ver la decisión sobre nombres de entidad). | Probe `2xx` con forma y paginación confirmadas; allowlist de campos extendida sólo con lo aprobado; sin snooze ni remediación remota; tests de exclusión de campos y de acciones remotas; los endpoints que sigan en `4xx` quedan documentados como Aparcado/Externo con evidencia. | Detect and Respond (licenciado) |
+| `RISK-REC-001` | Externo — falta contrato de filtros y permiso del lado de CyberArk | **Recomendaciones detalladas y progreso de discovery de Risk Management.** Completar lo que `RISK-001` dejó fuera por contrato: (1) `GET /recommendations` y (2) `GET /recommendations/{type}/by-tags`, y (3) `GET /risk-posture/secure-standing-privilege/discovery`. La vista actual muestra como recomendaciones sólo las opciones tipadas que CyberArk incluye en cada `riskType`, vinculadas al catálogo de remediaciones. | Probe de implementación 2026-10-01: `/recommendations` sin el contrato de filtros respondió `400` y `/recommendations/{type}/by-tags` respondió `403` (el usuario de servicio no tiene ese permiso); `discovery` nunca se probó. Pedir a CyberArk/IAM el contrato de filtros y el permiso exacto de sólo lectura; después ejecutar un probe read-only con `scripts/probe_cyberark_risk_contract.sh` (sólo status, forma, claves y conteos) antes de implementar. Custodia no adivina parámetros. `/entities/{id}` queda excluido: trae atributos de identidades, cuentas y apps (ver la decisión sobre nombres de entidad). | Probe `2xx` con forma y paginación confirmadas; allowlist de campos extendida sólo con lo aprobado; sin snooze ni remediación remota; tests de exclusión de campos y de acciones remotas; los endpoints que sigan en `4xx` quedan documentados como Aparcado/Externo con evidencia. | Detect and Respond (licenciado) |
 | `AUD-EXT-001` | Listo | Sesiones históricas y eventos de plataforma desde Audit and Reports | **Decisión cerrada:** sólo IDs opacos, tiempos UTC, protocolo, estado y códigos; excluir usuario, target, source/IP, recordings y textos libres; retención 180 días; permiso `pam:audit_read`. **Acceso confirmado 2026-10-01:** probe read-only autorizado `200` con la credencial existente; la licencia del tenant ya cubre la lectura. | Timeline read-only idempotente con allowlist, purga por retención y test de exclusión de campos | Audit and Reports (licenciado) |
 
 ## PAM — señales de limpieza para depuración (2026-10-01)
@@ -475,8 +475,8 @@ acceso, y confirmó integridad sin inconsistencias.
 
 | ID | Estado | Trabajo | Validación previa | Criterio de cierre |
 |---|---|---|---|---|
-| `PAM-PSM-001` | Externo — acción del dueño | **Limpieza operativa de servidores de sesión.** Revisar y dar de baja los PSM sin plataformas activas (10 de 13 en el barrido 2026-10-01). En uso: `UE-CYBERARK03` (37), `PSM_FO-CYBERARK-SRV` (16) y `EC2AMAZ-PCDGV9L` (3). | Confirmar con operación en la consola de CyberArk antes de ejecutar; sin cambios desde DS Hub. | Baja ejecutada y re-verificada con el barrido (0 huérfanos; los PSM en uso siguen referenciados). |
-| `PAM-GRP-002` | Candidato — depende de una fuente/clave verificable que identifique grupos administrados por Okta | **Detectar grupos de CyberArk cuyos miembros dependen de Okta.** Reutilizar la jerarquía de membresía ya ingerida en DS Hub para generar candidatos de revisión y reducir el universo de grupos a depurar. | `PAM-GRP-001` ya ofrece análisis PAM de sólo lectura, pero no identifica por sí solo el origen Okta. Antes de cruzar fuentes, confirmar con IAM/Assertiva un identificador estable o una lista explícita aprobada; evaluar `OKTA-DIR-001` cuando se resuelva su bloqueo externo. No inferir dependencia por nombre ni usar coincidencias de nombre autorizadas sólo para otras vistas como evidencia de baja. | Reporte read-only con recorrido y procedencia de membresías, grupos identificados/no resueltos/ambiguos y completitud visible; validación humana de candidatos; ninguna baja automática ni escritura en CyberArk desde DS Hub. |
+| `PAM-PSM-001` | Externo — acción del dueño | **Limpieza operativa de servidores de sesión.** Revisar y dar de baja los PSM sin plataformas activas (10 de 13 en el barrido 2026-10-01). En uso: `UE-CYBERARK03` (37), `PSM_FO-CYBERARK-SRV` (16) y `EC2AMAZ-PCDGV9L` (3). | Confirmar con operación en la consola de CyberArk antes de ejecutar; sin cambios desde Custodia. | Baja ejecutada y re-verificada con el barrido (0 huérfanos; los PSM en uso siguen referenciados). |
+| `PAM-GRP-002` | Candidato — depende de una fuente/clave verificable que identifique grupos administrados por Okta | **Detectar grupos de CyberArk cuyos miembros dependen de Okta.** Reutilizar la jerarquía de membresía ya ingerida en Custodia para generar candidatos de revisión y reducir el universo de grupos a depurar. | `PAM-GRP-001` ya ofrece análisis PAM de sólo lectura, pero no identifica por sí solo el origen Okta. Antes de cruzar fuentes, confirmar con IAM/Assertiva un identificador estable o una lista explícita aprobada; evaluar `OKTA-DIR-001` cuando se resuelva su bloqueo externo. No inferir dependencia por nombre ni usar coincidencias de nombre autorizadas sólo para otras vistas como evidencia de baja. | Reporte read-only con recorrido y procedencia de membresías, grupos identificados/no resueltos/ambiguos y completitud visible; validación humana de candidatos; ninguna baja automática ni escritura en CyberArk desde Custodia. |
 
 ## Barrido REST Privilege Cloud Standard (2026-09-10)
 
@@ -485,7 +485,7 @@ Fuente: árbol oficial
 (`PasswordVault/API` Gen2 y `PasswordVault/WebServices` Gen1). No se inventaron
 endpoints de SIA ni de Identity Administration a partir de este árbol.
 
-**Ya cubierto por DS Hub (no reabrir como feature):** Get all Safes, Get Safe
+**Ya cubierto por Custodia (no reabrir como feature):** Get all Safes, Get Safe
 details, Search for a Safe, Get all Safe members, Get accounts (inventario
 delgado), Get platforms (mapeo `general` + PSM), Get users / Get groups /
 Get group details (objetos PAM), throttling `429` en transporte PAM.
@@ -522,7 +522,7 @@ Infrastructure Access
 
 Este índice sirve para futuras iteraciones. **No habilita integraciones por sí
 solo**: cada fuente requiere tenant URL aprobada, OAuth/rol efectivo, probe
-anonimizado, allowlist y pruebas. DS Hub centraliza visibilidad autorizada;
+anonimizado, allowlist y pruebas. Custodia centraliza visibilidad autorizada;
 no reemplaza la licencia ni los controles de CyberArk; no solicita ni
 conserva secretos, tokens, claves, recordings o payloads completos.
 
@@ -573,8 +573,8 @@ la selección de recursos completos, la clasificación de capacidades sensibles
 y la vista previa de pantallas, sin
 presentar descripciones de permisos como garantía de acceso a una vista.
 
-Decisión de arquitectura 2026-09-26: DS Hub separa tres autoridades. Los
-usuarios locales y los sujetos OIDC reciben roles internos de DS Hub; los
+Decisión de arquitectura 2026-09-26: Custodia separa tres autoridades. Los
+usuarios locales y los sujetos OIDC reciben roles internos de Custodia; los
 grupos y administradores de Okta son objetos externos de sólo lectura; los
 administradores/roles de Netskope son objetos de Netskope y nunca se equiparan
 por nombre con los anteriores. Las relaciones externas usan IDs inmutables del
@@ -583,9 +583,9 @@ sancionadas en `integration-contracts.md`.
 
 | ID | Estado | Trabajo | Alcance decidido / dependencia | Criterio de cierre |
 |---|---|---|---|---|
-| `ACCESS-UI-001` | En curso — fases 1 a 3 hechas (2026-10-11) | **Administrar acceso desde la UI, no desde el código.** Aprobado 2026-10-11; diseño en [`access-ui-proposal.md`](../architecture/access-ui-proposal.md). Fase 1: roles por persona como chips; un rol `manual` convive con los de Okta y ningún login lo quita (migración 095). Fase 2: mapeo grupo → roles en PostgreSQL con adopción de `OIDC_ROLE_MAP_JSON` en la primera edición (migración 096). Fase 3: tabla por persona con «Gestionar» y chip de Okta con grupos observados; roles con capacidades legibles (lista plana, sin `domain:*`, «Datos por usuario» en DLP/UCI), «Duplicar como personalizado», asignaciones por rol y compuestos con áreas opcionales (un rol «sólo Netskope» ya no hereda PAM); textos del catálogo corregidos (migración 097). **Decisión 2026-10-11: la edición del mapeo de Okta sale de la UI** — sin SCIM DS Hub no conoce los grupos reales y un nombre tipeado mal no otorga nada sin avisar; el rol muestra «Lo otorga en Okta» en sólo lectura. `PUT /api/access/oidc-group-roles` queda disponible por API y vuelve a la UI con `ACCESS-UI-003`. Reconstrucción aprobada: mapa de accesos a todo el ancho y editor de capacidades desde cero; diseño en [`role-access-design.md`](../architecture/role-access-design.md), con modos explícitos de permisos individuales y niveles vinculados, revisión de cambios y Okta en sólo lectura. Pendiente (fase 4): explicar qué grupo causó cada rol OIDC y la vista previa de vistas por permiso. | Decisiones: roles del sistema no editables (sólo duplicar); SCIM entra después como otro origen. | Cada fase con tests de autorización (techo, propio rol, último administrador), auditoría y E2E. |
+| `ACCESS-UI-001` | En curso — fases 1 a 3 hechas (2026-10-11) | **Administrar acceso desde la UI, no desde el código.** Aprobado 2026-10-11; diseño en [`access-ui-proposal.md`](../architecture/access-ui-proposal.md). Fase 1: roles por persona como chips; un rol `manual` convive con los de Okta y ningún login lo quita (migración 095). Fase 2: mapeo grupo → roles en PostgreSQL con adopción de `OIDC_ROLE_MAP_JSON` en la primera edición (migración 096). Fase 3: tabla por persona con «Gestionar» y chip de Okta con grupos observados; roles con capacidades legibles (lista plana, sin `domain:*`, «Datos por usuario» en DLP/UCI), «Duplicar como personalizado», asignaciones por rol y compuestos con áreas opcionales (un rol «sólo Netskope» ya no hereda PAM); textos del catálogo corregidos (migración 097). **Decisión 2026-10-11: la edición del mapeo de Okta sale de la UI** — sin SCIM Custodia no conoce los grupos reales y un nombre tipeado mal no otorga nada sin avisar; el rol muestra «Lo otorga en Okta» en sólo lectura. `PUT /api/access/oidc-group-roles` queda disponible por API y vuelve a la UI con `ACCESS-UI-003`. Reconstrucción aprobada: mapa de accesos a todo el ancho y editor de capacidades desde cero; diseño en [`role-access-design.md`](../architecture/role-access-design.md), con modos explícitos de permisos individuales y niveles vinculados, revisión de cambios y Okta en sólo lectura. Pendiente (fase 4): explicar qué grupo causó cada rol OIDC y la vista previa de vistas por permiso. | Decisiones: roles del sistema no editables (sólo duplicar); SCIM entra después como otro origen. | Cada fase con tests de autorización (techo, propio rol, último administrador), auditoría y E2E. |
 | `ACCESS-LOCAL-001` | Verificar | **Validación residual de administración local separada de OIDC.** Las altas/desactivación, contraseña temporal, asignación acotada y revocación por cambio de contraseña/desactivación ya existen; no reimplementar. | Contrastar `user_admin.py`, rutas de usuarios y `user-admin.tsx` con los tests HTTP/RBAC y E2E. No existe una acción administrativa independiente de revocar sesiones; no agregarla por inferencia. | Regresión del flujo local completo y del secreto temporal efímero, aislamiento OIDC y auditoría/permisos. Si se solicita revocación independiente, delimitarla como trabajo nuevo autorizado. |
-| `ACCESS-BREAKGLASS-001` | Candidato, sin priorizar | **Sigue postergado (2026-10-15, dueño):** hoy la única cuenta local se usa sólo para QA con agent-browser; el acceso de las personas es por Okta y no se amplía el uso local. **Cuenta local de emergencia para el paso a OIDC puro.** Postergado a propósito: no está bloqueado por otra tarea, pero no tiene sentido implementarlo antes de que `AUTH_MODE=oidc` puro esté realmente cerca (depende del cierre de `PENTEST-003`). | **Decisión cerrada 2026-09-26:** cuenta administrativa separada de los usuarios cotidianos, contraseña fuerte custodiada/recuperada mediante CyberArk PAM. El usuario del dueño del producto no será superadmin ni se usará como primera cuenta privilegiada. **Vía de acceso decidida 2026-09-26 (revisión de alcance):** DS Hub es un dashboard de inventario interno, no una plataforma crítica; se descartó diseñar un segundo hostname/aplicación Cloudflare Access dedicado. Cloudflare Access hoy protege todo `dshub.itti.digital` sin excepción de `/api` (ver `docs/history/cloudflare-dshub-meeting.md`), así que la vía de emergencia es puramente API: una excepción puntual y auditada en la política de Cloudflare Access (Service Token o email único), acotada a esta cuenta, para poder autenticar por `curl`/API si el IdP corporativo está caído. No se crea infraestructura nueva del lado de DS Hub. | Runbook de uso/rotación, alerta y auditoría en cada login, prueba de recuperación desde PAM, la excepción de Access configurada y documentada, y criterio para cerrar `PENTEST-003`. |
+| `ACCESS-BREAKGLASS-001` | Candidato, sin priorizar | **Sigue postergado (2026-10-15, dueño):** hoy la única cuenta local se usa sólo para QA con agent-browser; el acceso de las personas es por Okta y no se amplía el uso local. **Cuenta local de emergencia para el paso a OIDC puro.** Postergado a propósito: no está bloqueado por otra tarea, pero no tiene sentido implementarlo antes de que `AUTH_MODE=oidc` puro esté realmente cerca (depende del cierre de `PENTEST-003`). | **Decisión cerrada 2026-09-26:** cuenta administrativa separada de los usuarios cotidianos, contraseña fuerte custodiada/recuperada mediante CyberArk PAM. El usuario del dueño del producto no será superadmin ni se usará como primera cuenta privilegiada. **Vía de acceso decidida 2026-09-26 (revisión de alcance):** Custodia es un dashboard de inventario interno, no una plataforma crítica; se descartó diseñar un segundo hostname/aplicación Cloudflare Access dedicado. Cloudflare Access hoy protege todo `custodia.itti.digital` sin excepción de `/api` (ver `docs/history/cloudflare-custodia-meeting.md`), así que la vía de emergencia es puramente API: una excepción puntual y auditada en la política de Cloudflare Access (Service Token o email único), acotada a esta cuenta, para poder autenticar por `curl`/API si el IdP corporativo está caído. No se crea infraestructura nueva del lado de Custodia. | Runbook de uso/rotación, alerta y auditoría en cada login, prueba de recuperación desde PAM, la excepción de Access configurada y documentada, y criterio para cerrar `PENTEST-003`. |
 
 La vista de grupos mapeados y miembros observados en futuros logins se
 implementó el 2026-10-03 (`ACCESS-OIDC-GROUPS-OBSERVED-001`). No cierra
@@ -626,14 +626,14 @@ No cierra causa raíz, scopes ni validaciones externas pendientes de estos IDs.
 
 Caso de uso aprobado por el dueño (2026-10-11): responde «¿tengo habilitada esta web? y, si no, ¿qué regla la bloquea?» de forma más simple que la consola de Netskope.
 
-Idea: que DS Hub no repita la pantalla «URL Lookup» de la consola de Netskope
+Idea: que Custodia no repita la pantalla «URL Lookup» de la consola de Netskope
 (categoría, tipo, políticas) sino que responda en términos de negocio: «esta
 URL está en la categoría X; se habilita cargando una solicitud del tipo Y», y
 que de paso simplifique esa consulta para quien opera Netskope.
 
 | Prioridad | ID | Estado | Oportunidad | Validación previa / criterio de cierre |
 |---|---|---|---|---|
-| P3 | `NSK-URLCAT-001` | Idea — sin probe, sin contrato | **Consulta de URL con respuesta de negocio.** El operador pega una URL o dominio y ve la categoría (predefinida o personalizada), si está bloqueada o permitida y qué solicitud la desbloquea. | (1) Probe de `POST /api/v2/nsiq/urllookup` (lote de hasta 100 URLs; devuelve categorías) con aprobación del dueño: ruta nunca llamada y enviar URLs a Netskope no es lectura pura, ver `netskope-api.md`. (2) Confirmar si la API trae las **políticas que cubren la URL** y los **perfiles de destino** que muestra la consola; esa parte no aparece en el listado público de `nsiq` y puede ser una API interna de la UI. Sin ella, «bloqueada o permitida» se deduciría de `policy/urllist` (403 sin scope, `NSK-CFG-001`) o de los nombres de política observados, y no sería confiable. (3) El «qué solicitud lo desbloquea» **no existe en ningún sistema que DS Hub lea**: haría falta una tabla mantenida por personas (categoría → tipo de solicitud/proceso) con su pantalla de edición y auditoría; la conexión con Jira la configura y define el dueño (2026-10-11); hasta entonces DS Hub no integra un gestor de tickets. **Evidencia 2026-10-12 (GET de sólo lectura, sin leer contenido):** `policy/urllist` ya responde `200` con 23 listas de URL (p. ej. «Allowed URLs», «Blocked URLs», excepciones SSL, whitelists); `policy/internetaccess/{rules,groups,rules/applied}` y `services/dlp/profiles` siguen en `403`. Una URL en una lista **no** implica que esté permitida o bloqueada: eso lo decide la regla de tiempo real que usa la lista (acción, quién y actividad), que sigue sin poder leerse. |
+| P3 | `NSK-URLCAT-001` | Idea — sin probe, sin contrato | **Consulta de URL con respuesta de negocio.** El operador pega una URL o dominio y ve la categoría (predefinida o personalizada), si está bloqueada o permitida y qué solicitud la desbloquea. | (1) Probe de `POST /api/v2/nsiq/urllookup` (lote de hasta 100 URLs; devuelve categorías) con aprobación del dueño: ruta nunca llamada y enviar URLs a Netskope no es lectura pura, ver `netskope-api.md`. (2) Confirmar si la API trae las **políticas que cubren la URL** y los **perfiles de destino** que muestra la consola; esa parte no aparece en el listado público de `nsiq` y puede ser una API interna de la UI. Sin ella, «bloqueada o permitida» se deduciría de `policy/urllist` (403 sin scope, `NSK-CFG-001`) o de los nombres de política observados, y no sería confiable. (3) El «qué solicitud lo desbloquea» **no existe en ningún sistema que Custodia lea**: haría falta una tabla mantenida por personas (categoría → tipo de solicitud/proceso) con su pantalla de edición y auditoría; la conexión con Jira la configura y define el dueño (2026-10-11); hasta entonces Custodia no integra un gestor de tickets. **Evidencia 2026-10-12 (GET de sólo lectura, sin leer contenido):** `policy/urllist` ya responde `200` con 23 listas de URL (p. ej. «Allowed URLs», «Blocked URLs», excepciones SSL, whitelists); `policy/internetaccess/{rules,groups,rules/applied}` y `services/dlp/profiles` siguen en `403`. Una URL en una lista **no** implica que esté permitida o bloqueada: eso lo decide la regla de tiempo real que usa la lista (acción, quién y actividad), que sigue sin poder leerse. |
 
 Alcance si se aprueba: fase 1 solo categoría + política de la consola (sin
 reglas de negocio); fase 2 la tabla categoría → solicitud. No persiste las URLs
@@ -664,7 +664,7 @@ categorías más frecuentes. El detalle de todos los widgets y hallazgos está e
 | Experiencia | Observaciones actuales por usuario; resúmenes futuros de experiencia | Mantener aparte; las métricas nuevas esperan su contrato y permisos |
 
 **Cómo cambia el almacenamiento:** Netskope conserva y calcula los resúmenes
-analíticos que pueda ofrecer. DS Hub los consulta y mantiene una caché breve.
+analíticos que pueda ofrecer. Custodia los consulta y mantiene una caché breve.
 La base local conserva inventario, decisiones, preferencias y auditoría.
 La captura mínima DLP y sus vistas de investigación permanecen; retirarlas
 requiere una decisión separada.
@@ -678,7 +678,7 @@ confirma por sí solo período, unidad o significado de un gráfico.
 |---|---|
 | 1. Corregir los números actuales | Una captura coherente y porcentajes con la población correcta |
 | 2. Definir cada métrica | Fuente, qué cuenta, período, filtros y disponibilidad claros |
-| 3. Validar un gráfico AA | Confirmar su significado y verlo funcionar en DS Hub |
+| 3. Validar un gráfico AA | Confirmar su significado y verlo funcionar en Custodia |
 | 4. Ordenar el tablero | Datos clave y gráficos legibles; cargar sólo lo necesario |
 | 5. Ampliar gradualmente | Migrar métricas equivalentes y sumar políticas/apps/web verificadas |
 | 6. Probar el resultado | Funcionamiento, permisos, errores y rendimiento medidos |
@@ -745,7 +745,7 @@ se valida con un probe read-only antes de implementarse.
 Para destrabar una familia, alcanza con uno de estos insumos, en este orden:
 
 1. nombre exacto del scope/API permission que aparece en la consola para el
-   token de DS Hub;
+   token de Custodia;
 2. captura del endpoint Swagger expandido con parámetros y schemas de
    request/response, ocultando host, tenant, IDs y ejemplos con valores;
 3. ejecución del probe versionado desde el entorno configurado, compartiendo
@@ -791,7 +791,7 @@ de mapear. El token actual sólo cubre `clientstatus`, `users/getusers` y
   permanecen excluidos.
 - Nunca persistir forensics DLP, contenido/snippets de coincidencias, hashes
   de archivos, nombres de archivo ni URLs completas con query string.
-- DS Hub sólo lee: cerrar/asignar incidentes, notas, URL lists, reglas NPA,
+- Custodia sólo lee: cerrar/asignar incidentes, notas, URL lists, reglas NPA,
   upgrades de publishers y tunnels quedan en la consola de Netskope.
 - No existe API REST para leer políticas Real-time Protection (Community
   confirma que sólo hay export CSV/JSON manual desde la UI). No se presentan
@@ -799,7 +799,7 @@ de mapear. El token actual sólo cubre `clientstatus`, `users/getusers` y
 - Límite documentado: 4 req/s por endpoint (`RateLimit-*`). datasearch es
   ad-hoc (10.000 filas por página, timeout 180 s); el iterador dataexport usa
   índices con nombre y consumo de lotes de una hora — usar un índice propio de
-  DS Hub para no robar el cursor a un SIEM o a Cloud Exchange.
+  Custodia para no robar el cursor a un SIEM o a Cloud Exchange.
 - Relaciones sólo por IDs exactos entregados en el payload (igual que PAM);
   nunca por email, hostname, nombre de app o similitud.
 
@@ -841,7 +841,7 @@ cambia la dependencia de la ruta, sin tocar el contrato ni los datos.
 Las capturas de la documentación Swagger aportadas por el dueño del producto
 confirman la existencia documental de la superficie `/api/v2/dem/*`; no
 confirman todavía que el token actual tenga scope ni revelan los schemas de
-respuesta. DS Hub adopta DEM sólo en lectura. Quedan fuera de alcance todos los
+respuesta. Custodia adopta DEM sólo en lectura. Quedan fuera de alcance todos los
 `POST` de creación y todos los `PUT`/`PATCH`/`DELETE`, incluidos cambios de
 apps, probes, receivers, reglas y settings. Las únicas excepciones a "GET" son
 los endpoints de consulta read-only que usan `POST` por diseño:
@@ -852,7 +852,7 @@ los endpoints de consulta read-only que usan `POST` por diseño:
 | `NSK-DEM-VALIDATE-001` | Externo | **Activación y primera captura real del inventario DEM de sites.** El código de `NSK-DEM-INV-001` está cerrado; el GET de probe no demuestra captura persistida. | En el entorno autorizado, comprobar migración 070, configurar el opt-in `NETSKOPE_DEM_SITES_PATH=/api/v2/dem/config/sites` y autorizar una corrida completa. No ejecutar desde el harness. | Primera corrida completa y captura allowlisteada confirmadas con conteos, permisos y frescura; sin ubicación, redes ni payload completo. El inventario es backend técnico; no exige reponer la antigua UI de sitios. |
 | `NSK-ADEM-WINDOWS-001` | Externo | **Validación operativa de POPs en ventanas de 24/48 h.** `NSK-ADEM-POP-001` entregó código y el tenant sólo fue validado en 2 h. | El dueño contrasta las ventanas con la consola desde el entorno autorizado, sin nuevas inferencias de usuario/latencia/egreso. | Evidencia no sensible de período y conteos; no confundir códigos POP con usuarios por POP. |
 | `NSK-ADEM-TIME-001` | Externo | **Semántica temporal de `lastActivity` ADEM.** El código `NSK-ADEM-USERPOP-001` muestra actividad fuera de ventana con frescura sin confirmar. Ver [nota de continuidad](DEM_ADEM_HANDOFF.md). | Solicitar explicación del tenant por el timestamp unos 24 min posterior al reloj de consulta. No recortar/corregir el dato artificialmente. Una tabla global por POP no está aprobada por esta tarea: faltan schema 200 y paginación de `getentities`. | Semántica documentada y UI/test ajustados sólo si corresponde a un contrato confirmado; sin IP, coordenadas, payload completo ni relaciones SSE por nombre. |
-| `NSK-LIC-001` | Reducido — verificado 2026-10-04 | **Uso de licencias de Enterprise Browser.** `nsbrowser/licensesettings` devuelve `assignedLicenses` (29) y un `totalLicenses` de 4.294.967.295 (2³²−1, centinela de «sin límite»): mostrar «Sin límite», nunca ese número ni «disponibles». Una sola tarjeta, junto a `NSK-EB-001`; no justifica una capa de sync propia. | **Descartado como denominador de usuarios:** `users/counts.totalUsers` (8.861) no coincide con el `totalResults` de `getusers` (8.921) ni con los activos de DS Hub (8.917), y el sync ya valida contra el `totalResults` de `getusers`; un tercer número con otra definición sólo generaría alarmas sin causa conocida. | Tarjeta de licencias con frescura y centinela explícito, o descarte con motivo. |
+| `NSK-LIC-001` | Reducido — verificado 2026-10-04 | **Uso de licencias de Enterprise Browser.** `nsbrowser/licensesettings` devuelve `assignedLicenses` (29) y un `totalLicenses` de 4.294.967.295 (2³²−1, centinela de «sin límite»): mostrar «Sin límite», nunca ese número ni «disponibles». Una sola tarjeta, junto a `NSK-EB-001`; no justifica una capa de sync propia. | **Descartado como denominador de usuarios:** `users/counts.totalUsers` (8.861) no coincide con el `totalResults` de `getusers` (8.921) ni con los activos de Custodia (8.917), y el sync ya valida contra el `totalResults` de `getusers`; un tercer número con otra definición sólo generaría alarmas sin causa conocida. | Tarjeta de licencias con frescura y centinela explícito, o descarte con motivo. |
 | `NSK-DEM-ALR-002` | Listo — verificado 2026-10-04 | **Reglas, receptores y alertas DEM.** `dem/alert/rules`, `dem/alert/receivers` y `POST dem/alerts/getalerts {limit, offset}` responden `200` (con `remainingQuota`). | Revisar sensibilidad de receptores (canales/destinos): persistir sólo nombre, tipo y estado. | Inventario de reglas/alertas con frescura; sin destinos de notificación. |
 | `NSK-ER-001` | Listo — probe 2026-10-04 | **Reportes ER (`reporting/er`).** `GET reporting/er/reports` `200` con 53 reportes. | Misma mecánica asíncrona que AA (`NSK-AA-001`); evaluar widgets útiles sin duplicar métricas propias. | Decisión de adoptar o descartar con muestra de widgets. |
 | `NSK-SCOPE-REQ-001` | Externo — falta scope (`403`, 2026-10-04; re-probe 2026-10-14: las 14 rutas listadas siguen en `403`) | **Scopes read-only a solicitar al administrador del tenant:** `auth/tokens` (auditoría de tokens), `dem/query/definitions`, `dem/apps`, `dem/appprobes`, `aig/*` (AI Gateway), `airt/*`, `casb/appinstances`, `analysis/npa/jobs`, `services/dlp/profiles`, `policy/internetaccess/*`, `profiles/networks`, `ips/threathuntingconfig`, `events/logstreaming/list`, `steering/expressconnect/sites`. `spm/*` devuelve `404` (sin licencia SPM; sólo `spm/stats/disconnectedinstances` responde `200`). | El dueño solicita los scopes; después se repite el probe (`NSK-API-001/v3`). | Cada ruta pasa a `200` y se diseña su tarea, o se descarta por licencia. |
@@ -883,7 +883,7 @@ NPA existente y no se duplica aquí.
 | Prioridad | ID | Estado | Oportunidad | Validación previa / criterio de cierre |
 |---|---|---|---|---|
 | P1 | `NSK-GRAPH-DEV-001` | Listo | **Cadena usuario observado → dispositivo → tag/regla de clasificación → steering.** Extiende la cadena actual con postura y método de encaminamiento. | Probe 2026-10-01 (`rules` 3, `tags` 1 y `steering` responden `200`); sólo IDs exactos presentes en ambos extremos, nodos sin vínculo explícitos y procedencia de cada arista; nunca unir por hostname, email, etiqueta o nombre. |
-| P1 | `NSK-GRAPH-RBAC-001` | Candidato — `NSK-RBAC-001` entregado (2026-10-14); falta decidir si el grafo aporta algo sobre la vista Administradores | **Mapa administrador → rol → API group/scope y grupo → membresía.** Permite detectar cuentas privilegiadas inactivas, roles huérfanos y alcance excesivo. | Grafo separado de admins DS Hub/Okta, permiso `netskope:admin_inventory_read`, IDs del proveedor y ningún dato de autenticación. |
+| P1 | `NSK-GRAPH-RBAC-001` | Candidato — `NSK-RBAC-001` entregado (2026-10-14); falta decidir si el grafo aporta algo sobre la vista Administradores | **Mapa administrador → rol → API group/scope y grupo → membresía.** Permite detectar cuentas privilegiadas inactivas, roles huérfanos y alcance excesivo. | Grafo separado de admins Custodia/Okta, permiso `netskope:admin_inventory_read`, IDs del proveedor y ningún dato de autenticación. |
 | P2 | `NSK-POLCFG-PROBE-001` | Externo — `403` en `rules`, `rules/applied`, `groups`, destinations, networks y service objects (2026-10-01) | **Políticas Internet Access, grupos y perfiles referenciables.** | Solicitar el scope read-only; no leer contenido de listas ni desplegar/cambiar políticas. Un `2xx` promueve `NSK-GRAPH-POL-001` a Listo; `404` lo aparca. |
 | P2 | `NSK-GRAPH-POL-001` | Bloqueado por `NSK-POLCFG-PROBE-001` | **Cadena grupo de política → regla aplicada → perfiles/destinos/service objects.** Responde qué configuración efectiva protege o encamina cada alcance. | Aristas sólo desde referencias ID confirmadas; distinguir borrador/aplicado; nodos desconocidos quedan explícitos, nunca resueltos por nombre. |
 | P2 | `NSK-GRAPH-DEM-001` | Bloqueado por `NSK-DEM-INV-001` y [`NSK-DEM-ALR-001`](BACKLOG_ARCHIVE.md) | **Topología DEM app → app probe/network probe → site/gateway → regla/alerta.** Permite navegar desde degradación agregada hasta el objeto monitorizado. | Sólo relaciones declaradas por IDs del contrato; ubicación limitada a país/región agregada; sin IP/hostname ni entidad personal. |
@@ -982,7 +982,7 @@ Registro solicitado por el dueño; no autoriza implementar ni eliminar código.
 Evidencia de lectura del worktree, no una auditoría integral concluida ni QA
 visual aprobado. Hay cambios concurrentes en Netskope/Personas que se preservan.
 El QA read-only de producción con `agent-browser` fue autorizado. El hostname
-`dshub.itti.digital:5173` falló con `ERR_NAME_NOT_RESOLVED`; luego se accedió a
+`custodia.itti.digital:5173` falló con `ERR_NAME_NOT_RESOLVED`; luego se accedió a
 `http://localhost:5173/` usando el perfil de autenticación local del dueño, sin
 exponer su contraseña. QA parcial: Métricas PAM, políticas SIA (expansión y
 contexto lateral), búsqueda de Safes sin resultados, Métricas Netskope e
@@ -1054,7 +1054,7 @@ la cobertura de revisión, no certifica todos los estados, permisos ni temas.
 **Conservar lo que ya ayuda:** en Personas, buscador primero, procedencia y
 referencias por nombre diferenciadas del vínculo por correo; evidencia técnica
 desplegable y fuentes explícitas. En detalle de equipo Netskope: «Usuario
-observado», «Señal reciente», «Registro en DS Hub» y «Datos técnicos» desplegable;
+observado», «Señal reciente», «Registro en Custodia» y «Datos técnicos» desplegable;
 no volver a mezclar fecha de sync y fecha de actividad. No reabrir esos cambios
 ni simplificarlos eliminando evidencia.
 
@@ -1066,7 +1066,7 @@ ni simplificarlos eliminando evidencia.
 
 | ID | Estado | Trabajo | Validación previa | Criterio de cierre |
 |---|---|---|---|---|
-| `HOME-WHEEL-002` | **Candidato, prioridad baja** | **Órbita 2.5D para el menú visual del Home.** Evolucionar la rueda circular de `HOME-WHEEL-001` a un anillo elíptico con profundidad visual: Personas/DS Hub permanece en el centro y cada herramienta ocupa un nodo distribuido por ángulo uniforme (`360° / N`). Los botones y logos oficiales siguen planos y legibles; el aro, las sombras, la escala y el orden de profundidad producen la perspectiva. | No es 3D real ni requiere WebGL/dependencias nuevas. Anillo estático, sin rotación automática, drag ni movimiento permanente; hover/foco sólo eleva y activa el nodo. La equidistancia es angular sobre la órbita circular original: la proyección elíptica no promete igual separación en píxeles. Mantener lista principal, orden de teclado, RBAC, BigID planned/no navegable, ambos temas, Axe y `prefers-reduced-motion`. Reutilizar los tokens globales de movimiento si `FE-MOTION-001` ya está cerrado al implementarlo. | Helper determinista calcula posición, profundidad, escala y `z-index` para `N`; nodos no colisionan ni desbordan en 1280×720 y 1440×900. Política de densidad explícita: 1–4 nodos de 84 px, 5–6 de 72 px, 7–8 de 60–64 px; al superar 8 aplica la navegación jerárquica documentada en [`HOME-WHEEL-X`](BACKLOG_ARCHIVE.md), nunca achicar indefinidamente. E2E cubre foco/teclado, orden DOM independiente de profundidad, BigID no interactivo, dark/light, Axe y reduced motion; `npm run verify` verde. |
+| `HOME-WHEEL-002` | **Candidato, prioridad baja** | **Órbita 2.5D para el menú visual del Home.** Evolucionar la rueda circular de `HOME-WHEEL-001` a un anillo elíptico con profundidad visual: Personas/Custodia permanece en el centro y cada herramienta ocupa un nodo distribuido por ángulo uniforme (`360° / N`). Los botones y logos oficiales siguen planos y legibles; el aro, las sombras, la escala y el orden de profundidad producen la perspectiva. | No es 3D real ni requiere WebGL/dependencias nuevas. Anillo estático, sin rotación automática, drag ni movimiento permanente; hover/foco sólo eleva y activa el nodo. La equidistancia es angular sobre la órbita circular original: la proyección elíptica no promete igual separación en píxeles. Mantener lista principal, orden de teclado, RBAC, BigID planned/no navegable, ambos temas, Axe y `prefers-reduced-motion`. Reutilizar los tokens globales de movimiento si `FE-MOTION-001` ya está cerrado al implementarlo. | Helper determinista calcula posición, profundidad, escala y `z-index` para `N`; nodos no colisionan ni desbordan en 1280×720 y 1440×900. Política de densidad explícita: 1–4 nodos de 84 px, 5–6 de 72 px, 7–8 de 60–64 px; al superar 8 aplica la navegación jerárquica documentada en [`HOME-WHEEL-X`](BACKLOG_ARCHIVE.md), nunca achicar indefinidamente. E2E cubre foco/teclado, orden DOM independiente de profundidad, BigID no interactivo, dark/light, Axe y reduced motion; `npm run verify` verde. |
 
 **POC experimental de `HOME-WHEEL-002` (2026-09-28):** la rama
 `experiment/home-wheel-002` prueba la variante radial 2D solicitada durante la
@@ -1115,7 +1115,7 @@ con su caso simple por eje. Drawers, popovers, tablas, workspaces y la órbita
 
 ## Operaciones y publicación
 
-### Harness de desarrollo (no runtime de DS Hub)
+### Harness de desarrollo (no runtime de Custodia)
 
 | ID | Estado | Trabajo | Validación previa | Criterio de cierre |
 |---|---|---|---|---|
@@ -1187,7 +1187,7 @@ permitió validar el acceso read-only al servicio de sesiones (`SIA-DIAG-001`,
 
 | ID | Estado | Trabajo | Alcance del piloto | Criterio de adopción o cierre |
 |---|---|---|---|---|
-| `CA-SDK-001` | Candidato, sin priorizar | **Evaluar `ark-sdk-python` como cliente de referencia para una fuente CyberArk, sin migración masiva ni dependencia de runtime.** | Un caso ya validado (por ejemplo, la lectura de sesiones), comparado contra el cliente actual: dependencias, autenticación (el SDK está orientado a perfiles/MFA interactivos; DS Hub usa credenciales de servicio), paginación, reintentos, logging y allowlists. | Se adopta parcialmente sólo si reduce transporte/mapping sin cambiar contratos existentes ni sumar dependencias fuera de la revisión de supply chain; si el cliente mínimo actual ya cubre el caso, se descarta y se documenta el motivo. |
+| `CA-SDK-001` | Candidato, sin priorizar | **Evaluar `ark-sdk-python` como cliente de referencia para una fuente CyberArk, sin migración masiva ni dependencia de runtime.** | Un caso ya validado (por ejemplo, la lectura de sesiones), comparado contra el cliente actual: dependencias, autenticación (el SDK está orientado a perfiles/MFA interactivos; Custodia usa credenciales de servicio), paginación, reintentos, logging y allowlists. | Se adopta parcialmente sólo si reduce transporte/mapping sin cambiar contratos existentes ni sumar dependencias fuera de la revisión de supply chain; si el cliente mínimo actual ya cubre el caso, se descarta y se documenta el motivo. |
 
 ### Limpieza y afinado general — `MAINT-001` (2026-10-01)
 
@@ -1216,7 +1216,7 @@ Cadena cerrada el 2026-10-09 (`DOCS-IDX-001`, `DOCS-LINT-001`, `DOCS-META-001`, 
 
 | ID | Estado | Alcance | Criterio de cierre |
 |---|---|---|---|
-| `PAM-RULES-001` | **Candidato; definición pendiente, no autorizado para implementar** | Crear y administrar reglas de evaluación propias de DS Hub desde Postura PAM. Mostrar el catálogo local y distinguirlo de los tipos de riesgo evaluados por CyberArk: un tipo de riesgo no equivale a una política de configuración. CyberArk permanece sólo lectura. Esta oportunidad no forma parte de la tabla unificada de hallazgos. | Definir condiciones y campos permitidos, población aplicable, severidad local, versionado y ciclo de activación/desactivación. Vista previa de resultados antes de activar; permiso estrecho server-side y auditoría transaccional; sincronizaciones no sobrescriben decisiones humanas. Sin secretos, ejecución de código arbitrario, modificación de reglas CyberArk ni deduplicación o ranking entre fuentes. Tests de autorización, validación, evaluación y auditoría; gate, revisión y aceptación humana antes del cierre. |
+| `PAM-RULES-001` | **Candidato; definición pendiente, no autorizado para implementar** | Crear y administrar reglas de evaluación propias de Custodia desde Postura PAM. Mostrar el catálogo local y distinguirlo de los tipos de riesgo evaluados por CyberArk: un tipo de riesgo no equivale a una política de configuración. CyberArk permanece sólo lectura. Esta oportunidad no forma parte de la tabla unificada de hallazgos. | Definir condiciones y campos permitidos, población aplicable, severidad local, versionado y ciclo de activación/desactivación. Vista previa de resultados antes de activar; permiso estrecho server-side y auditoría transaccional; sincronizaciones no sobrescriben decisiones humanas. Sin secretos, ejecución de código arbitrario, modificación de reglas CyberArk ni deduplicación o ranking entre fuentes. Tests de autorización, validación, evaluación y auditoría; gate, revisión y aceptación humana antes del cierre. |
 
 ## Criterio simple para nuevas métricas
 

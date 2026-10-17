@@ -134,7 +134,7 @@ contrato genérico de presets se conserva en `cross/lib/chain-preset-types.ts`.
 
 Una pieza es de `cross/` sólo si cae en una de estas categorías; el resto va a su herramienta:
 
-- Identidad, autorización y administración local de DS Hub (usuarios, roles, OIDC, tokens, rate limiting).
+- Identidad, autorización y administración local de Custodia (usuarios, roles, OIDC, tokens, rate limiting).
 - Auditoría, actividad, estado de integraciones y errores/logs operativos.
 - Cola de sincronización, persistencia CMDB genérica, cobertura y corridas (`sync_queue`, `cmdb_sync`, `repositories/cmdb_persistence`, `ingestion*`).
 - Shell, navegación, preferencias de workspace, búsqueda, transporte HTTP, controles y gráficos compartidos por varias herramientas.

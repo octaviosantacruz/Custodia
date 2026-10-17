@@ -151,7 +151,7 @@ class NetskopeObjectRow(BaseModel):
     device_activity: NetskopeUserDeviceActivity | None = None
     device_evidence: NetskopeDeviceEvidence | None = None
     review: NetskopeDeviceReview | None = None
-    # NSK-DEVREV-002: what DS Hub would suggest for an unclassified device; null when it suggests nothing.
+    # NSK-DEVREV-002: what Custodia would suggest for an unclassified device; null when it suggests nothing.
     review_suggestion: Literal["uninstalled_reported", "replaced", "historical_record"] | None = None
 
 

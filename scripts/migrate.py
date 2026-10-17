@@ -51,7 +51,7 @@ def main() -> None:
 
     with psycopg.connect(database_url) as conn:
         conn.execute("CREATE TABLE IF NOT EXISTS public.schema_migrations (version TEXT PRIMARY KEY, applied_at TIMESTAMPTZ NOT NULL DEFAULT now())")
-        conn.execute("SELECT pg_advisory_lock(hashtext('dshub-schema-migrations'))")
+        conn.execute("SELECT pg_advisory_lock(hashtext('custodia-schema-migrations'))")
         try:
             has_schema = conn.execute("""SELECT (to_regclass('public.safes') IS NOT NULL AND to_regclass('public.safe_members') IS NOT NULL AND to_regclass('public.cyberark_ingestion_runs') IS NOT NULL AND to_regclass('public.access_user_roles') IS NOT NULL)""").fetchone()[0]
             tracked_count = conn.execute("SELECT count(*) FROM public.schema_migrations").fetchone()[0]
@@ -83,7 +83,7 @@ def main() -> None:
             # Roll back a failed migration before releasing the lock; otherwise
             # PostgreSQL rejects the unlock query inside the aborted transaction.
             conn.rollback()
-            conn.execute("SELECT pg_advisory_unlock(hashtext('dshub-schema-migrations'))")
+            conn.execute("SELECT pg_advisory_unlock(hashtext('custodia-schema-migrations'))")
             conn.commit()
 
 if __name__ == "__main__":

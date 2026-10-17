@@ -215,8 +215,8 @@ async def delete_user_route(user_id: str, request: Request, actor_id: str = Depe
 
 @router.post(
     "/api/auth/users/{user_id}/roles", response_model=UserRoleGrantedResponse, status_code=201,
-    summary="Asignar un rol de DS Hub a una identidad",
-    description="Suma un rol asignado en DS Hub a una identidad local u Okta; convive con los roles que mapean sus grupos y ningún login lo quita. Aplica el techo de delegación; nadie cambia sus propios roles. Auditada.",
+    summary="Asignar un rol de Custodia a una identidad",
+    description="Suma un rol asignado en Custodia a una identidad local u Okta; convive con los roles que mapean sus grupos y ningún login lo quita. Aplica el techo de delegación; nadie cambia sus propios roles. Auditada.",
 )
 async def grant_user_role_route(user_id: str, payload: UserRoleGrant, request: Request, actor_id: str = Depends(require_any_permission("access:manage", "access:role_assignments_manage"))):
     try:
@@ -236,8 +236,8 @@ async def grant_user_role_route(user_id: str, payload: UserRoleGrant, request: R
 
 @router.delete(
     "/api/auth/users/{user_id}/roles/{role_code}", response_model=UserRoleRevokedResponse,
-    summary="Quitar un rol de DS Hub a una identidad",
-    description="Quita un rol asignado en DS Hub. Un rol que viene de un grupo de Okta responde 409: se cambia en Okta. Aplica el techo de delegación y nunca deja a DS Hub sin administrador activo. Auditada.",
+    summary="Quitar un rol de Custodia a una identidad",
+    description="Quita un rol asignado en Custodia. Un rol que viene de un grupo de Okta responde 409: se cambia en Okta. Aplica el techo de delegación y nunca deja a Custodia sin administrador activo. Auditada.",
 )
 async def revoke_user_role_route(user_id: str, role_code: str, request: Request, actor_id: str = Depends(require_any_permission("access:manage", "access:role_assignments_manage"))):
     try:

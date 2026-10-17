@@ -20,7 +20,7 @@
 .role-picker-option small { color: var(--text-secondary); font-size: 9px; }
 .role-picker-empty { color: var(--text-muted); display: block; font-size: 10px; padding: 12px 8px; }
 .role-picker-menu { border-radius: var(--radius-lg); }
-/* ACCESS-UI-001: one chip per role; only DS Hub roles have a remove button. */
+/* ACCESS-UI-001: one chip per role; only Custodia roles have a remove button. */
 .role-chip-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 10px; padding: 0; }
 .role-chip { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 999px; color: var(--text-primary); display: inline-flex; font-size: 12px; gap: 6px; min-height: 28px; padding: 3px 6px 3px 10px; }
 .role-chip small { color: var(--text-muted); font-size: 10px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }

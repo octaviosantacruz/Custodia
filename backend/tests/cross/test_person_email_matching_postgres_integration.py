@@ -7,7 +7,7 @@ fragment would pass the whole gate and only fail at runtime. This was a real
 regression: `pam_human_user_sql` shipped `NOT LIKE 'cyberark.cloud.%'` and
 raised `ProgrammingError` on the first real query.
 
-Opt-in only: requires DSHUB_TEST_DATABASE_URL. See pg_integration_base.py.
+Opt-in only: requires CUSTODIA_TEST_DATABASE_URL. See pg_integration_base.py.
 """
 
 import unittest

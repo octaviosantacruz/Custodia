@@ -835,7 +835,7 @@ test('NSK-INVENTORY-UX-001: grouped device filters restore deep links, remain re
   await expect(filters.getByRole('button', { name: 'Quitar filtro Candidato a revisión' })).toBeVisible();
   await expect(page.locator('.netskope-result-count')).toHaveText('2 dispositivos');
   await page.getByRole('button', { name: 'Ayuda: Evidencia del inventario Netskope' }).click();
-  await expect(page.getByRole('note')).toContainText('El estado de la señal (reciente, sin señal reciente, candidato a revisión) es una evaluación de DS Hub');
+  await expect(page.getByRole('note')).toContainText('El estado de la señal (reciente, sin señal reciente, candidato a revisión) es una evaluación de Custodia');
   await expect(page.getByRole('note')).toContainText('La antigüedad de un evento no demuestra que el equipo esté fuera de línea ni sin protección.');
   await page.keyboard.press('Escape');
   await expect(filters).not.toContainText(/offline/i);
@@ -1220,7 +1220,7 @@ test('NSK-SYNC-001: a scheduled Netskope sync refreshes the devices view without
   await page.getByRole('searchbox', { name: 'Buscar dispositivos Netskope' }).fill('LAPTOP');
   await expect.poll(() => deviceRequests.at(-1)?.get('q')).toBe('LAPTOP');
   const requestsBeforeEvent = deviceRequests.length;
-  await page.evaluate(() => { (window as unknown as { __dshubSyncMarker?: string }).__dshubSyncMarker = 'kept'; });
+  await page.evaluate(() => { (window as unknown as { __custodiaSyncMarker?: string }).__custodiaSyncMarker = 'kept'; });
 
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
 
@@ -1230,7 +1230,7 @@ test('NSK-SYNC-001: a scheduled Netskope sync refreshes the devices view without
   await expect(page.locator('.app-toast')).toContainText('Sincronización automática completada');
   await expect.poll(() => deviceRequests.length).toBeGreaterThan(requestsBeforeEvent);
   expect(deviceRequests.at(-1)?.get('q')).toBe('LAPTOP');
-  expect(await page.evaluate(() => (window as unknown as { __dshubSyncMarker?: string }).__dshubSyncMarker)).toBe('kept');
+  expect(await page.evaluate(() => (window as unknown as { __custodiaSyncMarker?: string }).__custodiaSyncMarker)).toBe('kept');
 });
 
 test('NSK-SYNC-002: a background sync keeps an in-progress dashboard draft', async ({ page }) => {
@@ -1699,7 +1699,7 @@ const DEVREV_BOARD_METRICS = {
   source_evidence: { source_fresh: true, source_status: 'completed', source_completed_at: '2026-10-05T11:00:00Z', as_of: '2026-10-05T12:00:00Z' },
 };
 
-test('NSK-REF-001: the users card states the total Netskope reports beside DS Hub\'s own count, and says so when they match or are missing (UX-AUD2-009)', async ({ page }) => {
+test('NSK-REF-001: the users card states the total Netskope reports beside Custodia\'s own count, and says so when they match or are missing (UX-AUD2-009)', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read'] });
   await page.route('**/api/dashboard/netskope/preferences', (route) => route.fulfill({ json: { widgets: [{ id: 'users_total', size: 'sm', filters: {} }, { id: 'devices_total', size: 'sm', filters: {} }], is_default: false } }));
   let metrics: Record<string, unknown> = { ...DEVREV_BOARD_METRICS, users_total: 8919, users_reported_total: 8859 };

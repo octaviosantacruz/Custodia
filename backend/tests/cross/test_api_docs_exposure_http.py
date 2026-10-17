@@ -41,18 +41,18 @@ class ApiDocsExposedByDefaultTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(openapi.status_code, 200)
         self.assertIn("paths", openapi.json())
 
-    async def test_docs_use_the_ds_hub_theme_instead_of_the_swagger_default(self):
+    async def test_docs_use_the_custodia_theme_instead_of_the_swagger_default(self):
         """/docs must render app/docs_theme.py's branded Scalar reference, not
         a bare swagger-ui-dist shell -- a regression here would silently drop
         the theme and go back to the generic orange Swagger look."""
         docs = await self.client.get("/docs")
         self.assertIn(SCALAR_JS_URL, docs.text)
         self.assertIn("Scalar.createApiReference", docs.text)
-        self.assertIn("#35c477", docs.text)  # DS Hub accent green
+        self.assertIn("#35c477", docs.text)  # Custodia accent green
         self.assertIn("data:image/svg+xml", docs.text)  # inlined favicon
         self.assertNotIn("swagger-ui", docs.text.lower())
         # No AI assistant and no Scalar cloud toolbar: the schema stays
-        # inside DS Hub's own deployment.
+        # inside Custodia's own deployment.
         self.assertIn('"agent": {"disabled": true}', docs.text)
         self.assertIn('"showDeveloperTools": "never"', docs.text)
         self.assertIn('"mcp": {"disabled": true}', docs.text)

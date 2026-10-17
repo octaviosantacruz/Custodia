@@ -32,7 +32,7 @@ test('catalog switcher flags match domain navigation', () => {
   }
 });
 
-/* UX-IA-001: Personas is transversal to neutral DS Hub, but the App
+/* UX-IA-001: Personas is transversal to neutral Custodia, but the App
    shell still routes it through the PAM lazy router (App.tsx gates routers
    with `domainOf`). `areaOf` is what navigation/grouping/branding must use;
    `domainOf` only carries the temporary render host in one documented place. */

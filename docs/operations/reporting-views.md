@@ -23,7 +23,7 @@ crudas guardadas, tokens ni textos de errores de sincronización. Hostname y
 usuario provienen de la proyección SSE ya aprobada; no vinculan otras fuentes.
 La empresa usa el mismo fallback de dominio que los filtros del inventario.
 
-`inventory_observed_at` es cuándo DS Hub observó el registro; **no es actividad
+`inventory_observed_at` es cuándo Custodia observó el registro; **no es actividad
 del cliente**. `last_event_at` es NULL para fechas ausentes, no numéricas,
 no positivas o futuras, igual que en la API. `event_age_days` conserva decimales:
 para cortes de 7 o 30 días se recomienda comparar `last_event_at` directamente.
@@ -73,7 +73,7 @@ acceso de `PUBLIC` al esquema y a las tres vistas. Además, las vistas no permit
 INSERT/UPDATE/DELETE, incluso al propietario; las escrituras operativas pasan
 por la API, con sus permisos y auditoría.
 
-Los permisos PostgreSQL **no heredan roles ni permisos de DS Hub**. Quien reciba
+Los permisos PostgreSQL **no heredan roles ni permisos de Custodia**. Quien reciba
 acceso a una vista podrá leer toda su población; no aplica restricciones por
 sesión de la aplicación. El DBA debe elegir el rol autorizado y comprobar que
 no tenga otros grants o membresías con escritura. No usar la cuenta de la app

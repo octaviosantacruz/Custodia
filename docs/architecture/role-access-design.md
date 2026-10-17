@@ -14,13 +14,13 @@ conserva el comportamiento actual del worktree.
 
 ## Pregunta y recorrido
 
-Para quien administra DS Hub: «¿Qué habilita cada rol y a quién se lo doy?».
+Para quien administra Custodia: «¿Qué habilita cada rol y a quién se lo doy?».
 
 La entrada es un **mapa de accesos a todo el ancho, con compartimientos por herramienta**. Cada rol aparece una sola vez, con columnas por área del catálogo y acceso directo a miembros. Cada celda
 muestra las capacidades del área; al abrirla, el editor enfoca esa área. El
 conteo usa el dominio de cada permiso, nunca el dominio nominal del rol: un
 nivel de Plataforma puede contener permisos PAM y la tabla lo muestra en PAM.
-CyberArk reúne PAM, Identity y SIA; Netskope reúne sus permisos. DS Hub contiene los roles de Plataforma y los perfiles transversales. Cada compartimiento se puede plegar y tiene su propia tabla, para que agregar una herramienta no agregue columnas a todas las demás. La búsqueda encuentra nombres, propósitos, códigos y capacidades. Los roles
+CyberArk reúne PAM, Identity y SIA; Netskope reúne sus permisos. Custodia contiene los roles de Plataforma y los perfiles transversales. Cada compartimiento se puede plegar y tiene su propia tabla, para que agregar una herramienta no agregue columnas a todas las demás. La búsqueda encuentra nombres, propósitos, códigos y capacidades. Los roles
 preparados tienen filtro propio; no se presentan como acceso efectivo.
 
 Crear, consultar y editar reemplazan el mapa por una **pantalla dedicada**:

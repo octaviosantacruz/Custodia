@@ -148,7 +148,7 @@ export function UserAdmin({ onNotice, onError, currentActorId, currentUserEmail,
   };
   return <>
     <section className="user-admin">
-      <header className="section-heading"><div><p className="eyebrow">DIRECTORIO DE DS HUB</p><h2>Acceso a la plataforma</h2><span className="database-caption">Una persona por fila. Cada cuenta conserva sus roles.</span></div><span className="database-toolbar-count">{loading ? 'Cargando...' : loadError ? 'Sin dato' : `${total} ${total === 1 ? 'persona' : 'personas'}`}</span></header>
+      <header className="section-heading"><div><p className="eyebrow">DIRECTORIO DE CUSTODIA</p><h2>Acceso a la plataforma</h2><span className="database-caption">Una persona por fila. Cada cuenta conserva sus roles.</span></div><span className="database-toolbar-count">{loading ? 'Cargando...' : loadError ? 'Sin dato' : `${total} ${total === 1 ? 'persona' : 'personas'}`}</span></header>
       {createdCredential && <aside className="created-credential" role="status"><div><strong>{createdCredential.title}</strong><span>{createdCredential.email}</span><small>Guardá esta contraseña temporal. Se muestra solo durante esta sesión.</small></div><code>{createdCredential.password}</code><button className="button subtle" type="button" onClick={() => void copyToClipboard(createdCredential.password)}><Copy size={14} /> Copiar contraseña</button><button className="icon-button" type="button" aria-label="Ocultar credencial temporal" onClick={() => setCreatedCredential(null)}><X size={15} /></button></aside>}
       <div className="user-directory-toolbar">
         <label className="search-box"><Search size={16} /><span className="sr-only">Buscar usuarios</span><input type="search" value={search} onChange={(event) => { setSearch(event.target.value); setPage(0); }} placeholder="Buscar por nombre o email" /></label>
@@ -158,7 +158,7 @@ export function UserAdmin({ onNotice, onError, currentActorId, currentUserEmail,
       </div>
       {catalogError && <p className="user-directory-error" role="status">Catálogo de acceso no disponible: {catalogError}</p>}
       {loading ? <StateBlock variant="loading" title="Cargando usuarios" /> : loadError ? <StateBlock variant="error" title="No se pudieron cargar los usuarios" hint={loadError} action={<button className="button subtle" type="button" onClick={() => void load()}>Reintentar</button>} /> : <>
-        <div className="user-directory-scroll"><table className="user-directory-table"><caption className="sr-only">Usuarios de DS Hub</caption><thead><tr><th scope="col">Usuario</th><th scope="col">Cuenta</th><th scope="col">Roles asignados</th><th scope="col">Último acceso</th><th scope="col"><span className="sr-only">Acciones</span></th></tr></thead><tbody>{people.map((person) => {
+        <div className="user-directory-scroll"><table className="user-directory-table"><caption className="sr-only">Usuarios de Custodia</caption><thead><tr><th scope="col">Usuario</th><th scope="col">Cuenta</th><th scope="col">Roles asignados</th><th scope="col">Último acceso</th><th scope="col"><span className="sr-only">Acciones</span></th></tr></thead><tbody>{people.map((person) => {
           const assigned = [...new Set(person.identities.flatMap((user) => user.roles))];
           const lastLogin = person.identities.map((user) => user.last_login_at).filter((value): value is string => Boolean(value)).sort((left, right) => new Date(left).getTime() - new Date(right).getTime()).at(-1);
           return <tr className="person-row" key={person.key}><td><div className="user-row-identity"><strong>{person.display_name}</strong><span>{person.email || 'Sin email'}</span>{person.identities.length > 1 && <small>{person.identities.length} identidades</small>}</div></td>
@@ -182,8 +182,8 @@ export function UserAdmin({ onNotice, onError, currentActorId, currentUserEmail,
         <ul className="role-chip-list" aria-label={`Roles de ${selectedUser.display_name}`}>{selectedAssignments.map((assignment) => {
           const name = roleByCode.get(assignment.role_code)?.display_name || assignment.role_code;
           const removable = assignment.source === 'manual' && canEditRoles;
-          return <li className={`role-chip is-${assignment.source}`} key={assignment.role_code} title={assignment.source === 'oidc' ? 'Asignado al iniciar sesión: el mapeo se edita en Roles y permisos' : 'Asignado en DS Hub'}>
-            <span>{name}</span><small>{assignment.source === 'oidc' ? 'Okta' : 'DS Hub'}</small>
+          return <li className={`role-chip is-${assignment.source}`} key={assignment.role_code} title={assignment.source === 'oidc' ? 'Asignado al iniciar sesión: el mapeo se edita en Roles y permisos' : 'Asignado en Custodia'}>
+            <span>{name}</span><small>{assignment.source === 'oidc' ? 'Okta' : 'Custodia'}</small>
             {removable ? <button type="button" className="role-chip-remove" disabled={roleBusy} aria-label={`Quitar ${name} de ${selectedUser.display_name}`} onClick={() => setPendingRoleChange({ user: selectedUser, roleCode: assignment.role_code, action: 'revoke' })}><X size={12} /></button> : null}
           </li>;
         })}</ul>

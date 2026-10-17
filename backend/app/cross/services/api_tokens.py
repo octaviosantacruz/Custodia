@@ -1,4 +1,4 @@
-"""Pure primitives for opaque, read-only DS Hub API tokens."""
+"""Pure primitives for opaque, read-only Custodia API tokens."""
 
 import hashlib
 import secrets

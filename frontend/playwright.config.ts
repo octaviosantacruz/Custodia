@@ -2,10 +2,10 @@ import { defineConfig } from '@playwright/test';
 
 // E2E_PORT lets parallel runs (for example one per platform group) use their
 // own preview server instead of colliding on 4173.
-// In a task worktree (../DSHub-wt/<ID>, see scripts/wt.sh) the port is derived
+// In a task worktree (../Custodia-wt/<ID>, see scripts/wt.sh) the port is derived
 // from the ID so parallel worktrees never share a preview server.
 function worktreePort(): number | undefined {
-  const id = process.cwd().match(/\/DSHub-wt\/([^/]+)/)?.[1];
+  const id = process.cwd().match(/\/Custodia-wt\/([^/]+)/)?.[1];
   if (!id) return undefined;
   let hash = 0;
   for (const char of id) hash = (hash * 31 + char.charCodeAt(0)) % 700;

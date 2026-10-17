@@ -4,16 +4,16 @@ dueño: Octavio Santacruz
 revisado: 2026-10-06
 ---
 
-# Consumir la API de DS Hub desde Postman
+# Consumir la API de Custodia desde Postman
 
 Importar estos dos archivos con **Import** en Postman:
 
-- [Colección de API](../../api/postman/DSHub.postman_collection.json).
-- [Entorno de ejemplo](../../api/postman/DSHub.postman_environment.json).
+- [Colección de API](../../api/postman/Custodia.postman_collection.json).
+- [Entorno de ejemplo](../../api/postman/Custodia.postman_environment.json).
 
 Seleccionar el entorno y cambiar `base_url` por la URL del backend, sin `/api`
 ni barra final. La colección contiene las operaciones publicadas en OpenAPI,
-agrupadas por lectura/escritura y área. Consume DS Hub; no se conecta a
+agrupadas por lectura/escritura y área. Consume Custodia; no se conecta a
 PostgreSQL ni directamente a CyberArk o Netskope.
 
 ## Autenticación

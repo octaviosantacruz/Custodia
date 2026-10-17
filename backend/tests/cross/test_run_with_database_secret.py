@@ -29,11 +29,11 @@ class RunWithDatabaseSecretTests(unittest.TestCase):
             raise ExecCalled
 
         resolution = SimpleNamespace(
-            database_url="postgresql://app:current@db.internal/dshub",
+            database_url="postgresql://app:current@db.internal/custodia",
             recovered_from_aws=True,
         )
         environment = {
-            "DATABASE_URL": "postgresql://app:stale@db.internal/dshub",
+            "DATABASE_URL": "postgresql://app:stale@db.internal/custodia",
             "DATABASE_PASSWORD_FILE": "/run/secrets/stale-password",
             "DATABASE_SECRET_ID": "rds!db-example",
         }

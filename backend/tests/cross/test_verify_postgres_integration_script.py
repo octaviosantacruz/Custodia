@@ -15,7 +15,7 @@ RUNNER = ROOT / "scripts" / "verify_postgres_integration.sh"
 class VerifyPostgresIntegrationScriptTests(unittest.TestCase):
     def test_explicit_skip_exits_cleanly_without_postgres_binaries(self):
         environment = os.environ | {
-            "DSHUB_SKIP_PG": "1",
+            "CUSTODIA_SKIP_PG": "1",
             "POSTGRES_BIN_DIR": str(ROOT / "missing-postgres-bin-dir"),
         }
 
@@ -29,4 +29,4 @@ class VerifyPostgresIntegrationScriptTests(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn("DSHUB_SKIP_PG=1", result.stdout)
+        self.assertIn("CUSTODIA_SKIP_PG=1", result.stdout)

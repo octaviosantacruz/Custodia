@@ -14,7 +14,7 @@ import type { WorkspaceView } from '../lib/workspaces';
 import { workspaceLabels } from '../lib/workspace-meta';
 import { syncForWorkspace, WORKSPACE_TOOL_LABELS } from '../../sources';
 import { areaOf } from '../lib/domains';
-import { DsHubMark } from './home-workspace';
+import { CustodiaMark } from './home-workspace';
 import type { SearchResult } from '../lib/search-api';
 import type { CommandCenterCommand } from '../lib/command-center';
 import type { WorkspacePreferences } from '../lib/workspace-preferences-api';
@@ -102,7 +102,7 @@ export function AppHeader({
         preferences={workspacePreferences}
         onPreferencesChange={onWorkspacePreferencesChange}
       />}
-      <button className="brand" type="button" onClick={onHome} aria-label="Ir al inicio de DS Hub" title="Ir al inicio de DS Hub"><span className="brand-mark"><DsHubMark /></span><span className="brand-copy"><strong>DS Hub</strong></span></button>
+      <button className="brand" type="button" onClick={onHome} aria-label="Ir al inicio de Custodia" title="Ir al inicio de Custodia"><span className="brand-mark"><CustodiaMark /></span><span className="brand-copy"><strong>Custodia</strong></span></button>
       <GlobalSearch includeInternal={includeInternalMetrics} permissions={authStatus.permissions || []} commands={commandCenterCommands} preferences={workspacePreferences} onWorkspaceSelect={onWorkspaceChange} onSelect={onSearchSelect} />
       {!isHome && <div className="topbar-location" role="group" aria-label="Ubicación actual"><span>{WORKSPACE_TOOL_LABELS[workspaceView]}</span>{locationRepeatsTool(WORKSPACE_TOOL_LABELS[workspaceView], workspaceLabels[workspaceView]) ? null : <><ChevronRight size={14} aria-hidden /><strong>{workspaceLabels[workspaceView]}</strong></>}</div>}
     </div>

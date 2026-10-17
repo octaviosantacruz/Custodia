@@ -37,7 +37,7 @@ test('key data explanation identifies the source and preserves the widget filter
   const explanation = dashboardWidgetExplanation(widget);
   assert.match(explanation.includes, /Clasificación: Pendiente/);
   assert.match(explanation.source, /CyberArk/);
-  assert.match(explanation.source, /localmente en DS Hub/);
+  assert.match(explanation.source, /localmente en Custodia/);
   assert.match(explanation.next, /Safes/);
 });
 

@@ -218,7 +218,7 @@ test('metric disclosures stay readable and keyboard accessible on desktop dark a
         expect(scan.violations).toEqual([]);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       }
-      await page.screenshot({ path: `/tmp/dshub-metric-reading-${path === '/pam' ? 'pam' : path === '/netskope' ? 'netskope' : 'posture'}-${theme}.png`, fullPage: true });
+      await page.screenshot({ path: `/tmp/custodia-metric-reading-${path === '/pam' ? 'pam' : path === '/netskope' ? 'netskope' : 'posture'}-${theme}.png`, fullPage: true });
     }
   }
 });

@@ -3,7 +3,7 @@ import { formatNumber } from '../../../cross/lib/format.ts';
 import { isChartMode, type ChartMode } from '../../../cross/lib/chart-mode.ts';
 import type { NetskopeAaChartSummary, NetskopeAccountStatus, NetskopeAlertWindow, NetskopeChartWidgetId, NetskopeDataWidgetId, NetskopeDeviceFilterKey, NetskopeDeviceQuery, NetskopeEventAge, NetskopeMetricBucket, NetskopeUserActivityDays, NetskopeUsersDeviceCountFilter, NetskopeWidgetFilterKey, NetskopeWidgetFilters, NetskopeWidgetInstance, NetskopeWidgetSize } from '../types/netskope';
 
-/* Count-only DLP aggregate widgets have no destination: DS Hub does not store
+/* Count-only DLP aggregate widgets have no destination: Custodia does not store
    or investigate individual incidents/events, so their drill is null and the
    card stays informational. */
 export type NetskopeDashboardDrill =
@@ -131,7 +131,7 @@ export function netskopeCardShare(id: NetskopeDataWidgetId, metrics: ShareMetric
   return { part, total, share: netskopeShareLabel(part, total), ratio: part / total, label };
 }
 
-/* NSK-REF-001: Netskope's own user total (users/counts) beside the identities DS Hub lists from getusers.
+/* NSK-REF-001: Netskope's own user total (users/counts) beside the identities Custodia lists from getusers.
    They are different counts of the same tenant; the card states both and never adjusts either. */
 /** NSK-USR-001: enabled/disabled users as the console counts them; only when every listed user has a status. */
 export function netskopeUsersSplit(metrics: { users_total?: number; users_enabled?: number | null; users_disabled?: number | null } | null | undefined): string | null {

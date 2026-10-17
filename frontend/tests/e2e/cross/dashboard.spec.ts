@@ -394,13 +394,13 @@ test('EDIT-PERSIST-001: the PAM board saves only with changes and survives reloa
   await firstData.press('ArrowRight');
   await expect(saveButton).toBeEnabled();
 
-  await page.evaluate(() => { (window as unknown as { __dshubSaveMarker?: string }).__dshubSaveMarker = 'kept'; });
+  await page.evaluate(() => { (window as unknown as { __custodiaSaveMarker?: string }).__custodiaSaveMarker = 'kept'; });
   await saveButton.click();
   await expect.poll(() => preferencePuts.length).toBe(1);
   await expect(page.getByRole('toolbar', { name: 'Edición del tablero PAM' })).toHaveCount(0);
   expect(preferencePuts[0].widgets[0].widget_id).toBe('pending-classification');
   // Saving never reloads the document; the marker set before saving survives.
-  expect(await page.evaluate(() => (window as unknown as { __dshubSaveMarker?: string }).__dshubSaveMarker)).toBe('kept');
+  expect(await page.evaluate(() => (window as unknown as { __custodiaSaveMarker?: string }).__custodiaSaveMarker)).toBe('kept');
 
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Datos clave' })).toBeVisible();

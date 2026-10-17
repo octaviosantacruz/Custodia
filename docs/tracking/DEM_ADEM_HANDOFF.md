@@ -48,7 +48,7 @@ vivo ni deducir salida por IP o por el nombre del POP.
 
 ## Qué existe hoy y con qué evidencia
 
-| Superficie | Evidencia | Estado en DS Hub |
+| Superficie | Evidencia | Estado en Custodia |
 |---|---|---|
 | `GET /api/v2/dem/config/sites` | Probe read-only del tenant: `200`, tres sitios. Swagger: array JSON directo; nombres, IDs, revisión, timestamps, conteos y `pop_tracing`. | Inventario técnico opt-in en corrida Netskope mediante `NETSKOPE_DEM_SITES_PATH=/api/v2/dem/config/sites`, migración 070 y allowlist estrecha. Falta activar y comprobar primera captura real. No es una métrica de experiencia. |
 | `GET /api/v2/adem/poplist` | Swagger aportado: `starttime`/`endtime` Unix requeridos; máximo 48 h dentro de 30 días; `prefix` opcional; ejemplo `{ "pops": ["US-NYC1"], "totalCount": 1 }`. | Implementado localmente como consulta read-only `GET /api/cmdb/netskope/experience/pops?hours=2|24|48`. Devuelve códigos y ventana, sin persistir ni vincular usuarios. Falta probar status y forma real con token del tenant. |

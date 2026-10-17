@@ -18,7 +18,7 @@ test('login view exposes an accessible form', async ({ page }) => {
   await expect.poll(() => page.evaluate(() => ({
     theme: document.documentElement.dataset.theme,
     legacyTheme: window.localStorage.getItem('openpam-theme'),
-    currentTheme: window.localStorage.getItem('dshub-theme:v1'),
+    currentTheme: window.localStorage.getItem('custodia-theme:v1'),
   }))).toEqual({ theme: 'light', legacyTheme: null, currentTheme: 'light' });
 
   const results = await new AxeBuilder({ page })
@@ -112,9 +112,9 @@ test('login removes decorative motion when reduced motion is requested', async (
   await expect(page.locator('.auth-card')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.auth-form-stage')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.auth-backdrop')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.auth-logo .ds-hub-mark-branch-left')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.auth-logo .ds-hub-mark-branch-right')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.auth-logo .ds-hub-mark-node-core')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.auth-logo .custodia-mark-branch-left')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.auth-logo .custodia-mark-branch-right')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.auth-logo .custodia-mark-node-core')).toHaveCSS('animation-name', 'none');
 });
 
 test('Mi cuenta lets a local account manage name and password in hybrid mode', async ({ page }) => {
@@ -205,12 +205,12 @@ test('Administration is reached from the profile menu and the tool menu, not fro
 
   await expect(page.locator('.home-admin-button')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Abrir Administración' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Abrir DS Hub' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Abrir Custodia' })).toHaveCount(0);
   await expect(page.locator('.home-visibility-core')).toHaveText('Conexiones');
   await page.getByRole('button', { name: /Cambiar herramienta/ }).click();
   const toolMenu = page.getByRole('region', { name: 'Herramientas' });
-  await expect(toolMenu.getByRole('button', { name: /Inicio Resumen general de DS Hub/ })).toBeVisible();
-  await expect(toolMenu.getByRole('button', { name: /Inicio Resumen general de DS Hub/ })).toHaveAttribute('aria-current', 'page');
+  await expect(toolMenu.getByRole('button', { name: /Inicio Resumen general de Custodia/ })).toBeVisible();
+  await expect(toolMenu.getByRole('button', { name: /Inicio Resumen general de Custodia/ })).toHaveAttribute('aria-current', 'page');
   // Conexiones and Administración are separate tools; the person view lives in the first.
   await expect(toolMenu.getByRole('button', { name: /^Administración / })).toBeVisible();
   await toolMenu.getByRole('button', { name: /^Conexiones / }).click();
@@ -255,7 +255,7 @@ test('home marks only Inicio as the current navigation destination', async ({ pa
 
   await page.getByRole('button', { name: /Cambiar herramienta.*Inicio/ }).click();
   const tools = page.getByRole('region', { name: 'Herramientas' });
-  await expect(tools.getByRole('button', { name: /Inicio Resumen general de DS Hub/ })).toHaveAttribute('aria-current', 'page');
+  await expect(tools.getByRole('button', { name: /Inicio Resumen general de Custodia/ })).toHaveAttribute('aria-current', 'page');
   await expect(tools.getByRole('button', { name: /CyberArk PAM, Identity Administration, SIA y Access/ })).not.toHaveAttribute('aria-current');
   await page.keyboard.press('Escape');
 
@@ -264,7 +264,7 @@ test('home marks only Inicio as the current navigation destination', async ({ pa
 });
 
 test('split navigation remains accessible in light theme', async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('dshub-theme:v1', 'light'));
+  await page.addInitScript(() => window.localStorage.setItem('custodia-theme:v1', 'light'));
   await mockAuthenticatedApp(page);
   await page.goto('/pam/safes');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
@@ -368,7 +368,7 @@ test('access administration tablist supports arrow-key roving navigation', async
   await mockAuthenticatedApp(page);
   await page.goto('/admin/access');
 
-  const peopleTab = page.getByRole('tab', { name: /Usuarios de DS Hub/ });
+  const peopleTab = page.getByRole('tab', { name: /Usuarios de Custodia/ });
   const rolesTab = page.getByRole('tab', { name: /Roles y permisos/ });
   await expect(peopleTab).toHaveAttribute('tabindex', '0');
   await expect(rolesTab).toHaveAttribute('tabindex', '-1');
@@ -454,9 +454,9 @@ test('Okta and local identities share a person row without sharing access contro
   await expect(page.getByRole('dialog', { name: 'Carlos Local' }).getByRole('button', { name: 'Eliminar' })).toBeVisible();
 });
 
-test('ACCESS-UI-001 an admin adds and removes DS Hub roles on an Okta person; Okta roles have no remove button', async ({ page }) => {
+test('ACCESS-UI-001 an admin adds and removes Custodia roles on an Okta person; Okta roles have no remove button', async ({ page }) => {
   const theme = test.info().project.use.colorScheme === 'light' ? 'light' : 'dark';
-  await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+  await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
   const calls: string[] = [];
   await mockAuthenticatedApp(page, {
     authMode: 'hybrid',
@@ -616,7 +616,7 @@ test('top navigation exposes context and keeps its controls accessible', async (
   await page.goto('/pam/assets');
 
   const topbar = page.locator('.topbar');
-  await expect(topbar.getByRole('button', { name: 'Ir al inicio de DS Hub' })).toBeVisible();
+  await expect(topbar.getByRole('button', { name: 'Ir al inicio de Custodia' })).toBeVisible();
   await expect(topbar.locator('.topbar-leading > *')).toHaveCount(5);
   await expect(topbar.locator('.topbar-leading > *').nth(2)).toHaveClass(/brand/);
   await expect(topbar.locator('.topbar-leading > *').nth(3)).toHaveClass(/global-search-trigger/);
@@ -628,7 +628,7 @@ test('top navigation exposes context and keeps its controls accessible', async (
 
   await topbar.getByRole('button', { name: /Cambiar herramienta/ }).click();
   const toolMenu = page.getByRole('region', { name: 'Herramientas' });
-  await expect(toolMenu.getByRole('button', { name: /Inicio Resumen general de DS Hub/ })).toBeVisible();
+  await expect(toolMenu.getByRole('button', { name: /Inicio Resumen general de Custodia/ })).toBeVisible();
   await expect(toolMenu.getByRole('button', { name: /CyberArk PAM, Identity Administration, SIA y Access/ })).toHaveAttribute('aria-current', 'page');
   await topbar.getByRole('button', { name: /Cambiar herramienta/ }).click();
 
@@ -902,7 +902,7 @@ test('workspace selector scopes shortcuts and recents to the active tool while k
 
 /* UX-SEARCH-001: Command-K v2. Navigation commands come from the workspace
    catalog, results carry explicit kind/platform badges and the empty state is
-   grouped by platform in CyberArk → Netskope → DS Hub order. */
+   grouped by platform in CyberArk → Netskope → Custodia order. */
 
 test('UX-SEARCH-001: the empty command center groups quick access by platform in order', async ({ page }) => {
   await mockAuthenticatedApp(page, { initialVisibleWorkspaces: ['safes', 'netskope', 'person'] });
@@ -911,7 +911,7 @@ test('UX-SEARCH-001: the empty command center groups quick access by platform in
   await page.getByRole('button', { name: 'Abrir command center' }).click();
   const dialog = page.getByRole('dialog', { name: 'Command center' });
   const quick = dialog.locator('.global-search-group').filter({ hasText: 'Accesos rápidos' });
-  await expect(quick.locator('.global-search-subgroup')).toHaveText(['CyberArk', 'Netskope', 'DS Hub']);
+  await expect(quick.locator('.global-search-subgroup')).toHaveText(['CyberArk', 'Netskope', 'Custodia']);
   await expect(quick.getByRole('option', { name: /^Safes\b/ })).toBeVisible();
   await expect(quick.getByRole('group', { name: 'Netskope', exact: true }).getByRole('option', { name: /^Métricas/ })).toBeVisible();
   const person = quick.getByRole('option', { name: /^Personas\b/ });
@@ -931,7 +931,7 @@ test('UX-SEARCH-001: persona, safe, identidad and netskope rank first and open o
   const combo = dialog.getByRole('combobox');
 
   await combo.fill('persona');
-  await expect(dialog.getByRole('option', { name: /^Personas DS Hub/ }).first().locator('.global-search-badge')).toHaveText(['DS Hub']);
+  await expect(dialog.getByRole('option', { name: /^Personas Custodia/ }).first().locator('.global-search-badge')).toHaveText(['Custodia']);
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/chains\/person$/);
   await expect(page.getByRole('searchbox', { name: 'Buscar persona por correo o nombre' })).toBeVisible();
@@ -999,7 +999,7 @@ test('UX-SEARCH-001: platform chips filter by mouse and keyboard', async ({ page
   expect(platformBadges.length).toBeGreaterThan(0);
   expect(platformBadges).toContain('Netskope');
   expect(platformBadges).not.toContain('CyberArk');
-  expect(platformBadges).not.toContain('DS Hub');
+  expect(platformBadges).not.toContain('Custodia');
 
   // A query with no results drops every group and keeps a valid (or no) active index.
   await combo.fill('zzzzqq');
@@ -1022,20 +1022,20 @@ test('UX-SEARCH-001: an actor without permissions never sees restricted destinat
   await combo.fill('persona');
   // The guide's "Personas" section is open to every actor; only the view is
   // restricted, so anchor on the view's own detail text.
-  await expect(dialog.getByRole('option', { name: /^Personas DS Hub Registros relacionados/ })).toHaveCount(0);
+  await expect(dialog.getByRole('option', { name: /^Personas Custodia Registros relacionados/ })).toHaveCount(0);
   await combo.fill('netskope');
   await expect(dialog.getByRole('option', { name: /^Métricas Netskope/ })).toHaveCount(0);
   await expect(dialog.getByRole('option', { name: /^Acceso\b/ })).toHaveCount(0);
   await combo.fill('actividad');
   await expect(dialog.getByRole('option', { name: /^Actividad\b/ })).toHaveCount(0);
-  await combo.fill('usuarios ds hub');
+  await combo.fill('usuarios custodia');
   await expect(dialog.getByRole('option', { name: /^Usuarios y permisos\b/ })).toHaveCount(0);
 });
 
 test('UX-SEARCH-001: the command center has no axe violations', async ({ page }) => {
-  // FE-AUD-009: browser colorScheme alone does not change DS Hub's stored theme.
+  // FE-AUD-009: browser colorScheme alone does not change Custodia's stored theme.
   const theme = test.info().project.use.colorScheme === 'light' ? 'light' : 'dark';
-  await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+  await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
   await mockAuthenticatedApp(page);
   await page.goto('/pam');
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
@@ -1061,7 +1061,7 @@ for (const authMode of ['local', 'hybrid', 'oidc'] as const) {
     await expect(tabs.getByRole('tab', { name: /Diagnóstico OIDC/ })).toHaveCount(0);
     await tabs.getByRole('tab', { name: /Roles y permisos/ }).click();
     await expect(page.getByRole('heading', { name: 'Roles y permisos' })).toBeVisible();
-    await tabs.getByRole('tab', { name: /Usuarios de DS Hub/ }).click();
+    await tabs.getByRole('tab', { name: /Usuarios de Custodia/ }).click();
     await expect(page.getByRole('heading', { name: 'Acceso a la plataforma' })).toBeVisible();
     expect(requests.filter((path) => path === '/api/access/oidc-health')).toEqual([]);
   });
@@ -1118,7 +1118,7 @@ test('ACCESS-UI-001 a role lists its members and adds or removes them from the r
   await expect(members.getByRole('listitem').filter({ hasText: 'Ana Okta' })).toContainText('por Okta');
   await expect(members.getByRole('listitem').filter({ hasText: 'Beto Local' })).toContainText('Local');
   await expect(page.getByRole('region', { name: 'Mapa de accesos por rol' })).toHaveCount(0);
-  // Okta-assigned members change in Okta: only the DS Hub assignment has a remove button.
+  // Okta-assigned members change in Okta: only the Custodia assignment has a remove button.
   await expect(members.getByRole('button', { name: 'Quitar Administrador de plataforma a Ana Okta' })).toHaveCount(0);
   await members.getByRole('button', { name: 'Quitar Administrador de plataforma a Beto Local' }).click();
   await expect.poll(() => calls.at(-1)).toBe('DELETE /api/auth/users/beto%40example.com/roles/admin');
@@ -1276,7 +1276,7 @@ test('editing a saved composition retains its levels until an area is explicitly
 });
 
 test('role map compares each role once across areas and opens a cell in its area', async ({ page }) => {
-  await page.addInitScript((theme) => localStorage.setItem('dshub-theme:v1', theme), test.info().project.use.colorScheme || 'dark');
+  await page.addInitScript((theme) => localStorage.setItem('custodia-theme:v1', theme), test.info().project.use.colorScheme || 'dark');
   await mockAuthenticatedApp(page);
   await page.goto('/admin/access');
   await page.getByRole('tab', { name: /Roles y permisos/ }).click();
@@ -1387,7 +1387,7 @@ test('delegated role editors cannot select capabilities above their delegation c
 });
 
 test('tool compartments group CyberArk areas, keep transversal roles unique, and accept new catalog tools', async ({ page }) => {
-  await page.addInitScript((theme) => localStorage.setItem('dshub-theme:v1', theme), test.info().project.use.colorScheme || 'dark');
+  await page.addInitScript((theme) => localStorage.setItem('custodia-theme:v1', theme), test.info().project.use.colorScheme || 'dark');
   await mockAuthenticatedApp(page);
   const areas = [
     { domain_code: 'platform', display_name: 'Plataforma', sort_order: 1 },

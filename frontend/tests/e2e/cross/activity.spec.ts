@@ -352,7 +352,7 @@ test('a sync enqueues PAM, isolated PSM, and configured sources', async ({ page 
 for (const theme of ['dark', 'light'] as const) {
   test(`UX-SYNC-001: all CyberArk feature runs show one accessible tool chip in ${theme}`, async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.addInitScript((value) => window.localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => window.localStorage.setItem('custodia-theme:v1', value), theme);
     await mockAuthenticatedApp(page);
     const sources = ['cyberark', 'identity_administration', 'sia', 'access'];
     const runIds = sources.map((_, index) => `ux-sync-${index}`);
@@ -413,7 +413,7 @@ test('ACCESS-AUDIT-EXPORT-001: the export button follows the permission and carr
   await expect(page.getByRole('button', { name: 'Exportar CSV' })).toBeEnabled();
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Exportar CSV' }).click();
-  expect((await download).suggestedFilename()).toBe('dshub-actividad.csv');
+  expect((await download).suggestedFilename()).toBe('custodia-actividad.csv');
   await expect(page.getByRole('status')).toContainText('CSV descargado con los filtros activos');
   expect(exported.at(-1)?.get('q')).toBe('Operador');
   expect((await new AxeBuilder({ page }).include('.activity-panel').analyze()).violations.map(({ id }) => id)).toEqual([]);

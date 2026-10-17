@@ -419,7 +419,7 @@ export type DashboardWidgetExplanation = {
 const DASHBOARD_MEASURE_EXPLANATIONS: Record<DashboardMeasure, { includes: string; source: string; next: string }> = {
   safes: { includes: 'Safes activos del inventario según los filtros aplicados.', source: 'Inventario de Safes sincronizado desde CyberArk.', next: 'Abrí el resultado para revisar los Safes que forman el total.' },
   accounts: { includes: 'Cuentas activas observadas según los filtros aplicados.', source: 'Inventario operativo de cuentas sincronizado desde CyberArk; no incluye secretos.', next: 'Abrí el resultado para revisar las cuentas que forman el total.' },
-  connections: { includes: 'Filas de conexiones migradas incluidas en la última carga.', source: 'Archivo CSV de inventario de conexiones importado en DS Hub.', next: 'Abrí Inventario para revisar IP, instancia, puerto y cobertura.' },
+  connections: { includes: 'Filas de conexiones migradas incluidas en la última carga.', source: 'Archivo CSV de inventario de conexiones importado en Custodia.', next: 'Abrí Inventario para revisar IP, instancia, puerto y cobertura.' },
   pam_users: { includes: 'Usuarios activos observados en la cadena PAM.', source: 'Inventario PAM sincronizado desde CyberArk.', next: 'Abrí Identidades para revisar roles y Safes alcanzables.' },
   pam_roles: { includes: 'Roles activos observados en la cadena PAM.', source: 'Inventario PAM sincronizado desde CyberArk.', next: 'Abrí Identidades para revisar miembros y alcance.' },
   sia_policies: { includes: 'Políticas de acceso activas disponibles en SIA.', source: 'Políticas sincronizadas desde Secure Infrastructure Access.', next: 'Abrí SIA para revisar grantees y destinos de cada política.' },
@@ -428,7 +428,7 @@ const DASHBOARD_MEASURE_EXPLANATIONS: Record<DashboardMeasure, { includes: strin
   account_platform_coverage: { includes: 'Cuentas activas con una plataforma informada.', source: 'Inventario operativo de cuentas sincronizado desde CyberArk.', next: 'Abrí Cuentas para revisar las que no tienen plataforma.' },
   safe_account_coverage: { includes: 'Safes activos que contienen al menos una cuenta activa, divididos por todos los Safes activos. Mide completitud del inventario; no prueba clasificación ni depuración y no representa el KR1 formal completo.', source: 'Cruce del inventario de Safes y cuentas sincronizado desde CyberArk.', next: 'Abrí Safes para revisar los que no tienen cuentas.' },
   cyberark_compliance: { includes: 'Cuentas con compliance.isCompliant=true dividido por todas las cuentas devueltas por CyberArk. Si falla alguna consulta, no se publica un porcentaje nuevo.', source: 'Último resumen agregado publicado por el script de compliance de CyberArk; no mide rotación SRS.', next: 'Ejecutá el script con --publish para actualizar el resultado. No se guardan detalles por cuenta.' },
-  kr1_safe_bu_coverage: { includes: 'Safes activos con unidad de negocio asignada sobre todos los Safes activos del alcance seleccionado. Es clasificación de Safes, no el KR1 completo ni la depuración.', source: 'Inventario de Safes y asignación local de unidad de negocio en DS Hub.', next: 'Abrí Safes para identificar los que aún no tienen unidad asignada.' },
+  kr1_safe_bu_coverage: { includes: 'Safes activos con unidad de negocio asignada sobre todos los Safes activos del alcance seleccionado. Es clasificación de Safes, no el KR1 completo ni la depuración.', source: 'Inventario de Safes y asignación local de unidad de negocio en Custodia.', next: 'Abrí Safes para identificar los que aún no tienen unidad asignada.' },
   kr2_connection_coverage: { includes: 'Conexiones importadas con coincidencia exacta en PAM, SIA o ambos, divididas por todas las conexiones de la última carga.', source: 'Inventario de conexiones importado desde CSV y coincidencias exactas con PAM y SIA. Es un proxy por conexión, no por cuenta elegible.', next: 'Abrí Inventario para revisar las filas sin cobertura.' },
 };
 
@@ -437,7 +437,7 @@ export function dashboardWidgetExplanation(widget: DashboardWidget): DashboardWi
   const labels = widgetFilterLabels(widget);
   const includes = labels.length ? `${base.includes} Filtros: ${labels.join(' · ')}.` : base.includes;
   const source = (widget.filters.classification_status || widget.filters.workflow_status || widget.filters.inventory_scope || widget.filters.data_quality_status)
-    ? `${base.source} La clasificación, alcance y estado operativo se mantienen localmente en DS Hub.`
+    ? `${base.source} La clasificación, alcance y estado operativo se mantienen localmente en Custodia.`
     : base.source;
   return { includes, source, next: base.next };
 }

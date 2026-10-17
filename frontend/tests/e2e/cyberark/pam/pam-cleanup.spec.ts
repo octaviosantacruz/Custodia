@@ -282,7 +282,7 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
       const results = await new AxeBuilder({ page }).include('.pam-cleanup-panel')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
       expect(results.violations).toEqual([]);
-      await page.screenshot({ path: `/tmp/dshub-cleanup-${viewport.width}-${theme}.png`, fullPage: true });
+      await page.screenshot({ path: `/tmp/custodia-cleanup-${viewport.width}-${theme}.png`, fullPage: true });
     });
   }
 }

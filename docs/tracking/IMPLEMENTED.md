@@ -4,7 +4,7 @@ dueño: Octavio Santacruz
 revisado: 2026-10-15
 ---
 
-# Implementado en DS Hub
+# Implementado en Custodia
 
 Índice del trabajo cerrado. El detalle de cada cierre (entrega, evidencia, commit)
 vive en `done/`, un archivo por periodo; aquí hay una línea por sección con sus IDs.

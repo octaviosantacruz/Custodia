@@ -1,4 +1,4 @@
-"""Punto de entrada HTTP de DS Hub: compone FastAPI, middleware y routers.
+"""Punto de entrada HTTP de Custodia: compone FastAPI, middleware y routers.
 
 Creado por Octavio Santacruz. Guía de mantenimiento: MAINTAINING.md.
 Las rutas de cada herramienta se incorporan mediante sources.py; la lógica
@@ -110,14 +110,14 @@ _OPENAPI_TAG_GROUPS = [
 
 # Curated request snippets for the operations a consumer hits first. Scalar
 # renders these as ready-to-copy examples; Swagger-compatible clients ignore
-# the x-codeSamples extension. Placeholders use $DSHUB_URL/$DSHUB_TOKEN so no
+# the x-codeSamples extension. Placeholders use $CUSTODIA_URL/$CUSTODIA_TOKEN so no
 # credential or tenant value is ever baked into the published contract.
 _OPENAPI_CODE_SAMPLES = {
     ("/api/auth/login", "post"): [{
         "lang": "Shell",
         "label": "curl (login local)",
         "source": (
-            "curl -sS -X POST \"$DSHUB_URL/api/auth/login\" \\\n"
+            "curl -sS -X POST \"$CUSTODIA_URL/api/auth/login\" \\\n"
             "  -H 'Content-Type: application/json' \\\n"
             "  -c cookies.txt \\\n"
             "  -d '{\"email\":\"usuario@empresa.com\",\"password\":\"<tu-contraseña>\"}'"
@@ -127,7 +127,7 @@ _OPENAPI_CODE_SAMPLES = {
         "lang": "Shell",
         "label": "curl (token personal de lectura)",
         "source": (
-            "curl -sS -X POST \"$DSHUB_URL/api/auth/api-tokens\" \\\n"
+            "curl -sS -X POST \"$CUSTODIA_URL/api/auth/api-tokens\" \\\n"
             "  -H 'Content-Type: application/json' \\\n"
             "  -b cookies.txt \\\n"
             "  -d '{\"label\":\"reportes\",\"expires_in_minutes\":60}'"
@@ -137,16 +137,16 @@ _OPENAPI_CODE_SAMPLES = {
         "lang": "Shell",
         "label": "curl (token Bearer personal)",
         "source": (
-            "curl -sS \"$DSHUB_URL/api/safes?limit=50\" \\\n"
-            "  -H \"Authorization: Bearer $DSHUB_TOKEN\""
+            "curl -sS \"$CUSTODIA_URL/api/safes?limit=50\" \\\n"
+            "  -H \"Authorization: Bearer $CUSTODIA_TOKEN\""
         ),
     }],
     ("/api/accounts/{safe_number}/{account_id}/classification", "patch"): [{
         "lang": "Shell",
         "label": "curl (automatización de escritura)",
         "source": (
-            "curl -sS -X PATCH \"$DSHUB_URL/api/accounts/42/7_12/classification\" \\\n"
-            "  -H \"X-Access-Token: $DSHUB_WRITE_TOKEN\" \\\n"
+            "curl -sS -X PATCH \"$CUSTODIA_URL/api/accounts/42/7_12/classification\" \\\n"
+            "  -H \"X-Access-Token: $CUSTODIA_WRITE_TOKEN\" \\\n"
             "  -H 'Content-Type: application/json' \\\n"
             "  -d '{\"inventory_account_type\":\"no_nominal\"}'"
         ),
@@ -194,10 +194,10 @@ API_ROUTERS = tuple(router for _, router in sorted(
 ))
 
 app = FastAPI(
-    title="DS Hub API",
+    title="Custodia API",
     version="0.1.0",
     description=(
-        "API del CMDB operativo de DS Hub para CyberArk (Privilege Cloud/PAM, "
+        "API del CMDB operativo de Custodia para CyberArk (Privilege Cloud/PAM, "
         "Identity Administration, SIA y Access space) y Netskope (SSE): ingesta, "
         "inventario de Safes y cuentas, clasificación, catálogos, analítica, "
         "auditoría y cobertura normalizada.\n\n"
@@ -208,12 +208,12 @@ app = FastAPI(
         "ni credenciales de cuentas."
     ),
     openapi_tags=[
-        {"name": "General", "description": "Plataforma DS Hub: autenticación, administración, actividad y operación transversal."},
-        {"name": "Plataforma", "description": "Autenticación, usuarios, permisos, actividad y preferencias de DS Hub."},
+        {"name": "General", "description": "Plataforma Custodia: autenticación, administración, actividad y operación transversal."},
+        {"name": "Plataforma", "description": "Autenticación, usuarios, permisos, actividad y preferencias de Custodia."},
         {"name": "Salud y estado", "description": "Liveness, readiness y estado de configuración de las integraciones."},
         {"name": "Autenticación", "description": "Login local, sesión, bootstrap inicial y tokens personales de API."},
-        {"name": "Usuarios y permisos", "description": "Usuarios locales de DS Hub y sus roles de administración."},
-        {"name": "Acceso y permisos", "description": "Catálogo de permisos, roles y dominios internos de DS Hub."},
+        {"name": "Usuarios y permisos", "description": "Usuarios locales de Custodia y sus roles de administración."},
+        {"name": "Acceso y permisos", "description": "Catálogo de permisos, roles y dominios internos de Custodia."},
         {"name": "Actividad", "description": "Bitácora administrativa, eventos de seguridad y errores operativos."},
         {"name": "Eventos", "description": "Señales livianas de refresco entre sesiones; no incluye datos de inventario."},
         {"name": "Preferencias de workspace", "description": "Accesos rápidos y workspaces recientes por usuario."},
@@ -326,7 +326,7 @@ OPENAPI_OPERATION_OVERRIDES = {
     ("/api/auth/login", "post"): ("Iniciar sesión local", "Valida las credenciales y crea una sesión firmada. El endpoint aplica rate limiting por IP y email."),
     ("/api/auth/oidc/login", "get"): ("Iniciar login corporativo", "Comienza el flujo OIDC cuando está habilitado y configurado."),
     ("/api/auth/password", "post"): ("Cambiar mi contraseña", "Cambia la contraseña del actor autenticado y aplica la política local vigente."),
-    ("/api/auth/callback", "get"): ("Completar callback OIDC", "Completa el callback del proveedor OIDC y crea la sesión de DS Hub."),
+    ("/api/auth/callback", "get"): ("Completar callback OIDC", "Completa el callback del proveedor OIDC y crea la sesión de Custodia."),
     ("/api/auth/logout", "post"): ("Cerrar sesión", "Invalida la sesión actual."),
     ("/api/auth/status", "get"): ("Consultar estado de sesión", "Devuelve autenticación, usuario, permisos y disponibilidad del bootstrap."),
     ("/api/auth/register", "post"): ("Crear primer usuario", "Crea el primer administrador local sin token, sólo cuando no existe ningún usuario y ALLOW_SELF_REGISTER_SETUP=true. Deshabilitado por defecto; ver AUTH_BOOTSTRAP_TOKEN para el camino recomendado."),
@@ -334,12 +334,12 @@ OPENAPI_OPERATION_OVERRIDES = {
     ("/api/catalogs", "get"): ("Listar catálogos", "Devuelve unidades de negocio, responsables y tipos de cuenta disponibles."),
     ("/api/business-units/{business_unit_id}", "patch"): ("Actualizar unidad de negocio", "Activa, desactiva o modifica una unidad de negocio; requiere catalogs:write."),
     ("/api/responsibles/{responsible_id}", "patch"): ("Actualizar responsable", "Activa, desactiva o modifica un responsable; requiere catalogs:write."),
-    ("/api/auth/users", "get"): ("Listar usuarios de DS Hub", "Devuelve usuarios locales y sus roles; requiere access:manage."),
-    ("/api/auth/users", "post"): ("Crear usuario de DS Hub", "Crea un usuario local y asigna su rol inicial; requiere access:manage."),
-    ("/api/auth/users/{user_id}", "patch"): ("Actualizar usuario de DS Hub", "Modifica el estado, nombre o roles de un usuario; requiere access:manage."),
-    ("/api/auth/users/{user_id}", "delete"): ("Eliminar usuario de DS Hub", "Elimina un usuario y sus asignaciones; requiere access:manage."),
+    ("/api/auth/users", "get"): ("Listar usuarios de Custodia", "Devuelve usuarios locales y sus roles; requiere access:manage."),
+    ("/api/auth/users", "post"): ("Crear usuario de Custodia", "Crea un usuario local y asigna su rol inicial; requiere access:manage."),
+    ("/api/auth/users/{user_id}", "patch"): ("Actualizar usuario de Custodia", "Modifica el estado, nombre o roles de un usuario; requiere access:manage."),
+    ("/api/auth/users/{user_id}", "delete"): ("Eliminar usuario de Custodia", "Elimina un usuario y sus asignaciones; requiere access:manage."),
     ("/api/auth/users/{user_id}/reissue-temp-password", "post"): ("Regenerar contraseña temporal", "Genera una contraseña temporal de un usuario; requiere access:manage."),
-    ("/api/access/permissions", "get"): ("Listar permisos", "Devuelve el catálogo de permisos internos de DS Hub."),
+    ("/api/access/permissions", "get"): ("Listar permisos", "Devuelve el catálogo de permisos internos de Custodia."),
     ("/api/access/roles", "get"): ("Listar roles internos", "Devuelve roles, permisos, estado y cantidad de usuarios."),
     ("/api/access/domains", "get"): ("Listar dominios y niveles", "Devuelve los dominios funcionales y niveles de acceso disponibles."),
     ("/api/safes/{safe_number}", "get"): ("Consultar detalle de Safe", "Devuelve el detalle, miembros, cuentas y auditoría asociada a una Safe."),
@@ -384,7 +384,7 @@ def custom_openapi():
         "apiBearer": {
             "type": "http",
             "scheme": "bearer",
-            "bearerFormat": "DSHub personal read token",
+            "bearerFormat": "Custodia personal read token",
             "description": "Token personal opaco, de sólo lectura y corta duración. Se emite desde POST /api/auth/api-tokens con una sesión válida.",
         },
     })

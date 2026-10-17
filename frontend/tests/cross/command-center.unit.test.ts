@@ -90,7 +90,7 @@ test('navigation commands derive from the catalog with one entry per authorized 
   assert.ok(!views.includes('netskope'));
   for (const command of commands) {
     assert.equal(command.kind, 'view');
-    assert.equal(command.platform === 'cyberark' || command.platform === 'netskope' || command.platform === 'dshub', true);
+    assert.equal(command.platform === 'cyberark' || command.platform === 'netskope' || command.platform === 'custodia', true);
     const entry = CATALOG_BY_ID[command.workspace!];
     assert.equal(entry.catalog, true, `${command.id} must be an advertised destination`);
     assert.equal(command.label, entry.label);
@@ -108,7 +108,7 @@ test('an unauthorized view never appears and a restricted destination is never g
 
 test('Personas is classified as a Conexiones view even though it renders through PAM', () => {
   const [person] = navigationCommands(['pam:catalogs_read']).filter((command) => command.workspace === 'person');
-  assert.equal(person.platform, 'dshub');
+  assert.equal(person.platform, 'custodia');
   assert.equal(person.kind, 'view');
   assert.equal(areaOf('person'), 'cross');
 });
@@ -137,7 +137,7 @@ test('searching the documented examples ranks the expected destination first', (
   assert.equal(rankCommands(commands, 'identidad', permissions)[0].workspace, 'identity');
   assert.equal(rankCommands(commands, 'netskope', permissions)[0].platform, 'netskope');
   assert.equal(rankCommands(commands, 'widget', permissions).every((command) => command.kind === 'widget'), true);
-  assert.equal(rankCommands(commands, 'usuarios ds hub', permissions)[0].workspace, 'users');
+  assert.equal(rankCommands(commands, 'usuarios custodia', permissions)[0].workspace, 'users');
   const metricViews = rankCommands(commands, 'métricas', permissions)
     .slice(0, 2)
     .map((command) => command.workspace)
@@ -145,12 +145,12 @@ test('searching the documented examples ranks the expected destination first', (
   assert.deepEqual(metricViews, ['general', 'netskope']);
 });
 
-test('empty-state platforms always follow CyberArk, Netskope, DS Hub order', () => {
+test('empty-state platforms always follow CyberArk, Netskope, Custodia order', () => {
   const permissions = ['access:manage'];
   const commands = navigationCommands(permissions);
   const sections = emptyStateSections(commands, permissions, ['netskopeInventory', 'safes', 'person'], []);
   const quick = sections.find((section) => section.id === 'quick');
-  assert.deepEqual(quick?.groups.map((group) => group.platform), ['cyberark', 'netskope', 'dshub']);
+  assert.deepEqual(quick?.groups.map((group) => group.platform), ['cyberark', 'netskope', 'custodia']);
   assert.deepEqual(quick?.groups.flatMap((group) => group.commands.map((command) => command.workspace)), ['safes', 'netskopeInventory', 'person']);
   const recent = sections.find((section) => section.id === 'recent');
   assert.equal(recent, undefined);
@@ -169,11 +169,11 @@ test('platform and kind chips filter local commands and remote inventory alike',
   const commands = [
     ...navigationCommands(permissions),
     ...widgetCommands(permissions, widgetSources),
-    fixture({ id: 'action-sync', kind: 'action', platform: 'dshub', label: 'Actualizar datos' }),
+    fixture({ id: 'action-sync', kind: 'action', platform: 'custodia', label: 'Actualizar datos' }),
   ];
-  const dshub = commands.filter((command) => matchesCommandFilters(command, 'dshub', 'all'));
-  assert.ok(dshub.length > 0);
-  assert.equal(dshub.every((command) => command.platform === 'dshub'), true);
+  const custodia = commands.filter((command) => matchesCommandFilters(command, 'custodia', 'all'));
+  assert.ok(custodia.length > 0);
+  assert.equal(custodia.every((command) => command.platform === 'custodia'), true);
   const actions = commands.filter((command) => matchesCommandFilters(command, 'all', 'action'));
   assert.deepEqual(actions.map((command) => command.id), ['action-sync']);
   const widgets = commands.filter((command) => matchesCommandFilters(command, 'netskope', 'widget'));

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type Theme = 'dark' | 'light';
 
-const THEME_STORAGE_KEY = 'dshub-theme:v1';
+const THEME_STORAGE_KEY = 'custodia-theme:v1';
 const LEGACY_THEME_STORAGE_KEY = 'openpam-theme';
 
 function readTheme(): Theme {

@@ -76,7 +76,7 @@ class CompositeRoleUpdatePayload(BaseModel):
     level_refs: list[RoleLevelRef] = Field(min_length=1, max_length=100)
 
 
-@router.get("/permissions", response_model=PermissionsResponse, summary="Listar permisos", description="Devuelve el catálogo de permisos internos de DS Hub a lectores y administradores delegados de acceso.")
+@router.get("/permissions", response_model=PermissionsResponse, summary="Listar permisos", description="Devuelve el catálogo de permisos internos de Custodia a lectores y administradores delegados de acceso.")
 async def permissions(request: Request, actor_id: str = Depends(require_any_permission_read("access:manage", "access:roles_read", "access:roles_manage", "access:permissions_manage", "access:role_assignments_manage", "access:oidc_mappings_read"))):
     return {"rows": await permission_catalog(request.app.state.db)}
 
@@ -215,7 +215,7 @@ class OidcGroupRolesPayload(BaseModel):
     "/oidc-group-roles", response_model=OidcGroupRolesResponse,
     summary="Definir los roles que otorga un grupo de Okta",
     description=(
-        "ACCESS-UI-001: reemplaza los roles de DS Hub que otorga un grupo de Okta; una lista vacía quita el grupo. "
+        "ACCESS-UI-001: reemplaza los roles de Custodia que otorga un grupo de Okta; una lista vacía quita el grupo. "
         "La primera edición adopta OIDC_ROLE_MAP_JSON y desde entonces el login sólo lee este mapeo. "
         "Rige en el próximo login de cada miembro. Aplica el techo de delegación a cada rol que agrega o quita. Auditada."
     ),

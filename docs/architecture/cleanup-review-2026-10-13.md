@@ -94,7 +94,7 @@ al dispatcher y se comprueba el orden persistencia → wake en el caso exitoso.
 `npm run verify` final completo: 1.611 tests backend (incluido PostgreSQL
 efímero), 434 unitarios frontend, tipos generados, build, probes, estilos,
 trackers, documentación y diff check. Log local:
-`/tmp/dshub-cleanup-final-verify.log`.
+`/tmp/custodia-cleanup-final-verify.log`.
 
 Balance exclusivo de limpieza, contabilizando los módulos movidos:
 producción +257/-440 (neto -183); tests y fixtures +106/-199 (neto -93).

@@ -11,7 +11,7 @@ custom roles created at runtime are data, not catalog.
 Usage:
     backend/.venv/bin/python scripts/generate_access_catalog.py            # rewrite the file
     backend/.venv/bin/python scripts/generate_access_catalog.py --check    # fail if it is stale
-    DSHUB_TEST_DATABASE_URL=... backend/.venv/bin/python scripts/generate_access_catalog.py  # reuse a migrated database
+    CUSTODIA_TEST_DATABASE_URL=... backend/.venv/bin/python scripts/generate_access_catalog.py  # reuse a migrated database
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = REPO_ROOT / "docs" / "architecture" / "access-catalog.md"
 REGENERATE = "backend/.venv/bin/python scripts/generate_access_catalog.py"
-OPT_IN_ENV_VAR = "DSHUB_TEST_DATABASE_URL"
+OPT_IN_ENV_VAR = "CUSTODIA_TEST_DATABASE_URL"
 
 FRONTMATTER = """---
 estado: vigente
@@ -126,7 +126,7 @@ def _postgres_bin() -> Path:
         return Path(configured)
     pg_config = shutil.which("pg_config")
     if not pg_config:
-        raise SystemExit("No se encontró pg_config; definí POSTGRES_BIN_DIR o DSHUB_TEST_DATABASE_URL.")
+        raise SystemExit("No se encontró pg_config; definí POSTGRES_BIN_DIR o CUSTODIA_TEST_DATABASE_URL.")
     return Path(subprocess.check_output([pg_config, "--bindir"], text=True).strip())
 
 
@@ -140,16 +140,16 @@ def migrated_database():
     import socket
 
     bin_dir = _postgres_bin()
-    with tempfile.TemporaryDirectory(prefix="dshub-catalog.") as temp:
+    with tempfile.TemporaryDirectory(prefix="custodia-catalog.") as temp:
         data_dir, socket_dir = Path(temp) / "data", Path(temp) / "socket"
         socket_dir.mkdir()
         with socket.socket() as probe:
             probe.bind(("127.0.0.1", 0))
             port = probe.getsockname()[1]
-        subprocess.run([bin_dir / "initdb", "--auth=trust", "--encoding=UTF8", "--no-locale", "--username=dshub_test", f"--pgdata={data_dir}"], check=True, stdout=subprocess.DEVNULL)
+        subprocess.run([bin_dir / "initdb", "--auth=trust", "--encoding=UTF8", "--no-locale", "--username=custodia_test", f"--pgdata={data_dir}"], check=True, stdout=subprocess.DEVNULL)
         subprocess.run([bin_dir / "pg_ctl", "-D", data_dir, "-o", f"-k {socket_dir} -p {port} -c listen_addresses=''", "-w", "start"], check=True, stdout=subprocess.DEVNULL)
         try:
-            url = f"postgresql://dshub_test@/postgres?host={socket_dir}&port={port}"
+            url = f"postgresql://custodia_test@/postgres?host={socket_dir}&port={port}"
             subprocess.run([sys.executable, str(REPO_ROOT / "scripts" / "migrate.py")], check=True, cwd=REPO_ROOT, env={**os.environ, "ENV_FILE": "/dev/null", "DATABASE_URL": url}, stdout=subprocess.DEVNULL)
             yield url
         finally:

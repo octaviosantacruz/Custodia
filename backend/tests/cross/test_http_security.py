@@ -21,7 +21,7 @@ async def call_middleware(method="GET", path="/api/summary", headers=None, body_
         await send({"type": "http.response.start", "status": 200, "headers": [(b"content-type", b"application/json")]})
         await send({"type": "http.response.body", "body": b"{}"})
 
-    middleware = ApiSecurityMiddleware(application, ["https://dshub.example"])
+    middleware = ApiSecurityMiddleware(application, ["https://custodia.example"])
     messages = []
 
     chunks = list(body_chunks) if body_chunks is not None else [b""]
@@ -100,7 +100,7 @@ class ApiSecurityMiddlewareTests(unittest.TestCase):
         self.assertEqual(response["status"], 413)
 
     def test_allows_configured_browser_origin_and_server_to_server_requests(self):
-        allowed, allowed_messages, _body1 = asyncio.run(call_middleware("PUT", headers={"origin": "https://dshub.example"}))
+        allowed, allowed_messages, _body1 = asyncio.run(call_middleware("PUT", headers={"origin": "https://custodia.example"}))
         no_origin, no_origin_messages, _body2 = asyncio.run(call_middleware("POST"))
 
         self.assertTrue(allowed)

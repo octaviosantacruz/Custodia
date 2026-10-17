@@ -13,7 +13,7 @@ role reassignment, a deactivation, a deletion, or editing a custom role's
 permissions/levels away from access:manage. Each used to check this
 condition (if at all) with its own ad-hoc COUNT query and its own lock
 key, so two of them running concurrently could each read a stale count
-and both commit, leaving DS Hub with zero users able to administer access.
+and both commit, leaving Custodia with zero users able to administer access.
 
 Every mutation that can affect this invariant must:
   1. call lock_admin_invariant(cursor) first, inside its own transaction,
@@ -28,7 +28,7 @@ concurrent mutations can both pass step 3 based on a pre-mutation snapshot.
 
 import os
 
-ADMIN_INVARIANT_LOCK_KEY = "dshub-effective-admin"
+ADMIN_INVARIANT_LOCK_KEY = "custodia-effective-admin"
 
 
 def _oidc_admin_issuer() -> str | None:

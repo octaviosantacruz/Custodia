@@ -1,7 +1,7 @@
 """Branded API reference served at /docs.
 
 The route used to render Swagger UI with a custom stylesheet. It now serves
-Scalar (MIT, pinned to a known version) themed to the DS Hub dark/green
+Scalar (MIT, pinned to a known version) themed to the Custodia dark/green
 identity: tag groups per platform, multi-language code samples and a modern
 request client, without the generic Swagger shell.
 

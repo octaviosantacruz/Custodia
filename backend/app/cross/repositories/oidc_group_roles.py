@@ -1,4 +1,4 @@
-"""ACCESS-UI-001 phase 2: the Okta group -> DS Hub role mapping kept in PostgreSQL.
+"""ACCESS-UI-001 phase 2: the Okta group -> Custodia role mapping kept in PostgreSQL.
 
 `access_oidc_mapping_state` says whether the mapping is managed here. Without
 that row the login keeps reading OIDC_ROLE_MAP_JSON; the first edit adopts the

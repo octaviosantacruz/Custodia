@@ -11,7 +11,7 @@ test('operational notices resolve the Netskope and CyberArk logos by product', (
   assert.equal(syncSourceMeta(cyberark).image, '/cyberark-logo-mint.png');
 });
 
-test('generic notices keep the DS Hub fallback instead of assigning a product', () => {
+test('generic notices keep the Custodia fallback instead of assigning a product', () => {
   assert.equal(syncSourceFromNotice('Nombre actualizado.'), null);
 });
 
@@ -82,19 +82,19 @@ test('automatic notices expose a compact title and source-aware detail', () => {
     presentNotice('Terminó una sincronización automática. Tu vista actual se conserva.'),
     {
       source: null,
-      eyebrow: 'DS HUB · ACTUALIZACIÓN',
+      eyebrow: 'CUSTODIA · ACTUALIZACIÓN',
       title: 'Sincronización automática finalizada',
       detail: 'Tu vista actual se conserva.',
     },
   );
 });
 
-test('a failed multi-source batch stays a DS Hub error notice', () => {
+test('a failed multi-source batch stays a Custodia error notice', () => {
   assert.deepEqual(
-    presentNotice('DS Hub terminó una sincronización automática con errores. Netskope, CyberArk; revisá Actividad para el detalle.'),
+    presentNotice('Custodia terminó una sincronización automática con errores. Netskope, CyberArk; revisá Actividad para el detalle.'),
     {
       source: null,
-      eyebrow: 'DS HUB · ACTUALIZACIÓN',
+      eyebrow: 'CUSTODIA · ACTUALIZACIÓN',
       title: 'Sincronización automática con errores',
       detail: 'Netskope, CyberArk; revisá Actividad para el detalle.',
     },
@@ -116,7 +116,7 @@ test('automatic CyberArk source runs collapse into one notice and auxiliary succ
       { source_system: 'cyberark', status: 'completed', received_safe_count: 436 },
       { source_system: 'netskope', status: 'completed' },
     ]),
-    'DS Hub terminó una sincronización automática. Herramientas actualizadas: CyberArk, Netskope. Tu vista actual se conserva.',
+    'Custodia terminó una sincronización automática. Herramientas actualizadas: CyberArk, Netskope. Tu vista actual se conserva.',
   );
 });
 
@@ -146,7 +146,7 @@ test('partial and failed automatic runs are distinguishable from a clean complet
       { source_system: 'cyberark', status: 'completed' },
       { source_system: 'netskope', status: 'completed' },
     ]),
-    'DS Hub terminó una sincronización automática. Herramientas actualizadas: CyberArk, Netskope. Tu vista actual se conserva.',
+    'Custodia terminó una sincronización automática. Herramientas actualizadas: CyberArk, Netskope. Tu vista actual se conserva.',
   );
   assert.equal(
     automaticSyncBatchNotice([{ source_system: 'sia', status: 'partial' }]),

@@ -1,5 +1,5 @@
 ---
-description: Revisión independiente de DS Hub, con excepción de commit local aprobado
+description: Revisión independiente de Custodia, con excepción de commit local aprobado
 mode: subagent
 model: commandcode-openai/gpt-6-luna
 steps: 25
@@ -8,7 +8,7 @@ permissions:
     resource: "*"
     effect: deny
   - action: external_directory
-    resource: "/home/ubuntu/DSHub-wt/*"
+    resource: "/home/ubuntu/Custodia-wt/*"
     effect: allow
   - action: read
     resource: "*"
@@ -48,7 +48,7 @@ permissions:
     effect: ask
 ---
 
-Sos el revisor independiente de DS Hub. No modifiques ni ejecutes código.
+Sos el revisor independiente de Custodia. No modifiques ni ejecutes código.
 Única excepción: inspección Git y commit local de cambios ya revisados, sin
 editar contenido, cuando el orchestrator transmita autorización humana explícita
 del mensaje y archivos/hunks de esta etapa. Cada comando requiere aprobación.
@@ -85,6 +85,6 @@ entregado con tenant activado. blocked si faltan contrato o evidencia externa;
 changes_requested para arreglos locales. No cierres trackers ni otorgues autorización
 humana de commit: sólo el usuario puede darla.
 
-El orchestrator te pasa <W> = /home/ubuntu/DSHub-wt/<ID> (rama task/<ID>). Revisá solo ahí: rutas
+El orchestrator te pasa <W> = /home/ubuntu/Custodia-wt/<ID> (rama task/<ID>). Revisá solo ahí: rutas
 absolutas bajo <W> y shell con workdir=<W>. Antes de revisar, git branch --show-current
 con workdir=<W> debe devolver task/<ID>; si no, detenete.

@@ -167,7 +167,7 @@ async def collect_oidc_health(pool: Any) -> dict[str, Any]:
     config = collect_oidc_configuration()
     stored = await stored_group_role_pairs(pool)
     if stored is not None:
-        # ACCESS-UI-001: once managed in DS Hub, the login no longer reads OIDC_ROLE_MAP_JSON.
+        # ACCESS-UI-001: once managed in Custodia, the login no longer reads OIDC_ROLE_MAP_JSON.
         config["role_map"] = [{"group": group, "role_code": role_code} for group, role_code in stored]
         config["role_map_invalid"] = False
     role_rows = await list_roles(pool)

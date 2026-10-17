@@ -106,7 +106,7 @@ export function RoleAdmin(props: Props) {
       onBack={() => setEditor(null)} onSave={save} onAssignmentsChanged={() => void refreshRoles()}
       onCopy={() => setEditor({ ...editor, creating: true, copy: true })}
     /> : <>
-      <header className="role-map-header"><div><h2>Roles y permisos</h2><p>Compará qué habilita cada rol en DS Hub.</p></div>{canManage && <button ref={newRoleRef} className="button primary" type="button" onClick={() => open(null)}><Plus size={15} /> Nuevo rol</button>}</header>
+      <header className="role-map-header"><div><h2>Roles y permisos</h2><p>Compará qué habilita cada rol en Custodia.</p></div>{canManage && <button ref={newRoleRef} className="button primary" type="button" onClick={() => open(null)}><Plus size={15} /> Nuevo rol</button>}</header>
       <div className="role-map-toolbar"><label className="search-box"><Search size={16} /><span className="sr-only">Buscar roles</span><input type="search" placeholder="Buscar por rol o capacidad" value={query} onChange={(event) => setQuery(event.target.value)} /></label><CompactSelect ariaLabel="Filtrar roles" value={filter} options={[{ value: 'active', label: 'Roles activos' }, { value: 'custom', label: 'Personalizados' }, { value: 'system', label: 'Del sistema' }, { value: 'planned', label: 'Preparados' }, { value: 'all', label: 'Todos los roles' }]} onChange={setFilter} /><span className="role-result-count" role="status">{rows.length} de {catalog.roles.length} roles</span></div>
       <div className="role-compartments" role="region" aria-label="Mapa de accesos por rol">{roleGroups.map(({ tool, roles: toolRoles, areas }) => {
         const hasUnknown = toolRoles.some((role) => role.permission_codes.some((code) => !byCode.has(code)));

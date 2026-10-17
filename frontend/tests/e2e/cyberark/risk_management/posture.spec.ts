@@ -94,7 +94,7 @@ test('posture retains local detail and hides every CyberArk request without perm
   await mockAuthenticatedApp(page, { permissions: ['inventory:read'], onRequest: (path) => { if (path.includes('cyberark-risk')) reads.push(path); } });
   await page.goto('/pam/posture');
   await expect(page.getByRole('columnheader', { name: 'Objeto relacionado' })).toBeVisible();
-  await expect(page.getByRole('cell').filter({ hasText: 'DS Hub · Calidad de datos' })).toBeVisible();
+  await expect(page.getByRole('cell').filter({ hasText: 'Custodia · Calidad de datos' })).toBeVisible();
   await expect(page.getByRole('cell', { name: /svc-finance/ })).toBeVisible();
   await expect(page.getByRole('cell', { name: /^Finance/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Fuente de postura' })).toHaveCount(0);
@@ -149,7 +149,7 @@ test('CyberArk pagination prevents skipping a pending page and handles an empty 
   await expect(next).toBeDisabled();
 });
 
-test('one findings table preserves source semantics and applies filters and review only to DS Hub (UX-AUD2-009)', async ({ page }) => {
+test('one findings table preserves source semantics and applies filters and review only to Custodia (UX-AUD2-009)', async ({ page }) => {
   const riskRequests: URL[] = [];
   let updatePath = '';
   page.on('request', (request) => {
@@ -168,8 +168,8 @@ test('one findings table preserves source semantics and applies filters and revi
   await expect(localRow.getByRole('cell', { name: 'Abierto', exact: true })).toBeVisible();
   await expect(riskRow.getByRole('cell', { name: 'Alta', exact: true })).toBeVisible();
   await expect(riskRow.getByRole('cell', { name: 'Abierto', exact: true })).toBeVisible();
-  await expect(page.getByText('Filtros DS Hub', { exact: true })).toBeVisible();
-  await expect(page.getByText('Aplican sólo a DS Hub.', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Filtros Custodia', { exact: true })).toBeVisible();
+  await expect(page.getByText('Aplican sólo a Custodia.', { exact: true })).toHaveCount(0);
   await expect(page.getByLabel('Cobertura y frescura por fuente')).toContainText('Inventario local');
   await page.getByRole('button', { name: 'Ayuda: Acerca de Postura PAM' }).click();
   await expect(page.getByRole('note')).toContainText('La severidad y el estado corresponden a cada fuente');
@@ -181,12 +181,12 @@ test('one findings table preserves source semantics and applies filters and revi
   });
   await page.getByRole('button', { name: 'Filtrar hallazgos por severidad' }).click();
   await page.getByRole('option', { name: 'Crítica', exact: true }).click();
-  await expect(page.getByText('DS Hub: no hay hallazgos para estos filtros')).toBeVisible();
+  await expect(page.getByText('Custodia: no hay hallazgos para estos filtros')).toBeVisible();
   await expect(riskRow).toBeVisible();
   expect(filters.at(-1)?.searchParams.get('severity')).toBe('critical');
   expect(riskRequests.every((url) => !url.searchParams.has('severity') && !url.searchParams.has('status') && !url.searchParams.has('rule_id'))).toBe(true);
   await page.unroute('**/api/findings?**');
-  await page.getByRole('button', { name: 'Limpiar filtros DS Hub' }).click();
+  await page.getByRole('button', { name: 'Limpiar filtros Custodia' }).click();
   await page.getByRole('button', { name: 'Cuenta sin plataforma informada' }).click();
   const localDrawer = page.getByRole('dialog');
   await localDrawer.getByRole('button', { name: 'Estado del hallazgo' }).click();
@@ -207,7 +207,7 @@ for (const failing of ['local', 'risk', 'catalog'] as const) {
     if (failing === 'local') {
       await page.getByRole('button', { name: 'Filtrar hallazgos por estado' }).click();
       await page.getByRole('option', { name: 'Reconocido' }).click();
-      await expect(page.getByText('No se pudieron cargar los hallazgos DS Hub')).toBeVisible();
+      await expect(page.getByText('No se pudieron cargar los hallazgos Custodia')).toBeVisible();
       await expect(page.getByRole('button', { name: 'Privilegio permanente' })).toBeVisible();
     } else {
       await page.getByRole('button', { name: 'Actualizar lectura' }).click();
@@ -233,10 +233,10 @@ test('pending local findings leave CyberArk findings readable', async ({ page })
   });
   await page.getByRole('button', { name: 'Filtrar hallazgos por estado' }).click();
   await page.getByRole('option', { name: 'Reconocido' }).click();
-  await expect(page.getByText('Cargando hallazgos DS Hub…')).toBeVisible();
+  await expect(page.getByText('Cargando hallazgos Custodia…')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Privilegio permanente' })).toBeVisible();
   release();
-  await expect(page.getByText('DS Hub: no hay hallazgos para estos filtros')).toBeVisible();
+  await expect(page.getByText('Custodia: no hay hallazgos para estos filtros')).toBeVisible();
 });
 
 for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
@@ -250,7 +250,7 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
         await expect(table.getByRole('columnheader', { name: 'Hallazgo', exact: true })).toBeVisible();
         await expect(table.getByRole('columnheader', { name: 'Fuente', exact: true })).toHaveCount(0);
         await expect(page.getByRole('table')).toHaveCount(1);
-        await expect(table.getByRole('cell').filter({ hasText: 'DS Hub' })).toBeVisible();
+        await expect(table.getByRole('cell').filter({ hasText: 'Custodia' })).toBeVisible();
         await expect(table.getByRole('cell').filter({ hasText: 'CyberArk Risk Management' })).toBeVisible();
         if (includeEntityNames) {
           await expect(table.getByRole('cell').filter({ hasText: 'Privileged identity' })).toBeVisible();
@@ -284,7 +284,7 @@ for (const viewport of [{ width: 1280, height: 720 }, { width: 1440, height: 900
         await page.getByRole('button', { name: 'Tipos de riesgo (1)' }).click();
         const catalogResults = await new AxeBuilder({ page }).include('.posture-section-switch').include('.cyberark-risk-section').withTags(['wcag2a', 'wcag2aa']).analyze();
         expect(catalogResults.violations).toEqual([]);
-        await page.screenshot({ path: `/tmp/dshub-posture-${viewport.width}-${theme}-names-${includeEntityNames}.png`, fullPage: true });
+        await page.screenshot({ path: `/tmp/custodia-posture-${viewport.width}-${theme}-names-${includeEntityNames}.png`, fullPage: true });
       });
     }
   }
@@ -337,7 +337,7 @@ test('UX-AUD2-019: mixed finding origins and types remain readable in the findin
   const table = page.getByRole('table', { name: 'Hallazgos PAM' });
   await expect(table.getByRole('columnheader', { name: /^(Fuente|Categoría \/ tipo)$/ })).toHaveCount(0);
   const local = table.getByRole('row', { name: /Cuenta sin plataforma informada/ }).getByRole('cell').first();
-  await expect(local).toContainText('DS Hub');
+  await expect(local).toContainText('Custodia');
   await expect(local).toContainText('Calidad de datos');
   const external = table.getByRole('row', { name: /Privilegio permanente/ }).getByRole('cell').first();
   await expect(external).toContainText('CyberArk');

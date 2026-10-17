@@ -65,7 +65,7 @@ async def record_alert_aggregates(
 
 
 # Individual DLP incident/event persistence was removed with the DLP cache
-# poller: DS Hub keeps only the count-only alert aggregates above. The
+# poller: Custodia keeps only the count-only alert aggregates above. The
 # historical tables (netskope_dlp_event_cache/netskope_dlp_cache_state) are
 # intentionally not dropped or purged here; that requires a separate explicit
 # authorization.

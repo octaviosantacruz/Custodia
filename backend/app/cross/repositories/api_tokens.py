@@ -31,7 +31,7 @@ async def create_api_token(
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     "SELECT pg_advisory_xact_lock(hashtext(%s))",
-                    (f"dshub-api-token:{actor_id}",),
+                    (f"custodia-api-token:{actor_id}",),
                 )
                 await cursor.execute(
                     """SELECT count(*)::int AS count

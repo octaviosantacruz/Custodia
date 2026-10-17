@@ -89,7 +89,7 @@ export function NetskopeDeviceDetail({ row, onOpenUser }: { row: NetskopeRow; on
       <span className="netskope-device-detail-label">Señal</span>
       <p><strong>{evidence?.last_signal_at ? `Reportó ${relativeTime(evidence.last_signal_at)}` : 'Sin señal registrada'}</strong>{evidence?.last_seen_event ? ` · ${evidence.last_seen_event}` : ''}</p>
       <p>{DEVICE_EVIDENCE_LABELS[evidence?.state ?? 'unknown']}{evidence?.last_signal_at ? <> · <DateTime value={evidence.last_signal_at} /></> : null}</p>
-      <p className="muted">En DS Hub desde <DateTime value={row.first_seen_at} /></p>
+      <p className="muted">En Custodia desde <DateTime value={row.first_seen_at} /></p>
     </section>
     {user?.object_id ? <RecentActivity userId={user.object_id} deviceObjectId={row.object_id} onOpenUser={onOpenUser ? () => onOpenUser({ userId: user.object_id!, email: user.email || email, name: user.display_name || email }) : undefined} />
       : <section aria-label="Rendimiento y anomalías"><span className="netskope-device-detail-label">Rendimiento y anomalías</span><p className="muted">Sin usuario correlacionado: no se consulta ADEM ni UEBA.</p></section>}

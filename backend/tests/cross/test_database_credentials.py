@@ -21,7 +21,7 @@ from app.cross.services.database_credentials import (
 )
 
 
-CURRENT_URL = "postgresql://app:old-password@db.internal:5432/dshub?sslmode=require"
+CURRENT_URL = "postgresql://app:old-password@db.internal:5432/custodia?sslmode=require"
 
 
 class LocalPasswordFileTests(unittest.TestCase):
@@ -52,7 +52,7 @@ class AwsSecretsManagerTests(unittest.TestCase):
             )
 
         value = get_secret_string(
-            "dshub/database",
+            "custodia/database",
             region="us-east-1",
             runner=runner,
         )
@@ -66,7 +66,7 @@ class AwsSecretsManagerTests(unittest.TestCase):
                 "secretsmanager",
                 "get-secret-value",
                 "--secret-id",
-                "dshub/database",
+                "custodia/database",
                 "--region",
                 "us-east-1",
                 "--output",
@@ -89,7 +89,7 @@ class AwsSecretsManagerTests(unittest.TestCase):
             )
 
         with self.assertRaises(SecretRetrievalError) as raised:
-            get_secret_string("dshub/database", runner=runner)
+            get_secret_string("custodia/database", runner=runner)
 
         self.assertNotIn("leaked-password", str(raised.exception))
         self.assertNotIn("AccessDenied", str(raised.exception))
@@ -104,7 +104,7 @@ class AwsSecretsManagerTests(unittest.TestCase):
             )
 
         with self.assertRaisesRegex(SecretRetrievalError, "SecretString"):
-            get_secret_string("dshub/database", runner=runner)
+            get_secret_string("custodia/database", runner=runner)
 
 
 class DatabaseCredentialParsingTests(unittest.TestCase):
@@ -115,7 +115,7 @@ class DatabaseCredentialParsingTests(unittest.TestCase):
         self.assertEqual(values["user"], "app")
         self.assertEqual(values["password"], "new p@ss")
         self.assertEqual(values["host"], "db.internal")
-        self.assertEqual(values["dbname"], "dshub")
+        self.assertEqual(values["dbname"], "custodia")
         self.assertEqual(values["sslmode"], "require")
 
     def test_rds_json_builds_connection_and_preserves_existing_sslmode(self) -> None:
@@ -142,7 +142,7 @@ class DatabaseCredentialParsingTests(unittest.TestCase):
         self.assertEqual(values["sslmode"], "require")
 
     def test_database_url_json_is_accepted(self) -> None:
-        expected = "postgresql://app:new-password@db.internal/dshub"
+        expected = "postgresql://app:new-password@db.internal/custodia"
         self.assertEqual(
             database_url_from_secret(json.dumps({"DATABASE_URL": expected}), None),
             expected,
@@ -170,7 +170,7 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
 
         resolution = resolve_database_url(
             CURRENT_URL,
-            "dshub/database",
+            "custodia/database",
             region=None,
             probe=lambda url: None,
             fetch_secret=fetch,
@@ -190,7 +190,7 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
 
         resolution = resolve_database_url(
             CURRENT_URL,
-            "dshub/database",
+            "custodia/database",
             region="us-east-1",
             probe=probe,
             fetch_secret=lambda secret_id, region: '{"password":"new-password"}',
@@ -211,7 +211,7 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
         with self.assertRaisesRegex(DatabaseCredentialError, "no es de autenticación"):
             resolve_database_url(
                 CURRENT_URL,
-                "dshub/database",
+                "custodia/database",
                 region=None,
                 probe=lambda url: (_ for _ in ()).throw(
                     psycopg.OperationalError("connection timed out")
@@ -222,10 +222,10 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
         self.assertFalse(fetched)
 
     def test_missing_database_url_fetches_complete_secret(self) -> None:
-        complete_url = "postgresql://app:new-password@db.internal/dshub"
+        complete_url = "postgresql://app:new-password@db.internal/custodia"
         resolution = resolve_database_url(
             None,
-            "dshub/database",
+            "custodia/database",
             region=None,
             probe=lambda url: None,
             fetch_secret=lambda secret_id, region: json.dumps({"DATABASE_URL": complete_url}),
@@ -247,7 +247,7 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
         with self.assertRaises(DatabaseCredentialError) as raised:
             resolve_database_url(
                 CURRENT_URL,
-                "dshub/database",
+                "custodia/database",
                 region=None,
                 probe=probe,
                 fetch_secret=lambda secret_id, region: '{"password":"new-password"}',
@@ -270,14 +270,14 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
                 exc = psycopg.OperationalError(
                     'connection failed: connection to server at "db.internal" '
                     'failed: FATAL:  no pg_hba.conf entry for host "10.0.0.5", '
-                    'user "app", database "dshub", no encryption'
+                    'user "app", database "custodia", no encryption'
                 )
                 exc.sqlstate = "28000"
                 raise exc
 
         resolution = resolve_database_url(
             CURRENT_URL,
-            "dshub/database",
+            "custodia/database",
             region="us-east-1",
             probe=probe,
             fetch_secret=lambda secret_id, region: '{"password":"rotated-password"}',
@@ -298,12 +298,12 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
             if len(probed) == 1:
                 raise psycopg.OperationalError(
                     'FATAL:  no pg_hba.conf entry for host "10.0.0.5", user "app", '
-                    'database "dshub", no encryption'
+                    'database "custodia", no encryption'
                 )
 
         resolution = resolve_database_url(
             CURRENT_URL,
-            "dshub/database",
+            "custodia/database",
             region=None,
             probe=probe,
             fetch_secret=lambda secret_id, region: '{"password":"rotated-password"}',
@@ -315,7 +315,7 @@ class DatabaseCredentialResolutionTests(unittest.TestCase):
 class DatabaseCredentialProviderTests(unittest.TestCase):
     def test_conninfo_callable_returns_current_url_without_recovering(self) -> None:
         provider = DatabaseCredentialProvider(
-            CURRENT_URL, "dshub/database", region=None, probe=lambda url: None,
+            CURRENT_URL, "custodia/database", region=None, probe=lambda url: None,
         )
         self.assertEqual(provider(), CURRENT_URL)
 
@@ -329,7 +329,7 @@ class DatabaseCredentialProviderTests(unittest.TestCase):
 
         provider = DatabaseCredentialProvider(
             CURRENT_URL,
-            "dshub/database",
+            "custodia/database",
             region=None,
             probe=probe,
             fetch_secret=lambda secret_id, region: '{"password":"rotated-password"}',
@@ -352,7 +352,7 @@ class DatabaseCredentialProviderTests(unittest.TestCase):
             raise SecretRetrievalError("AWS CLI no pudo recuperar el secreto")
 
         provider = DatabaseCredentialProvider(
-            CURRENT_URL, "dshub/database", region=None, probe=probe, fetch_secret=fetch_secret,
+            CURRENT_URL, "custodia/database", region=None, probe=probe, fetch_secret=fetch_secret,
         )
 
         asyncio.run(provider.on_reconnect_failed(pool=object()))  # must not raise
@@ -375,7 +375,7 @@ class DatabaseCredentialProviderTests(unittest.TestCase):
             return '{"password":"rotated-password"}'
 
         provider = DatabaseCredentialProvider(
-            CURRENT_URL, "dshub/database", region=None, probe=probe, fetch_secret=fetch_secret,
+            CURRENT_URL, "custodia/database", region=None, probe=probe, fetch_secret=fetch_secret,
         )
 
         async def run_both() -> tuple[bool, bool]:

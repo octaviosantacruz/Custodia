@@ -37,7 +37,7 @@ def generate_temp_password() -> str:
 
 
 # ACCESS-UI-001: each role with its origin -- 'oidc' (mapped from the identity's
-# groups at login, changed only in the provider) or 'manual' (assigned in DS Hub).
+# groups at login, changed only in the provider) or 'manual' (assigned in Custodia).
 ROLE_ASSIGNMENTS_SQL = """COALESCE((SELECT jsonb_agg(jsonb_build_object('role_code', assignment.role_code,
                                                  'source', assignment.assignment_source)
                                       ORDER BY assignment.role_code)
@@ -133,7 +133,7 @@ async def list_access_review(
     """One row per role assignment with the signals a periodic access review looks at (read-only).
 
     Flags: ``inactive_account`` (a deactivated local account still holds roles), ``manual_old`` (a role assigned
-    in DS Hub at least ``days`` days ago) and ``stale_login`` (an Okta identity whose last login is at least
+    in Custodia at least ``days`` days ago) and ``stale_login`` (an Okta identity whose last login is at least
     ``days`` days old). Local accounts record no login, and an Okta role is rewritten at every login, so neither
     gets a date they do not have: ``last_login_at`` / ``granted_at`` stay null instead of being inferred.
     """
@@ -472,7 +472,7 @@ async def _identity_exists(cursor, user_id: str) -> bool:
 
 
 async def grant_user_role(pool: AsyncConnectionPool, user_id: str, role_code: str, actor_id: str) -> bool | None:
-    """ACCESS-UI-001: add one DS Hub ('manual') role to a local or OIDC identity.
+    """ACCESS-UI-001: add one Custodia ('manual') role to a local or OIDC identity.
 
     Returns None when the identity does not exist and False when it already
     holds the role. The delegation ceiling applies as for any assignment.
@@ -500,11 +500,11 @@ async def grant_user_role(pool: AsyncConnectionPool, user_id: str, role_code: st
 
 
 async def revoke_user_role(pool: AsyncConnectionPool, user_id: str, role_code: str, actor_id: str) -> bool:
-    """ACCESS-UI-001: remove one DS Hub ('manual') role.
+    """ACCESS-UI-001: remove one Custodia ('manual') role.
 
     An 'oidc' role is refused: the next login would bring it back, so it is
     changed only in the provider. Revoking needs the same ceiling as granting,
-    and never leaves DS Hub without an active administrator.
+    and never leaves Custodia without an active administrator.
     """
     async with pool.connection() as conn:
         async with conn.transaction():

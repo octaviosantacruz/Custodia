@@ -13,7 +13,7 @@ revisado: 2026-10-06
 
 - **GET (612):** las 611 rutas del catálogo anterior más `marketplace/agent-entitlements/employee-counts` (sin triage). Estado por ruta: ver las marcas y la tabla por familia.
 - **Consultas por POST (69):** 4 ya usadas (`users/getusers`, `users/getgroups`, ADEM `device/getlist` y `device/getdetails`) y 65 candidatas por heurística de nombre (último segmento `get*`, `/query/`, `criteria/schema`, `estimate`). Es una aproximación: `nsiq/urllookup` (envía URLs a Netskope), `atp/*` (suben archivos), `dspm/.../startscan|abortscan`, `analysis/npa` y similares **no** se tratan como lectura aunque parezcan consultas. Cada candidata se revisa a mano antes de un probe.
-- **Escritura, acción o despliegue (621):** crear, reemplazar, borrar, desplegar, revertir, subir, escanear, rotar o resetear. Fuera de alcance: DS Hub es de sólo lectura hacia Netskope.
+- **Escritura, acción o despliegue (621):** crear, reemplazar, borrar, desplegar, revertir, subir, escanear, rotar o resetear. Fuera de alcance: Custodia es de sólo lectura hacia Netskope.
 
 ## Reglas no negociables antes de promover una tarea
 
@@ -37,7 +37,7 @@ revisado: 2026-10-06
 | `excluido` | Prohibida por diseño (contenido/forense/credenciales/descargas) o fuera del alcance del CMDB. |
 | `deprecado` | La propia ruta se declara deprecada; no promover sin un motivo concreto. |
 
-## Cobertura actual de DS Hub (rutas usadas o probadas)
+## Cobertura actual de Custodia (rutas usadas o probadas)
 
 | Ruta | Estado |
 |---|---|
@@ -172,7 +172,7 @@ La vista "Túneles de steering", la tarea `netskope_steering` y la ruta `GET /ap
 
 ### Experiencia digital: descubrimiento (`NSK-EXP-DISCOVERY-001`, 2026-10-10)
 Probe `scripts/probe_netskope_experience.py` (sólo lectura; informa forma y clase de cada campo, nunca IPs, correos ni identificadores). Resultados del tenant:
-- **On-Premises Detection ya viene en `clientstatus`** (la ruta que sincronizamos, hoy sin guardar): `onpremises_status` (`on-prem`, `off-prem`, `unconfig`, `Unknown`), `onprem_status.{status,method,match_ip}` (`method` `Egress_IP` o `HTTP`), `last_connected_from_public_ip` / `_private_ip`, `netskope_pop`, `pop_pinned`, `zipcode`, `host_info.client_config` y `host_info.steering_config` (nombre de la configuración aplicada). Netskope decide oficina o remoto; DS Hub no necesita la lista de IPs de egreso (`clientconfiguration` sigue en 404).
+- **On-Premises Detection ya viene en `clientstatus`** (la ruta que sincronizamos, hoy sin guardar): `onpremises_status` (`on-prem`, `off-prem`, `unconfig`, `Unknown`), `onprem_status.{status,method,match_ip}` (`method` `Egress_IP` o `HTTP`), `last_connected_from_public_ip` / `_private_ip`, `netskope_pop`, `pop_pinned`, `zipcode`, `host_info.client_config` y `host_info.steering_config` (nombre de la configuración aplicada). Netskope decide oficina o remoto; Custodia no necesita la lista de IPs de egreso (`clientconfiguration` sigue en 404).
 - **Equipos con señal en 7 días (4495):** 397 `on-prem`, 4064 `off-prem`, 34 `Unknown`. Contra la lista de egreso de una configuración (8 IPs): 371 de los 388 equipos con esa IP pública figuran `on-prem` (14 `off-prem`, 3 `Unknown`); 26 `on-prem` no están en esa lista porque otras client config tienen otras. Sobre los 8985 registros, `unconfig`, vacío y `Unknown` son registros viejos o sin detección configurada.
 - **Client config aplicada:** `Default tenant config` 4388, `TestCiber` 79, `Client Default` 22, `Test AI Homologacion` 6; steering: `Default tenant config` 4308, `Vmedia tenant config` 162.
 - **ADEM, nivel tenant:** `getsummary` da `totalUsersCount` (~3470), `activeDevicesCount`, `userCountPoorExp`, `appsImpactedCount` y la lista de apps. `getentities` **ignora `offset` y `limit` > 100**: devuelve siempre los 100 usuarios de peor puntaje (`expScore` 42–75), cada uno con `location` en texto de ciudad, `devices`, `applications` y `userGroups`. No hay distribución del tenant completo por esta vía.
@@ -191,11 +191,11 @@ Evidencia de forma y allowlists por caso de uso. Un `200` o un probe **no** habi
 
 ### Autenticación
 
-El cliente (`netskope/sse/integrations/netskope.py`) envía `Netskope-API-Token` desde `NETSKOPE_API_TOKEN` o `NETSKOPE_API_TOKEN_FILE`; no obtiene ni renueva tokens OAuth. Que la consola muestre `View` no confirma el acceso de cada endpoint para DS Hub: los permisos se comprueban con esa credencial. `POST /api/v2/platform/oauth2/token` está referenciado, pero no se confirmó `client_credentials`, scopes, audiencia, expiración ni compatibilidad con las rutas actuales; no se reutiliza el transporte OAuth de CyberArk ni se sustituye el header por `Bearer`. Cambiarlo exige documentación/OpenAPI del tenant y confirmar grant no interactivo, permisos mínimos de lectura, ciclo de vida del token y manejo de `401`/`403`. Un token no elimina las credenciales (API token, access token, refresh y client secret lo son): se proveen al proceso por un gestor de secretos o montaje restringido y nunca se persisten en PostgreSQL, exportaciones, frontend, logs ni documentación.
+El cliente (`netskope/sse/integrations/netskope.py`) envía `Netskope-API-Token` desde `NETSKOPE_API_TOKEN` o `NETSKOPE_API_TOKEN_FILE`; no obtiene ni renueva tokens OAuth. Que la consola muestre `View` no confirma el acceso de cada endpoint para Custodia: los permisos se comprueban con esa credencial. `POST /api/v2/platform/oauth2/token` está referenciado, pero no se confirmó `client_credentials`, scopes, audiencia, expiración ni compatibilidad con las rutas actuales; no se reutiliza el transporte OAuth de CyberArk ni se sustituye el header por `Bearer`. Cambiarlo exige documentación/OpenAPI del tenant y confirmar grant no interactivo, permisos mínimos de lectura, ciclo de vida del token y manejo de `401`/`403`. Un token no elimina las credenciales (API token, access token, refresh y client secret lo son): se proveen al proceso por un gestor de secretos o montaje restringido y nunca se persisten en PostgreSQL, exportaciones, frontend, logs ni documentación.
 
 ### Permisos y accesibilidad del tenant
 
-Matriz del 2026-09-24 (token read-only), actualizada el 2026-10-01 (11:56–11:58 UTC, credencial de DS Hub, sólo GET, 17 rutas de desbloqueo y 15 de DEM):
+Matriz del 2026-09-24 (token read-only), actualizada el 2026-10-01 (11:56–11:58 UTC, credencial de Custodia, sólo GET, 17 rutas de desbloqueo y 15 de DEM):
 
 | Resultado | Rutas |
 |---|---|
@@ -204,7 +204,7 @@ Matriz del 2026-09-24 (token read-only), actualizada el 2026-10-01 (11:56–11:5
 | `403` | `policy/internetaccess/{rules,rules/applied,groups}`, `profiles/networks`, `dem/query/definitions`, `dem/apps`, `dem/appprobes`; `services/cci/app` responde `200` con un error funcional del servicio |
 | `404` (GET, 2026-09) | `users/getgroups` (el contrato real es POST; ver grupos), client configuration, steering devices, SSPM score y UCI |
 
-DEM repitió **11 `200`, 3 `403` y 1 `400`** (límite 4 req/s). El bloqueo observado para métricas DEM es `dem/query/definitions`; los POST `dem/query/getdataset`, `getentities`, `alerts/getalerts` y `adem/users/metrics/getexpscore` no se ejecutaron y no se clasifican como denegados por extrapolación. Los `403` los resuelve el dueño del tenant contrastando la cuenta y el token efectivos de DS Hub con las rutas exactas; nunca se pide escritura para arreglar lecturas denegadas.
+DEM repitió **11 `200`, 3 `403` y 1 `400`** (límite 4 req/s). El bloqueo observado para métricas DEM es `dem/query/definitions`; los POST `dem/query/getdataset`, `getentities`, `alerts/getalerts` y `adem/users/metrics/getexpscore` no se ejecutaron y no se clasifican como denegados por extrapolación. Los `403` los resuelve el dueño del tenant contrastando la cuenta y el token efectivos de Custodia con las rutas exactas; nunca se pide escritura para arreglar lecturas denegadas.
 
 ### DEM: sitios (`NSK-DEM-INV-001`)
 
@@ -218,9 +218,9 @@ Opt-in con `NETSKOPE_GROUPS_PATH=/api/v2/users/getgroups` (otro valor es inerte 
 
 ### Experiencia digital: ADEM
 
-- **POPs:** `GET /api/v2/adem/poplist` exige `starttime` y `endtime` en segundos Unix (ventana máxima 48 h dentro de los últimos 30 días; `prefix` opcional) y responde `{pops: [...], totalCount}`. DS Hub consulta ventanas de 2, 24 o 48 h bajo `netskope:read`, valida la forma y expone sólo códigos de POP, cantidad y período; no persiste ni mezcla con los sitios DEM, y no infiere usuario, dispositivo, volumen, sesiones, latencia ni IP de egreso (probe 2026-09-30: 18 códigos en 2 h).
+- **POPs:** `GET /api/v2/adem/poplist` exige `starttime` y `endtime` en segundos Unix (ventana máxima 48 h dentro de los últimos 30 días; `prefix` opcional) y responde `{pops: [...], totalCount}`. Custodia consulta ventanas de 2, 24 o 48 h bajo `netskope:read`, valida la forma y expone sólo códigos de POP, cantidad y período; no persiste ni mezcla con los sitios DEM, y no infiere usuario, dispositivo, volumen, sesiones, latencia ni IP de egreso (probe 2026-09-30: 18 códigos en 2 h).
 - **Por usuario/dispositivo (`NSK-ADEM-USERPOP-001`, probe 2026-09-30):** `POST adem/users/device/getlist` con `{user, starttime, endtime, userLocation: []}` devuelve `[{deviceId, deviceName, deviceOs}]`; `POST adem/users/device/getdetails` con `{user, deviceId, starttime, endtime}` devuelve `pop` y `lastActivity` (entero de segundos Unix). La fecha observada quedó ≈24 minutos **después** del reloj de consulta: la semántica de frescura no está confirmada y no se corrige ni recorta (`NSK-ADEM-TIME-001`, externa).
-- DS Hub ofrece `GET /api/cmdb/netskope/users/{object_id}/experience/devices?hours=2|24|48` y `.../devices/{device_id}` bajo `netskope:read`: resuelve sólo usuarios activos de `source_system = netskope` (su correo persistido es el parámetro `user`), verifica que el dispositivo pertenece al listado de ese usuario y ventana, y expone ID/nombre/SO, POP, actividad informada, procedencia y período (`activity_status`: `in_window`, `outside_window`, `unknown`). No persiste nada, excluye IP, gateway, geo, coordenadas y score, reemplaza errores remotos por un mensaje controlado y no vincula `deviceId` ADEM con dispositivos SSE por semejanza. **Única excepción (ADR 006, 2026-10-11):** en la ruta de puntaje de un usuario, un equipo ADEM se une al equipo del inventario de ese usuario por nombre **exacto y único** en ambos lados (`services/netskope_device_link.py`), devuelto como `inventory_device_id`; sin coincidencia única cada lado queda por separado. `getentities` y los agregados por POP siguen pendientes de schema `200` y paginación.
+- Custodia ofrece `GET /api/cmdb/netskope/users/{object_id}/experience/devices?hours=2|24|48` y `.../devices/{device_id}` bajo `netskope:read`: resuelve sólo usuarios activos de `source_system = netskope` (su correo persistido es el parámetro `user`), verifica que el dispositivo pertenece al listado de ese usuario y ventana, y expone ID/nombre/SO, POP, actividad informada, procedencia y período (`activity_status`: `in_window`, `outside_window`, `unknown`). No persiste nada, excluye IP, gateway, geo, coordenadas y score, reemplaza errores remotos por un mensaje controlado y no vincula `deviceId` ADEM con dispositivos SSE por semejanza. **Única excepción (ADR 006, 2026-10-11):** en la ruta de puntaje de un usuario, un equipo ADEM se une al equipo del inventario de ese usuario por nombre **exacto y único** en ambos lados (`services/netskope_device_link.py`), devuelto como `inventory_device_id`; sin coincidencia única cada lado queda por separado. `getentities` y los agregados por POP siguen pendientes de schema `200` y paginación.
 
 ### UCI por empresa (`NSK-EXP-UEBA-001`, fase 2)
 `GET /api/cmdb/netskope/uci/companies` (`netskope:uba_read`, auditada con conteos): por empresa (`company` o dominio del correo), usuarios activos **con correo** y cuántos tienen UCI Poor o Moderate. Es una **proporción**, no un promedio de puntaje: los usuarios Good no se guardan (`netskope_user_uci` solo conserva Poor y Moderate), así que promediar sesgaría hacia las empresas sanas. Los usuarios sin correo no entran al denominador porque el correo es la única clave que los une al UCI. Ordenada por proporción en riesgo, 25 empresas como máximo (el resto suma en `omitted_users`). **Tendencia semanal:** cada sincronización de UCI guarda en `netskope_uci_company_history` (migración `093`) los conteos por empresa y semana (`users`, `poor`, `moderate`; la última lectura de la semana gana; solo cantidades, nunca usuarios, correos ni puntajes; se purga a las 26 semanas). La respuesta incluye `previous` (conteos de la última semana anterior guardada, o `null`) y `previous_week`; la UI muestra la variación en puntos porcentuales y «Sin dato» sin foto previa. Si registrar la foto falla, la captura de UCI igual termina.
@@ -236,7 +236,7 @@ Opt-in con `NETSKOPE_GROUPS_PATH=/api/v2/users/getgroups` (otro valor es inerte 
 
 Las alertas se consultan como agregados count-only con `fields=count_total:count(id)` por `datasearch/alert` (`NETSKOPE_ALERT_PATH=/api/v2/events/datasearch/alert`); nunca se descargan ni persisten eventos, usuarios, IPs, archivos, URLs ni forense. Cada sync toma ventanas móviles de **7, 30 y 90 días** y guarda total, Top de `alert_type` y `action` y los nombres de `policy` observados con su conteo (la severidad se lee de AA, sin snapshot local); la API sólo expone las diez claves más frecuentes por dimensión, los ceros también se guardan y las dimensiones fuera de la allowlist se rechazan. La retención es de 180 días (`ALERT_AGGREGATE_RETENTION_DAYS`).
 
-**El endpoint no es exclusivo de DLP:** el total cuenta todos los tipos del tenant (2026-09-25, 7 días: `policy` 27.035.528, 99,9 %, frente a `DLP` 24.575; 30 días 127.408.129 frente a 141.173; 90 días 336.957.366 frente a 417.528), por eso la UI lo rotula «Alertas Netskope agregadas» y muestra aparte el corte DLP. Filtrar por `alert_type` exigiría un contrato nuevo. `NETSKOPE_DLP_ALERTS_PATH` (`dataexport/alerts/dlp`) es un iterator de exportación cruda (`index`/`operation`) que no acepta el contrato agregado y puede devolver datos personales y forenses: DS Hub informa si está configurada pero no la consume.
+**El endpoint no es exclusivo de DLP:** el total cuenta todos los tipos del tenant (2026-09-25, 7 días: `policy` 27.035.528, 99,9 %, frente a `DLP` 24.575; 30 días 127.408.129 frente a 141.173; 90 días 336.957.366 frente a 417.528), por eso la UI lo rotula «Alertas Netskope agregadas» y muestra aparte el corte DLP. Filtrar por `alert_type` exigiría un contrato nuevo. `NETSKOPE_DLP_ALERTS_PATH` (`dataexport/alerts/dlp`) es un iterator de exportación cruda (`index`/`operation`) que no acepta el contrato agregado y puede devolver datos personales y forenses: Custodia informa si está configurada pero no la consume.
 
 **Políticas observadas.** `dimension = policy` (migración `075`) es sólo **observada**: una política aparece si disparó en la captura; el catálogo configurado no se importa y una ausente no se marca deshabilitada. Por política se expone nombre, volumen por ventana y primera/última captura (`captured_at` de los snapshots, nunca la fecha de un evento); no hay dimensión cruzada `policy × action`, así que la «acción dominante» es siempre «Sin dato», y un dato ausente es «Sin dato», nunca `0`. **Veracidad de la ventana (`NSK-POL-002`, migración `081`):** la tarea de alertas escribe por ventana una fila marcadora `policy_capture` cuando todas sus consultas tuvieron éxito; cada ventana de la API trae `policy_capture` = `captured` (el cohorte incluyó filas `policy` o el marcador) o `missing`. Sólo `captured` con lista vacía significa «ninguna política disparó»; `missing` es «Sin captura de políticas» y los cohortes anteriores a la `081` quedan `missing` hasta la próxima sync, sin heredar políticas de una corrida previa. `first_captured_at` es el mínimo entre los snapshots conservados (no la primera aparición real; la UI rotula «Desde (retención 180 d)»). `GET /api/cmdb/netskope/observed-policies` (`netskope:read`, aislado por `source_system`) no devuelve usuarios ni eventos y no tiene drill-down (decisión al aceptar `NSK-POL-001`).
 
@@ -246,7 +246,7 @@ Las alertas se consultan como agregados count-only con `fields=count_total:count
 
 **Allowlist persistida** (tipo `netskope_policy_group`, migración `099`): `group_id` (texto), `group_name`, `group_type` y `can_be_edited_deleted`. Nunca `created_by`, `modify_by` (identidades de administradores) ni `modify_time`. La lectura es opcional dentro de `netskope_inventory`: si falla, la respuesta no tiene `data[]`, viene vacía, alcanza el tope de 500 o trae un grupo sin id o nombre, los grupos almacenados no se tocan y la corrida queda parcial (`policy_groups_error`). Como la respuesta no trae total, no se puede probar que esté completa: sólo una lectura válida y no vacía reconcilia (y retira lo ausente). Lectura: `GET /api/cmdb/netskope/policy-groups` (`netskope:read`).
 
-**Las reglas no están ahí.** `policy/npa/rules` responde `200` con 0 reglas (sólo Private Access). Las rutas de reglas, `GET policy/internetaccess/rules` (confirmada en el Swagger: filtro `jql` por `id`, `group_id`, `name`, `enabled`, `status`; `limit` máx. 1000), `internetaccess/groups`, `internetaccess/rules/applied` y `services/dlp/profiles`, siguen en `403` (probe del 2026-10-12). El Swagger las describe como *«still under development and not ready for use. Please work with your account team to learn about them and request access»*, el mismo mensaje en todas las que fallan: el acceso lo habilita Netskope, no un scope del token. Hasta tenerlo (`NSK-POLICY-003`), DS Hub no sabe qué cubre cada grupo.
+**Las reglas no están ahí.** `policy/npa/rules` responde `200` con 0 reglas (sólo Private Access). Las rutas de reglas, `GET policy/internetaccess/rules` (confirmada en el Swagger: filtro `jql` por `id`, `group_id`, `name`, `enabled`, `status`; `limit` máx. 1000), `internetaccess/groups`, `internetaccess/rules/applied` y `services/dlp/profiles`, siguen en `403` (probe del 2026-10-12). El Swagger las describe como *«still under development and not ready for use. Please work with your account team to learn about them and request access»*, el mismo mensaje en todas las que fallan: el acceso lo habilita Netskope, no un scope del token. Hasta tenerlo (`NSK-POLICY-003`), Custodia no sabe qué cubre cada grupo.
 
 ### DLP: captura mínima (`NSK-DLP-001`)
 
@@ -268,7 +268,7 @@ lectura de este apartado atribuyó la diferencia de usuarios a Netskope y era er
 
 | Cifra de la consola | Cómo se obtiene | Resultado |
 |---|---|---|
-| Dispositivos con evento en 7 días: 4.578 | misma consulta de DS Hub (el tablero mostró 4.577 minutos después) | Coincide. La ventana se mide contra la hora de la consulta y los datos cambian solo con cada sync: un equipo sale de la ventana cada pocos minutos. |
+| Dispositivos con evento en 7 días: 4.578 | misma consulta de Custodia (el tablero mostró 4.577 minutos después) | Coincide. La ventana se mide contra la hora de la consulta y los datos cambian solo con cada sync: un equipo sale de la ventana cada pocos minutos. |
 | Usuarios de esos equipos: 4.454 | usernames distintos | Coincide |
 | Total Users: 8.859 | filas de `getusers` (8.923, con 4 repetidas al paginar) menos 64 usuarios con **todas** sus cuentas `deleted` | Exacto |
 | Enterprise Accounts Disabled: 1.987 | cuentas con `deleted` distinto de `true` y `active = false` | Exacto |
@@ -280,7 +280,7 @@ lectura de este apartado atribuyó la diferencia de usuarios a Netskope y era er
 - **Qué trae `getusers`:** cada usuario trae `accounts[]` con `scimId`, `userName`, `active`, `deleted`, `ou`, `parentGroups`, `provisioner` y
   `lastModified`, **solo si la proyección pide `accounts`**; sin ella el tenant devuelve una cuenta reducida (sin `active` ni `deleted`). La
   corrida la pide siempre desde `NSK-USR-001`. `getusers` rechaza cualquier otro campo de estado (`active`, `status`, etc. a nivel usuario).
-- **Qué cuenta DS Hub:** un usuario es tal si tiene al menos una cuenta no borrada; está **habilitado** si alguna de ellas está activa. Quien
+- **Qué cuenta Custodia:** un usuario es tal si tiene al menos una cuenta no borrada; está **habilitado** si alguna de ellas está activa. Quien
   tiene todas sus cuentas borradas sale del snapshot y una corrida completa lo retira. Una cuenta sin `deleted` explícito en `true` cuenta
   como viva. Está **deshabilitado** solo quien tiene todas sus cuentas vivas con `active: false` explícito; una cuenta sin `active` o con un
   valor que no es booleano no es evidencia, y el usuario queda desconocido (sin `accounts[]` utilizable, también). Una misma id leída dos veces
@@ -295,7 +295,7 @@ lectura de este apartado atribuyó la diferencia de usuarios a Netskope y era er
   dejado la empresa**, y varios de esos equipos siguen reportando (`Tunnel Up`, `Dem Heartbeat`). Revisión operativa: el drill de la tarjeta
   «Sin usuario resuelto» (o el filtro de usuario observado «Sin resolver») abre los 14 equipos recientes; los 53 se ven en el inventario con
   «Incluye dispositivos sin evento en 7 días» y el mismo filtro. Se confirma si el usuario fue dado de baja y se reasigna, retira o reinstala
-  el cliente; DS Hub no cambia nada en Netskope. La lista nominal no se guarda en el repositorio.
+  el cliente; Custodia no cambia nada en Netskope. La lista nominal no se guarda en el repositorio.
 - **Filas repetidas:** 4 filas de `getusers` se repiten idénticas en el borde de las páginas (posiciones 1998/1999, 3997/3998…). El mapeo da el
   mismo objeto y la deduplicación del snapshot las une; una repetición con datos distintos sigue fallando la corrida.
 - **`userCount` de un grupo cuenta cuentas no borradas**, no usuarios: coincide en 420 de 422 grupos (los otros 2 difieren en 3 en total). Eso
@@ -304,7 +304,7 @@ lectura de este apartado atribuyó la diferencia de usuarios a Netskope y era er
 - **Campos de grupo útiles:** `created`, `lastModified`, `lastModifiedBy`, `lastProvisioner`, `provisioner` (707 AD, 9 SCIM, 2 Local) y
   `parentGroups`. Las columnas «# User», «Provision Method», «Creation Date» y «Last Edited» de la consola salen de ahí.
 - **`GET users/counts`** devuelve la cabecera de la consola (`totalUsers`, `activeAccounts`, `inactiveAccounts`, `totalGroups`, `totalOUs`,
-  `lastModified`). DS Hub la guarda por corrida (`netskope_reported_counts`, migraciones 086 y 088) solo como referencia.
+  `lastModified`). Custodia la guarda por corrida (`netskope_reported_counts`, migraciones 086 y 088) solo como referencia.
 - **SCIM** (`scim/Users`) informa `totalResults` 8.859 pero pagina 9.094 registros: no se usa.
 - **Grupos:** la base no tiene grupos ni membresías porque `NETSKOPE_GROUPS_PATH` no está configurado en el servicio; con `accounts[]` pedido
   siempre, habilitarlos es solo esa variable.

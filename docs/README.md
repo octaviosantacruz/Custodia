@@ -4,9 +4,9 @@ dueño: Octavio Santacruz
 revisado: 2026-10-09
 ---
 
-# Documentación de DS Hub
+# Documentación de Custodia
 
-DS Hub reúne inventarios de **CyberArk** y **Netskope** para que el equipo pueda
+Custodia reúne inventarios de **CyberArk** y **Netskope** para que el equipo pueda
 revisarlos, clasificarlos y entender sus métricas. Cada plataforma conserva
 sus propios datos y permisos. [AGENTS.md](../AGENTS.md) explica el producto y
 sus reglas.

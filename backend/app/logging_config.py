@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 
 
 _request_id: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "dshub_request_id", default=""
+    "custodia_request_id", default=""
 )
 _CONFIGURED = False
 

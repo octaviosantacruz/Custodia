@@ -48,7 +48,7 @@ export type RegisteredWorkspace = WorkspaceCatalogEntry & {
   category?: { id: string; order: number };
   recentWorkspace?: string;
   refreshSources?: readonly string[];
-  command: { tool: string; platform: 'cyberark' | 'netskope' | 'dshub'; aliases: readonly string[]; priority: number };
+  command: { tool: string; platform: 'cyberark' | 'netskope' | 'custodia'; aliases: readonly string[]; priority: number };
 };
 
 export type SyncPresentation = { text: string; running: boolean; observedAt?: string | null };

@@ -4,10 +4,10 @@ dueño: Octavio Santacruz
 revisado: 2026-10-09
 ---
 
-# Comandos clave de DS Hub
+# Comandos clave de Custodia
 
 **Última revisión:** 2026-10-03. Chuleta de operación para el host de este
-repositorio (`/home/ubuntu/DSHub`). No reemplaza a
+repositorio (`/home/ubuntu/Custodia`). No reemplaza a
 [`deployment.md`](deployment.md): ahí está el porqué de cada decisión; aquí sólo
 el comando. Todo se ejecuta desde la raíz del repo salvo que se indique otra cosa.
 
@@ -18,14 +18,14 @@ el comando. Todo se ejecuta desde la raíz del repo salvo que se indique otra co
 ## 1. Servicio (systemd)
 
 ```bash
-sudo systemctl status dshub        # estado y últimos procesos
-sudo systemctl restart dshub       # tras git pull, cambios de .env o de código
-sudo systemctl stop dshub          # bajar todo (backend + vite preview)
-sudo systemctl start dshub
+sudo systemctl status custodia        # estado y últimos procesos
+sudo systemctl restart custodia       # tras git pull, cambios de .env o de código
+sudo systemctl stop custodia          # bajar todo (backend + vite preview)
+sudo systemctl start custodia
 
-tail -f /var/log/dshub/backend.log      # backend (uvicorn)
-tail -f /var/log/dshub/frontend.log     # frontend (vite preview)
-journalctl -u dshub -f                  # migraciones, build y supervisor
+tail -f /var/log/custodia/backend.log      # backend (uvicorn)
+tail -f /var/log/custodia/frontend.log     # frontend (vite preview)
+journalctl -u custodia -f                  # migraciones, build y supervisor
 curl --fail --silent http://127.0.0.1:8000/api/health/ready   # backend listo
 ```
 
@@ -150,7 +150,7 @@ La sincronización la ejecuta el coordinador dentro del backend; las corridas
 manuales se disparan desde la pantalla **Actividad → Sincronizaciones** o por
 API (`POST /api/ingestion/<fuente>/runs`, con sesión autorizada).
 
-Variables (en `.env.local`, reiniciar `dshub` tras cambiarlas):
+Variables (en `.env.local`, reiniciar `custodia` tras cambiarlas):
 
 ```bash
 INGESTION_INTERVAL_MINUTES=60                     # intervalo por defecto; 0 = apagado
@@ -176,10 +176,10 @@ Parar el servicio **antes** de instalar paquetes en `backend/.venv` (Python
 conserva módulos en memoria y una mezcla de versiones rompe las sincronizaciones):
 
 ```bash
-sudo systemctl stop dshub
+sudo systemctl stop custodia
 backend/.venv/bin/python -m pip install --require-hashes -r backend/requirements.lock.txt
 backend/.venv/bin/python -m pip check
-sudo systemctl start dshub
+sudo systemctl start custodia
 curl --fail --silent http://127.0.0.1:8000/api/health/ready
 ```
 
@@ -222,7 +222,7 @@ Reglas efectivas de un agente (orchestrator, worker, reviewer), sin invocar
 modelos:
 
 ```bash
-opencode api GET '/api/agent?location%5Bdirectory%5D=%2Fhome%2Fubuntu%2FDSHub'
+opencode api GET '/api/agent?location%5Bdirectory%5D=%2Fhome%2Fubuntu%2FCustodia'
 ```
 
 **Orden para trabajar con el CLI** (la clave de Command Code vive en
@@ -231,7 +231,7 @@ opencode api GET '/api/agent?location%5Bdirectory%5D=%2Fhome%2Fubuntu%2FDSHub'
 ```bash
 source ~/.profile                    # si la terminal no es de login
 [ -n "$COMMANDCODE_API_KEY" ] && echo "clave presente" || echo "FALTA"
-cd ~/DSHub && opencode
+cd ~/Custodia && opencode
 ```
 
 Verificar que cada servidor de OpenCode tiene la clave en su entorno
@@ -263,7 +263,7 @@ recurso exactos (detalle en `.opencode/README.md`).
 
 | Síntoma | Comprobar |
 |---|---|
-| El sitio no responde | `systemctl status dshub`, `journalctl -u dshub -n 100`, `curl .../api/health/ready` |
+| El sitio no responde | `systemctl status custodia`, `journalctl -u custodia -n 100`, `curl .../api/health/ready` |
 | Una sincronización falla con `ImportError` | Se actualizaron paquetes con el backend activo: reiniciar (sección 8) |
 | `Error: http://127.0.0.1:4173 is already used` | Preview E2E huérfano: sección 5 |
 | E2E de postura Netskope agota el tiempo en la corrida completa | Intermitente conocido (`NSK-E2E-TIME-001`): repetirlo solo con `-g` |
@@ -272,8 +272,8 @@ recurso exactos (detalle en `.opencode/README.md`).
 
 ## 12. Worktrees por tarea
 
-No se crean a mano: `/dshub-task <ID>` (orchestrator) y `/dshub-goal <ID>` (modo
-noche) corren `scripts/wt.sh new <ID>` y trabajan en `../DSHub-wt/<ID>`, rama
+No se crean a mano: `/custodia-task <ID>` (orchestrator) y `/custodia-goal <ID>` (modo
+noche) corren `scripts/wt.sh new <ID>` y trabajan en `../Custodia-wt/<ID>`, rama
 `task/<ID>` (detalle en `.opencode/README.md`). Los enlaces a `node_modules`,
 `backend/.venv` y `.env.local` se crean solos. Lo que sí usas tú:
 
@@ -284,10 +284,10 @@ scripts/wt.sh clean <ID>             # borra árbol y rama ya integrados
 scripts/wt.sh new <ID>               # sólo si quieres trabajar tú ahí (idempotente)
 ```
 
-- Para revisar a mano un árbol: `cd ../DSHub-wt/<ID>`; los E2E usan solos un
+- Para revisar a mano un árbol: `cd ../Custodia-wt/<ID>`; los E2E usan solos un
   puerto propio (4200-4899, derivado del ID).
 - `merge` se niega si el árbol tiene cambios sin commitear o si el rebase
   conflictúa (se resuelve dentro del árbol); `clean` se niega si hay commits sin
   integrar. El árbol principal debe estar en la rama base.
-- El servicio `dshub` y los puertos 8000/5173 pertenecen al árbol principal:
+- El servicio `custodia` y los puertos 8000/5173 pertenecen al árbol principal:
   reiniciar tras integrar, no desde un worktree.

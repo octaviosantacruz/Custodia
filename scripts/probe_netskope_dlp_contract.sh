@@ -53,7 +53,7 @@ request() {
     --get "$base_url$path" "$@"
 }
 
-index="dshub-dlp-contract-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+index="custodia-dlp-contract-$(date -u +%Y%m%dT%H%M%SZ)-$$"
 status="$(request "$body" \
   --data-urlencode "operation=$(date -u -d '24 hours ago' +%s)" \
   --data-urlencode "index=$index")"
@@ -138,7 +138,7 @@ for filter in hostname user userkey; do
   filter_status="$(request "$filter_body" \
     --data-urlencode "operation=$(date -u -d '24 hours ago' +%s)" \
     --data-urlencode "index=${index}-${filter}" \
-    --data-urlencode "${filter}=__dshub_contract_probe__")"
+    --data-urlencode "${filter}=__custodia_contract_probe__")"
   filter_count="$(jq -r 'if (.result | type) == "array" then (.result | length) else 0 end' "$filter_body" 2>/dev/null || echo 0)"
   echo "filter=$filter status=$filter_status result_count=$filter_count"
 done

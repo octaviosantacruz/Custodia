@@ -139,7 +139,7 @@ async def netskope_group_members(
 # purge) until a separate explicit authorization.
 RETIRED_DLP_DETAIL = (
     "La investigación de incidentes y eventos DLP individuales por dispositivo "
-    "está retirada: DS Hub sólo mantiene agregados y alertas mínimas por usuario."
+    "está retirada: Custodia sólo mantiene agregados y alertas mínimas por usuario."
 )
 
 

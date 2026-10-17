@@ -80,7 +80,7 @@ class SeverityContract:
 class SeverityApproval:
     """Operator attestation after inspecting the tenant's saved definition.
 
-    The API available to DS Hub does not expose its filters/measure definition.
+    The API available to Custodia does not expose its filters/measure definition.
     Its SHA is evidence identity, not proof of automated remote drift detection.
     """
 

@@ -32,7 +32,7 @@ export function ProfileMenu({ authStatus, theme, onThemeChange, onRefreshData, r
   const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'U';
   const permissions = authStatus.permissions ?? [];
   const adminViews = (['users', 'activity'] as const).filter((view) => hasWorkspaceAccess(view, permissions));
-  const ADMIN_ENTRIES = { users: { label: 'Usuarios y permisos', title: 'Administrar usuarios, roles y permisos de DS Hub', icon: Users }, activity: { label: 'Actividad', title: 'Auditoría, sincronizaciones y errores', icon: History } } as const;
+  const ADMIN_ENTRIES = { users: { label: 'Usuarios y permisos', title: 'Administrar usuarios, roles y permisos de Custodia', icon: Users }, activity: { label: 'Actividad', title: 'Auditoría, sincronizaciones y errores', icon: History } } as const;
   const goTo = (view: WorkspaceView) => { setOpen(false); onNavigate(view); };
   const endSession = async () => {
     setOpen(false);
@@ -69,7 +69,7 @@ export function ProfileMenu({ authStatus, theme, onThemeChange, onRefreshData, r
       <button className="profile-menu-action" type="button" title="Guías de uso e interpretación de datos" onClick={() => goTo('help')}><BookOpen size={15} /> Ayuda</button>
       <button className="profile-menu-action" type="button" title="Editar tu nombre o cambiar tu contraseña" onClick={() => { setOpen(false); setAccountOpen(true); }}><UserCircle size={15} /> Mi cuenta</button>
       {authStatus.mode === 'local' && <button className="profile-menu-action" type="button" title="Cerrar la sesión actual y acceder con otra cuenta" onClick={() => void endSession()}><Repeat2 size={15} /> Cambiar cuenta</button>}
-      <button className="profile-menu-action danger" type="button" title="Finalizar la sesión en DS Hub" onClick={() => void endSession()}><LogOut size={15} /> Cerrar sesión</button>
+      <button className="profile-menu-action danger" type="button" title="Finalizar la sesión en Custodia" onClick={() => void endSession()}><LogOut size={15} /> Cerrar sesión</button>
     </section>}
     {accountOpen && <AccountProfileModal authStatus={authStatus} onClose={() => setAccountOpen(false)} onNotice={onNotice} onProfileUpdated={onProfileUpdated} fallbackFocusRef={triggerRef} />}
   </div>;

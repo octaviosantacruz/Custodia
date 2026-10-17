@@ -115,7 +115,7 @@ class OidcHealthResponse(BaseModel):
     default_role: str | None
     default_role_status: str | None
     default_role_display_name: str | None
-    # ACCESS-UI-001: 'database' once the mapping is edited from DS Hub.
+    # ACCESS-UI-001: 'database' once the mapping is edited from Custodia.
     role_map_source: Literal['database', 'environment']
     role_map: list[OidcRoleMappingEntry]
     last_oidc_login_at: datetime | None

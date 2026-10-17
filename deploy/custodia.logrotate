@@ -1,4 +1,4 @@
-/var/log/dshub/*.log {
+/var/log/custodia/*.log {
     daily
     rotate 14
     compress

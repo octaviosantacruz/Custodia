@@ -5,7 +5,7 @@ serializes two concurrent transactions on a real PostgreSQL instance.
 No mock can demonstrate this: a fake cursor has no notion of a second,
 independent connection blocking on the same lock key.
 
-Opt-in only: requires DSHUB_TEST_DATABASE_URL to be set explicitly to a
+Opt-in only: requires CUSTODIA_TEST_DATABASE_URL to be set explicitly to a
 disposable/test PostgreSQL instance. This deliberately never reads
 .env.local or falls back to DATABASE_URL -- an earlier version of this
 test did, and it silently reused whatever real database that file

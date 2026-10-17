@@ -1,4 +1,4 @@
-"""NSK-POSTURE-001: Netskope posture checks over data DS Hub already synchronizes.
+"""NSK-POSTURE-001: Netskope posture checks over data Custodia already synchronizes.
 
 Every check is the exact inventory query its "Ver en inventario" drill opens
 (same filters, same scope), so a group's count always equals the list behind

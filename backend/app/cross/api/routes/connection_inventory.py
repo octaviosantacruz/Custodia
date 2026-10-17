@@ -203,7 +203,7 @@ async def export_connection_inventory_csv(
     return Response(
         content="\ufeff" + content,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=\"dshub-destinos.csv\""},
+        headers={"Content-Disposition": "attachment; filename=\"custodia-destinos.csv\""},
     )
 
 

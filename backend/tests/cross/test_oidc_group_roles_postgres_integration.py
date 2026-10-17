@@ -1,5 +1,5 @@
 """ACCESS-UI-001 phase 2 on real PostgreSQL: the Okta group -> role mapping is
-edited in DS Hub. Until the first edit the login reads OIDC_ROLE_MAP_JSON; the
+edited in Custodia. Until the first edit the login reads OIDC_ROLE_MAP_JSON; the
 first edit adopts it whole, and from then on the table is the only source even
 when empty. Ceiling and catalog checks roll back the whole edit.
 Opt-in; see tests/support/pg_integration_base.py."""

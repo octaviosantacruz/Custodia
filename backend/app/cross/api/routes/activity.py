@@ -55,5 +55,5 @@ async def export_activity(
     return Response(
         content="\ufeff" + content,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=\"dshub-actividad.csv\""},
+        headers={"Content-Disposition": "attachment; filename=\"custodia-actividad.csv\""},
     )

@@ -85,14 +85,14 @@ sólo el rol que los lista. Qué permiso exige cada endpoint:
 | `safes:read` | CyberArk PAM | active | Consultar Safes, sus miembros y sus cuentas | `admin`, `cyberark_admin`, `cyberark_operator`, `cyberark_reader`, `operator`, `reader` |
 | `access:directory_read` | Plataforma | active | Consultar personas e identidades locales/OIDC | `admin` |
 | `access:local_users_manage` | Plataforma | active | Administrar identidades locales y sus credenciales temporales | `admin` |
-| `access:manage` | Plataforma | active | Administrar usuarios, roles y permisos de DS Hub | `admin` |
+| `access:manage` | Plataforma | active | Administrar usuarios, roles y permisos de Custodia | `admin` |
 | `access:oidc_mappings_read` | Plataforma | active | Consultar mapeos y diagnóstico OIDC no secreto | `admin` |
 | `access:permissions_manage` | Plataforma | active | Crear permisos internos; reservado al superadministrador | `admin` |
 | `access:role_assignments_manage` | Plataforma | active | Asignar roles dentro del techo de delegación | `admin` |
 | `access:roles_manage` | Plataforma | active | Crear y modificar roles dentro del techo de delegación | `admin` |
 | `access:roles_read` | Plataforma | active | Consultar roles, permisos, dominios y niveles | `admin` |
 | `audit:read` | Plataforma | active | Consultar auditoría y registros operativos sanitizados | `admin` |
-| `domain:admin` | Plataforma | active | Ingresar a la administración de DS Hub | `admin` |
+| `domain:admin` | Plataforma | active | Ingresar a la administración de Custodia | `admin` |
 | `security:events_read` | Plataforma | active | Consultar eventos de autenticación y seguridad sanitizados | `admin` |
 | `domain:sia` | Secure Infrastructure Access | active | Ingresar al dominio SIA | `admin`, `sia_reader` |
 | `sia:catalogs_read` | Secure Infrastructure Access | active | Consultar catálogos técnicos de SIA: conectores, recursos y cuentas fuertes de base de datos | `admin`, `sia_reader` |

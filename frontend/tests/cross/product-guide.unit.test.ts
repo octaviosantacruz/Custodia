@@ -114,7 +114,7 @@ test('Command-K finds every section with the guide names and keeps them out of t
   assert.equal(new Set(ids).size, ids.length);
   for (const command of commands) {
     assert.equal(command.kind, 'view');
-    assert.equal(command.platform, 'dshub');
+    assert.equal(command.platform, 'custodia');
     assert.equal(command.workspace, 'help');
     assert.ok(command.sectionId, command.id);
     assert.equal(command.hideInEmptyState, true, command.id);

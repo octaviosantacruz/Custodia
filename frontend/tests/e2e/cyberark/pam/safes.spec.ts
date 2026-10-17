@@ -755,7 +755,7 @@ test('safe inventory fits common desktop widths without horizontal scroll and fi
   await expect(page.getByRole('button', { name: /^Filtrar columna/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Filtrar por acción siguiente' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Filtrar por tipo de cuenta' })).toBeVisible();
-  await page.screenshot({ path: '/tmp/claude-1000/-home-ubuntu-DSHub/27c4ffc5-d05b-48f8-9b27-9c0b36277689/scratchpad/safes-1440.png' });
+  await page.screenshot({ path: '/tmp/claude-1000/-home-ubuntu-Custodia/27c4ffc5-d05b-48f8-9b27-9c0b36277689/scratchpad/safes-1440.png' });
 });
 
 test('a row select that has to open upwards on a short window keeps a usable, selectable menu', async ({ page }) => {
@@ -809,7 +809,7 @@ test('the Safe table needs no side scrolling even with long names, retention tex
   await expect(page.locator('.account-inline-row').first()).toBeVisible();
   const { clientWidth, scrollWidth } = await tableWrap.evaluate((el) => ({ clientWidth: el.clientWidth, scrollWidth: el.scrollWidth }));
   expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
-  await page.screenshot({ path: '/tmp/claude-1000/-home-ubuntu-DSHub/27c4ffc5-d05b-48f8-9b27-9c0b36277689/scratchpad/noscroll-1100.png' });
+  await page.screenshot({ path: '/tmp/claude-1000/-home-ubuntu-Custodia/27c4ffc5-d05b-48f8-9b27-9c0b36277689/scratchpad/noscroll-1100.png' });
 });
 
 

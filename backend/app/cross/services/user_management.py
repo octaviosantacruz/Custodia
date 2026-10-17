@@ -162,7 +162,7 @@ async def remove_user(pool: AsyncConnectionPool, user_id: str, actor_id: str) ->
 
 
 async def assign_role(pool: AsyncConnectionPool, user_id: str, role_code: str, actor_id: str) -> bool | None:
-    """ACCESS-UI-001: add a DS Hub role to a local or OIDC identity."""
+    """ACCESS-UI-001: add a Custodia role to a local or OIDC identity."""
     if user_id == actor_id:
         raise SelfRoleChangeError
     if not await role_exists(pool, role_code):
@@ -171,7 +171,7 @@ async def assign_role(pool: AsyncConnectionPool, user_id: str, role_code: str, a
 
 
 async def unassign_role(pool: AsyncConnectionPool, user_id: str, role_code: str, actor_id: str) -> bool:
-    """ACCESS-UI-001: remove a DS Hub role; OIDC-mapped roles change only in the provider."""
+    """ACCESS-UI-001: remove a Custodia role; OIDC-mapped roles change only in the provider."""
     if user_id == actor_id:
         raise SelfRoleChangeError
     return await revoke_user_role(pool, user_id, role_code, actor_id)

@@ -118,7 +118,7 @@ async def export_accounts_csv(
     return Response(
         content="\ufeff" + _accounts_csv(rows),
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=\"dshub-accounts.csv\""},
+        headers={"Content-Disposition": "attachment; filename=\"custodia-accounts.csv\""},
     )
 
 
@@ -156,7 +156,7 @@ async def export_safes_csv(
     return Response(
         content="\ufeff" + csv_content,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=\"dshub-safes.csv\""},
+        headers={"Content-Disposition": "attachment; filename=\"custodia-safes.csv\""},
     )
 
 

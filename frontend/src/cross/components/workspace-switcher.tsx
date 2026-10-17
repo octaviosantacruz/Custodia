@@ -4,7 +4,7 @@ import {
   Check, ChevronDown, LoaderCircle, Save, Settings2, SlidersHorizontal, X,
 } from 'lucide-react';
 import { usePopover } from '../hooks/use-popover';
-import { DsHubMark } from './home-workspace';
+import { CustodiaMark } from './home-workspace';
 import { areaOf, domainMeta, domains, domainWorkspaces, type Domain } from '../lib/domains';
 import {
   canonicalWorkspaceList, hasWorkspaceAccess, workspacePath, type WorkspaceView,
@@ -36,7 +36,7 @@ const PRODUCT_MARKS: Record<Domain, { label: string; image?: { dark: string; lig
 function ProductMark({ view, compact = false }: { view: WorkspaceView; compact?: boolean }) {
   const product = PRODUCT_MARKS[areaOf(view)];
   return <span className={'workspace-product-mark' + (compact ? ' compact' : '')} title={WORKSPACE_TOOL_LABELS[view]}>
-    {areaOf(view) === 'cross' ? <DsHubMark size={compact ? 16 : 18} /> : areaOf(view) === 'admin' ? <SlidersHorizontal size={compact ? 14 : 16} aria-hidden="true" /> : product.image ? <>
+    {areaOf(view) === 'cross' ? <CustodiaMark size={compact ? 16 : 18} /> : areaOf(view) === 'admin' ? <SlidersHorizontal size={compact ? 14 : 16} aria-hidden="true" /> : product.image ? <>
       <img className="workspace-product-logo-on-dark" src={product.image.dark} alt="" />
       <img className="workspace-product-logo-on-light" src={product.image.light} alt="" />
     </> : <span aria-hidden="true">{product.fallback}</span>}

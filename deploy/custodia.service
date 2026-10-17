@@ -4,27 +4,27 @@
 # los pasos de instalación.
 #
 # Ajustar antes de copiar a un host nuevo:
-# - User / WorkingDirectory si el checkout no es /home/ubuntu/DSHub.
+# - User / WorkingDirectory si el checkout no es /home/ubuntu/Custodia.
 # - La ruta de Environment=PATH si Node no está instalado vía nvm en
 #   /home/ubuntu/.nvm/versions/node/v24.19.0 (systemd no carga el shell
 #   profile, así que el PATH de nvm hay que darlo explícito acá).
 
 [Unit]
-Description=DS Hub (backend + frontend production preview)
+Description=Custodia (backend + frontend production preview)
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/DSHub
-LogsDirectory=dshub
+WorkingDirectory=/home/ubuntu/Custodia
+LogsDirectory=custodia
 Environment=PATH=/home/ubuntu/.nvm/versions/node/v24.19.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-Environment=DSHUB_LOG_DIR=/var/log/dshub
+Environment=CUSTODIA_LOG_DIR=/var/log/custodia
 ExecStart=/home/ubuntu/.nvm/versions/node/v24.19.0/bin/npm run deploy
 Restart=always
 RestartSec=5
 KillMode=control-group
-# Keep supervisor output in journald. Using append:/var/log/dshub/deploy.log
+# Keep supervisor output in journald. Using append:/var/log/custodia/deploy.log
 # makes systemd open the file before LogsDirectory is available and can fail
 # startup with status=209/STDOUT on hosts that have not pre-created the path.
 StandardOutput=journal

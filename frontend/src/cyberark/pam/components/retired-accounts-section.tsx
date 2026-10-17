@@ -5,7 +5,7 @@ import { usePamRefreshKey } from '../../shared/refresh-context';
 import type { Account } from '../types/safe';
 
 /** Accounts a complete sync no longer saw. CyberArk may keep them through the Safe's retention, which
- *  is what blocks deleting the Safe. The date is when DS Hub detected it, not when it was deleted. */
+ *  is what blocks deleting the Safe. The date is when Custodia detected it, not when it was deleted. */
 export function RetiredAccountsSection({ safeNumber }: { safeNumber: number }) {
   const refreshKey = usePamRefreshKey();
   const query = useQuery({

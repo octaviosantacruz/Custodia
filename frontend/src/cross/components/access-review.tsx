@@ -68,7 +68,7 @@ export function AccessReview() {
               {data.rows.map((row) => <tr key={`${row.actor_id}:${row.role_code}`}>
                 <td><div className="user-row-identity"><strong>{row.display_name}</strong><span>{row.email || 'Sin email'}</span></div></td>
                 <td>{row.role_name}</td>
-                <td>{row.source === 'oidc' ? <span className="user-status-chip oidc">Okta</span> : <span className="user-status-chip">DS Hub</span>}</td>
+                <td>{row.source === 'oidc' ? <span className="user-status-chip oidc">Okta</span> : <span className="user-status-chip">Custodia</span>}</td>
                 <td>{row.source === 'manual' ? <div className="user-row-identity"><DateTime value={row.granted_at} /><span>{row.granted_by ? `por ${row.granted_by}` : 'Autor sin dato'}</span></div> : <span className="muted">Según grupos de Okta</span>}</td>
                 <td><DateTime value={row.last_login_at} /></td>
                 <td>{row.flags.length ? <div className="access-review-flags">{row.flags.map((item) => <StatusBadge key={item} tone="warning">{FLAG_LABELS[item]}</StatusBadge>)}</div> : <span className="muted">Sin señales</span>}</td>

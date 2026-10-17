@@ -27,14 +27,14 @@ const NO_RESULTS: SearchResult[] = [];
 const PLATFORM_LABELS: Record<CommandPlatform, string> = {
   cyberark: 'CyberArk',
   netskope: 'Netskope',
-  dshub: 'DS Hub',
+  custodia: 'Custodia',
 };
 
 const PLATFORM_FILTERS: ReadonlyArray<{ value: CommandPlatformFilter; label: string }> = [
   { value: 'all', label: 'Todos' },
   { value: 'cyberark', label: 'CyberArk' },
   { value: 'netskope', label: 'Netskope' },
-  { value: 'dshub', label: 'DS Hub' },
+  { value: 'custodia', label: 'Custodia' },
 ];
 
 type GlobalSearchProps = {

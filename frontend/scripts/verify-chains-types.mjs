@@ -15,7 +15,7 @@ export function verifyGeneratedTypes({ generatedPath = GENERATED_PATH, generate 
     throw new Error(`Falta ${relative(process.cwd(), generatedPath)}. ${hint}`);
   }
   const committed = readFileSync(generatedPath, 'utf8');
-  const tempDir = mkdtempSync(join(tmpdir(), 'dshub-openapi-check-'));
+  const tempDir = mkdtempSync(join(tmpdir(), 'custodia-openapi-check-'));
   try {
     const regeneratedPath = join(tempDir, 'chains-api.generated.ts');
     generate(regeneratedPath);

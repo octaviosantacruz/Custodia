@@ -20,7 +20,7 @@ const selectPerson = async (page: import('@playwright/test').Page, query: string
 
 for (const theme of ['dark', 'light'] as const) {
   test(`retired client coverage redirects to Personas and preserves selected-person evidence in ${theme} theme (UX-AUD2-009)`, async ({ page }) => {
-    await page.addInitScript((value) => window.localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => window.localStorage.setItem('custodia-theme:v1', value), theme);
     const requests: string[] = [];
     await mockAuthenticatedApp(page, { onRequest: (path) => requests.push(path) });
     await page.setViewportSize({ width: 1440, height: 900 });

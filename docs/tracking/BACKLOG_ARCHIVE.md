@@ -87,8 +87,8 @@ credencial.
 |---|---|---|---|---|
 | `ACCESS-UI-003` | **Aparcado** | **Editar el mapeo grupo de Okta → rol desde la UI eligiendo grupos reales.** | El backend (tabla, adopción, techo, auditoría) ya existe; falta la lista de grupos del proveedor para no depender de texto libre. | Selector de grupos reales, sin nombres tipeados; E2E y regresión de la adopción. |
 | `ACCESS-OIDC-FRESHNESS-001` | **Aparcado** | **Revocación/frescura de autorizaciones OIDC.** | Identidad estable `issuer + subject`; reconciliación read-only de membresías; al retirar un rol se incrementa la versión de autorización y se invalida la sesión. Fallo de Okta no concede privilegios nuevos. | Una baja de grupo deja de autorizar sin esperar un nuevo login; checkpoint y auditoría sin guardar tokens ni payloads completos. |
-| `OKTA-API-001` | **Aparcado** | **Service app Okta de sólo lectura, separada del cliente OIDC interactivo.** | Solicitar `private_key_jwt` y scopes mínimos `okta.users.read`, `okta.groups.read`; sumar `okta.roles.read`/`okta.logs.read` sólo para sus tareas. Limitar resource sets a los grupos de DS Hub. | Credencial configurada como secreto externo; probe registra sólo status, forma, conteos y paginación; nunca claves ni valores personales. |
-| `OKTA-DIR-001` | **Aparcado** | **Inventario de grupos DS Hub y membresías.** | Sólo grupos de una allowlist/prefijo acordado; lectura, sin altas/bajas. Relación grupo → rol por ID/configuración exacta. | Detecta grupo desconocido, rol inexistente, miembro sin mapping y drift; aislamiento por `source_system`; sin escritura remota. |
+| `OKTA-API-001` | **Aparcado** | **Service app Okta de sólo lectura, separada del cliente OIDC interactivo.** | Solicitar `private_key_jwt` y scopes mínimos `okta.users.read`, `okta.groups.read`; sumar `okta.roles.read`/`okta.logs.read` sólo para sus tareas. Limitar resource sets a los grupos de Custodia. | Credencial configurada como secreto externo; probe registra sólo status, forma, conteos y paginación; nunca claves ni valores personales. |
+| `OKTA-DIR-001` | **Aparcado** | **Inventario de grupos Custodia y membresías.** | Sólo grupos de una allowlist/prefijo acordado; lectura, sin altas/bajas. Relación grupo → rol por ID/configuración exacta. | Detecta grupo desconocido, rol inexistente, miembro sin mapping y drift; aislamiento por `source_system`; sin escritura remota. |
 | `OKTA-ADMIN-001` | **Aparcado** | **Inventario de administradores y roles Okta.** | Requiere `okta.roles.read`; no se mezcla con administradores internos ni Netskope. | Vista read-only de principal, rol e IDs de recurso; permiso `access:oidc_mappings_read`; sin mutaciones. |
 | `OKTA-AUD-001` | **Aparcado** | **Cambios de grupo/rol desde System Log.** | Requiere `okta.logs.read`; cursor durable, retención 180 días, allowlist de tipos de evento, IDs y tiempos; excluir request/debug payloads. | Ingesta incremental idempotente, revocación conectada a `ACCESS-OIDC-FRESHNESS-001` y auditoría consultable con permiso estrecho. |
 
@@ -96,7 +96,7 @@ credencial.
 
 | ID | Estado | Trabajo | Validación previa | Criterio de cierre |
 |---|---|---|---|---|
-| `HOME-WHEEL-X` | **Aparcado — horizonte muy futuro** | **Escalado del Home por áreas cuando una órbita plana deje de alcanzar.** La raíz muestra áreas y, al elegir una, la misma órbita muestra sus herramientas; Personas/DS Hub continúa en el centro, la lista conserva el catálogo completo y un breadcrumb más “Volver a áreas” hacen explícito el nivel. Taxonomía organizativa propuesta: **Data Security** → CyberArk, Netskope, BigID; **Endpoint** → Tenable One, Proofpoint, Cortex, Cloudflare WAF; **Cross-area** → Wiz, Google SecOps, Okta. Cada nivel distribuye sus nodos con `360° / N`; si una sola área supera 8 herramientas, pagina dentro de esa área sin rotación automática ni reducción indefinida de nodos. | Es una solución futura de navegación, no aprobación de integraciones ni afirmación de relaciones técnicas entre proveedores. Hoy sólo CyberArk y Netskope están en alcance y BigID es un placeholder planned; Tenable, Proofpoint, Cortex, Cloudflare WAF, Wiz, Google SecOps y Okta no deben aparecer ni generar workspaces hasta contar con decisión y contrato propios. JumpCloud y Cloudflare ZTNA quedan fuera de esta taxonomía hasta una decisión explícita. Las áreas expresan propiedad organizativa, no procedencia de datos. Mantener orden DOM/teclado independiente de la profundidad visual, RBAC por destino, logos oficiales sólo en el nivel herramienta, iconos neutrales para áreas, ambos temas, Axe y reduced motion. | Reactivar sólo cuando existan destinos aprobados en al menos dos áreas o el catálogo plano alcance más de 8 herramientas autorizadas. Antes de código: validar la taxonomía con el dueño de producto y producir un prototipo HTML/CSS sin dependencias ni datos inventados. Cierre exige navegación área → herramienta y retorno por teclado, deep links estables, lista completa siempre disponible, estado anunciado por lector de pantalla, cero exposición de herramientas sin contrato y pruebas de overflow/Axe/reduced-motion en desktop. |
+| `HOME-WHEEL-X` | **Aparcado — horizonte muy futuro** | **Escalado del Home por áreas cuando una órbita plana deje de alcanzar.** La raíz muestra áreas y, al elegir una, la misma órbita muestra sus herramientas; Personas/Custodia continúa en el centro, la lista conserva el catálogo completo y un breadcrumb más “Volver a áreas” hacen explícito el nivel. Taxonomía organizativa propuesta: **Data Security** → CyberArk, Netskope, BigID; **Endpoint** → Tenable One, Proofpoint, Cortex, Cloudflare WAF; **Cross-area** → Wiz, Google SecOps, Okta. Cada nivel distribuye sus nodos con `360° / N`; si una sola área supera 8 herramientas, pagina dentro de esa área sin rotación automática ni reducción indefinida de nodos. | Es una solución futura de navegación, no aprobación de integraciones ni afirmación de relaciones técnicas entre proveedores. Hoy sólo CyberArk y Netskope están en alcance y BigID es un placeholder planned; Tenable, Proofpoint, Cortex, Cloudflare WAF, Wiz, Google SecOps y Okta no deben aparecer ni generar workspaces hasta contar con decisión y contrato propios. JumpCloud y Cloudflare ZTNA quedan fuera de esta taxonomía hasta una decisión explícita. Las áreas expresan propiedad organizativa, no procedencia de datos. Mantener orden DOM/teclado independiente de la profundidad visual, RBAC por destino, logos oficiales sólo en el nivel herramienta, iconos neutrales para áreas, ambos temas, Axe y reduced motion. | Reactivar sólo cuando existan destinos aprobados en al menos dos áreas o el catálogo plano alcance más de 8 herramientas autorizadas. Antes de código: validar la taxonomía con el dueño de producto y producir un prototipo HTML/CSS sin dependencias ni datos inventados. Cierre exige navegación área → herramienta y retorno por teclado, deep links estables, lista completa siempre disponible, estado anunciado por lector de pantalla, cero exposición de herramientas sin contrato y pruebas de overflow/Axe/reduced-motion en desktop. |
 
 ### Métricas y decisiones de producto pendientes
 
@@ -113,7 +113,7 @@ Administration o Netskope sólo debería convertirse en un servicio Docker
 independiente cuando necesite permisos de red distintos, ciclo de despliegue
 propio, escalado independiente o aislamiento de fallos. Cada módulo debe
 exponer un contrato interno mínimo, no compartir secretos por volumen y
-persistir a través de la capa de repositorios definida por DS Hub.
+persistir a través de la capa de repositorios definida por Custodia.
 
 | ID | Estado | Trabajo | Condición de entrada | Criterio de cierre | Referencia |
 |---|---|---|---|---|---|
@@ -136,9 +136,9 @@ persistir a través de la capa de repositorios definida por DS Hub.
 
 | ID | Estado | Trabajo | Validación previa | Criterio de cierre | Fuente |
 |---|---|---|---|---|---|
-| `CONN-002` | Retirado | Inventario manual de connectors PSM/SIA y su capacidad operativa | **Decisión cerrada:** no crear un inventario manual paralelo sin fuente autoritativa. DS Hub enlaza observabilidad existente; CPU/RAM no se presentan como dato de CyberArk. | Reactivar como un ID nuevo únicamente cuando exista contrato real de Connector Manager y dueño del dato. **2026-10-01: contrato localizado y validado → nueva tarea `CMGR-001`.** | — |
+| `CONN-002` | Retirado | Inventario manual de connectors PSM/SIA y su capacidad operativa | **Decisión cerrada:** no crear un inventario manual paralelo sin fuente autoritativa. Custodia enlaza observabilidad existente; CPU/RAM no se presentan como dato de CyberArk. | Reactivar como un ID nuevo únicamente cuando exista contrato real de Connector Manager y dueño del dato. **2026-10-01: contrato localizado y validado → nueva tarea `CMGR-001`.** | — |
 | `AIM-002` | Retirado | Métodos de autenticación AIM | — | Retirado junto con el catálogo AIM de aplicaciones; no se implementará mientras la funcionalidad permanezca fuera de alcance | — |
-| `REC-001` | Retirado | Metadatos de recordings PSM | **Decisión cerrada:** DS Hub no ingiere recordings ni sus metadatos. `SESS-001` cubre únicamente agregados operativos no personales. | Fuera de alcance; nunca `Play recording`, archivos, SessionID, IP, RiskScore ni IncidentDetails | [contratos](../architecture/integration-contracts.md) |
+| `REC-001` | Retirado | Metadatos de recordings PSM | **Decisión cerrada:** Custodia no ingiere recordings ni sus metadatos. `SESS-001` cubre únicamente agregados operativos no personales. | Fuera de alcance; nunca `Play recording`, archivos, SessionID, IP, RiskScore ni IncidentDetails | [contratos](../architecture/integration-contracts.md) |
 | `PAM-USR-002` | Retirado | Detalle PAM por usuario (`GET /API/Users/{id}`) | **Decisión cerrada:** emails adicionales, teléfonos, dirección y `personalDetails` quedan fuera del inventario. | `PAM-USR-001` cubre el estado necesario sin PII | [contratos](../architecture/integration-contracts.md) |
 
 ### Métricas y decisiones de producto pendientes
@@ -147,9 +147,9 @@ persistir a través de la capa de repositorios definida por DS Hub.
 |---|---|---|---|---|
 | `OKR-001` | Retirado | **KR sin fuente calculable.** | **Decisión cerrada:** no implementar métricas de clasificación/depuración o HA hasta que exista fuente; la UI declara “no disponible” y no inventa equivalencias. | Reactivar con un ID nuevo por KR cuando fuente, fórmula, denominador y frecuencia estén documentados. |
 | `OKR-002` | Retirado | **KR de Jira/SOC.** | **Decisión cerrada 2026-09-26:** no integrar Jira/SOC. Reactivar con un ID nuevo sólo si aparece una necesidad operativa concreta. | No mostrar porcentajes ni datos simulados de Jira/SOC. |
-| `COMPLIANCE-001` | Retirado | **Equivalencia con el reporte oficial de CyberArk.** | **Decisión cerrada 2026-09-26:** no buscar equivalencia. La métrica propia de DS Hub se considera más útil y conserva su fórmula, fuente, denominador, ventana y etiqueta explícita; no se presenta como el reporte oficial ni como rotación. | Mantener pruebas de cálculo y procedencia; cualquier comparación futura requiere un ID/caso de uso nuevo. |
+| `COMPLIANCE-001` | Retirado | **Equivalencia con el reporte oficial de CyberArk.** | **Decisión cerrada 2026-09-26:** no buscar equivalencia. La métrica propia de Custodia se considera más útil y conserva su fórmula, fuente, denominador, ventana y etiqueta explícita; no se presenta como el reporte oficial ni como rotación. | Mantener pruebas de cálculo y procedencia; cualquier comparación futura requiere un ID/caso de uso nuevo. |
 
-### IA en DS Hub (fuera del roadmap activo)
+### IA en Custodia (fuera del roadmap activo)
 
 | ID | Estado | Trabajo | Validación previa | Criterio de cierre |
 |---|---|---|---|---|
@@ -169,7 +169,7 @@ contrato de datos y una pregunta operativa concreta.
   (este último sólo por UUID coincidente). No presentarla como facturación.
 - Rotación de credenciales: no presentar frescura de inventario como rotación.
 - CPU, RAM, disco, servicios o certificados: enlazar observabilidad existente;
-   no crear un segundo inventario de hosts en DS Hub. `CONN-002` fue retirado;
+   no crear un segundo inventario de hosts en Custodia. `CONN-002` fue retirado;
    sólo se reconsidera con un ID nuevo, contrato real y dueño del dato.
 - Targets/workspaces/conectores SIA, Connector Health y Session Intelligence:
   los **target sets de SIA** y el **inventario de Connector Manager** ya tienen
@@ -183,7 +183,7 @@ contrato de datos y una pregunta operativa concreta.
   `lib/format.ts` + `status-glossary.tsx`. No es una capa i18n completa.
 - PDF, animaciones complejas y nuevos gráficos: priorizar primero filtros,
   denominadores, fecha de actualización y navegación al dato fuente.
-- Orquestación remota desde DS Hub (idea, 2026-09-12): disparar acciones sobre
+- Orquestación remota desde Custodia (idea, 2026-09-12): disparar acciones sobre
   el servidor destino de un PSM (ej. "actualizar Windows en el puerto tal")
   sin login manual, posiblemente vía un agente instalado en el endpoint.
   Es un dominio distinto al de un CMDB de solo lectura: requeriría agente en
@@ -193,7 +193,7 @@ contrato de datos y una pregunta operativa concreta.
   vector de ataque mayor si se compromete el control plane). Antes de
   diseñar nada custom, revisar qué expone CyberArk PSM/SIA en materia de
   ejecución remota para reusar en vez de reinventar. No tocar sin decisión de
-  producto explícita y sin tratarlo como una fase separada de "DS Hub Ops".
+  producto explícita y sin tratarlo como una fase separada de "Custodia Ops".
 - Librerías de frontend evaluadas el 2026-09-25 y descartadas por ahora
   (las que sí entraron son `FE-DATA-001` y `FE-API-001`):
   - **TanStack Table:** las tablas ya paginan y filtran del lado del

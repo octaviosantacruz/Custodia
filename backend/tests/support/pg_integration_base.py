@@ -1,7 +1,7 @@
 """IF-006: shared scaffolding for tests that need a real PostgreSQL
 instance instead of a mocked cursor. Every test module built on
 PostgresIntegrationTestCase is opt-in only: it requires
-DSHUB_TEST_DATABASE_URL to point at a disposable/test database and never
+CUSTODIA_TEST_DATABASE_URL to point at a disposable/test database and never
 reads .env.local or a bare DATABASE_URL (see the incident documented in
 test_admin_invariant_postgres_integration.py -- that variable used to
 silently reuse this repo's real RDS instance and could hang the gate on
@@ -9,11 +9,11 @@ any machine where that host isn't reachable).
 
 To provision a local throwaway database for these tests:
 
-    sudo -u postgres psql -c "CREATE ROLE dshub_test LOGIN PASSWORD '...'"
-    sudo -u postgres psql -c "CREATE DATABASE dshub_test OWNER dshub_test"
-    ENV_FILE=/dev/null DATABASE_URL=postgresql://dshub_test:...@localhost:5432/dshub_test \
+    sudo -u postgres psql -c "CREATE ROLE custodia_test LOGIN PASSWORD '...'"
+    sudo -u postgres psql -c "CREATE DATABASE custodia_test OWNER custodia_test"
+    ENV_FILE=/dev/null DATABASE_URL=postgresql://custodia_test:...@localhost:5432/custodia_test \
         backend/.venv/bin/python scripts/migrate.py
-    DSHUB_TEST_DATABASE_URL=postgresql://dshub_test:...@localhost:5432/dshub_test \
+    CUSTODIA_TEST_DATABASE_URL=postgresql://custodia_test:...@localhost:5432/custodia_test \
         PYTHONPATH=backend backend/.venv/bin/python -m unittest discover -s backend/tests -k Postgres
 """
 
@@ -23,7 +23,7 @@ import unittest
 from psycopg.rows import dict_row
 from psycopg_pool import AsyncConnectionPool
 
-OPT_IN_ENV_VAR = "DSHUB_TEST_DATABASE_URL"
+OPT_IN_ENV_VAR = "CUSTODIA_TEST_DATABASE_URL"
 
 
 class PostgresIntegrationTestCase(unittest.IsolatedAsyncioTestCase):

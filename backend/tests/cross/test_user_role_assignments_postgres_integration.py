@@ -1,6 +1,6 @@
-"""ACCESS-UI-001 on real PostgreSQL: DS Hub roles coexist with the roles an OIDC
+"""ACCESS-UI-001 on real PostgreSQL: Custodia roles coexist with the roles an OIDC
 login maps from groups. A login replaces only its own rows, an OIDC role is
-never removed from DS Hub, the delegation ceiling applies, and every change is
+never removed from Custodia, the delegation ceiling applies, and every change is
 audited. Opt-in; see tests/support/pg_integration_base.py."""
 
 import json

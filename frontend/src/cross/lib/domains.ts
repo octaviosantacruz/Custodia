@@ -53,7 +53,7 @@ export function domainLanding(id: Domain): WorkspaceView {
 
 /* First switcher destination the actor can actually open, in editorial order.
    The chrome uses it to land on a real workspace instead of assuming the
-   first one is authorized (e.g. DS Hub with only Acceso or Actividad). */
+   first one is authorized (e.g. Custodia with only Acceso or Actividad). */
 export function firstAccessibleDomainWorkspace(id: Domain, permissions: string[]): WorkspaceView | null {
   return DOMAIN_WORKSPACES[id].find((view) => hasWorkspaceAccess(view, permissions)) ?? null;
 }

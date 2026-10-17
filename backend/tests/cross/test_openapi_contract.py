@@ -1472,7 +1472,7 @@ class OpenApiContractTests(unittest.TestCase):
         )
         self.assertIn('No se exponen secretos', schema['info']['description'])
         self.assertIn('Netskope', schema['info']['description'])
-        self.assertEqual(schema['paths']['/api/auth/users']['get']['summary'], 'Listar usuarios de DS Hub')
+        self.assertEqual(schema['paths']['/api/auth/users']['get']['summary'], 'Listar usuarios de Custodia')
         self.assertEqual(schema['paths']['/api/auth/login']['post']['summary'], 'Iniciar sesión local')
         self.assertTrue(schema['paths']['/api/auth/login']['post']['description'])
         self.assertTrue(schema['paths']['/api/safes']['get']['summary'])

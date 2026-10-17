@@ -143,7 +143,7 @@ def publish(result: dict[str, int | float]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Porcentaje de cuentas compliant informado por CyberArk")
     parser.add_argument("--concurrency", type=int, default=5, help="consultas simultáneas (1 a 10; default: 5)")
-    parser.add_argument("--publish", action="store_true", help="guardar sólo el resumen agregado para KR6 en DS Hub")
+    parser.add_argument("--publish", action="store_true", help="guardar sólo el resumen agregado para KR6 en Custodia")
     args = parser.parse_args()
     if not 1 <= args.concurrency <= 10:
         parser.error("--concurrency debe estar entre 1 y 10")

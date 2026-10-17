@@ -1,7 +1,7 @@
 """AUTH-AGENT-001 on real PostgreSQL: the automation account opens with a credential
 that signs in without a first-login change, closes behind another one, every
 change ends its sessions and is audited without the secret, and closing never
-leaves DS Hub without an administrator. Opt-in; see tests/support/pg_integration_base.py."""
+leaves Custodia without an administrator. Opt-in; see tests/support/pg_integration_base.py."""
 
 import json
 import os

@@ -1,7 +1,7 @@
 import { AlertCircle, Eye, EyeOff, Info } from 'lucide-react';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { LOCAL_LOGIN_PATH, passwordChecks, type UseAuthState } from '../hooks/use-auth';
-import { DsHubMark } from './home-workspace';
+import { CustodiaMark } from './home-workspace';
 import { ErrorDetailsButton } from './error-details';
 import './auth-view.css';
 
@@ -31,7 +31,7 @@ const AUTH_STARS = (() => {
 })();
 
 /* The bridge: two small clusters of nodes (two isolated platforms) with one
-   arc crossing the gap between them and a larger node at its apex (DS Hub).
+   arc crossing the gap between them and a larger node at its apex (Custodia).
    Kept in the lower band, below the card. */
 type AuthNode = [x: number, y: number, r: number];
 const AUTH_CLUSTER_LEFT: AuthNode[] = [[170, 765, 4], [255, 717, 3], [300, 780, 5], [380, 735, 4], [430, 775, 7], [350, 825, 3]];
@@ -82,7 +82,7 @@ function AuthShell({ children, state, role }: { children: ReactNode; state?: boo
 
 function AuthHeader({ eyebrow, title, detail }: { eyebrow?: string; title: string; detail?: string }) {
   return <header className="auth-card-header">
-    <div className="auth-brand"><span className="auth-logo"><DsHubMark /></span><span className="auth-wordmark">DS Hub</span></div>
+    <div className="auth-brand"><span className="auth-logo"><CustodiaMark /></span><span className="auth-wordmark">Custodia</span></div>
     {eyebrow ? <p className="auth-step-label">{eyebrow}</p> : null}
     <h1>{title}</h1>
     {detail ? <p className="auth-card-detail">{detail}</p> : null}
@@ -122,7 +122,7 @@ export function AuthView({ auth, error }: AuthViewProps) {
     setRegisterName, registerPasswordConfirm, setRegisterPasswordConfirm, registerBusy, setupStep,
     setSetupStep, authMessage, authError, authErrorDetails, retryAuth, submitRegistration, submitLogin, submitPasswordChange,
   } = auth;
-  if (!authChecked) return <AuthShell state role="status"><AuthHeader title="Comprobando tu acceso" detail="Verificando la sesión antes de cargar DS Hub." /></AuthShell>;
+  if (!authChecked) return <AuthShell state role="status"><AuthHeader title="Comprobando tu acceso" detail="Verificando la sesión antes de cargar Custodia." /></AuthShell>;
   if (authError) return <AuthShell state role="alert">
     <AuthHeader title="No se pudo comprobar la sesión" detail={authError} />
     {authErrorDetails ? <p className="auth-error-reference">{authErrorDetails.status ? `HTTP ${authErrorDetails.status}` : 'Sin respuesta'}{authErrorDetails.path ? ` · ${authErrorDetails.path}` : ''}{authErrorDetails.requestId ? ` · Ref. ${authErrorDetails.requestId}` : ''}</p> : null}
@@ -149,7 +149,7 @@ export function AuthView({ auth, error }: AuthViewProps) {
     };
     const header = setupAvailable
       ? !showRegistration
-        ? <AuthHeader title="Creá la cuenta inicial" detail="Vas a usarla para ingresar y administrar DS Hub." />
+        ? <AuthHeader title="Creá la cuenta inicial" detail="Vas a usarla para ingresar y administrar Custodia." />
         : <AuthHeader eyebrow={`PASO ${setupStep} DE 2`} title={setupStep === 1 ? 'Tus datos' : 'Elegí una contraseña'} />
       : <AuthHeader title="Iniciar sesión" detail="Portal de métricas y relaciones entre herramientas de seguridad" />;
 

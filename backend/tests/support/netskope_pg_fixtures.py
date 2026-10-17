@@ -1,6 +1,6 @@
 """Shared seeding helpers for Netskope Postgres integration tests.
 
-Only ever used against the disposable DSHUB_TEST_DATABASE_URL database
+Only ever used against the disposable CUSTODIA_TEST_DATABASE_URL database
 (see tests/support/pg_integration_base.py); every test wipes source_system
 'netskope' rows before and after itself."""
 

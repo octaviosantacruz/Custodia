@@ -124,7 +124,7 @@ class WorkspacePreferencesRouteTests(unittest.TestCase):
             ))
         self.assertEqual(overlap.exception.status_code, 422)
 
-    def test_quick_access_allows_six_pam_workspaces_plus_a_ds_hub_shortcut(self):
+    def test_quick_access_allows_six_pam_workspaces_plus_a_custodia_shortcut(self):
         six_pam = ["general", "posture", "graph", "safes", "identity", "sia"]
         combined = [*six_pam, "person"]
         self.assertEqual(WorkspacePreferencesUpdate(visible_workspaces=combined).visible_workspaces, combined)

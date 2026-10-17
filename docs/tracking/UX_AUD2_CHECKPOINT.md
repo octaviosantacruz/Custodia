@@ -39,7 +39,7 @@ Resultado: **26 cerrados, 0 parciales y 0 pendientes**. La auditoría
 | 015 | Cerrado | Lista previa de catorce filas verificada: quince rutas más alias, Vigentes/Retiradas, PSM/SIA y CPM. Un H1, descripción de una línea sin elipsis, método en ayuda junto al título; controles, conteos y secciones distintas conservados. Regresión anterior falla, dark/light reales y ciclo de vida de la ayuda con teclado/historia en verde. |
 | 016 | Cerrado | Inicio muestra un solo control selector y el logo sólo en el header; Conexiones sustituye CROSS. E2E en ambos temas comprueba ausencia del selector redundante. Un build temporal que lo repone falla ambos casos. |
 | 017 | Cerrado | Conectores y la guía hablan de vistas; el filtro Standard describe evidencia y su tooltip preserva el criterio PAM sin afirmar facturación. Access traduce Target a Destino y VMs conservan Máquina virtual. Seis rutas verifican copy sin snake_case, separándolo de datos reales y código técnico; Limpieza tiene la comprobación en su prueba propietaria. Ambos temas en verde. |
-| 018 | Cerrado | Limpieza conserva cálculo/evidencia en el detalle; Relaciones y límites iguales de Steering muestran una aclaración. Netskope reúne método y límites del vínculo en la ayuda del inventario y omite filtros activos vacíos, conservando fuente/vigencia visibles. Hallazgos conserva «Filtros DS Hub» y cobertura por fuente sin repetir el alcance; Salud PAM tiene su explicación en ayuda junto al título. Pruebas propietarias verifican ayuda, Escape, filtros y datos operativos en ambos temas. |
+| 018 | Cerrado | Limpieza conserva cálculo/evidencia en el detalle; Relaciones y límites iguales de Steering muestran una aclaración. Netskope reúne método y límites del vínculo en la ayuda del inventario y omite filtros activos vacíos, conservando fuente/vigencia visibles. Hallazgos conserva «Filtros Custodia» y cobertura por fuente sin repetir el alcance; Salud PAM tiene su explicación en ayuda junto al título. Pruebas propietarias verifican ayuda, Escape, filtros y datos operativos en ambos temas. |
 | 019 | Cerrado | Esquema fijo: columnas consolidadas en contexto, sin inferir homogeneidad de una página. Se conservan tipos, procedencia, estados, decisiones y observaciones distintas en páginas posteriores. Regresión propietaria anterior falla; seis vistas verificadas en dark/light reales. |
 | 020 | Cerrado | Los ajustes de Identity, Actividad, PSM y unidades de Plataformas siguen presentes. VMs, cuentas BD, target sets y Access omiten el ID repetido cuando coincide exactamente con el nombre; conservan copiar el ID original y mostrar IDs distintos. Tipos de almacén y target set aparecen en su columna una sola vez. Ocho E2E verifican estas cuatro vistas en ambos temas. |
 | 021 | Cerrado | Nueve filas de barrido verificadas en lectura, edición, vacío y alertas: un título por sección, sin contadores redundantes; seis KPI sin recorte y detalle en ayuda. Grilla SSE ocupa la fila, conserva tamaños relativos/orden y no escribe preferencias. Diferencia conserva ambos conteos y signo. Ocho propietarios verifican dark/light reales; grupos y verify aprobados. |
@@ -440,7 +440,7 @@ Sin cambios de APIs, migraciones, push ni despliegue.
 
 Salud PAM conserva conectividad, versiones y observación; la explicación de
 los conteos está en una ayuda junto al título, cuyo nombre accesible se
-conserva. Hallazgos mantiene «Filtros DS Hub», cobertura y frescura separadas
+conserva. Hallazgos mantiene «Filtros Custodia», cobertura y frescura separadas
 por fuente y sus errores/permisos; se elimina la segunda frase de alcance.
 
 Inventario Netskope reúne la explicación del vínculo exacto y los límites de
@@ -644,15 +644,15 @@ no vigente.
   admitidas, DLP solo rechazado antes de leer datos. Prueba HTTP y contrato
   OpenAPI focalizados: dos pases.
 - `E2E_PORT=4262 npm --prefix frontend run test:e2e:netskope -- --config
-  /tmp/dshub-008-playwright.config.ts`: **220 pases**. Ambos proyectos ejecutan
+  /tmp/custodia-008-playwright.config.ts`: **220 pases**. Ambos proyectos ejecutan
   todos los casos, sin limitar el proyecto light al shell de autenticación.
 - Comprobación de los ajustes finales con `npm --prefix frontend run test:e2e
-  -- --config /tmp/dshub-008-playwright.config.ts --grep
+  -- --config /tmp/custodia-008-playwright.config.ts --grep
   'UX-AUD2-008|header.*sync|product without runs|the stale card counts|the personal board shows unclassified|UX-AUD2-013: Netskope'`:
   **12 pases**; prueba propietaria de tarjetas por diagnóstico con
-  `/tmp/dshub-008-preview.config.ts`: **dos pases**. Incluye ambos temas.
+  `/tmp/custodia-008-preview.config.ts`: **dos pases**. Incluye ambos temas.
 - `E2E_PORT=4262 npm --prefix frontend run test:e2e:cross -- --config
-  /tmp/dshub-008-preview.config.ts`: **400 pases y dos fallos** de una misma
+  /tmp/custodia-008-preview.config.ts`: **400 pases y dos fallos** de una misma
   expectativa que todavía exigía el estado dentro de la tarjeta. Se ajustó
   para leer el estado compartido y conservar el método en HelpHint. Repetición
   con el mismo comando y `--grep 'Netskope explanations preserve unknowns'`:
@@ -671,7 +671,7 @@ Código, contratos generados y pruebas (commit `c26f93f6`):
 
 - `backend/app/netskope/sse/api/routes/cmdb_netskope.py`
 - `backend/tests/netskope/test_netskope_sync_evidence_http.py`
-- `api/postman/DSHub.postman_collection.json`
+- `api/postman/Custodia.postman_collection.json`
 - `frontend/src/source-contract.ts`
 - `frontend/src/sources.ts`
 - `frontend/src/cross/components/app-header.tsx`
@@ -709,7 +709,7 @@ recién al cargar otra página.
 | Vista | Columnas a quitar | Conservación del dato |
 | --- | --- | --- |
 | Identity, Roles y grupos | Tipo | Tipo accesible del chip e identificación del grupo; el contexto Roles/Grupos evita repetir Rol de CyberArk por fila. |
-| Hallazgos PAM | Fuente, Categoría / tipo | Procedencia y categoría/tipo junto al hallazgo; DS Hub y CyberArk siguen claramente separados por fila, incluso en resultados mixtos. |
+| Hallazgos PAM | Fuente, Categoría / tipo | Procedencia y categoría/tipo junto al hallazgo; Custodia y CyberArk siguen claramente separados por fila, incluso en resultados mixtos. |
 | Activos de Access | Estado | Estado informado junto al activo; ausencia de estado explicada en HelpHint, sin repetir Sin estado. |
 | Máquinas virtuales SIA | Tipo, Ubicación | Tipo distinto del contexto Máquina virtual y método de ubicación en el contexto de cada recurso; sin inferir direcciones ni descartar variantes. |
 | Usuarios Netskope | Primera/Última observación | Una columna Observación: una fecha si coinciden, intervalo con ambas cuando difieren; timestamps originales accesibles y conservados en el drawer. |
@@ -736,8 +736,8 @@ placeholder cuando no existe decisión humana.
 ### Corrección de la evidencia de temas
 
 Se detectó que `colorScheme` de Playwright sólo cambia la preferencia del
-navegador: DS Hub inicia en dark si no tiene preferencia guardada. El fixture
-ahora aplica `dshub-theme:v1` a los casos de auditoría. Los seis casos
+navegador: Custodia inicia en dark si no tiene preferencia guardada. El fixture
+ahora aplica `custodia-theme:v1` a los casos de auditoría. Los seis casos
 propietarios de 019 y el de 008 comprueban el data-theme efectivo.
 
 Las corridas anteriores que sólo seleccionaban el proyecto light no prueban
@@ -755,28 +755,28 @@ corridas como evidencia de un tema que no aplicaban.
   corrección del fixture de temas; no se atribuye al proyecto light una
   cobertura real de tema claro.
 - `E2E_PORT=4263 npm --prefix frontend run test:e2e:cyberark -- --config
-  /tmp/dshub-019-playwright.config.ts`: **253 pases y 11 fallos** de expectativas
+  /tmp/custodia-019-playwright.config.ts`: **253 pases y 11 fallos** de expectativas
   anteriores: Tipo duplicado, ruta Identity raíz, celdas Tipo/Categoría y
   posición del objeto de un hallazgo. Se actualizaron conservando permisos,
   navegación, nombres ausentes, IDs opacos y detalle.
 - `npm --prefix frontend run test:e2e -- --config
-  /tmp/dshub-019-playwright.config.ts --grep
+  /tmp/custodia-019-playwright.config.ts --grep
   'UX-AUD2-019|UX-AUD2-008|an admin classifies a device|posture desktop keyboard|identity navigation has two tabs|Federaciones tab is hidden|SIA resources workspace shows VM|posture retains local detail|legacy findings fall back|authorized missing entity names'`:
   **44 pases**, incluidas las expectativas anteriores corregidas y teclado/Axe
   en 1280×720 y 1440×900.
 - `E2E_PORT=4263 npm --prefix frontend run test:e2e:netskope -- --config
-  /tmp/dshub-019-preview.config.ts`: **220 pases y cuatro fallos** de las dos
+  /tmp/custodia-019-preview.config.ts`: **220 pases y cuatro fallos** de las dos
   listas de columnas que todavía exigían Diagnóstico. Se ajustaron al esquema
   consolidado, sin quitar filtros, enlaces, estados ni accesibilidad.
 - Repetición final con `npm --prefix frontend run test:e2e -- --config
-  /tmp/dshub-019-preview.config.ts --grep
+  /tmp/custodia-019-preview.config.ts --grep
   'UX-AUD2-019|UX-AUD2-008|NSK-INVENTORY-UX-001|Netskope inventory presents'`:
   **18 pases**. Verifica data-theme real en los propietarios, páginas posteriores
   de Access/VMs/usuarios/equipos, procedencia mixta de hallazgos y timestamps
   distintos dentro del mismo minuto. No quedan fallos conocidos de las
   corridas de plataformas sin resolver.
 - `E2E_PORT=4263 npm --prefix frontend run test:e2e:cross -- --config
-  /tmp/dshub-019-preview.config.ts --grep 'UX-AUD2-'`: primera corrida,
+  /tmp/custodia-019-preview.config.ts --grep 'UX-AUD2-'`: primera corrida,
   **56 pases y dos fallos** del selector de Tipo de VM retirado; corregido para
   comprobar la cabecera Máquina virtual. Repetición completa: **58 pases**
   con preferencias reales dark/light.
@@ -883,34 +883,34 @@ importado no crea vínculos normalizados nuevos entre herramientas.
 ### Comandos y evidencia
 
 - Contra el build anterior 4f351b89, config privado
-  `/tmp/dshub-015-red.config.ts`, grep `UX-AUD2-015`: **26 fallos y dos pases**
+  `/tmp/custodia-015-red.config.ts`, grep `UX-AUD2-015`: **26 fallos y dos pases**
   (roles/grupos ya conformantes). Al agregar la ruta /netskope/devices se
   repitió contra ese mismo baseline: **dos fallos** por el título repetido.
   Total de regresión de cabeceras: **28 fallos, dos controles conformantes**.
 - La regresión de navegación por teclado se corrió contra el primer build
   que no remontaba la introducción, config privado
-  `/tmp/dshub-015-help-red.config.ts`: **dos fallos**, la nota anterior seguía
+  `/tmp/custodia-015-help-red.config.ts`: **dos fallos**, la nota anterior seguía
   abierta al navegar. Corregida en App con identidad por workspace.
 - `npm --prefix frontend run typecheck`: aprobado. Los builds posteriores
   también verificaron los tipos.
 - `E2E_PORT=4264 npm --prefix frontend run test:e2e:cross -- --config
-  /tmp/dshub-015-playwright.config.ts --grep 'UX-AUD2-'`: **88 pases** iniciales.
+  /tmp/custodia-015-playwright.config.ts --grep 'UX-AUD2-'`: **88 pases** iniciales.
 - `E2E_PORT=4264 npm --prefix frontend run test:e2e:cyberark -- --config
-  /tmp/dshub-015-playwright.config.ts`: **258 pases, seis fallos**. Axe detectó
+  /tmp/custodia-015-playwright.config.ts`: **258 pases, seis fallos**. Axe detectó
   los saltos de encabezado en Retiradas y Destinatarios SIA tras retirar el
   segundo título; se reparó la jerarquía, conservando tamaños. El caso de
   debounce se adelantaba a la petición inicial después de esperar el H1 del
   shell; ahora espera el buscador propietario y la primera petición antes
   de contar las siguientes. Sin quitar aserciones ni ampliar timeouts.
 - `E2E_PORT=4264 npm --prefix frontend run test:e2e -- --config
-  /tmp/dshub-015-playwright.config.ts --grep
+  /tmp/custodia-015-playwright.config.ts --grep
   'UX-AUD2-|Retiradas lists Safes|SIA recipient controls work with Enter|SIA policy search is debounced|Netskope inventory presents'`:
   **116 pases**, incluidos los seis fallos anteriores corregidos, Axe y
   los contratos de 008/019 conservados.
 - `E2E_PORT=4264 npm --prefix frontend run test:e2e:netskope -- --config
-  /tmp/dshub-015-playwright.config.ts`: **224 pases**.
+  /tmp/custodia-015-playwright.config.ts`: **224 pases**.
 - Comprobación final con `npm --prefix frontend run test:e2e -- --config
-  /tmp/dshub-015-playwright.config.ts --grep
+  /tmp/custodia-015-playwright.config.ts --grep
   'UX-AUD2-015|UX-PERSON-002: the Netskope platform keeps its own deep link|Retiradas lists Safes|SIA recipient controls work with Enter|SIA policy search is debounced'`:
   **40 pases**, incluidos los 32 propietarios de 015 en los temas reales
   y el deep link de Personas cuyo selector quedó actualizado.
@@ -922,7 +922,7 @@ importado no crea vínculos normalizados nuevos entre herramientas.
   Repetición completa final: **1.493 backend y 433 frontend**, PostgreSQL
   efímero, ruff, probes, estilos, tipos, build y harness en verde.
 - Sobre ese build final, `npm --prefix frontend run test:e2e -- --config
-  /tmp/dshub-015-built-preview.config.ts --grep
+  /tmp/custodia-015-built-preview.config.ts --grep
   '/pam/safes has one view heading|/pam/assets has one view heading|Retiradas lists Safes'`:
   **seis pases** tras precisar el texto de ambas ayudas.
 - `node scripts/check-task-trackers.mjs` y `git diff --check` en el cierre.
@@ -1059,7 +1059,7 @@ alterar el tope de styles.css. No es el refactor FE-CSS-001.
 ### Comandos y evidencia
 
 - `E2E_PORT=4266 npm --prefix frontend run test:e2e:cross -- --config
-  /tmp/dshub-021-red.config.ts --grep 'UX-AUD2-021'`: **seis fallos** sobre el
+  /tmp/custodia-021-red.config.ts --grep 'UX-AUD2-021'`: **seis fallos** sobre el
   build previo 5e63538c, por títulos redundantes y sublíneas con elipsis.
   La cuarta regresión de agregados se agregó y corrió contra el mismo build,
   grep `UX-AUD2-021: aggregate alerts`: **dos fallos** por la cabecera anterior.
@@ -1072,7 +1072,7 @@ alterar el tope de styles.css. No es el refactor FE-CSS-001.
   porque se comparaba su ancho con el borde exterior; ahora se compara el
   área interior, descontando padding/bordes, sin aflojar la comprobación.
 - `E2E_PORT=4266 npm --prefix frontend run test:e2e -- --config
-  /tmp/dshub-021-playwright.config.ts --grep
+  /tmp/custodia-021-playwright.config.ts --grep
   'UX-AUD2-021|NSK-XMET-003:.*card|NSK-DEVREV-001: the board|NSK-REF-|NSK-USR-001|NSK-A11Y-002|NSK-HB-001: the stale card|NSK-XMET-003:.*activity'`:
   **20 pases**, incluidos los ocho propietarios de 021 con data-theme real,
   ciclo lectura/edición/vacío, valores, ventanas, filtros, null/No disponible,
@@ -1081,7 +1081,7 @@ alterar el tope de styles.css. No es el refactor FE-CSS-001.
   comprobar la lectura breve y el detalle en ayuda, conservando numeradores,
   denominadores, captura y estados de disponibilidad.
 - `E2E_PORT=4266 npm --prefix frontend run test:e2e:netskope -- --config
-  /tmp/dshub-021-preview.config.ts`: **218 pases y seis fallos** de tres casos
+  /tmp/custodia-021-preview.config.ts`: **218 pases y seis fallos** de tres casos
   anteriores: alcance y recomendación en texto fijo, más un selector que
   confundía el nuevo botón Explicar con el botón de drill. Se conservaron
   las aserciones de permiso, conteos, ventana, filtros y guardado explícito.
@@ -1090,12 +1090,12 @@ alterar el tope de styles.css. No es el refactor FE-CSS-001.
   casos). El alias de alertas se repitió por su ID correcto `NSK-ALR-001`:
   **dos pases**. No quedan fallos de la corrida Netskope sin resolver.
 - `E2E_PORT=4267 npm --prefix frontend run test:e2e:cross -- --config
-  /tmp/dshub-021-cross.config.ts --grep
+  /tmp/custodia-021-cross.config.ts --grep
   'dashboard.spec.ts|auth.spec.ts|UX-AUD2-'`: **220 pases** de tableros PAM,
   shell/auth y regresiones de auditoría; persistencia, presets, filtros,
   teclado y permisos conservados.
 - `E2E_PORT=4267 npm --prefix frontend run test:e2e:cyberark -- --config
-  /tmp/dshub-021-cross.config.ts --grep
+  /tmp/custodia-021-cross.config.ts --grep
   'readers see metrics|readers find PAM views|opening PAM from home|CyberArk node in the home'`:
   **ocho pases**, entradas a PAM y métricas sin controles de sync para lectores.
 - `npm run verify`, al implementar y otra vez tras corregir las expectativas
@@ -1243,11 +1243,11 @@ después completar el barrido de fechas de 009.
 ### Comandos y archivos de 023
 
 - `npm run verify` completo, sin omitir PostgreSQL.
-- `npm --prefix frontend run build -- --outDir /tmp/dshub-023-final-dist`.
-- `E2E_PORT=4272 npm --prefix frontend run test:e2e:netskope -- --config /tmp/dshub-023-netskope.config.ts`.
-- `E2E_PORT=4273 npm --prefix frontend run test:e2e:cyberark -- --config /tmp/dshub-023-cyberark.config.ts`.
-- `E2E_PORT=4277 npm --prefix frontend run test:e2e:cross -- --config /tmp/dshub-023-final-owner.config.ts --grep UX-AUD2-023 --workers=1`.
-- `E2E_PORT=4274 npm --prefix frontend run test:e2e:netskope -- --config /tmp/dshub-023-netskope-recheck.config.ts --grep 'NSK-VER-001: client compliance|NSK-VER-001: a Netskope admin|NSK-POSTURE-UX-001: posture has no horizontal|NSK-A11Y-001: axe check|single inventory: review evidence|VIS-NSK-HIST-001: device history|UX-AUD2-023' --workers=1`.
+- `npm --prefix frontend run build -- --outDir /tmp/custodia-023-final-dist`.
+- `E2E_PORT=4272 npm --prefix frontend run test:e2e:netskope -- --config /tmp/custodia-023-netskope.config.ts`.
+- `E2E_PORT=4273 npm --prefix frontend run test:e2e:cyberark -- --config /tmp/custodia-023-cyberark.config.ts`.
+- `E2E_PORT=4277 npm --prefix frontend run test:e2e:cross -- --config /tmp/custodia-023-final-owner.config.ts --grep UX-AUD2-023 --workers=1`.
+- `E2E_PORT=4274 npm --prefix frontend run test:e2e:netskope -- --config /tmp/custodia-023-netskope-recheck.config.ts --grep 'NSK-VER-001: client compliance|NSK-VER-001: a Netskope admin|NSK-POSTURE-UX-001: posture has no horizontal|NSK-A11Y-001: axe check|single inventory: review evidence|VIS-NSK-HIST-001: device history|UX-AUD2-023' --workers=1`.
 - Último caso, sin otras suites activas: mismo comando Netskope/config con
   `--grep 'NSK-POSTURE-UX-001: posture has no horizontal' --project=chromium-dark --workers=1`.
 - `node scripts/check-task-trackers.mjs` y `git diff --check`.
@@ -1343,13 +1343,13 @@ No se presentan estos grupos focales como suites completas de plataforma.
 
 Comandos principales:
 
-- `npm --prefix frontend run build -- --outDir /tmp/dshub-024-final-dist`.
-- `E2E_PORT=4278 npm --prefix frontend run test:e2e -- --config /tmp/dshub-024-red.config.ts --grep UX-AUD2-024 --workers=1` (build previo congelado).
+- `npm --prefix frontend run build -- --outDir /tmp/custodia-024-final-dist`.
+- `E2E_PORT=4278 npm --prefix frontend run test:e2e -- --config /tmp/custodia-024-red.config.ts --grep UX-AUD2-024 --workers=1` (build previo congelado).
 - Corrida adicional del mismo baseline: `--grep 'workspace intro translates|sync warnings form|one inventory result|account creation hints|existing inventory searches'`.
-- `E2E_PORT=4279 npm --prefix frontend run test:e2e -- --config /tmp/dshub-024-owner.config.ts --grep UX-AUD2-024 --workers=1`.
-- `E2E_PORT=4279 npm --prefix frontend run test:e2e:cyberark -- --config /tmp/dshub-024-owner.config.ts --grep 'UX-AUD2-024|cleanup desktop keyboard|SIA recipient controls|Safe filters and grouped inventory' --workers=1`.
-- `E2E_PORT=4279 npm --prefix frontend run test:e2e:cross -- --config /tmp/dshub-024-owner.config.ts --grep 'UX-AUD2-024|activity uses shared search|submitting the currently selected page|Activity, operational logs and errors label|access administration tablist supports|directory readers without mapping' --workers=1`.
-- `E2E_PORT=4279 npm --prefix frontend run test:e2e:netskope -- --config /tmp/dshub-024-owner.config.ts --grep 'UX-AUD2-024|NSK-POL|NSK-UBA|NSK-XMET-002' --workers=1`.
+- `E2E_PORT=4279 npm --prefix frontend run test:e2e -- --config /tmp/custodia-024-owner.config.ts --grep UX-AUD2-024 --workers=1`.
+- `E2E_PORT=4279 npm --prefix frontend run test:e2e:cyberark -- --config /tmp/custodia-024-owner.config.ts --grep 'UX-AUD2-024|cleanup desktop keyboard|SIA recipient controls|Safe filters and grouped inventory' --workers=1`.
+- `E2E_PORT=4279 npm --prefix frontend run test:e2e:cross -- --config /tmp/custodia-024-owner.config.ts --grep 'UX-AUD2-024|activity uses shared search|submitting the currently selected page|Activity, operational logs and errors label|access administration tablist supports|directory readers without mapping' --workers=1`.
+- `E2E_PORT=4279 npm --prefix frontend run test:e2e:netskope -- --config /tmp/custodia-024-owner.config.ts --grep 'UX-AUD2-024|NSK-POL|NSK-UBA|NSK-XMET-002' --workers=1`.
 - Control plural adicional del grupo Netskope: mismo config/puerto,
   `--grep 'Netskope distinguishes inventory users from recent device activity' --workers=1`.
 - `npm run verify`, `node frontend/scripts/verify-style-ownership.mjs`,
@@ -1450,8 +1450,8 @@ La repetición focal Netskope de 009/023/024 tuvo **44 pases**, incluidos ambos
 temas de este caso. `npm run verify` previo: **1.493 backend y 433 frontend**,
 PostgreSQL, build y verificadores aprobados. Comandos:
 
-- `npm --prefix frontend run test:e2e:netskope -- --config=/tmp/dshub-009-final-next.config.ts --workers=2`.
-- `npm --prefix frontend run test:e2e:netskope -- --config=/tmp/dshub-009-last.config.ts --grep='UX-AUD2-009|UX-AUD2-023|UX-AUD2-024' --workers=2`.
+- `npm --prefix frontend run test:e2e:netskope -- --config=/tmp/custodia-009-final-next.config.ts --workers=2`.
+- `npm --prefix frontend run test:e2e:netskope -- --config=/tmp/custodia-009-last.config.ts --grep='UX-AUD2-009|UX-AUD2-023|UX-AUD2-024' --workers=2`.
 - `node scripts/check-task-trackers.mjs`.
 
 Docs: este commit, `docs(audit): complementar UX-AUD2-024 con la carga en singular`.

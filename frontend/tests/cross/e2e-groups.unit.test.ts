@@ -28,7 +28,7 @@ test('group filters are anchored so a spec never selects a sibling', () => {
 });
 
 test('unit CLI discovers nested tests, ignores E2E/support, and propagates a failing case', () => {
-  const directory = mkdtempSync(resolve(tmpdir(), 'dshub-test-discovery-'));
+  const directory = mkdtempSync(resolve(tmpdir(), 'custodia-test-discovery-'));
   const runner = resolve(import.meta.dirname, '../../scripts/unit-tests.mjs');
   try {
     for (const folder of ['cross', 'cyberark/pam', 'e2e/support']) {

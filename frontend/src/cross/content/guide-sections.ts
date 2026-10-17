@@ -17,7 +17,7 @@ export type GuideSectionId =
   | 'datos'
   | 'api';
 
-export type GuideGroupId = 'general' | 'cyberark' | 'netskope' | 'dshub';
+export type GuideGroupId = 'general' | 'cyberark' | 'netskope' | 'custodia';
 
 export type GuideSectionMeta = {
   id: GuideSectionId;
@@ -35,22 +35,22 @@ export const GUIDE_GROUP_LABELS: Record<GuideGroupId, string> = {
   general: 'General',
   cyberark: 'CyberArk',
   netskope: 'Netskope',
-  dshub: 'DS Hub',
+  custodia: 'Custodia',
 };
 
 /* Canonical editorial order shared by the side navigation and Command-K. */
 export const GUIDE_SECTIONS: readonly GuideSectionMeta[] = [
   {
     id: 'primeros-pasos', group: 'general', title: 'Primeros pasos',
-    summary: 'Qué es DS Hub, cómo moverte entre herramientas y de dónde salen los datos que ves.',
-    owner: 'Equipo de producto DS Hub',
+    summary: 'Qué es Custodia, cómo moverte entre herramientas y de dónde salen los datos que ves.',
+    owner: 'Equipo de producto Custodia',
     updateRule: 'Revisar al cambiar el Inicio, la navegación o el flujo de sincronización.',
     aliases: ['inicio', 'empezar', 'introduccion', 'overview'], priority: 50,
   },
   {
-    id: 'personas', group: 'dshub', title: 'Personas',
+    id: 'personas', group: 'custodia', title: 'Personas',
     summary: 'Buscá una persona, sus registros relacionados y la cobertura disponible dentro de Personas.',
-    owner: 'Equipo de producto DS Hub',
+    owner: 'Equipo de producto Custodia',
     updateRule: 'Revisar si cambia el vínculo por correo, los estados de vínculo o la vista por persona.',
     aliases: ['conexiones', 'persona', 'vinculo', 'correo', 'people', 'cobertura por persona'], priority: 51,
   },
@@ -90,37 +90,37 @@ export const GUIDE_SECTIONS: readonly GuideSectionMeta[] = [
     aliases: ['netskope', 'dlp', 'sse', 'dispositivos'], priority: 56,
   },
   {
-    id: 'tableros', group: 'dshub', title: 'Tableros y widgets',
+    id: 'tableros', group: 'custodia', title: 'Tableros y widgets',
     summary: 'Los tableros personales de PAM y Netskope: qué muestran y cómo se editan.',
-    owner: 'Equipo de producto DS Hub',
+    owner: 'Equipo de producto Custodia',
     updateRule: 'Revisar al agregar, quitar o cambiar widgets y presets registrados.',
     aliases: ['widgets', 'dashboard', 'metricas', 'tablero'], priority: 57,
   },
   {
-    id: 'administracion', group: 'dshub', title: 'Administración y permisos',
+    id: 'administracion', group: 'custodia', title: 'Administración y permisos',
     summary: 'Roles, permisos efectivos, auditoría local y autenticación local/OIDC.',
-    owner: 'Equipo de plataforma DS Hub',
+    owner: 'Equipo de plataforma Custodia',
     updateRule: 'Revisar al cambiar el catálogo de permisos, roles o el modo de autenticación.',
     aliases: ['roles', 'permisos', 'usuarios', 'auditoria', 'oidc'], priority: 58,
   },
   {
-    id: 'casos-de-uso', group: 'dshub', title: 'Casos de uso',
+    id: 'casos-de-uso', group: 'custodia', title: 'Casos de uso',
     summary: 'Recorridos concretos para las preguntas operativas más frecuentes.',
-    owner: 'Equipo de producto DS Hub',
+    owner: 'Equipo de producto Custodia',
     updateRule: 'Revisar cuando cambien los flujos principales o se sumen capacidades.',
     aliases: ['use cases', 'recorridos', 'ejemplos'], priority: 59,
   },
   {
-    id: 'datos', group: 'dshub', title: 'Significado y frescura de datos',
+    id: 'datos', group: 'custodia', title: 'Significado y frescura de datos',
     summary: 'Qué significa cada estado, qué es frescura y qué no está implementado.',
-    owner: 'Equipo de plataforma DS Hub',
+    owner: 'Equipo de plataforma Custodia',
     updateRule: 'Revisar ante cualquier cambio de contrato de datos o de semántica.',
     aliases: ['frescura', 'rotacion', 'procedencia', 'source system', 'estados'], priority: 60,
   },
   {
-    id: 'api', group: 'dshub', title: 'API para desarrolladores',
-    summary: 'La referencia técnica de la API de DS Hub y cómo autenticarse.',
-    owner: 'Equipo de plataforma DS Hub',
+    id: 'api', group: 'custodia', title: 'API para desarrolladores',
+    summary: 'La referencia técnica de la API de Custodia y cómo autenticarse.',
+    owner: 'Equipo de plataforma Custodia',
     updateRule: 'Revisar si cambia la exposición de la referencia o el contrato de tokens.',
     aliases: ['openapi', 'scalar', 'referencia', 'tokens'], priority: 61,
   },

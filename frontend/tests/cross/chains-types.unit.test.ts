@@ -36,7 +36,7 @@ test('the drift check fails with a regeneration hint when the file is stale', ()
 });
 
 test('the drift check fails when the generated file is missing', () => {
-  const missing = join(tmpdir(), `dshub-missing-generated-${process.pid}`, 'chains-api.generated.ts');
+  const missing = join(tmpdir(), `custodia-missing-generated-${process.pid}`, 'chains-api.generated.ts');
   assert.throws(
     () => verifyGeneratedTypes({ generatedPath: missing, generate: () => {} }),
     /generate:chains-types/,

@@ -53,7 +53,7 @@ class AgentAccessScriptTests(unittest.TestCase):
         self.assertTrue(open_access.await_args.args[2].startswith("system:agent-access:"))
         close_access.assert_not_awaited()
         command, kwargs = run.call_args.args[0], run.call_args.kwargs
-        self.assertEqual(command[:4], ["agent-browser", "auth", "save", "dshub"])
+        self.assertEqual(command[:4], ["agent-browser", "auth", "save", "custodia"])
         self.assertIn("http://localhost:5173/login/local", command)
         self.assertIn("--password-stdin", command)
         self.assertNotIn(SECRET, " ".join(command))
@@ -65,7 +65,7 @@ class AgentAccessScriptTests(unittest.TestCase):
         output, run, open_access, close_access = self.run_main(["close", "--email", "admin@example.test"])
         close_access.assert_awaited_once()
         open_access.assert_not_awaited()
-        self.assertEqual(run.call_args.args[0], ["agent-browser", "auth", "delete", "dshub"])
+        self.assertEqual(run.call_args.args[0], ["agent-browser", "auth", "delete", "custodia"])
         self.assertIn("desactivada", output)
 
     def test_a_failed_profile_save_is_reported_without_the_secret(self):

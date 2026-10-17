@@ -1,4 +1,4 @@
-# Agentes DS Hub — OpenCode V2
+# Agentes Custodia — OpenCode V2
 
 Orchestrator (primary) coordina worker y reviewer (subagents). No hay OMP, Bun,
 SDK propio ni servicio adicional. OpenCode ya instalado: V2.0.20.
@@ -35,7 +35,7 @@ orchestrator (antes planner). En una sesión existente seleccionar **orchestrato
 y comprobar su modelo manualmente.
 
 ```text
-/dshub-task CHAIN-012 — alcance: mapa de columnas Netskope y sus tests; sin cambiar contratos
+/custodia-task CHAIN-012 — alcance: mapa de columnas Netskope y sus tests; sin cambiar contratos
 ```
 
 Es un ejemplo, no autorización para ejecutar ese ID automáticamente.
@@ -64,7 +64,7 @@ No hay commits automáticos; un checkpoint sin gate/revisión sigue no aceptado.
   estas formas literales) `npm --prefix frontend run build|test:unit|verify:styles`,
   los E2E por grupo `test:e2e:netskope`, `test:e2e:cyberark` (incluye SIA) y
   `test:e2e:cross` (shell y Personas), y el `rsync`
-  de copia aislada a `/tmp/opencode/dshub/`. `cd … &&` o argumentos extra no
+  de copia aislada a `/tmp/opencode/custodia/`. `cd … &&` o argumentos extra no
   coinciden con el patrón y se deniegan.
 - **Forma de los comandos de shell (los tres perfiles):** un comando por llamada,
   literal y desde la raíz del repo, sin `cd`, `&&`, `;`, `|`, redirecciones ni
@@ -104,20 +104,20 @@ trabaja en su propio worktree y rama `task/<ID>`, y lo crea el propio agente**: 
 hay nada que ejecutar a mano.
 
 ```text
-/dshub-task VIS-PAM-ACC-001 — alcance: ...      (orchestrator, con aprobaciones)
-/dshub-goal VIS-PAM-ACC-001                     (autopilot, modo noche)
+/custodia-task VIS-PAM-ACC-001 — alcance: ...      (orchestrator, con aprobaciones)
+/custodia-goal VIS-PAM-ACC-001                     (autopilot, modo noche)
 ```
 
 Qué pasa por dentro:
 
 1. El orchestrator (o el autopilot) comprueba que el ID existe en `TO_IMPLEMENT.md` y
-   corre `scripts/wt.sh new <ID>`: crea `/home/ubuntu/DSHub-wt/<ID>` desde la punta de
+   corre `scripts/wt.sh new <ID>`: crea `/home/ubuntu/Custodia-wt/<ID>` desde la punta de
    la rama base (o lo reutiliza si ya existe), con enlaces a `node_modules`,
    `backend/.venv` y `.env.local`. Lo no commiteado en el árbol principal no viaja.
 2. La sesión sigue abierta en el árbol principal, pero todo el trabajo va a `<W>`:
    rutas absolutas bajo `<W>` para leer/editar y `workdir=<W>` en cada comando de
    shell (el comando sigue siendo el literal de permissions). Las reglas
-   `external_directory` y de edición de cada perfil habilitan `DSHub-wt/*`.
+   `external_directory` y de edición de cada perfil habilitan `Custodia-wt/*`.
 3. Cada agente verifica con `git branch --show-current` (workdir `<W>`) que la rama
    es `task/<ID>` antes de actuar y antes de cada commit; si no, se detiene, porque
    estaría operando sobre el árbol principal.
@@ -200,11 +200,11 @@ Uso (en tmux, para que sobreviva a un corte de SSH):
 ```bash
 tmux new -s noche
 source ~/.profile && [ -n "$COMMANDCODE_API_KEY" ] && echo "clave presente"
-cd ~/DSHub && opencode --agent autopilot
+cd ~/Custodia && opencode --agent autopilot
 # dentro de la sesión:
-/dshub-goal VIS-NSK-HIST-001 VIS-PAM-RET-001
+/custodia-goal VIS-NSK-HIST-001 VIS-PAM-RET-001
 # correcciones sobre una corrida que quedó detenida:
-/dshub-fix VIS-NSK-HIST-001
+/custodia-fix VIS-NSK-HIST-001
 ```
 
 Sin interfaz: `opencode run --agent autopilot "Ejecutá el flujo completo para: VIS-NSK-HIST-001"`.

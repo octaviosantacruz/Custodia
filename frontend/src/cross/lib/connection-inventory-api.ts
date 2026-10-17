@@ -15,7 +15,7 @@ export function previewConnectionImport(payload: ConnectionInventoryImportPayloa
 }
 
 export function exportConnectionInventory(): Promise<void> {
-  return download('/connection-inventory/export.csv', 'dshub-destinos.csv');
+  return download('/connection-inventory/export.csv', 'custodia-destinos.csv');
 }
 
 export function importConnectionInventory(payload: ConnectionInventoryImportPayload): Promise<{ imported: boolean; import_id: string; row_count: number; mode: string; counts: ConnectionImportCounts }> {

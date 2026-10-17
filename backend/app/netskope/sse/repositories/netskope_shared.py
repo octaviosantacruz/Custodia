@@ -109,7 +109,7 @@ RECENT_DEVICE_CONDITION = recent_device_condition()
 STALE_DEVICE_CONDITION = stale_device_condition()
 
 # The newest client-inventory run controls freshness, not the last successful
-# run nor last_seen_at (which is merely the time DS Hub synced a record).
+# run nor last_seen_at (which is merely the time Custodia synced a record).
 SOURCE_EVIDENCE_CTES = f"""
     latest_source AS (
       SELECT status AS source_status, completed_at AS source_completed_at

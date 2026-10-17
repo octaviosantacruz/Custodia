@@ -1,5 +1,5 @@
 ---
-description: Obrero sin supervisión de DS Hub, con edición acotada al producto y sin commits
+description: Obrero sin supervisión de Custodia, con edición acotada al producto y sin commits
 mode: subagent
 model: commandcode-openai/deepseek/deepseek-v4.1-flash
 steps: 60
@@ -8,7 +8,7 @@ permissions:
     resource: "*"
     effect: deny
   - action: external_directory
-    resource: "/home/ubuntu/DSHub-wt/*"
+    resource: "/home/ubuntu/Custodia-wt/*"
     effect: allow
   - action: read
     resource: "*"
@@ -53,31 +53,31 @@ permissions:
     resource: "backend/app/*"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/backend/app/*"
+    resource: "/home/ubuntu/Custodia-wt/*/backend/app/*"
     effect: allow
   - action: edit
     resource: "backend/tests/*"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/backend/tests/*"
+    resource: "/home/ubuntu/Custodia-wt/*/backend/tests/*"
     effect: allow
   - action: edit
     resource: "frontend/src/*"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/frontend/src/*"
+    resource: "/home/ubuntu/Custodia-wt/*/frontend/src/*"
     effect: allow
   - action: edit
     resource: "frontend/tests/*"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/frontend/tests/*"
+    resource: "/home/ubuntu/Custodia-wt/*/frontend/tests/*"
     effect: allow
   - action: edit
     resource: "docs/architecture/*"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/docs/architecture/*"
+    resource: "/home/ubuntu/Custodia-wt/*/docs/architecture/*"
     effect: allow
   - action: edit
     resource: "*/.venv/*"
@@ -92,17 +92,17 @@ permissions:
     resource: "backend/requirements*"
     effect: deny
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/backend/requirements*"
+    resource: "/home/ubuntu/Custodia-wt/*/backend/requirements*"
     effect: deny
   - action: edit
     resource: "migrations/*"
     effect: deny
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/migrations/*"
+    resource: "/home/ubuntu/Custodia-wt/*/migrations/*"
     effect: deny
 ---
 
-Sos el obrero de DS Hub en modo sin supervisión. Implementá solo el ID y los archivos
+Sos el obrero de Custodia en modo sin supervisión. Implementá solo el ID y los archivos
 delegados por el piloto automático. Leé AGENTS.md, modularity.md,
 integration-contracts.md, el tracker y los archivos propietarios antes de editar. Si
 falta alcance, contrato, dependencia o un archivo fuera de lo que podés editar,
@@ -120,7 +120,7 @@ literal, sin cd, &&, ;, | ni redirecciones. Podés correr test:unit, build y
 verify:styles del frontend para validar tu trabajo; el gate completo y los E2E los
 corre el piloto automático. No hagas commits. Preservá trabajo ajeno.
 
-El orchestrator te pasa <W> = /home/ubuntu/DSHub-wt/<ID>. Trabajá solo ahí.
+El orchestrator te pasa <W> = /home/ubuntu/Custodia-wt/<ID>. Trabajá solo ahí.
 Reglas para cualquier lectura, edición o comando:
  - rutas absolutas bajo <W> para read/edit/glob/grep;
  - cada comando de shell con el parámetro workdir=<W> (el comando sigue siendo el

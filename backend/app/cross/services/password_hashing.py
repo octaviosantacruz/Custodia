@@ -18,7 +18,7 @@ from argon2.low_level import Type as Argon2Type
 # max_length of their own at the API schema layer).
 MAX_PASSWORD_LENGTH = 128
 KDF_MAX_CONCURRENCY = 4
-_KDF_EXECUTOR = ThreadPoolExecutor(max_workers=KDF_MAX_CONCURRENCY, thread_name_prefix="dshub-kdf")
+_KDF_EXECUTOR = ThreadPoolExecutor(max_workers=KDF_MAX_CONCURRENCY, thread_name_prefix="custodia-kdf")
 
 # PENTEST-009: NIST SP 800-63B recommends a longer minimum instead of
 # composition rules for single-factor passwords, and discourages forcing

@@ -9,7 +9,7 @@ actually executed it. An empty, freshly migrated schema is enough: this
 only proves the query parses and runs, not that it returns particular
 rows.
 
-Opt-in only: requires DSHUB_TEST_DATABASE_URL. See pg_integration_base.py.
+Opt-in only: requires CUSTODIA_TEST_DATABASE_URL. See pg_integration_base.py.
 """
 
 import unittest

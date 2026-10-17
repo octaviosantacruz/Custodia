@@ -15,7 +15,7 @@ type NotificationMenuProps = {
   onEventsSeen: () => void;
 };
 
-const LAST_SEEN_RUN_KEY = 'dshub-notification:last-seen-run:v1';
+const LAST_SEEN_RUN_KEY = 'custodia-notification:last-seen-run:v1';
 const LEGACY_LAST_SEEN_RUN_KEY = 'openpam-last-seen-run-id';
 
 function readLastSeenRunId(): string | null {

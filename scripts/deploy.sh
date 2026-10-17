@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # Keep the long-lived service streams separate. systemd creates this directory
-# through LogsDirectory= in deploy/dshub.service; the /tmp fallback keeps the
+# through LogsDirectory= in deploy/custodia.service; the /tmp fallback keeps the
 # script usable when run manually without root-owned /var/log access.
-LOG_DIR="${DSHUB_LOG_DIR:-/tmp/dshub}"
+LOG_DIR="${CUSTODIA_LOG_DIR:-/tmp/custodia}"
 mkdir -p "$LOG_DIR"
 BACKEND_LOG="$LOG_DIR/backend.log"
 FRONTEND_LOG="$LOG_DIR/frontend.log"

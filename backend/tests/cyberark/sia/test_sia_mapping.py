@@ -32,7 +32,7 @@ class SiaMappingTests(unittest.TestCase):
         rules = [{
             "ruleName": "Rule1",
             "userData": {
-                "users": [{"name": "user@example.com", "source": "DS Hub Cloud Directory"}],
+                "users": [{"name": "user@example.com", "source": "Custodia Cloud Directory"}],
                 "groups": [{"name": "Ops"}],
                 "roles": [],
             },

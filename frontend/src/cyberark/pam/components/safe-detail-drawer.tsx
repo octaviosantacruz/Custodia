@@ -170,7 +170,7 @@ export function SafeDetailDrawer({
             { id: 'business-unit', label: 'Unidad', icon: <Plus size={14} />, title: 'Crear una unidad de negocio para clasificar Safes', onSelect: onAddBusinessUnit },
             { id: 'responsible', label: 'Responsable', icon: <Plus size={14} />, title: 'Crear un responsable para asignar Safes', onSelect: onAddResponsible },
           ]}
-        /><div className="drawer-save-area">{saveState === 'saved' && <span className="drawer-save-feedback success" role="status">Guardado correctamente</span>}{saveState === 'error' && <span className="drawer-save-feedback error" role="alert">{saveError}</span>}<button className="button primary" type="button" title="Guardar los cambios de clasificación en DS Hub" onClick={() => void save()} disabled={saving || !draftChanges.length}><Save size={15} /> {saving ? 'Guardando...' : saveState === 'saved' ? 'Guardado' : 'Guardar clasificación'}</button></div></div>
+        /><div className="drawer-save-area">{saveState === 'saved' && <span className="drawer-save-feedback success" role="status">Guardado correctamente</span>}{saveState === 'error' && <span className="drawer-save-feedback error" role="alert">{saveError}</span>}<button className="button primary" type="button" title="Guardar los cambios de clasificación en Custodia" onClick={() => void save()} disabled={saving || !draftChanges.length}><Save size={15} /> {saving ? 'Guardando...' : saveState === 'saved' ? 'Guardado' : 'Guardar clasificación'}</button></div></div>
       </section>}
 
       {activeTab === 'history' && <section className="detail-section audit-section">

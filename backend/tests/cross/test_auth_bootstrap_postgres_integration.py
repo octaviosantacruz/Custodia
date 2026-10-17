@@ -6,7 +6,7 @@ only with mocked repositories. This runs them through the real ASGI app, the
 real rate limiter, hashing, advisory lock and security-event log, so the
 `auth.py` / `account_security` boundary can be refactored safely.
 
-Opt-in (DSHUB_TEST_DATABASE_URL, a disposable database). The first-admin flows
+Opt-in (CUSTODIA_TEST_DATABASE_URL, a disposable database). The first-admin flows
 only exist while ``access_users`` is empty, so the module skips when other
 users are present and removes everything it creates.
 """

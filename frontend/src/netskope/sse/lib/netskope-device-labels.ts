@@ -21,7 +21,7 @@ export function deviceMakeModelLabel(make: string | null | undefined, model: str
   return `${manufacturer} ${product}`;
 }
 
-/** How DS Hub reads the client's last signal; the colour dot in the inventory carries the same state. */
+/** How Custodia reads the client's last signal; the colour dot in the inventory carries the same state. */
 export const DEVICE_EVIDENCE_LABELS: Record<'recent' | 'not_recent' | 'review' | 'unknown', string> = {
   recent: 'Señal reciente',
   not_recent: 'Sin señal reciente',

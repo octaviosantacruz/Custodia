@@ -1,4 +1,4 @@
-"""NSK-REF-001: the user total Netskope reports is a reference beside DS Hub's own count."""
+"""NSK-REF-001: the user total Netskope reports is a reference beside Custodia's own count."""
 
 from datetime import datetime, timezone
 
@@ -47,7 +47,7 @@ class NetskopeReportedCountsPostgresTests(PostgresIntegrationTestCase):
             (metrics["accounts_reported_active"], metrics["accounts_reported_inactive"], metrics["groups_reported_total"], metrics["ous_reported_total"]),
             (10209, 1987, 718, 141))
         self.assertEqual(metrics["users_repeated_rows"], 4)
-        # DS Hub's own count is untouched by the reference.
+        # Custodia's own count is untouched by the reference.
         self.assertEqual(metrics["users_total"], 2)
 
     async def test_a_second_write_for_the_same_run_replaces_the_first_and_a_negative_total_is_rejected(self):

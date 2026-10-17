@@ -48,7 +48,7 @@ test('identity navigation has two tabs and combines roles and Okta groups from I
 
 for (const theme of ['dark', 'light'] as const) {
   test(`roles and Okta groups can be filtered by type and sorted by name or member count in ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
     await mockAuthenticatedApp(page);
     const requests: URL[] = [];
     await page.route('**/api/cmdb/identity-roles?**', async (route) => {
@@ -156,7 +156,7 @@ test('the Federaciones tab is hidden without identity:catalogs_read/access:manag
 
 for (const theme of ['dark', 'light'] as const) {
   test(`Identidades axe check covers navigation, Federación and the Standard badge in ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
     await mockAuthenticatedApp(page);
     await page.goto('/pam/identity');
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
@@ -187,7 +187,7 @@ test('the retired Federaciones URL lands on Identidades even for catalog readers
 for (const theme of ['dark', 'light'] as const) {
   test(`Identity layers expose direct members, Okta groups, cycles and user paths in ${theme} (UX-AUD2-009)`, async ({ page }) => {
     await mockAuthenticatedApp(page);
-    await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
     const nodes = [
       { object_id: 32, display_name: 'Administration Role', kind: 'role' },
       { object_id: 33, display_name: 'System Administrator', kind: 'role' },
@@ -340,7 +340,7 @@ test('member matches live inside the roles table: lazy, per-row chips, detail, f
 
 test('member match bar shows its explicit empty state', async ({ page }) => {
   await mockAuthenticatedApp(page);
-  await page.addInitScript(() => localStorage.setItem('dshub-theme:v1', 'light'));
+  await page.addInitScript(() => localStorage.setItem('custodia-theme:v1', 'light'));
   await page.route('**/api/cmdb/identity-roles/member-matches', (route) => route.fulfill({ json: {
     same_direct_members: [], same_user_references: [], roles_with_incomplete_user_paths: [],
     permissions_status: 'not_collected', scope: MATCH_SCOPE,
@@ -358,7 +358,7 @@ test('member match bar shows its explicit empty state', async ({ page }) => {
 
 test('member match bar warns when the analysis is incomplete', async ({ page }) => {
   await mockAuthenticatedApp(page);
-  await page.addInitScript(() => localStorage.setItem('dshub-theme:v1', 'dark'));
+  await page.addInitScript(() => localStorage.setItem('custodia-theme:v1', 'dark'));
   await page.route('**/api/cmdb/identity-roles/member-matches', (route) => route.fulfill({ json: {
     same_direct_members: [], same_user_references: [], roles_with_incomplete_user_paths: ['Unresolved'],
     permissions_status: 'not_collected', scope: MATCH_SCOPE,

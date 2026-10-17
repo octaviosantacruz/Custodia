@@ -280,7 +280,7 @@ class PermissionHttpMatrixTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(events.status_code, 200)
 
     async def test_role_chips_need_role_assignment_and_never_change_own_or_okta_roles(self):
-        """ACCESS-UI-001: add/remove one DS Hub role per identity."""
+        """ACCESS-UI-001: add/remove one Custodia role per identity."""
         self.session.set_permissions(["access:directory_read", "access:local_users_manage"])
         denied = await self.client.post("/api/auth/users/okta-1/roles", json={"role_code": "reader"})
         self.assertEqual(denied.status_code, 403)

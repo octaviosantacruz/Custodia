@@ -22,7 +22,7 @@ export const registration = {
       id: 'posture', path: '/pam/posture', domain: 'pam',
       label: 'Postura', detail: '¿Qué hallazgos requieren atención?', icon: ShieldAlert,
       description: 'Revisá riesgos y problemas del inventario, y registrá su seguimiento.',
-      introHelp: { label: 'Acerca de Postura PAM', paragraphs: ['Hallazgos de DS Hub y CyberArk Risk Management. La severidad y el estado corresponden a cada fuente y sus reglas; los datos de CyberArk son una lectura en vivo y DS Hub no los persiste.', 'Podés cambiar los filtros o, si tenés permiso, actualizar las reglas locales con el inventario vigente.'] },
+      introHelp: { label: 'Acerca de Postura PAM', paragraphs: ['Hallazgos de Custodia y CyberArk Risk Management. La severidad y el estado corresponden a cada fuente y sus reglas; los datos de CyberArk son una lectura en vivo y Custodia no los persiste.', 'Podés cambiar los filtros o, si tenés permiso, actualizar las reglas locales con el inventario vigente.'] },
       catalog: true, switcher: true, gate: 'open',
       order: 1,
       runtime: 'cyberark',

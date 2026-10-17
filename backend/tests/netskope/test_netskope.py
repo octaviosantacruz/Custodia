@@ -456,7 +456,7 @@ class NetskopeHttpTests(unittest.TestCase):
             self.assertEqual(request.method, "GET")
             self.assertEqual(request.url.path, "/api/v2/events/dataexport/events/incident")
             self.assertEqual(request.url.params["operation"], "next")
-            self.assertEqual(request.url.params["index"], "dshub-dlp-test")
+            self.assertEqual(request.url.params["index"], "custodia-dlp-test")
             return httpx.Response(200, json={"result": [{"dlp_incident_id": 7}], "timestamp_hwm": 1720003600})
 
         settings = NetskopeSettings(**{
@@ -467,7 +467,7 @@ class NetskopeHttpTests(unittest.TestCase):
 
         async def exercise():
             async with NetskopeClient(settings, client) as netskope:
-                return await netskope.get_dlp_incident_page("next", "dshub-dlp-test")
+                return await netskope.get_dlp_incident_page("next", "custodia-dlp-test")
 
         payload = asyncio.run(exercise())
         asyncio.run(client.aclose())
@@ -587,7 +587,7 @@ class NetskopeHttpTests(unittest.TestCase):
 
         async def exercise():
             async with NetskopeClient(settings, httpx.AsyncClient(transport=httpx.MockTransport(lambda _: httpx.Response(200, json={})))) as netskope:
-                await netskope.get_dlp_incident_page("next", "dshub-dlp-test")
+                await netskope.get_dlp_incident_page("next", "custodia-dlp-test")
 
         with self.assertRaises(NetskopeNotConfigured):
             asyncio.run(exercise())

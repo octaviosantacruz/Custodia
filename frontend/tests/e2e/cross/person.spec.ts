@@ -275,12 +275,12 @@ test('HOME-EDGE-001: the wheel draws no edge at rest and lights one only on hove
   await expect(page.locator('.home-visibility-line-bigid')).toHaveCSS('opacity', '0');
 });
 
-test('CHAIN-010: without a tool read permission the wheel centre stays DS Hub', async ({ page }) => {
+test('CHAIN-010: without a tool read permission the wheel centre stays Custodia', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['inventory:read'] });
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /Hola/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Abrir Conexiones' })).toHaveCount(0);
-  await expect(page.locator('.home-visibility-core')).toHaveText('DS Hub');
+  await expect(page.locator('.home-visibility-core')).toHaveText('Custodia');
    // UX-IA-001: no Personas button and no empty Conexiones section.
    await expect(page.getByRole('heading', { name: 'Cross' })).toHaveCount(0);
   await expect(page.locator('.home-domain-button-people')).toHaveCount(0);
@@ -307,10 +307,10 @@ test('HOME-BRAND-001: the original three-node mark animates without changing its
   await mockAuthenticatedApp(page);
   await page.goto('/');
 
-  const mark = page.locator('.brand .ds-hub-mark');
+  const mark = page.locator('.brand .custodia-mark');
   await expect(mark).toBeVisible();
   await expect(mark).toHaveAttribute('aria-hidden', 'true');
-  await expect(mark.locator('.ds-hub-mark-branch')).toHaveCount(3);
+  await expect(mark.locator('.custodia-mark-branch')).toHaveCount(3);
   await expect(page.locator('.home-content > .home-mark')).toHaveCount(0);
   const favicon = await page.request.get('/favicon.svg');
   expect(favicon.ok()).toBe(true);
@@ -318,11 +318,11 @@ test('HOME-BRAND-001: the original three-node mark animates without changing its
   // The animated mark remains on login; Home keeps the header brand only.
   await page.route('**/api/auth/status', (route) => route.fulfill({ json: unauthenticated }));
   await page.reload();
-  const loginMark = page.locator('.auth-logo .ds-hub-mark');
+  const loginMark = page.locator('.auth-logo .custodia-mark');
   await expect(loginMark).toBeVisible();
-  await expect(loginMark.locator('.ds-hub-mark-branch')).toHaveCount(3);
-  await expect(loginMark.locator('.ds-hub-mark-branch-left')).toHaveCSS('animation-name', 'ds-hub-mark-draw');
-  await expect(loginMark.locator('.ds-hub-mark-node-core')).toHaveCSS('animation-name', 'ds-hub-mark-node-arrive');
+  await expect(loginMark.locator('.custodia-mark-branch')).toHaveCount(3);
+  await expect(loginMark.locator('.custodia-mark-branch-left')).toHaveCSS('animation-name', 'custodia-mark-draw');
+  await expect(loginMark.locator('.custodia-mark-node-core')).toHaveCSS('animation-name', 'custodia-mark-node-arrive');
 });
 
 test('UX-IA-001: home lists Conexiones under Cross and platforms separately', async ({ page }) => {
@@ -345,8 +345,8 @@ test('UX-IA-001: home lists Conexiones under Cross and platforms separately', as
   await expect(actions.nth(3)).toHaveAttribute('aria-disabled', 'true');
   await expect(actions.nth(3)).toContainText('Próximamente');
   await expect(page.getByRole('button', { name: /BigID DSPM/ })).toHaveCount(0);
-  // The transversal entry wears the neutral DS Hub mark, not a product logo.
-  await expect(page.locator('.home-domain-button-people svg.ds-hub-mark')).toBeVisible();
+  // The transversal entry wears the neutral Custodia mark, not a product logo.
+  await expect(page.locator('.home-domain-button-people svg.custodia-mark')).toBeVisible();
 });
 
 test('UX-IA-001: the left Personas button drives the same wheel state as the core', async ({ page }) => {
@@ -411,7 +411,7 @@ for (const permission of ['pam:catalogs_read', 'identity:catalogs_read', 'netsko
   });
 }
 
-test('TOOL-LOGO-001: each context uses its own logo variant, per theme; DS Hub views keep an icon', async ({ page }) => {
+test('TOOL-LOGO-001: each context uses its own logo variant, per theme; Custodia views keep an icon', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['pam:catalogs_read', 'identity:catalogs_read', 'netskope:read'] });
   await page.goto('/');
   const trigger = page.getByRole('button', { name: /Cambiar herramienta/ });
@@ -525,9 +525,9 @@ test('UX-IA-001: Administración lands on the first authorized workspace when Pe
   await expect(page.locator('.home-domain-button-people')).toHaveCount(0);
 
   await page.getByRole('button', { name: /Cambiar herramienta/ }).click();
-  const dshubArea = page.getByRole('region', { name: 'Herramientas' }).getByRole('button', { name: /^Administración / });
-  await expect(dshubArea).toBeVisible();
-  await dshubArea.click();
+  const custodiaArea = page.getByRole('region', { name: 'Herramientas' }).getByRole('button', { name: /^Administración / });
+  await expect(custodiaArea).toBeVisible();
+  await custodiaArea.click();
   await expect(page).toHaveURL(/\/admin\/access$/);
   await expect(page.getByRole('button', { name: /Cambiar workspace.*Usuarios y permisos/ })).toBeVisible();
 
@@ -553,7 +553,7 @@ test('UX-PERSON-002: the simplified home has no axe violations', async ({ page }
     { viewport: { width: 1440, height: 900 }, theme: 'light' },
   ] as const) {
     await page.setViewportSize(scenario.viewport);
-    await page.evaluate((theme) => window.localStorage.setItem('dshub-theme:v1', theme), scenario.theme);
+    await page.evaluate((theme) => window.localStorage.setItem('custodia-theme:v1', theme), scenario.theme);
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', scenario.theme);
     await settleAnimations(page.locator('.home-workspace'));
@@ -720,14 +720,14 @@ test('HOME-WHEEL-002: reduced motion keeps the home wheel static', async ({ page
   await expect(page.locator('.home-visibility-ring')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.home-greeting-text')).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.home-greeting-accent')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.brand .ds-hub-mark-branch-left')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.brand .ds-hub-mark-branch-right')).toHaveCSS('animation-name', 'none');
-  await expect(page.locator('.brand .ds-hub-mark-node-core')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.brand .custodia-mark-branch-left')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.brand .custodia-mark-branch-right')).toHaveCSS('animation-name', 'none');
+  await expect(page.locator('.brand .custodia-mark-node-core')).toHaveCSS('animation-name', 'none');
 });
 
 for (const theme of ['dark', 'light'] as const) {
   test(`CONN-NAV-001 desktop navigation, search and deep links work in ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => window.localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => window.localStorage.setItem('custodia-theme:v1', value), theme);
     await mockAuthenticatedApp(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/chains/person');

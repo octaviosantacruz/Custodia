@@ -2,7 +2,7 @@
 # Worktrees por tarea: cada ID (humano o agente) trabaja en su propio árbol y
 # su propia rama, así que dos actores nunca editan los mismos archivos.
 #
-#   scripts/wt.sh new <ID>        crea (o reutiliza) ../DSHub-wt/<ID> en la rama task/<ID>;
+#   scripts/wt.sh new <ID>        crea (o reutiliza) ../Custodia-wt/<ID> en la rama task/<ID>;
 #                                 lo invocan el orchestrator y el autopilot, no hace falta a mano
 #   scripts/wt.sh status          lista los árboles y su estado
 #   scripts/wt.sh merge <ID>      rebase sobre la rama base y fast-forward en el árbol principal
@@ -12,7 +12,7 @@
 set -euo pipefail
 
 MAIN="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROOT="$(dirname "$MAIN")/DSHub-wt"
+ROOT="$(dirname "$MAIN")/Custodia-wt"
 
 die() { echo "wt: $*" >&2; exit 1; }
 

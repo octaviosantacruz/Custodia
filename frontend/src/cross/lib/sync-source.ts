@@ -36,7 +36,7 @@ export function syncSourceLabel(source: SyncSource | null | undefined, sourceFil
 
 /** Tool-level identity used by operator-facing synchronization summaries.
  * Feature/source labels remain available separately for audit detail. */
-/** The sync source a navigation area belongs to (`pam` -> CyberArk, `dlp` -> Netskope); null for DS Hub-level areas. */
+/** The sync source a navigation area belongs to (`pam` -> CyberArk, `dlp` -> Netskope); null for Custodia-level areas. */
 export function syncSourceForArea(area: Domain): SyncSource | null {
   return REGISTERED_SYNCS.find((sync) => sync.domain === area)?.source ?? null;
 }
@@ -264,15 +264,15 @@ export function refreshVisibleWorkspaceForSources(
 /** Resolve the product that owns a human-facing operational notice.
  *
  * Notices predate structured metadata, so the conservative fallback remains
- * the generic DS Hub check when neither product is named. PAM/Safes are part
+ * the generic Custodia check when neither product is named. PAM/Safes are part
  * of the CyberArk domain; Netskope is only selected when it is explicit.
  */
 export function syncSourceFromNotice(notice: string): SyncSource | null {
   const normalized = notice.toLocaleLowerCase('es');
-  // A DS Hub batch can name more than one product. Do not give that shared
+  // A Custodia batch can name more than one product. Do not give that shared
   // result the icon/eyebrow of whichever source happens to be mentioned
   // first in its detail.
-  if (normalized.startsWith('ds hub terminó una sincronización automática') || normalized.startsWith('ds hub sincronizó')) return null;
+  if (normalized.startsWith('custodia terminó una sincronización automática') || normalized.startsWith('custodia sincronizó')) return null;
   const hinted = HINTED_SYNCS.find((sync) => sync.noticeHints?.some((word) => normalized.includes(word)));
   if (hinted) return hinted.source;
   return null;
@@ -290,14 +290,14 @@ export type NoticePresentation = {
 export function presentNotice(notice: string, workspaceSource: SyncSource | null = null): NoticePresentation {
   const source = syncSourceFromNotice(notice) ?? workspaceSource;
   const sourceLabel = source ? syncToolLabel(syncToolForSource(source)) : null;
-  const eyebrow = sourceLabel ? `${sourceLabel} · ACTUALIZACIÓN` : 'DS HUB · ACTUALIZACIÓN';
+  const eyebrow = sourceLabel ? `${sourceLabel} · ACTUALIZACIÓN` : 'CUSTODIA · ACTUALIZACIÓN';
   const automatic = /sincronización automática|sincronizó automáticamente|sincronizó parcialmente/i.test(notice);
   if (!automatic) return { source, eyebrow, title: notice };
 
   const withoutSource = sourceLabel && notice.startsWith(sourceLabel)
     ? notice.slice(sourceLabel.length).trim()
     : notice;
-  const automaticBody = withoutSource.replace(/^DS Hub\s+/i, '');
+  const automaticBody = withoutSource.replace(/^Custodia\s+/i, '');
   const completed = automaticBody.match(/^sincronizó automáticamente (.+?)\. (.+)$/i);
   if (completed) {
     return {
@@ -353,8 +353,8 @@ export function automaticSyncBatchNotice(runs: readonly CompletedSync[]): string
   }
   const labels = [...new Set(runs.map((run) => syncToolLabel(syncToolForSource(run.source_system))))];
   const failed = runs.some((run) => (run.status !== 'completed' && run.status !== 'partial') || (run.error_count || 0) > 0);
-  if (failed) return `DS Hub terminó una sincronización automática con errores. ${labels.join(', ')}; revisá Actividad para el detalle.`;
-  if (runs.some((run) => run.status === 'partial')) return `DS Hub sincronizó parcialmente: ${labels.join(', ')}. Tu vista actual se conserva; revisá Actividad.`;
+  if (failed) return `Custodia terminó una sincronización automática con errores. ${labels.join(', ')}; revisá Actividad para el detalle.`;
+  if (runs.some((run) => run.status === 'partial')) return `Custodia sincronizó parcialmente: ${labels.join(', ')}. Tu vista actual se conserva; revisá Actividad.`;
   if (labels.length === 1) return `${labels[0]} sincronizó automáticamente. Tu vista actual se conserva.`;
-  return `DS Hub terminó una sincronización automática. Herramientas actualizadas: ${labels.join(', ')}. Tu vista actual se conserva.`;
+  return `Custodia terminó una sincronización automática. Herramientas actualizadas: ${labels.join(', ')}. Tu vista actual se conserva.`;
 }

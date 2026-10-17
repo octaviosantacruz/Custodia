@@ -68,15 +68,15 @@ arranque.
 El checkout conserva cuatro remotos: `itti` es el SSH activo; `gvz` es el
 original personal; `origin` y `Cybersecurity-Org` son aliases de la
 organización. No se sincronizan solos: se hace push explícito al remoto
-correcto. Los logs del servicio se consultan con `journalctl -u dshub` y en
-`/var/log/dshub/`; nunca copiar secretos desde ellos.
+correcto. Los logs del servicio se consultan con `journalctl -u custodia` y en
+`/var/log/custodia/`; nunca copiar secretos desde ellos.
 
 `npm run verify` incluye los tests con PostgreSQL real mediante un cluster
 efímero local: usa `initdb` en un directorio temporal, sólo socket local y
 `trust`, ejecuta las migraciones y borra el cluster al terminar. No lee
-`DATABASE_URL` ni `.env.local`; `DSHUB_TEST_DATABASE_URL` existe únicamente en
+`DATABASE_URL` ni `.env.local`; `CUSTODIA_TEST_DATABASE_URL` existe únicamente en
 ese proceso. Si faltan binarios de PostgreSQL el gate falla de forma explícita;
-`DSHUB_SKIP_PG=1` permite omitirlo deliberadamente. El aprovisionamiento y la
+`CUSTODIA_SKIP_PG=1` permite omitirlo deliberadamente. El aprovisionamiento y la
 recuperación de respaldo productivos se ejecutan con el runbook interno
 aprobado, fuera del repositorio.
 
@@ -89,8 +89,8 @@ archivos no existen.
 
 ```bash
 # Diseño previsto, NO funciona en el estado actual del repo:
-docker build -f backend/Dockerfile -t dshub-backend .
-docker build -f frontend/Dockerfile -t dshub-frontend .
+docker build -f backend/Dockerfile -t custodia-backend .
+docker build -f frontend/Dockerfile -t custodia-frontend .
 ```
 
 El orquestador debe publicar el frontend por HTTPS, resolver el upstream del
@@ -105,26 +105,26 @@ build del frontend + backend en `:8000` + `vite preview` del frontend en `:5173`
 `systemd`, para que el proceso siga arriba aunque se cierre la sesión SSH y
 se reinicie solo si se cae o si el servidor rebootea.
 
-Unit instalada en `/etc/systemd/system/dshub.service` (no versionada en el
+Unit instalada en `/etc/systemd/system/custodia.service` (no versionada en el
 repo porque depende de rutas absolutas de este host — `nvm`, usuario `ubuntu`,
 etc.; una copia de referencia queda documentada acá):
 
 ```ini
 [Unit]
-Description=DS Hub (backend + frontend production preview)
+Description=Custodia (backend + frontend production preview)
 After=network.target
 
 [Service]
 Type=simple
 User=ubuntu
-WorkingDirectory=/home/ubuntu/DSHub
+WorkingDirectory=/home/ubuntu/Custodia
 Environment=PATH=/home/ubuntu/.nvm/versions/node/v24.19.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ExecStart=/home/ubuntu/.nvm/versions/node/v24.19.0/bin/npm run deploy
 Restart=always
 RestartSec=5
 KillMode=control-group
-LogsDirectory=dshub
-Environment=DSHUB_LOG_DIR=/var/log/dshub
+LogsDirectory=custodia
+Environment=CUSTODIA_LOG_DIR=/var/log/custodia
 StandardOutput=journal
 StandardError=journal
 
@@ -143,10 +143,10 @@ Notas del diseño:
 - `Environment=PATH=...` incluye el `bin` de la versión de Node instalada vía
   `nvm` para ese usuario, porque los servicios de systemd no heredan el shell
   profile (`.bashrc`/`nvm.sh`) de una sesión interactiva.
-- Los mensajes de despliegue quedan en `/var/log/dshub/deploy.log` (y también
-  en el journal de `dshub.service`) y los
-  procesos se separan en `/var/log/dshub/backend.log` y
-  `/var/log/dshub/frontend.log`. `LogsDirectory=dshub` crea el directorio
+- Los mensajes de despliegue quedan en `/var/log/custodia/deploy.log` (y también
+  en el journal de `custodia.service`) y los
+  procesos se separan en `/var/log/custodia/backend.log` y
+  `/var/log/custodia/frontend.log`. `LogsDirectory=custodia` crea el directorio
   bajo `/var/log` con permisos para el usuario del servicio.
 - `WantedBy=multi-user.target` + `systemctl enable`: arranca automáticamente
   en cada boot del servidor, sin intervención manual.
@@ -155,21 +155,21 @@ Instalación/actualización en un host nuevo (ajustar rutas de usuario/nvm si
 difieren):
 
 ```bash
-sudo cp deploy/dshub.service /etc/systemd/system/dshub.service   # o pegar el contenido de arriba
-sudo cp deploy/dshub.logrotate /etc/logrotate.d/dshub
+sudo cp deploy/custodia.service /etc/systemd/system/custodia.service   # o pegar el contenido de arriba
+sudo cp deploy/custodia.logrotate /etc/logrotate.d/custodia
 sudo systemctl daemon-reload
-sudo systemctl enable --now dshub.service
+sudo systemctl enable --now custodia.service
 ```
 
 Operación diaria:
 
 ```bash
-sudo systemctl status dshub      # ver estado y últimos procesos
-sudo systemctl restart dshub     # reiniciar (p.ej. tras git pull / npm install)
-sudo systemctl stop dshub        # bajar el servicio
-tail -f /var/log/dshub/backend.log       # backend
-tail -f /var/log/dshub/frontend.log      # frontend/Vite
-journalctl -u dshub -f                    # migraciones, build y supervisor
+sudo systemctl status custodia      # ver estado y últimos procesos
+sudo systemctl restart custodia     # reiniciar (p.ej. tras git pull / npm install)
+sudo systemctl stop custodia        # bajar el servicio
+tail -f /var/log/custodia/backend.log       # backend
+tail -f /var/log/custodia/frontend.log      # frontend/Vite
+journalctl -u custodia -f                    # migraciones, build y supervisor
 ```
 
 ### Actualización de dependencias Python
@@ -182,11 +182,11 @@ y `pip check` funcionen correctamente. Se observó este caso con AnyIO y
 `cannot import name 'get_coro_name'`.
 
 ```bash
-sudo systemctl stop dshub
+sudo systemctl stop custodia
 backend/.venv/bin/python -m pip install --require-hashes -r backend/requirements.lock.txt
 backend/.venv/bin/python -m pip check
 backend/.venv/bin/python -c 'import asyncio, anyio; asyncio.run(anyio.sleep(0))'
-sudo systemctl start dshub
+sudo systemctl start custodia
 curl --fail --silent --show-error http://127.0.0.1:8000/api/health/ready
 ```
 
@@ -196,7 +196,7 @@ activo, reiniciar tras validar el entorno y comprobar una nueva corrida:
 el reinicio no cambia el estado de las corridas fallidas históricas ni
 demuestra por sí solo que una sincronización completa haya terminado.
 
-### Errores operativos desde DS Hub
+### Errores operativos desde Custodia
 
 El workspace **Actividad → Errores del sistema**, disponible sólo con
 `access:manage`, muestra los errores internos no controlados desde la
@@ -206,7 +206,7 @@ SQL, tokens o secretos. Al usuario que recibe un `500` se le muestra la misma
 referencia, para correlacionar el incidente sin revelar detalles internos.
 
 Para una investigación de infraestructura que requiera la traza completa,
-un operador del host puede buscar esa referencia en `/var/log/dshub/backend.log`.
+un operador del host puede buscar esa referencia en `/var/log/custodia/backend.log`.
 No copiar líneas que contengan secretos a tickets, chats o commits.
 
 Limitaciones a tener presentes:
@@ -232,7 +232,7 @@ Las migraciones son secuenciales e inmutables. El paso controlado del despliegue
 es `npm run deploy`, que ejecuta primero el runner idempotente mediante
 `scripts/deploy.sh`; si una migración falla, el
 backend y el frontend no se arrancan y el error queda en la salida del deploy
-y en `/var/log/dshub.log`. Esto evita que el servicio publique una aplicación
+y en `/var/log/custodia.log`. Esto evita que el servicio publique una aplicación
 que no puede completar su startup por esquema incompleto.
 
 Los cambios del cache DLP requieren las migraciones `063`, `064` y `065`.

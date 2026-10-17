@@ -23,7 +23,7 @@ El estado general del trabajo sigue en
 
 ## Objetivo
 
-Administrar el acceso a DS Hub desde la app con dos recorridos claros:
+Administrar el acceso a Custodia desde la app con dos recorridos claros:
 darle acceso a una persona y definir un perfil reutilizable para un equipo.
 La pantalla debe responder quién tiene acceso, qué puede hacer y de dónde
 proviene ese acceso.
@@ -63,7 +63,7 @@ La orientación expresada por el dueño es simplificar Okta: presentarlo como
 un smartchip del usuario, con los grupos observados en el login y su fecha.
 Si no hay grupos informados, se muestra únicamente «Okta». No se incorpora
 una referencia de grupo cargada a mano. El foco del rediseño es la
-representación de roles y permisos de DS Hub.
+representación de roles y permisos de Custodia.
 El dueño aprobó implementar este diseño tras incorporar las correcciones
 sobre las fases existentes, el editor de mapeos y los dominios opcionales.
 
@@ -110,7 +110,7 @@ reciben acciones de contraseña local o administración remota de Okta.
 
 ### Smartchip de Okta
 
-El chip utiliza únicamente los grupos que DS Hub ya guarda al iniciar sesión
+El chip utiliza únicamente los grupos que Custodia ya guarda al iniciar sesión
 en `access_oidc_users.observed_groups`, junto con `groups_observed_at`. El
 contrato actual observa grupos mapeados; no representa todo el directorio Okta.
 
@@ -176,7 +176,7 @@ directo en una composición distinta.
 ### Okta en el rol: sólo lectura (revisión del dueño, 2026-10-11)
 
 La primera implementación movió el editor del mapeo al detalle de cada rol.
-Revisada en pantalla, el dueño decidió sacarlo: sin SCIM ni API de Okta, DS Hub
+Revisada en pantalla, el dueño decidió sacarlo: sin SCIM ni API de Okta, Custodia
 no conoce los grupos reales, el nombre se tipea a mano y un error no otorga
 nada sin avisar; además, el mapeo se configura una vez y repetir un editor en
 cada rol agrega ruido. Lo cotidiano —dar o quitar un rol a una persona— ya se
@@ -204,7 +204,7 @@ Ejemplo conceptual, sin asignaciones reales:
 
 | Área | Nivel elegido | Consulta |
 |---|---|---|
-| Plataforma DS Hub | Sin participación en la composición | Ver capacidades |
+| Plataforma Custodia | Sin participación en la composición | Ver capacidades |
 | CyberArk PAM | Operador | Ver capacidades |
 | Identity Administration | Lector | Ver capacidades |
 | SIA | Lector | Ver capacidades |

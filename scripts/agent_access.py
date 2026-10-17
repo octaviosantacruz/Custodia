@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Open or close the local DS Hub account used by browser automation (AUTH-AGENT-001).
+"""Open or close the local Custodia account used by browser automation (AUTH-AGENT-001).
 
 People sign in through Okta; the local account stays disabled until a
 browser-automation session needs it.
@@ -12,7 +12,7 @@ deletes the profile. Both end every open session of the account and are
 audited in the same transaction. A failed profile step only needs another run.
 
     npm run agent-access -- open --email admin@itti.digital
-    agent-browser auth login dshub      # local form at /login/local
+    agent-browser auth login custodia      # local form at /login/local
     npm run agent-access -- close --email admin@itti.digital
 """
 
@@ -34,7 +34,7 @@ if str(BACKEND) not in sys.path:
 from app.cross.services.user_management import close_automation_access, open_automation_access  # noqa: E402
 from app.db import create_pool  # noqa: E402
 
-DEFAULT_PROFILE = "dshub"
+DEFAULT_PROFILE = "custodia"
 DEFAULT_LOGIN_URL = "http://localhost:5173/login/local"
 
 

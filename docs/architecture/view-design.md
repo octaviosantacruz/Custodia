@@ -6,7 +6,7 @@ revisado: 2026-10-12
 
 # Diseño de vistas por pregunta
 
-Cada vista de DS Hub responde **una pregunta de una persona concreta**. El
+Cada vista de Custodia responde **una pregunta de una persona concreta**. El
 menú se ordena por esas preguntas, no por la herramienta de origen del dato ni
 por la tabla que lo contiene. Criterio fijado por el dueño del producto el
 2026-10-11 (`UX-IA-002`) después de ver Experiencia digital de Netskope: tres

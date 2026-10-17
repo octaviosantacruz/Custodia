@@ -1,4 +1,4 @@
-"""REL-001 matching against real PostgreSQL; opt-in via DSHUB_TEST_DATABASE_URL."""
+"""REL-001 matching against real PostgreSQL; opt-in via CUSTODIA_TEST_DATABASE_URL."""
 
 import unittest
 from uuid import uuid4

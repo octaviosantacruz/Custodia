@@ -8,7 +8,7 @@ export type CompactSelectOption = { value: string; label: string };
 type CompactSelectProps = { value: string; options: CompactSelectOption[]; onChange: (value: string) => void; ariaLabel: string; disabled?: boolean; className?: string; onAdd?: () => void; addLabel?: string };
 
 /* FE-A11Y-001 pilot: React Aria Components owns the keyboard, typeahead,
-   focus and overlay behaviour; DS Hub keeps its own classes and CSS, and
+   focus and overlay behaviour; Custodia keeps its own classes and CSS, and
    `--trigger-width` replaces the hand-computed minimum width. The popover
    stays in RAC's default (modal) mode on purpose: the non-modal variant
    focuses the selected option on open, the browser scrolls it into view and

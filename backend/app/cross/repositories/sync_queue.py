@@ -235,7 +235,7 @@ async def source_sync_lock(pool: AsyncConnectionPool, source_system: str):
     """Hold a PostgreSQL session lock so only one process syncs a source."""
     async with pool.connection() as conn:
         cursor = await conn.execute(
-            "SELECT pg_try_advisory_lock(hashtextextended('dshub:sync:' || %s, 0)) AS acquired",
+            "SELECT pg_try_advisory_lock(hashtextextended('custodia:sync:' || %s, 0)) AS acquired",
             (source_system,),
         )
         acquired = (await cursor.fetchone())["acquired"]
@@ -244,7 +244,7 @@ async def source_sync_lock(pool: AsyncConnectionPool, source_system: str):
         finally:
             if acquired:
                 await conn.execute(
-                    "SELECT pg_advisory_unlock(hashtextextended('dshub:sync:' || %s, 0))",
+                    "SELECT pg_advisory_unlock(hashtextextended('custodia:sync:' || %s, 0))",
                     (source_system,),
                 )
 
@@ -259,7 +259,7 @@ async def scheduler_cycle_lock(pool: AsyncConnectionPool):
     """
     async with pool.connection() as conn:
         cursor = await conn.execute(
-            "SELECT pg_try_advisory_lock(hashtextextended('dshub:ingestion-scheduler', 0)) AS acquired"
+            "SELECT pg_try_advisory_lock(hashtextextended('custodia:ingestion-scheduler', 0)) AS acquired"
         )
         acquired = (await cursor.fetchone())["acquired"]
         try:
@@ -267,5 +267,5 @@ async def scheduler_cycle_lock(pool: AsyncConnectionPool):
         finally:
             if acquired:
                 await conn.execute(
-                    "SELECT pg_advisory_unlock(hashtextextended('dshub:ingestion-scheduler', 0))"
+                    "SELECT pg_advisory_unlock(hashtextextended('custodia:ingestion-scheduler', 0))"
                 )

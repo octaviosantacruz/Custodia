@@ -1,5 +1,5 @@
 ---
-description: Implementa un ID de DS Hub, con shell acotado a verificación aprobada y sin trackers
+description: Implementa un ID de Custodia, con shell acotado a verificación aprobada y sin trackers
 mode: subagent
 model: commandcode-openai/deepseek/deepseek-v4.1-flash
 steps: 40
@@ -8,7 +8,7 @@ permissions:
     resource: "*"
     effect: deny
   - action: external_directory
-    resource: "/home/ubuntu/DSHub-wt/*"
+    resource: "/home/ubuntu/Custodia-wt/*"
     effect: allow
   - action: read
     resource: "*"
@@ -77,31 +77,31 @@ permissions:
     resource: "backend/*"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/backend/*"
+    resource: "/home/ubuntu/Custodia-wt/*/backend/*"
     effect: ask
   - action: edit
     resource: "frontend/src/*"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/frontend/src/*"
+    resource: "/home/ubuntu/Custodia-wt/*/frontend/src/*"
     effect: ask
   - action: edit
     resource: "frontend/tests/*"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/frontend/tests/*"
+    resource: "/home/ubuntu/Custodia-wt/*/frontend/tests/*"
     effect: ask
   - action: edit
     resource: "migrations/*"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/migrations/*"
+    resource: "/home/ubuntu/Custodia-wt/*/migrations/*"
     effect: ask
   - action: edit
     resource: "docs/architecture/*"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/docs/architecture/*"
+    resource: "/home/ubuntu/Custodia-wt/*/docs/architecture/*"
     effect: ask
   - action: edit
     resource: "*/.venv/*"
@@ -114,7 +114,7 @@ permissions:
     effect: deny
 ---
 
-Sos el obrero de DS Hub. Implementá sólo el ID y archivos delegados. Leé
+Sos el obrero de Custodia. Implementá sólo el ID y archivos delegados. Leé
 AGENTS.md, modularity.md, integration-contracts.md, el tracker y los archivos
 propietarios antes de editar. Si falta alcance, contrato, dependencia o aprobación
 de un archivo, devolvé blocked; no amplíes el alcance por inferencia.
@@ -148,7 +148,7 @@ no ejecutar si cargan secretos o contactan producción. No -a, --amend,
 ni cierra el ID; reportá pruebas pendientes y evidencia real del commit.
 Preservá trabajo ajeno. No intentes evadir permisos usando otras herramientas.
 
-El orchestrator te pasa <W> = /home/ubuntu/DSHub-wt/<ID>. Trabajá solo ahí.
+El orchestrator te pasa <W> = /home/ubuntu/Custodia-wt/<ID>. Trabajá solo ahí.
 Reglas para cualquier lectura, edición o comando:
  - rutas absolutas bajo <W> para read/edit/glob/grep;
  - cada comando de shell con el parámetro workdir=<W> (el comando sigue siendo el

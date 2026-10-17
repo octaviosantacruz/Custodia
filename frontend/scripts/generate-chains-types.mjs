@@ -50,7 +50,7 @@ function run(command, args) {
 
 /** Regenerates `outputPath` from the live OpenAPI schema. */
 export function generateTo(outputPath) {
-  const tempDir = mkdtempSync(join(tmpdir(), 'dshub-openapi-'));
+  const tempDir = mkdtempSync(join(tmpdir(), 'custodia-openapi-'));
   try {
     const schemaPath = join(tempDir, 'openapi-chains.json');
     run(pythonBinary(), [dumpScript, '--path-prefix', pathPrefix, '--output', schemaPath]);

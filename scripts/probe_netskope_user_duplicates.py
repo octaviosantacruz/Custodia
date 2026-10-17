@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only probe: why DS Hub's Netskope user total differs from Netskope's own.
+"""Read-only probe: why Custodia's Netskope user total differs from Netskope's own.
 
 Reads users and the reported counts once, writes nothing, prints no secrets.
 Run: scripts/run_with_database_secret.py -- env PYTHONPATH=backend backend/.venv/bin/python scripts/probe_netskope_user_duplicates.py
@@ -30,7 +30,7 @@ async def main() -> None:
     print(f"Filas devueltas por la API de usuarios:      {len(users)}")
     print(f"Filas con todas sus cuentas borradas:        {len(deleted_rows)}")
     print(f"Filas vivas (lo que cuenta Netskope):        {alive_rows}   (totalUsers informado: {reported})")
-    print(f"Usuarios vivos únicos (inventario DS Hub):   {alive_distinct}")
+    print(f"Usuarios vivos únicos (inventario Custodia):   {alive_distinct}")
     print(f"Diferencia por repetidos:                    {alive_rows - alive_distinct}")
     print()
     for user_id, rows in sorted(repeated.items(), key=lambda item: item[1][0]):

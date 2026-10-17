@@ -44,7 +44,7 @@ test('readers find PAM views without seeing restricted workspaces', async ({ pag
   await page.getByRole('button', { name: /Cambiar workspace/ }).click();
   const menu = page.getByRole('region', { name: 'Workspaces' });
   await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Postura ¿Qué hallazgos requieren atención\?/ })).toBeVisible();
-  await expect(menu.getByRole('link', { name: /Usuarios y permisos Cuentas, roles y acceso a DS Hub/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /Usuarios y permisos Cuentas, roles y acceso a Custodia/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Acceso ¿Quién llega a qué Safe y por qué\?/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Plataformas Safes y cuentas por plataforma/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Conectores PSM PSM y plataformas vinculadas/ })).toHaveCount(0);
@@ -310,7 +310,7 @@ test('Cadenas PAM links a role to the consolidated Roles workspace', async ({ pa
 
 for (const theme of ['dark', 'light'] as const) {
   test(`PAM platforms are a dedicated workspace separate from connectors and SIA in ${theme}`, async ({ page }) => {
-    await page.addInitScript((value) => localStorage.setItem('dshub-theme:v1', value), theme);
+    await page.addInitScript((value) => localStorage.setItem('custodia-theme:v1', value), theme);
     await mockAuthenticatedApp(page, { largeInventory: true });
     await page.goto('/pam/platforms');
 
@@ -398,7 +398,7 @@ test('posture workspace exposes evidence and administrative status action', asyn
   await page.goto('/pam/posture');
 
   await expect(page.getByRole('table', { name: 'Hallazgos PAM' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Actualizar reglas DS Hub' })).toHaveAttribute('title', 'Volver a evaluar las reglas locales con el inventario actual');
+  await expect(page.getByRole('button', { name: 'Actualizar reglas Custodia' })).toHaveAttribute('title', 'Volver a evaluar las reglas locales con el inventario actual');
   await expect(page.getByRole('cell', { name: 'Calidad de datos' })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Completar plataforma en la fuente' })).toBeVisible();
   await page.getByRole('button', { name: /Cuenta sin plataforma informada/ }).click();
@@ -426,7 +426,7 @@ test('internal scope is fixed to included, ignoring a stale stored preference', 
   const findingsUrl = lastUrlFor('/api/findings');
   const chainSearchUrl = lastUrlFor('/api/chains/pam/search');
 
-  await page.addInitScript(() => window.localStorage.setItem('dshub.include-internal-metrics', 'false'));
+  await page.addInitScript(() => window.localStorage.setItem('custodia.include-internal-metrics', 'false'));
   await mockAuthenticatedApp(page);
   await page.goto('/pam/posture');
   await page.getByRole('button', { name: 'Abrir menú de usuario' }).click();

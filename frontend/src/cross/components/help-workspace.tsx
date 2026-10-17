@@ -91,7 +91,7 @@ export function HelpWorkspace({ apiDocsEnabled, requestedSection = null, permiss
       <p className="help-owner">Responsable: {active.owner} · Se actualiza: {active.updateRule}</p>
       {content.blocks.map(renderBlock)}
       {visibleLinks.length ? <p className="help-links">
-        <strong>Abrir en DS Hub:</strong>
+        <strong>Abrir en Custodia:</strong>
         {visibleLinks.map((link) => <a
           key={link.view}
           href={workspacePath(link.view)}

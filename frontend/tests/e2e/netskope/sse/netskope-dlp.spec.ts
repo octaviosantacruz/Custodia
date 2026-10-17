@@ -28,7 +28,7 @@ test('DLP alerts are listed by policy with volume, trend and mix, and no per-use
   for (const artifact of ['file_path', 'sha256', 'srcip', 'dlp_match_info', 'original_file']) {
     expect(body).not.toContain(artifact);
   }
-  await expect(page.getByText('DS Hub no guarda archivo')).toBeVisible();
+  await expect(page.getByText('Custodia no guarda archivo')).toBeVisible();
 
   const accessibility = await new AxeBuilder({ page }).include('.netskope-dlp').analyze();
   expect(accessibility.violations).toEqual([]);

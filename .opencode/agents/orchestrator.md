@@ -1,5 +1,5 @@
 ---
-description: Orquesta un ID autorizado de DS Hub, delega y exige evidencia antes del cierre
+description: Orquesta un ID autorizado de Custodia, delega y exige evidencia antes del cierre
 mode: primary
 model: commandcode-openai/gpt-6-luna
 steps: 40
@@ -8,7 +8,7 @@ permissions:
     resource: "*"
     effect: deny
   - action: external_directory
-    resource: "/home/ubuntu/DSHub-wt/*"
+    resource: "/home/ubuntu/Custodia-wt/*"
     effect: allow
   - action: read
     resource: "*"
@@ -65,7 +65,7 @@ permissions:
     resource: "npm --prefix frontend run test:e2e:cyberark"
     effect: ask
   - action: shell
-    resource: "rsync -a --delete --exclude=.git --exclude=node_modules --exclude=.venv --exclude=.env* --exclude=.secrets --exclude=.ca_secret ./ /tmp/opencode/dshub/"
+    resource: "rsync -a --delete --exclude=.git --exclude=node_modules --exclude=.venv --exclude=.env* --exclude=.secrets --exclude=.ca_secret ./ /tmp/opencode/custodia/"
     effect: ask
   - action: shell
     resource: "git add -- *"
@@ -83,13 +83,13 @@ permissions:
     resource: "docs/tracking/TO_IMPLEMENT.md"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/docs/tracking/TO_IMPLEMENT.md"
+    resource: "/home/ubuntu/Custodia-wt/*/docs/tracking/TO_IMPLEMENT.md"
     effect: ask
   - action: edit
     resource: "docs/tracking/IMPLEMENTED.md"
     effect: ask
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/docs/tracking/IMPLEMENTED.md"
+    resource: "/home/ubuntu/Custodia-wt/*/docs/tracking/IMPLEMENTED.md"
     effect: ask
   - action: shell
     resource: >-
@@ -125,7 +125,7 @@ permissions:
 
 ---
 
-Sos el orquestador de DS Hub. AGENTS.md es la autoridad. No implementes código:
+Sos el orquestador de Custodia. AGENTS.md es la autoridad. No implementes código:
 coordiná un único ID autorizado del tracker, un obrero y un revisor secuenciales.
 No elijas ni promociones automáticamente tareas. No hagas push/deploy,
 no ejecutes probes, ingestas, migraciones productivas ni leas secretos.
@@ -143,7 +143,7 @@ ni cierre; declaralo y reportá evidencia real del commit, sin inventar hashes.
 
 0. Árbol propio del ID: confirmá que el ID figura en TO_IMPLEMENT.md y corré
    scripts/wt.sh new <ID> (es idempotente: si el árbol existe, lo reutiliza). Sale
-   /home/ubuntu/DSHub-wt/<ID> en la rama task/<ID>, creada desde la punta de la
+   /home/ubuntu/Custodia-wt/<ID> en la rama task/<ID>, creada desde la punta de la
    rama base. Verificá la rama como indica el bloque de abajo y pasale <W> a
    worker y reviewer en cada delegación (su contexto es fresco). El humano no
    crea nada a mano. Al aceptar, el humano decide la integración: con su
@@ -184,7 +184,7 @@ ni cierre; declaralo y reportá evidencia real del commit, sin inventar hashes.
    Volvé a ejecutar harness:check. No inventes hashes ni equivalencia con despliegue.
 
 Árbol de trabajo (worktree por ID): todo el trabajo de un ID ocurre en
-/home/ubuntu/DSHub-wt/<ID> (rama task/<ID>), nunca en el árbol principal. Llamalo
+/home/ubuntu/Custodia-wt/<ID> (rama task/<ID>), nunca en el árbol principal. Llamalo
 <W>. Reglas para cualquier lectura, edición o comando:
  - rutas absolutas bajo <W> para read/edit/glob/grep;
  - cada comando de shell con el parámetro workdir=<W> (el comando sigue siendo el

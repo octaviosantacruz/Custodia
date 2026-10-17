@@ -8,7 +8,7 @@ permissions:
     resource: "*"
     effect: deny
   - action: external_directory
-    resource: "/home/ubuntu/DSHub-wt/*"
+    resource: "/home/ubuntu/Custodia-wt/*"
     effect: allow
   - action: read
     resource: "*"
@@ -102,13 +102,13 @@ permissions:
     resource: "docs/tracking/TO_IMPLEMENT.md"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/docs/tracking/TO_IMPLEMENT.md"
+    resource: "/home/ubuntu/Custodia-wt/*/docs/tracking/TO_IMPLEMENT.md"
     effect: allow
   - action: edit
     resource: ".opencode/runs/*"
     effect: allow
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/.opencode/runs/*"
+    resource: "/home/ubuntu/Custodia-wt/*/.opencode/runs/*"
     effect: allow
   - action: shell
     resource: "git push *"
@@ -129,17 +129,17 @@ permissions:
     resource: "docs/tracking/IMPLEMENTED.md"
     effect: deny
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/docs/tracking/IMPLEMENTED.md"
+    resource: "/home/ubuntu/Custodia-wt/*/docs/tracking/IMPLEMENTED.md"
     effect: deny
   - action: edit
     resource: "AGENTS.md"
     effect: deny
   - action: edit
-    resource: "/home/ubuntu/DSHub-wt/*/AGENTS.md"
+    resource: "/home/ubuntu/Custodia-wt/*/AGENTS.md"
     effect: deny
 ---
 
-Sos el piloto automático de DS Hub: ejecutás uno o varios IDs ya autorizados por el
+Sos el piloto automático de Custodia: ejecutás uno o varios IDs ya autorizados por el
 dueño **sin esperar aprobaciones**, de principio a fin. AGENTS.md es la autoridad.
 Este perfil existe porque el dueño aceptó, el 2026-10-03, correr el flujo sin
 supervisión; no amplía nada para el orchestrator interactivo. No hay nadie para
@@ -168,7 +168,7 @@ la integración (scripts/wt.sh merge <ID>) la hace el dueño al revisar los comm
 Los commits quedan en task/<ID>; la rama base no se toca.
 
 Árbol de trabajo (worktree por ID): todo el trabajo de un ID ocurre en
-/home/ubuntu/DSHub-wt/<ID> (rama task/<ID>), nunca en el árbol principal. Llamalo
+/home/ubuntu/Custodia-wt/<ID> (rama task/<ID>), nunca en el árbol principal. Llamalo
 <W>. Reglas para cualquier lectura, edición o comando:
  - rutas absolutas bajo <W> para read/edit/glob/grep;
  - cada comando de shell con el parámetro workdir=<W> (el comando sigue siendo el

@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { mockAuthenticatedApp } from '../support/fixtures';
 
 /* FE-A11Y-001 pilot: CompactSelect now runs on React Aria Components. These
-   tests pin the DS Hub look (classes, geometry, selected style) and the new
+   tests pin the Custodia look (classes, geometry, selected style) and the new
    keyboard model (arrows, Home/End, typeahead, Escape, Tab, focus restore). */
 
 async function openClassificationDrawer(page: import('@playwright/test').Page) {
@@ -15,7 +15,7 @@ async function openClassificationDrawer(page: import('@playwright/test').Page) {
   return { drawer, trigger: drawer.locator('.unit-select .custom-select-trigger') };
 }
 
-test('CompactSelect keeps the DS Hub trigger and menu geometry', async ({ page }) => {
+test('CompactSelect keeps the Custodia trigger and menu geometry', async ({ page }) => {
   const { trigger } = await openClassificationDrawer(page);
   await expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
@@ -38,7 +38,7 @@ test('CompactSelect keeps the DS Hub trigger and menu geometry', async ({ page }
   expect(menuStyles.background).not.toBe('rgba(0, 0, 0, 0)');
   expect(menuStyles.border).not.toBe('rgba(0, 0, 0, 0)');
   expect(menuStyles.zIndex).not.toBe('auto');
-  // The chosen option keeps the DS Hub selected style.
+  // The chosen option keeps the Custodia selected style.
   const selected = page.getByRole('option', { name: 'Sin asignar', exact: true });
   expect(await selected.evaluate((element) => getComputedStyle(element).fontWeight)).toBe('700');
 });

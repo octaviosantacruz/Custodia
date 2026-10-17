@@ -55,8 +55,8 @@ request() {
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 alerts_body="$workdir/alerts.json"
 incidents_body="$workdir/incidents.json"
-alerts_status="$(request '/api/v2/events/dataexport/alerts/dlp' "$alerts_body" "dshub-dlp-crosswalk-alerts-$timestamp-$$")"
-incidents_status="$(request '/api/v2/events/dataexport/events/incident' "$incidents_body" "dshub-dlp-crosswalk-incidents-$timestamp-$$")"
+alerts_status="$(request '/api/v2/events/dataexport/alerts/dlp' "$alerts_body" "custodia-dlp-crosswalk-alerts-$timestamp-$$")"
+incidents_status="$(request '/api/v2/events/dataexport/events/incident' "$incidents_body" "custodia-dlp-crosswalk-incidents-$timestamp-$$")"
 
 echo "probe=NSK-DLP-CROSSWALK-001/v1 alerts_status=$alerts_status incidents_status=$incidents_status"
 

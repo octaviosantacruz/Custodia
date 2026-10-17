@@ -1,7 +1,7 @@
 import type { AccessDomain, AccessPermission, AccessRole } from './access-control-api';
 
 export type AccessTool = { id: string; name: string; dark?: string; light?: string };
-const hub: AccessTool = { id: 'hub', name: 'DS Hub y perfiles transversales' };
+const hub: AccessTool = { id: 'hub', name: 'Custodia y perfiles transversales' };
 const cyberark: AccessTool = { id: 'cyberark', name: 'CyberArk', dark: '/cyberark-logo-white.png', light: '/cyberark-logo-dark.png' };
 const netskope: AccessTool = { id: 'netskope', name: 'Netskope', dark: '/netskope-full-white.png', light: '/netskope-full-black.png' };
 const bigid: AccessTool = { id: 'bigid', name: 'BigID', dark: '/bigid-full-white.png', light: '/bigid-full-black.png' };

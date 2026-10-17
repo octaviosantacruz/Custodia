@@ -16,7 +16,7 @@ assert SPEC and SPEC.loader
 REFRESH = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(REFRESH)
 
-BASE_URL = "host=db.internal port=5432 user=app dbname=dshub"
+BASE_URL = "host=db.internal port=5432 user=app dbname=custodia"
 FRESH = "fresh-password-value"
 
 

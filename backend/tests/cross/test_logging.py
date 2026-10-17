@@ -10,7 +10,7 @@ from app.logging_config import JsonLogFormatter, _log_level, reset_request_id, s
 
 def _record(msg, args=(), exc_info=None):
     return logging.LogRecord(
-        name="app.example", level=logging.ERROR, pathname="/srv/dshub/backend/app/example.py",
+        name="app.example", level=logging.ERROR, pathname="/srv/custodia/backend/app/example.py",
         lineno=42, msg=msg, args=args, exc_info=exc_info,
     )
 
@@ -35,7 +35,7 @@ class StructuredLoggingTests(unittest.TestCase):
 
         self.assertEqual(payload["level"], "ERROR")
         self.assertEqual(payload["logger"], "app.example")
-        self.assertEqual(payload["file"], "/srv/dshub/backend/app/example.py")
+        self.assertEqual(payload["file"], "/srv/custodia/backend/app/example.py")
         self.assertEqual(payload["line"], 42)
         self.assertEqual(payload["message"], "No se pudo sincronizar cyberark")
         self.assertEqual(payload["request_id"], "request-test-123")
@@ -106,7 +106,7 @@ class RequestIdPropagationTests(unittest.IsolatedAsyncioTestCase):
             "type": "http", "method": method, "path": "/api/summary", "scheme": "http",
             "headers": [(key.lower().encode(), value.encode()) for key, value in (headers or {}).items()],
         }
-        await ApiSecurityMiddleware(application, ["https://dshub.example"])(scope, receive, send)
+        await ApiSecurityMiddleware(application, ["https://custodia.example"])(scope, receive, send)
         start = next(message for message in messages if message["type"] == "http.response.start")
         return start["status"], dict(start["headers"])[b"x-request-id"].decode()
 

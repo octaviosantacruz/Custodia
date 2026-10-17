@@ -88,7 +88,7 @@ async def _session_version_is_stale(request: Request, actor_id: str) -> bool:
     matches the account's current value in the database -- meaning the
     password was changed/reset, the account was deactivated, or the row no
     longer exists, since this cookie was issued. OIDC sessions are identified
-    explicitly because DS Hub does not manage their credentials. A session
+    explicitly because Custodia does not manage their credentials. A session
     without either that marker or a version is an old/ambiguous local cookie
     and is invalidated instead of bypassing revocation."""
     session = getattr(request, "session", {})

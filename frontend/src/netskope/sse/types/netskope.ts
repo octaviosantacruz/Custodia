@@ -13,7 +13,7 @@ export type NetskopeRow = {
   device_evidence?: NetskopeDeviceEvidence | null;
   /* NSK-DEVREV-001: the human decision, or null while nobody classified the device. */
   review?: NetskopeDeviceReview | null;
-  /* NSK-DEVREV-002: what DS Hub suggests for an unclassified device; a suggestion is never a decision. */
+  /* NSK-DEVREV-002: what Custodia suggests for an unclassified device; a suggestion is never a decision. */
   review_suggestion?: NetskopeReviewSuggestion | null;
 };
 

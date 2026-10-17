@@ -85,7 +85,7 @@ async def assert_schema_ready(pool) -> None:
         missing_tables = ", ".join(missing)
         raise SchemaNotReadyError(
             "Faltan migraciones de base de datos: "
-            f"{missing_tables}. Ejecutá scripts/migrate.sh antes de iniciar DSHub."
+            f"{missing_tables}. Ejecutá scripts/migrate.sh antes de iniciar Custodia."
         )
 
     rows = await fetch_all(
@@ -113,5 +113,5 @@ async def assert_schema_ready(pool) -> None:
     if missing_columns:
         raise SchemaNotReadyError(
             "Faltan migraciones de base de datos: columnas requeridas "
-            f"{', '.join(missing_columns)}. Ejecutá scripts/migrate.sh antes de iniciar DSHub."
+            f"{', '.join(missing_columns)}. Ejecutá scripts/migrate.sh antes de iniciar Custodia."
         )

@@ -1,6 +1,6 @@
 """DOCS-GEN-002: docs/architecture/access-catalog.md is generated from the migrated catalog.
 
-Opt-in like every PostgreSQL integration test: it needs DSHUB_TEST_DATABASE_URL
+Opt-in like every PostgreSQL integration test: it needs CUSTODIA_TEST_DATABASE_URL
 pointing at a database with the migrations applied (``npm run verify`` provides one).
 """
 
@@ -26,9 +26,9 @@ def _load_generator():
 class AccessCatalogReferenceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        url = os.environ.get('DSHUB_TEST_DATABASE_URL', '').strip()
+        url = os.environ.get('CUSTODIA_TEST_DATABASE_URL', '').strip()
         if not url:
-            raise unittest.SkipTest('DSHUB_TEST_DATABASE_URL no está configurada; ver tests/support/pg_integration_base.py.')
+            raise unittest.SkipTest('CUSTODIA_TEST_DATABASE_URL no está configurada; ver tests/support/pg_integration_base.py.')
         cls.generator = _load_generator()
         try:
             cls.connection = psycopg.connect(url, connect_timeout=5)

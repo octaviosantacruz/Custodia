@@ -69,7 +69,7 @@ def _is_count(value: Any) -> bool:
 async def _reported_counts(client: NetskopeClient) -> tuple[int, datetime | None, dict[str, int | None]] | None:
     """NSK-REF-001: the totals Netskope reports in its console header, or None when they cannot be read.
 
-    They are only a reference shown beside DS Hub's own counts, so any failure or odd value is dropped
+    They are only a reference shown beside Custodia's own counts, so any failure or odd value is dropped
     instead of failing the inventory run. Each optional total is kept only when it is a valid count.
     """
     try:
@@ -147,7 +147,7 @@ async def sync_netskope_inventory(pool: AsyncConnectionPool, run_id: UUID, progr
     deleted_ids = netskope_deleted_user_ids(users)
     deleted_users = len(deleted_ids)
     if reported is not None:
-        # Netskope's total counts live rows; DS Hub counts distinct ids. The exact gap is the live rows repeated.
+        # Netskope's total counts live rows; Custodia counts distinct ids. The exact gap is the live rows repeated.
         live_ids = [str(user.get("id")) for user in users if str(user.get("id")) not in deleted_ids]
         reported = (reported[0], reported[1], {**reported[2], "repeated_user_rows": len(live_ids) - len(set(live_ids))})
     distinct_users = len({user.get("id") for user in users})
