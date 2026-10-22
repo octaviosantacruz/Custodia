@@ -1,5 +1,0 @@
-.role-group-links { border-top: 1px solid var(--border-soft); margin-top: 18px; padding-top: 16px; }
-.role-group-links h3 { font-size: 13px; margin: 0 0 6px; }
-.role-group-links p { color: var(--text-secondary); font-size: 11px; line-height: 1.6; }
-.role-group-links ul { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 12px 0; padding: 0; }
-.role-group-links li { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 5px; font-size: 11px; max-width: 100%; overflow-wrap: anywhere; padding: 5px 7px; }

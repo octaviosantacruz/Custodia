@@ -1,1 +1,0 @@
-export type AuditEntry = { audit_id: number; actor_id: string; action: string; entity_type: string; entity_id: string; before_data: Record<string, unknown> | null; after_data: Record<string, unknown> | null; created_at: string };

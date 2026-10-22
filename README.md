@@ -3,26 +3,27 @@
 Inventario de herramientas de seguridad con procedencia, cambios explicables
 y decisiones humanas que una sincronización no sobrescribe.
 
-La demo vigente está en `company-demo/`: **Faro Digital**, una empresa ficticia
-con personas, áreas, equipos y accesos relacionados, sobre la interfaz React
-original. [Escenario y recorrido](docs/COMPANY-DEMO.md). **Todavía no incluye
-backend Go ni autenticación real**. El orden elegido es Portfolio, instalación autohospedada y,
+La demo vigente está en `web/`: **Acme Corp**, una empresa ficticia
+con personas, áreas, equipos y accesos relacionados, sobre una interfaz e
+identidad visual nuevas ([WEB.md](docs/WEB.md)). La interfaz heredada de
+`company-demo/` se retiró el 22/10 ([escenario](docs/COMPANY-DEMO.md)).
+**Todavía no incluye backend Go ni autenticación real**. El orden elegido es Portfolio, instalación autohospedada y,
 después de validar uso, evaluar SaaS.
 
 ## Empezar
 
 1. Leer la [revisión del producto existente](docs/EXISTING-PRODUCT.md): la UI
    original y la lógica Python son la base que se debe preservar y extender.
-2. Recorrer [Faro Digital](docs/COMPANY-DEMO.md) y seguir el
+2. Recorrer [Acme Corp](docs/WEB.md) y seguir el
    [tracker](docs/TO_IMPLEMENT.md): ampliar esa experiencia con datos
    sintéticos y portar sus contratos a Go por recorridos.
 
 ```bash
-cd company-demo
+cd web
 npm ci
 npm run build
 npm run preview
-# http://127.0.0.1:4182
+# http://127.0.0.1:4184
 ```
 
 Dirección aclarada por el dueño el 22/10: inventario de herramientas de
@@ -35,7 +36,7 @@ objetivo ni la referencia de paridad. Su aceptación no bloquea Go.
 | Tema | Documento |
 |---|---|
 | Alcance y etapas | [Producto](docs/PRODUCT.md) |
-| Empresa ficticia y recorridos de la demo vigente | [Faro Digital](docs/COMPANY-DEMO.md) |
+| Empresa ficticia, sitio y demo vigentes | [WEB.md](docs/WEB.md) · escenario original en [COMPANY-DEMO.md](docs/COMPANY-DEMO.md) |
 | Go y PostgreSQL | [Arquitectura](docs/ARCHITECTURE.md) |
 | Configurar y sincronizar herramientas | [Conectores](docs/CONNECTORS.md) |
 | Switchboard, OIDC y QA | [Acceso](docs/ACCESS.md) |
@@ -50,8 +51,8 @@ objetivo ni la referencia de paridad. Su aceptación no bloquea Go.
 ## Verificación disponible
 
 ```bash
-npm run verify          # documentos + modelos de empresa y experimento, sin instalar
-npm run verify:company  # build y Chromium de Faro Digital (instalar company-demo antes)
+npm run verify          # documentos + modelos de empresa y experimento (instalar web antes)
+npm run verify:web      # build, modelo y Chromium de la interfaz nueva
 npm run verify:demo     # sólo experimento reducido anterior, en demo/
 npm run package:demo    # sólo paquete del experimento anterior, sin publicar
 ```
@@ -77,7 +78,8 @@ final del dueño y la distribución siguen pendientes; Go no está implementado.
 ## Relación con la versión anterior
 
 La rama `product/go-reset` parte de `f6a7acc`: primero retiró el árbol heredado;
-ahora recupera su frontend en `company-demo/` para conservar la experiencia.
+luego recuperó su frontend en `company-demo/` (commit `71c68de`) y el 22/10
+lo retiró en favor de la interfaz nueva de `web/`.
 No recupera el backend ni su configuración de despliegue. El checkout
 `/home/saint/projects/Custodia` conserva la aplicación anterior y es el que
 usan los servicios locales. No se modificaron sus unidades ni sus bases.

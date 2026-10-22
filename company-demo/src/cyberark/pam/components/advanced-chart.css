@@ -1,7 +1,0 @@
-/* FE-AUD-006: keyboard-reachable data behind the canvas chart. */
-.advanced-chart-frame { height: 100%; min-height: 180px; position: relative; width: 100%; }
-.advanced-chart-data { bottom: 4px; position: absolute; right: 6px; z-index: 2; }
-.advanced-chart-data summary { background: var(--bg-elevated); border: 1px solid var(--border-soft); border-radius: 4px; color: var(--text-secondary); cursor: pointer; font-size: 11px; list-style: none; padding: 2px 8px; }
-.advanced-chart-data summary:focus-visible { box-shadow: var(--focus-ring); outline: none; }
-.advanced-chart-data[open] { background: var(--bg-elevated); border: 1px solid var(--border-strong); left: 6px; max-height: 240px; overflow: auto; padding: 6px; }
-.advanced-chart-data[open] summary { border-color: transparent; margin-bottom: 6px; }

@@ -5,8 +5,10 @@ El contexto compartido está en `/home/saint/projects/AGENTS.md`.
 
 ## Dirección corregida por el dueño — 22/10
 
-Priorizar la experiencia original: frontend React, diseño, navegación y
-flujos de `/home/saint/projects/Custodia`. Leer docs/EXISTING-PRODUCT.md.
+La interfaz es nueva y propia (`web/`, docs/WEB.md, aprobada por el dueño
+el 22/10); no derivar de la UI de DSHub. Los flujos y reglas de
+`/home/saint/projects/Custodia` siguen siendo referencia de contratos:
+leer docs/EXISTING-PRODUCT.md.
 Custodia inventaría herramientas de ciberseguridad (Netskope, CyberArk,
 CrowdStrike y otras) y permite cruces e inferencias explicables. La demo
 reducida es un experimento; no define producto, paridad ni UI objetivo y su
@@ -14,9 +16,9 @@ aceptación deja de bloquear Go. La referencia contractual está en Python.
 
 - Producto personal: demo Portfolio primero, autohospedado Go después y SaaS
   sólo tras validar uso. No traducir toda la aplicación anterior ni copiar
-  su backlog laboral. Demo vigente: empresa ficticia Faro Digital en
-  `company-demo/`, con frontend original recuperado y API sintética aislada;
-  ver docs/COMPANY-DEMO.md. `demo/` conserva el experimento reducido.
+  su backlog laboral. Demo vigente: empresa ficticia Acme Corp en
+  `web/`, interfaz e identidad nuevas sin código de DSHub; ver docs/WEB.md.
+  La UI recuperada de `company-demo/` se retiró (consultar `71c68de`). `demo/` conserva el experimento reducido.
   Sin backend Go ni autenticación real.
 - Backend objetivo Go; PostgreSQL autoridad; React/TypeScript para interfaz.
   Versiones y dependencias se fijan al implementar. No hay librería compartida
@@ -42,8 +44,8 @@ aceptación deja de bloquear Go. La referencia contractual está en Python.
   cierres con evidencia; distinguir diseño, código, prueba y despliegue.
 - `npm run verify` valida la documentación y el modelo del ejemplo;
   `npm run verify:demo` compila la demo y recorre el guion en un navegador.
-  `npm run verify:company` verifica la demo vigente de Faro Digital; el
-  comando anterior sigue reservado al experimento de `demo/`.
+  `npm run verify:web` verifica la interfaz de `web/`; `verify:demo`
+  sigue reservado al experimento de `demo/`.
   Al implementar Go, añadir su gate y ejecutarlo. No reportar suites de la
   versión anterior como prueba del producto nuevo.
 - Las dependencias de `demo/` van con versión exacta. Cambiar el modelo

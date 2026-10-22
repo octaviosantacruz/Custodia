@@ -30,6 +30,16 @@ Las fechas relativas usan un instante de presentación explícito, instalado
 por el entrypoint del laboratorio. No se altera `Date.now` de la aplicación,
 sus timers o su caché. Fuera del laboratorio el helper conserva el reloj real.
 
+Interfaz nueva `web/` (22/10, [WEB.md](WEB.md)): código propio sin
+componentes ni assets de `company-demo/src`. Incluye
+`@fontsource-variable/instrument-sans` y
+`@fontsource-variable/jetbrains-mono` 5.3.0 (OFL-1.1) en el build . Desde el 22/10 incluye, a pedido del
+dueño, `public/logos/` con los logos blancos de CyberArk, Netskope y BigID
+copiados de `company-demo/public` (`71c68de`): identifican productos de los
+que Custodia lee y el sitio declara que son marcas de sus dueños, sin
+afiliación. Siguen dentro de la revisión de marcas de `PROD-DIST-001`. El modelo de Faro Digital es una copia del de
+`company-demo/lab/` (commit `71c68de`; carpeta retirada el 22/10).
+
 El build de Faro Digital incorpora más dependencias y logos que el experimento
 reducido: React, TanStack Query, React Aria, Lucide, ECharts, Geist, Caveat y
 assets originales, entre otros. La tabla inferior **sólo cubre `demo/`**;

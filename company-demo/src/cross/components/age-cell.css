@@ -1,6 +1,0 @@
-.age-cell { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.age-cell.is-fresh { color: var(--text-primary); }
-.age-cell.is-aging { color: var(--warning); }
-.age-cell.is-stale { color: var(--danger); }
-.age-cell.is-unknown { color: var(--text-muted); }
-.age-cell-flag { font-size: 10px; }

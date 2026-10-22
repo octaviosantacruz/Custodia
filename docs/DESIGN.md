@@ -50,8 +50,8 @@ permanecen en su módulo cuando aportan una respuesta útil.
 ## Primer laboratorio fiel
 
 La demo debe representar una empresa. [Faro Digital](COMPANY-DEMO.md)
-implementa el primer laboratorio en `company-demo/`: frontend original
-recuperado, personas/áreas/equipos/accesos del mismo escenario y contratos
+implementó el primer laboratorio en `company-demo/` (retirado el 22/10;
+la interfaz vigente es [web/](WEB.md)): frontend original recuperado, personas/áreas/equipos/accesos del mismo escenario y contratos
 HTTP sintéticos. Ya permite Personas, cobertura, cadena PAM, Safes y equipos
 Netskope con búsqueda, evidencia, ambigüedad y falta de dato. No demuestra
 autorización de backend ni todas las pantallas de la aplicación.

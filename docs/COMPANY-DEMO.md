@@ -6,6 +6,11 @@ revisado: 2026-10-22
 
 # Faro Digital: una empresa para investigar
 
+> **Retirado el 22/10.** La interfaz de `company-demo/` descrita abajo se
+> quitó de la rama `product/custodia-ui`; la vigente es [web/](WEB.md). El
+> escenario (personas, equipos, Safes, regla CONN-001) sigue igual en `web/`.
+> La UI anterior se consulta en Git, commit `71c68de`.
+
 Requisito del dueño: la demo representa una empresa, conserva la experiencia
 original y muestra para qué sirve inventariar herramientas de ciberseguridad
 y cruzar su evidencia. No es una colección de pantallas con cifras sueltas.
@@ -23,7 +28,7 @@ las 13:00. Los correos usan `faro.example`; las direcciones de destinos son
 `192.0.2.0/24`. No se usan inventarios, identidades, dominios, grupos ni
 credenciales de una empresa real.
 
-[company.json](../company-demo/lab/company.json) es la única fuente de estos
+[company.json](../web/src/model/company.json) es la única fuente de estos
 datos. Los endpoints sintéticos derivan de ella búsquedas, fichas, relaciones,
 equipos y cuentas: no mantienen cifras decorativas independientes.
 
