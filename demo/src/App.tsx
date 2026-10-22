@@ -8,6 +8,9 @@ import scenarioData from '../../fixtures/lab/scenario.json';
 const scenario = scenarioData as unknown as Scenario;
 const TOTAL = scenario.steps.length;
 
+type Sim = 'ok' | 'loading' | 'empty' | 'offline' | 'forbidden' | 'error';
+const SIMS: Sim[] = ['ok', 'loading', 'empty', 'offline', 'forbidden', 'error'];
+
 type View = 'connections' | 'inventory' | 'changes';
 const VIEWS: View[] = ['connections', 'inventory', 'changes'];
 
@@ -46,6 +49,7 @@ export function App() {
   const [view, setView] = useState<View>('connections');
   const [selected, setSelected] = useState<string | null>(null);
   const [connection, setConnection] = useState('all');
+  const [sim, setSim] = useState<Sim>('ok');
   const returnFocus = useRef<HTMLElement | null>(null);
   // Sólo una apertura hecha por la persona mueve el foco al detalle; el guion
   // no le saca el foco del botón que está usando.
@@ -68,6 +72,7 @@ export function App() {
     const clamped = Math.min(TOTAL, Math.max(1, next));
     const target = viewFor(scenario.steps[clamped - 1]);
     setStep(clamped);
+    setSim('ok');
     setView(target.view);
     setSelected(target.record ?? null);
     if (target.record) setConnection('all');
@@ -109,7 +114,7 @@ export function App() {
         </div>
       </header>
 
-      <ScriptPanel t={t} lang={lang} step={step} current={current} onGo={go} />
+      <ScriptPanel t={t} lang={lang} step={step} current={current} onGo={go} sim={sim} onSim={setSim} />
 
       <nav className="tabs" aria-label={t.nav}>
         {VIEWS.map(v => (
@@ -121,8 +126,9 @@ export function App() {
 
       <div className={view === 'inventory' ? 'work with-detail' : 'work'}>
         <main id="main" tabIndex={-1}>
-          {view === 'connections' && <Connections t={t} state={state} fmt={fmt} />}
-          {view === 'inventory' && (
+          {sim !== 'ok' && <SimState t={t} sim={sim} onRetry={() => setSim('ok')} />}
+          {sim === 'ok' && view === 'connections' && <Connections t={t} state={state} fmt={fmt} />}
+          {sim === 'ok' && view === 'inventory' && (
             <Inventory
               t={t}
               state={state}
@@ -133,9 +139,9 @@ export function App() {
               onOpen={open}
             />
           )}
-          {view === 'changes' && <Changes t={t} state={state} fmt={fmt} />}
+          {sim === 'ok' && view === 'changes' && <Changes t={t} state={state} fmt={fmt} />}
         </main>
-        {view === 'inventory' && (
+        {view === 'inventory' && sim === 'ok' && (
           <Detail t={t} state={state} fmt={fmt} recordKey={selected} focusTick={focusTick} onClose={close} />
         )}
       </div>
@@ -144,7 +150,7 @@ export function App() {
   );
 }
 
-function ScriptPanel({ t, lang, step, current, onGo }: { t: Strings; lang: Lang; step: number; current: Step; onGo: (n: number) => void }) {
+function ScriptPanel({ t, lang, step, current, onGo, sim, onSim }: { t: Strings; lang: Lang; step: number; current: Step; onGo: (n: number) => void; sim: Sim; onSim: (s: Sim) => void }) {
   return (
     <section className="script" aria-labelledby="script-title">
       <div className="script-head">
@@ -177,7 +183,18 @@ function ScriptPanel({ t, lang, step, current, onGo }: { t: Strings; lang: Lang;
         <button type="button" onClick={() => onGo(1)} disabled={step === 1}>
           {t.reset}
         </button>
+        <label className="field sim" htmlFor="sim-state">
+          <span>{t.sim.label}</span>
+          <select id="sim-state" value={sim} onChange={e => onSim(e.target.value as Sim)}>
+            {SIMS.map(code => (
+              <option key={code} value={code}>
+                {t.sim[code]}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
+      <p className="muted small">{t.sim.note}</p>
     </section>
   );
 }
@@ -224,6 +241,37 @@ function Connections({ t, state, fmt }: { t: Strings; state: State; fmt: Intl.Da
           </tbody>
         </table>
       </div>
+    </section>
+  );
+}
+
+function SimState({ t, sim, onRetry }: { t: Strings; sim: Exclude<Sim, 'ok'>; onRetry: () => void }) {
+  if (sim === 'loading') {
+    return (
+      <section className="state" aria-busy="true" role="status">
+        <p>{t.sim.loadingText}</p>
+        <div className="skeleton" aria-hidden="true" />
+        <div className="skeleton" aria-hidden="true" />
+        <div className="skeleton short" aria-hidden="true" />
+      </section>
+    );
+  }
+  const text = { empty: [t.sim.emptyTitle, t.sim.emptyText], offline: [t.sim.offlineTitle, t.sim.offlineText], forbidden: [t.sim.forbiddenTitle, t.sim.forbiddenText], error: [t.sim.errorTitle, t.sim.errorText] }[sim];
+  const mark = { empty: '○', offline: '⚠', forbidden: '⊘', error: '✕' }[sim];
+  return (
+    <section className={`state ${sim}`} role={sim === 'error' || sim === 'offline' ? 'alert' : 'status'}>
+      <h2>
+        <span aria-hidden="true">{mark} </span>
+        {text[0]}
+      </h2>
+      <p>{text[1]}</p>
+      {sim === 'error' && (
+        <div>
+          <button type="button" className="primary" onClick={onRetry}>
+            {t.sim.retry}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

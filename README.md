@@ -41,7 +41,8 @@ comprueba documentación, enlaces, separación de IDs y el modelo contra el
 [fixture](fixtures/lab/scenario.json). `verify:demo` instala las dependencias
 fijadas de `demo/`, compila sin `.env` y recorre los siete pasos del guion con
 Playwright, incluyendo teclado, foco, ES/EN, pantalla angosta, accesibilidad
-WCAG A/AA con axe y que no haya peticiones fuera del origen. Playwright
+WCAG A/AA con axe, los estados de ejemplo y que no haya peticiones fuera
+del origen. Playwright
 necesita su Chromium (`npx playwright install chromium`) y las librerías del
 sistema (`npx playwright install-deps chromium`, con sudo).
 

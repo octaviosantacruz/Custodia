@@ -59,7 +59,7 @@ test('Sur no cambia en ningún paso del guion', async ({ page }) => {
   await open(page);
   for (let i = 1; i <= 7; i++) {
     await tab(page, 'Inventario').click();
-    await page.getByLabel('Conexión').selectOption('sur');
+    await page.locator('#connection-filter').selectOption('sur');
     const rows = page.getByRole('row').filter({ hasText: 'Laboratorio Sur' });
     await expect(rows).toHaveCount(1);
     await expect(rows).toContainText('gw-sur-17');
@@ -143,6 +143,30 @@ test('sin violaciones de accesibilidad WCAG A/AA en cada vista', async ({ page }
     const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(result.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(' | ')}`), check.view).toEqual([]);
   }
+});
+
+test('reproduce los estados vacío, cargando, sin conexión, sin permiso y error recuperable', async ({ page }) => {
+  await open(page);
+  const pick = (label: string) => page.getByLabel('Estado de ejemplo').selectOption({ label });
+  await pick('Cargando');
+  await expect(page.getByRole('status')).toContainText('Cargando');
+  await pick('Sin conexiones');
+  await expect(page.getByRole('heading', { name: /Todavía no hay conexiones/ })).toBeVisible();
+  await expect(page.getByRole('table')).toHaveCount(0);
+  await pick('Sin conexión con la fuente');
+  await expect(page.getByRole('alert')).toContainText('no se registra ninguna baja');
+  await pick('Permiso insuficiente');
+  await expect(page.getByRole('heading', { name: /Tu rol no incluye esta colección/ })).toBeVisible();
+  await pick('Error recuperable');
+  await expect(page.getByRole('alert')).toContainText('El inventario anterior sigue vigente');
+  const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  expect(result.violations.map(v => v.id)).toEqual([]);
+  await page.getByRole('button', { name: 'Reintentar' }).click();
+  await expect(page.getByRole('row', { name: /Laboratorio Norte/ })).toBeVisible();
+  // El guion siempre vuelve al estado normal.
+  await pick('Cargando');
+  await next(page);
+  await expect(page.getByRole('status').filter({ hasText: 'Cargando' })).toHaveCount(0);
 });
 
 test('no hace ninguna petición fuera de su propio origen', async ({ page }) => {

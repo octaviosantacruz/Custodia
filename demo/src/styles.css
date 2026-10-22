@@ -545,3 +545,52 @@ footer {
     transition: border-color 120ms ease, background-color 120ms ease;
   }
 }
+
+.small {
+  font-size: 0.8125rem;
+}
+
+.sim {
+  margin-left: auto;
+}
+
+.state {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+  max-width: 60ch;
+  background: var(--bg-band);
+}
+
+.state.offline,
+.state.error {
+  border-color: oklch(0.85 0.12 85 / 0.6);
+}
+
+.state.forbidden {
+  border-color: oklch(0.76 0.14 25 / 0.6);
+}
+
+.skeleton {
+  height: 1rem;
+  border-radius: 4px;
+  background: var(--bg-raised);
+}
+
+.skeleton.short {
+  width: 40%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
