@@ -5,7 +5,8 @@ El contexto compartido está en `/home/saint/projects/AGENTS.md`.
 
 - Producto personal: demo Portfolio primero, autohospedado Go después y SaaS
   sólo tras validar uso. No traducir toda la aplicación anterior ni copiar
-  su backlog laboral. Estado actual: documentación, sin aplicación.
+  su backlog laboral. Estado actual: documentación, ejemplo del laboratorio
+  (`fixtures/`) y demo estática (`demo/`); sin backend Go ni autenticación.
 - Backend objetivo Go; PostgreSQL autoridad; React/TypeScript para interfaz.
   Versiones y dependencias se fijan al implementar. No hay librería compartida
   ni importación aprobada con SIGEA.
@@ -24,9 +25,13 @@ El contexto compartido está en `/home/saint/projects/AGENTS.md`.
   nuevas, migración explícita y pruebas en destinos descartables.
 - Los IDs viven sólo en docs/TO_IMPLEMENT.md y docs/IMPLEMENTED.md. Mover
   cierres con evidencia; distinguir diseño, código, prueba y despliegue.
-- `npm run verify` valida sólo esta base documental. Al implementar, añadir
-  gates apropiados y ejecutarlos. No reportar suites de la versión anterior
-  como prueba del producto nuevo.
+- `npm run verify` valida la documentación y el modelo del ejemplo;
+  `npm run verify:demo` compila la demo y recorre el guion en un navegador.
+  Al implementar Go, añadir su gate y ejecutarlo. No reportar suites de la
+  versión anterior como prueba del producto nuevo.
+- Las dependencias de `demo/` van con versión exacta. Cambiar el modelo
+  (`demo/src/model`) exige mantener de acuerdo el fixture y sus pruebas: el
+  backend Go heredará ese contrato.
 - Preservar cambios ajenos. No cambiar servicios activos, despliegues,
   credenciales, datos o historia Git por limpiar el árbol del producto.
   No commit, push ni publicación sin pedido explícito.

@@ -4,16 +4,16 @@ Inventario de herramientas de seguridad con procedencia, cambios explicables
 y decisiones humanas que una sincronización no sobrescribe.
 
 Este checkout inicia el producto personal desde una base limpia. Contiene
-documentación y su verificador; **todavía no incluye aplicación, demo ni
-backend Go**. El orden elegido es Portfolio, instalación autohospedada y,
+documentación, el ejemplo del laboratorio y una demo estática en `demo/`
+(datos ficticios, sin backend); **todavía no incluye backend Go ni
+autenticación**. El orden elegido es Portfolio, instalación autohospedada y,
 después de validar uso, evaluar SaaS.
 
 ## Empezar
 
 1. Leer [producto](docs/PRODUCT.md) y [diseño de la demo](docs/DESIGN.md).
-2. Trabajar `PROD-FIX-001` del [tracker](docs/TO_IMPLEMENT.md): un ejemplo
-   reproducible con dos conexiones, cambios y revisión humana.
-3. Construir la demo antes de ampliar conectores o desarrollar SaaS.
+2. Seguir el [tracker](docs/TO_IMPLEMENT.md): terminar la demo antes de
+   ampliar conectores o desarrollar SaaS.
 
 ## Documentación
 
@@ -32,12 +32,21 @@ después de validar uso, evaluar SaaS.
 ## Verificación disponible
 
 ```bash
-npm run verify
+npm run verify        # documentación + tests del modelo (node --test, sin instalar nada)
+npm run verify:demo   # build de la demo + recorrido completo en Chromium (npm ci)
 ```
 
-Requiere Node.js con soporte de módulos ES; no instala paquetes. Comprueba
-documentación, enlaces y separación de IDs. No ejecuta pruebas de producto:
-sus gates se agregarán con la demo y Go.
+`verify` requiere Node.js 24 o superior (ejecuta TypeScript directamente);
+comprueba documentación, enlaces, separación de IDs y el modelo contra el
+[fixture](fixtures/lab/scenario.json). `verify:demo` instala las dependencias
+fijadas de `demo/`, compila sin `.env` y recorre los siete pasos del guion con
+Playwright, incluyendo teclado, foco, ES/EN, pantalla angosta, accesibilidad
+WCAG A/AA con axe y que no haya peticiones fuera del origen. Playwright
+necesita su Chromium (`npx playwright install chromium`) y las librerías del
+sistema (`npx playwright install-deps chromium`, con sudo).
+
+Para verla: `cd demo && npm ci && npm run build && npm run preview`
+(`http://127.0.0.1:4180`).
 
 ## Relación con la versión anterior
 

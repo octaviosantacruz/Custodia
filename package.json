@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "verify": "node scripts/check-docs.mjs && npm run test:model",
-    "test:model": "node --test demo/src/model/*.test.ts"
+    "test:model": "node --test demo/src/model/*.test.ts",
+    "verify:demo": "cd demo && npm ci && npm run build && npm run test:e2e"
   }
 }
