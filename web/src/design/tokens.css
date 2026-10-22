@@ -1,0 +1,96 @@
+/* ==================================================================
+   Custodia · sistema visual
+   ------------------------------------------------------------------
+   Idea: cadena de custodia. Cada dato muestra quién lo dice (la
+   fuente) y qué se concluye (el veredicto). El color tiene tres
+   trabajos, y cada familia hace sólo el suyo:
+
+   1. MARCA (lima) .......... quién somos y qué se puede hacer:
+                              logo, acción principal, foco, selección.
+                              Nunca en datos ni en estados.
+   2. PROCEDENCIA ........... qué herramienta lo dice. Un tono por tipo
+                              de fuente (no por fabricante), siempre con
+                              su sello de dos letras. Colores fríos.
+   3. VEREDICTO ............. qué concluye una regla: cubierto, parcial,
+                              brecha, desconocido. Siempre con su forma
+                              (lleno, medio, rombo, trama), nunca sólo
+                              color.
+
+   Todo lo demás es tinta: una escala neutra de 10 pasos en el mismo
+   matiz frío. Los valores están en OKLCH para que la luminosidad sea
+   comparable entre familias (las fuentes comparten L≈0.76, los
+   veredictos L≈0.72-0.84).
+   ================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- Tinta: superficies y texto (matiz 255, croma casi nulo) ---- */
+  --ink-50: oklch(0.13 0.008 255);   /* fondo de la aplicación */
+  --ink-100: oklch(0.16 0.009 255);  /* panel */
+  --ink-150: oklch(0.19 0.010 255);  /* panel elevado, filas activas */
+  --ink-200: oklch(0.23 0.011 255);  /* hover, campos */
+  --ink-300: oklch(0.28 0.012 255);  /* filo */
+  --ink-400: oklch(0.36 0.014 255);  /* filo fuerte, iconos apagados */
+  --ink-600: oklch(0.68 0.014 255);  /* texto terciario */
+  --ink-700: oklch(0.79 0.012 255);  /* texto secundario */
+  --ink-900: oklch(0.96 0.005 255);  /* texto primario */
+
+  /* ---- 1 · Marca ---- */
+  --brand: oklch(0.91 0.19 124);
+  --brand-strong: oklch(0.95 0.16 124);
+  --brand-ink: oklch(0.22 0.06 124);           /* texto sobre lima */
+  --brand-soft: oklch(0.91 0.19 124 / 0.12);
+
+  /* ---- 2 · Procedencia (L 0.76, tonos fríos) ---- */
+  --src-pam: oklch(0.75 0.14 296);             /* PA · identidad y privilegios (CyberArk) */
+  --src-sse: oklch(0.77 0.14 352);             /* SE · red y navegación */
+  --src-dspm: oklch(0.77 0.12 232);            /* DS · datos, DSPM (reservado) */
+  --src-edr: oklch(0.74 0.12 260);             /* ED · endpoint (reservado) */
+  --src-vuln: oklch(0.76 0.10 205);            /* VU · vulnerabilidades (reservado) */
+  --src-firewall: oklch(0.74 0.07 275);        /* FW · firewalls (reservado) */
+
+  /* ---- 3 · Veredicto ---- */
+  --v-covered: oklch(0.78 0.14 160);
+  --v-partial: oklch(0.84 0.14 80);
+  --v-gap: oklch(0.72 0.18 27);
+  --v-unknown: oklch(0.70 0.012 255);
+
+  /* ---- Tipografía ---- */
+  --font-ui: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-data: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+  --t-xs: 11.5px;
+  --t-sm: 12.5px;
+  --t-md: 14px;
+  --t-lg: 16px;
+  --t-xl: 20px;
+  --t-2xl: 28px;
+  --t-3xl: 40px;
+
+  /* ---- Forma y ritmo ---- */
+  --r-sm: 5px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+
+/* Cada componente toma "su" color de una sola variable: --tone. */
+[data-src='pam'] { --tone: var(--src-pam); }
+[data-src='sse'] { --tone: var(--src-sse); }
+[data-src='dspm'] { --tone: var(--src-dspm); }
+[data-src='edr'] { --tone: var(--src-edr); }
+[data-src='vuln'] { --tone: var(--src-vuln); }
+[data-src='firewall'] { --tone: var(--src-firewall); }
+[data-verdict='covered'] { --tone: var(--v-covered); }
+[data-verdict='partial'] { --tone: var(--v-partial); }
+[data-verdict='gap'] { --tone: var(--v-gap); }
+[data-verdict='unknown'] { --tone: var(--v-unknown); }
