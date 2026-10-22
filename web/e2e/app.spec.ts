@@ -51,12 +51,13 @@ test('the demo opens behind its own sign-in and never calls a server', async ({ 
   page.on('pageerror', e => errors.push(e.message));
   page.on('request', r => requests.push(r.url()));
   await enter(page);
-  const findings = page.getByRole('region', { name: 'Hallazgos cruzados' }).getByRole('listitem').filter({ has: page.getByRole('heading', { level: 3 }) });
+  const findings = page.getByRole('region', { name: 'Hallazgos y cruces' }).getByRole('listitem').filter({ has: page.getByRole('heading', { level: 3 }) });
   await expect(findings).toHaveCount(3);
   await expect(findings.nth(0)).toContainText('Acceso privilegiado sin ningún equipo observado');
   await expect(findings.nth(0)).toContainText('Alice Morgan');
   await expect(findings.nth(1)).toContainText('Bob Chen');
   await expect(findings.nth(2)).toContainText('Dos identidades activas comparten un correo');
+  await expect(findings.nth(2).locator('.chain')).toHaveAttribute('aria-label', 'Fuentes: 1');
   await expect(page.getByText('50%', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Salir de la demo' }).click();
   await expect(page).toHaveURL(/#\/entrar$/);
@@ -85,7 +86,7 @@ for (const [mode, label] of [['stale', 'Desactualizada (73 h)'], ['partial', 'Pa
     await page.getByRole('combobox', { name: 'Escenario de Netskope' }).selectOption({ label });
     await expect(page.getByRole('status')).toContainText('todo veredicto queda desconocido');
     await expect(page.getByText('no evaluable', { exact: true })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Hallazgos cruzados' })).not.toContainText('Brecha');
+    await expect(page.getByRole('region', { name: 'Hallazgos y cruces' })).not.toContainText('Brecha');
     await page.getByRole('link', { name: 'Equipos', exact: true }).click();
     await expect(page.getByRole('row')).toHaveCount(7);
     await page.goto(demo('/personas/3'));
@@ -119,6 +120,23 @@ test('people filter by verdict', async ({ page }) => {
   await page.goto(demo('/personas'));
   await page.getByRole('button', { name: /^Cubierto/ }).click();
   await expect(page.getByRole('row')).toHaveCount(4);
+});
+
+test('tool search includes visible roles and systems without changing raw provenance', async ({ page }) => {
+  await enter(page);
+  await page.goto(demo('/cyberark/identidades'));
+  await page.getByRole('searchbox').fill('Producción');
+  await expect(page.getByText('1 de 7', { exact: true })).toBeVisible();
+  await expect(page.getByRole('row').filter({ hasText: 'Bob Chen' })).toHaveCount(1);
+
+  await page.goto(demo('/netskope/versiones'));
+  await page.getByRole('searchbox').fill('Windows');
+  await expect(page.getByRole('row').filter({ hasText: '110.0.1' })).toHaveCount(1);
+  await page.getByRole('combobox', { name: 'Escenario de Netskope' }).selectOption('stale');
+  await page.getByRole('button', { name: 'Atributos de 110.0.1', exact: true }).click();
+  await expect(page.getByText('2026-10-19T13:00:00Z', { exact: true })).toBeVisible();
+  await page.getByRole('combobox', { name: 'Escenario de Netskope' }).selectOption('complete');
+  await expect(page.getByText('2026-10-22T13:00:00Z', { exact: true })).toBeVisible();
 });
 
 test('every demo screen passes automatic WCAG A/AA checks', async ({ page }) => {

@@ -26,12 +26,17 @@ function Bonds({ bonds }: { bonds?: Bond[] }) {
   );
 }
 
-function ToolTable<T extends Row>({ caption, rows, columns, bonds = true }: { caption: string; rows: T[]; columns: Column<T>[]; bonds?: boolean }) {
+function ToolTable<T extends Row>({ caption, rows, columns, searchValues, bonds = true }: {
+  caption: string; rows: T[]; columns: Column<T>[]; searchValues: (row: T) => (string | number)[]; bonds?: boolean;
+}) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState<string | null>(null);
   const searchId = useId();
   const needle = query.trim().toLocaleLowerCase();
-  const shown = needle ? rows.filter(row => JSON.stringify(row.raw).toLocaleLowerCase().includes(needle)) : rows;
+  const shown = needle ? rows.filter(row => [
+    JSON.stringify(row.raw), ...searchValues(row),
+    ...(bonds ? row.bonds?.flatMap(bond => [bond.person.name, bond.basis]) ?? [] : []),
+  ].join(' ').toLocaleLowerCase().includes(needle)) : rows;
   const span = columns.length + (bonds ? 2 : 1);
 
   return (
@@ -106,7 +111,8 @@ const list = (items: string[]) => items.length ? items.join(', ') : <span classN
 export function Identities() {
   return (
     <ToolPage source="pam" module="Identity" title="Identidades" lede="Identidades activas del directorio de CyberArk Identity.">
-      <ToolTable caption="Identidades de CyberArk" rows={cyberarkIdentities()} columns={[
+      <ToolTable caption="Identidades de CyberArk" rows={cyberarkIdentities()}
+        searchValues={r => [r.name, r.id, r.email, r.state, ...r.roles]} columns={[
         { label: 'Identidad', render: r => <><span className="strong">{r.name}</span><span className="data muted block">{r.id}</span></> },
         { label: 'Correo', render: r => <span className="data">{r.email}</span> },
         { label: 'Estado', render: r => r.state },
@@ -119,7 +125,8 @@ export function Identities() {
 export function Roles() {
   return (
     <ToolPage source="pam" module="Identity" title="Roles" lede="Roles de CyberArk y los Safes a los que dan acceso.">
-      <ToolTable caption="Roles de CyberArk" rows={cyberarkRoles()} columns={[
+      <ToolTable caption="Roles de CyberArk" rows={cyberarkRoles()}
+        searchValues={r => [r.name, r.id, ...r.safes]} columns={[
         { label: 'Rol', render: r => <><span className="strong">{r.name}</span><span className="data muted block">{r.id}</span></> },
         { label: 'Safes', render: r => <span className="data">{r.safes.join(', ')}</span> },
       ]} />
@@ -130,7 +137,8 @@ export function Roles() {
 export function Safes() {
   return (
     <ToolPage source="pam" module="PAM" title="Safes" lede="Safes de CyberArk PAM con su configuración y sus miembros.">
-      <ToolTable caption="Safes de CyberArk" rows={cyberarkSafes()} columns={[
+      <ToolTable caption="Safes de CyberArk" rows={cyberarkSafes()}
+        searchValues={r => [r.id, r.area, r.accounts, r.members, r.cpm, r.retention, r.review]} columns={[
         { label: 'Safe', render: r => <><span className="data strong">{r.id}</span><span className="muted block">{r.area}</span></> },
         { label: 'Cuentas', render: r => r.accounts, num: true },
         { label: 'Miembros', render: r => r.members, num: true },
@@ -146,7 +154,8 @@ export function Safes() {
 export function Accounts() {
   return (
     <ToolPage source="pam" module="PAM" title="Cuentas" lede="Cuentas privilegiadas por Safe y plataforma. Sin credenciales ni secretos.">
-      <ToolTable caption="Cuentas de CyberArk" rows={cyberarkAccounts()} columns={[
+      <ToolTable caption="Cuentas de CyberArk" rows={cyberarkAccounts()}
+        searchValues={r => [r.name, r.user, r.address, r.platform, r.safe, r.managed ? 'sí' : 'no']} columns={[
         { label: 'Cuenta', render: r => <span className="data strong">{r.name}</span> },
         { label: 'Usuario', render: r => <span className="data">{r.user}</span> },
         { label: 'Dirección', render: r => <span className="data">{r.address}</span> },
@@ -161,7 +170,8 @@ export function Accounts() {
 export function Platforms() {
   return (
     <ToolPage source="pam" module="PAM" title="Plataformas" lede="Plataformas de las cuentas privilegiadas.">
-      <ToolTable caption="Plataformas de CyberArk" bonds={false} rows={cyberarkPlatforms()} columns={[
+      <ToolTable caption="Plataformas de CyberArk" bonds={false} rows={cyberarkPlatforms()}
+        searchValues={r => [r.id, r.accounts, r.managed, ...r.safes]} columns={[
         { label: 'Plataforma', render: r => <span className="strong">{r.id}</span> },
         { label: 'Cuentas', render: r => r.accounts, num: true },
         { label: 'Con gestión automática', render: r => r.managed, num: true },
@@ -175,7 +185,8 @@ export function NetskopeUsers() {
   const { mode } = useApp();
   return (
     <ToolPage source="sse" module="Usuarios" title="Usuarios" lede="Usuarios de Netskope con sus equipos y su última señal.">
-      <ToolTable caption="Usuarios de Netskope" rows={netskopeUsers(mode)} columns={[
+      <ToolTable caption="Usuarios de Netskope" rows={netskopeUsers(mode)}
+        searchValues={r => [r.name, r.email, r.devices, r.recent, r.lastSignalAt ? ago(r.lastSignalAt) : 'sin equipos']} columns={[
         { label: 'Usuario', render: r => <><span className="strong">{r.name}</span><span className="data muted block">{r.email}</span></> },
         { label: 'Equipos', render: r => r.devices, num: true },
         { label: 'Con señal en 7 días', render: r => r.recent, num: true },
@@ -189,7 +200,8 @@ export function NetskopeDevices() {
   const { mode } = useApp();
   return (
     <ToolPage source="sse" module="Equipos" title="Equipos" lede="Equipos con el cliente de Netskope y su última señal.">
-      <ToolTable caption="Equipos de Netskope" rows={netskopeDevices(mode).map(d => ({ ...d, id: d.deviceId }))} columns={[
+      <ToolTable caption="Equipos de Netskope" rows={netskopeDevices(mode).map(d => ({ ...d, id: d.deviceId }))}
+        searchValues={r => [r.hostname, r.deviceId, `${r.os} ${r.osVersion}`, r.clientVersion, ago(r.lastSignalAt), r.recent ? 'con señal' : 'sin señal']} columns={[
         { label: 'Equipo', render: r => <><span className="data strong">{r.hostname}</span><span className="data muted block">{r.deviceId}</span></> },
         { label: 'Sistema', render: r => `${r.os} ${r.osVersion}` },
         { label: 'Cliente', render: r => <span className="data">{r.clientVersion}</span> },
@@ -205,7 +217,8 @@ export function NetskopeVersions() {
   const { mode } = useApp();
   return (
     <ToolPage source="sse" module="Clientes" title="Versiones de cliente" lede="Versiones del cliente de Netskope instaladas en los equipos.">
-      <ToolTable caption="Versiones del cliente de Netskope" bonds={false} rows={netskopeVersions(mode)} columns={[
+      <ToolTable caption="Versiones del cliente de Netskope" bonds={false} rows={netskopeVersions(mode)}
+        searchValues={r => [r.id, r.devices, r.recent, ...r.systems]} columns={[
         { label: 'Versión', render: r => <span className="data strong">{r.id}</span> },
         { label: 'Equipos', render: r => r.devices, num: true },
         { label: 'Con señal en 7 días', render: r => r.recent, num: true },

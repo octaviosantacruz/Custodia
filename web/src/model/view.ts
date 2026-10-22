@@ -80,15 +80,15 @@ export type Insight = {
 const TONE_ORDER: Record<CoverageStatus, number> = { gap: 0, partial: 1, unknown: 2, covered: 3 };
 
 /**
- * Hallazgos cruzados: sólo existen cuando dos fuentes, juntas, dicen
- * algo que ninguna dice sola. Cada uno nombra la regla y las fuentes.
+ * Hallazgos de fuentes y cruces: cada uno nombra sólo las fuentes cuya
+ * evidencia utiliza. Una colisión de Identity no necesita datos de Netskope.
  */
 export function insights(mode: SourceMode): Insight[] {
   const list: Insight[] = [];
   for (const person of people) {
     const view = personView(person, mode);
     if (view.identity.status === 'ambiguous') {
-      list.push({ id: `dup-${person.id}`, tone: 'unknown', person, sources: ['pam', 'sse'],
+      list.push({ id: `dup-${person.id}`, tone: 'unknown', person, sources: ['pam'],
         title: 'Dos identidades activas comparten un correo',
         rule: 'Unión sólo por correo exacto y único', detail: 'No se elige una automáticamente. La cobertura queda desconocida hasta que una persona decida.' });
     }

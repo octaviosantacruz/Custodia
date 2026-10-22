@@ -2,7 +2,7 @@
 // cada fila trae su ID de origen y, aparte, el vínculo que Custodia propone con
 // una persona y por qué. Todo sale del mismo escenario de Acme Corp.
 import { accounts, company, people, safes, type Person, type SourceMode } from './company.ts';
-import { allDevices } from './view.ts';
+import { allDevices, sourceRun } from './view.ts';
 
 export type Raw = Record<string, string | number | boolean | null>;
 export type Bond = { person: Person; basis: 'correo exacto' | 'ambiguo, sin unir' | 'miembro del Safe' | 'responsable' };
@@ -133,7 +133,7 @@ export function netskopeVersions(mode: SourceMode) {
       devices: list.length,
       systems: [...new Set(list.map(d => `${d.os} ${d.osVersion}`))],
       recent: list.filter(d => d.recent).length,
-      raw: { client_version: version, device_count: list.length, observed_at: company.capturedAt } satisfies Raw,
+      raw: { client_version: version, device_count: list.length, observed_at: sourceRun('sse', mode).completed_at } satisfies Raw,
     };
   });
 }

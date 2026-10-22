@@ -12,8 +12,8 @@ después de validar uso, evaluar SaaS.
 
 ## Empezar
 
-1. Leer la [revisión del producto existente](docs/EXISTING-PRODUCT.md): la UI
-   original y la lógica Python son la base que se debe preservar y extender.
+1. Leer la [revisión del producto existente](docs/EXISTING-PRODUCT.md): los
+   recorridos y contratos Python son referencia para la interfaz nueva.
 2. Recorrer [Acme Corp](docs/WEB.md) y seguir el
    [tracker](docs/TO_IMPLEMENT.md): ampliar esa experiencia con datos
    sintéticos y portar sus contratos a Go por recorridos.
@@ -81,7 +81,11 @@ La rama `product/go-reset` parte de `f6a7acc`: primero retiró el árbol heredad
 luego recuperó su frontend en `company-demo/` (commit `71c68de`) y el 22/10
 lo retiró en favor de la interfaz nueva de `web/`.
 No recupera el backend ni su configuración de despliegue. El checkout
-`/home/saint/projects/Custodia` conserva la aplicación anterior y es el que
-usan los servicios locales. No se modificaron sus unidades ni sus bases.
+`/home/saint/projects/Custodia` conserva la aplicación anterior en
+`maintenance/v1`, fijada a `f6a7acc`, y es el que usan los servicios locales.
+El checkout del producto es `/home/saint/projects/Custodia-product`; `main`
+integra allí las ramas del producto. No actualizar el checkout v1 a `main`:
+el producto no incluye el runtime que necesitan sus unidades.
+No se modificaron sus unidades ni sus bases.
 La historia Git sigue disponible como referencia; no es material listo para
 publicar. La procedencia y distribución se revisan en `PROD-DIST-001`.

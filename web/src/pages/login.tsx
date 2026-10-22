@@ -42,7 +42,7 @@ export function Login() {
           <button type="button" className="button is-wide" disabled aria-describedby="login-sso-note">Entrar con passkey o SSO</button>
           <p id="login-sso-note" className="hint">Diseñado para entrar por Switchboard u OIDC genérico. Todavía no está implementado.</p>
         </div>
-        <p className="login-foot">custodia · CMDB de seguridad de código abierto · demo</p>
+        <p className="login-foot">custodia · inventario de seguridad con procedencia · demo</p>
       </section>
     </div>
   );

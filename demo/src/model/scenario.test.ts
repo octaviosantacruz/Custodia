@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { applyRun, emptyState, ModelError, setReview, type Run, type State } from './inventory.ts';
+import { applyRun, emptyState, ModelError, recordKey, setReview, type Run, type State } from './inventory.ts';
 import { initialState, stateAt, type Scenario } from './scenario.ts';
 
 const scenario: Scenario = JSON.parse(readFileSync(new URL('../../../fixtures/lab/scenario.json', import.meta.url), 'utf8'));
@@ -71,6 +71,42 @@ test('Sur no cambia en ningún paso: el mismo ID externo en otra conexión es ot
     assert.deepEqual(sur(stateAt(scenario, step.id)), start, `paso ${step.id}`);
   }
   assert.notEqual(stateAt(scenario, 6).records['norte/resources/r-17'].attributes.name, start[0].attributes.name);
+});
+
+test('IDs opacos con separadores no comparten registros, revisiones ni líneas base', () => {
+  let state = emptyState([
+    { id: 'a/b', name: 'Primera', connector: 'lab', collections: ['c'] },
+    { id: 'a', name: 'Segunda', connector: 'lab', collections: ['b/c', 'b'] },
+  ]);
+  const cases = [
+    { connection: 'a/b', collection: 'c', externalId: 'd' },
+    { connection: 'a', collection: 'b/c', externalId: 'd' },
+    { connection: 'a', collection: 'b', externalId: 'c/d' },
+  ];
+  for (const [index, item] of cases.entries()) {
+    state = applyRun(state, {
+      id: `opaque-${index}`, connection: item.connection, collection: item.collection,
+      scope: 'all', completeness: 'complete', observedAt: '2026-10-22T00:00:00Z',
+      observations: [{ externalId: item.externalId, attributes: { name: `record-${index}` } }],
+    });
+    assert.equal(state.runs.at(-1)!.baseline, null, 'la primera corrida de cada colección es independiente');
+    const key = recordKey(item.connection, item.collection, item.externalId);
+    assert.equal(state.reviews[key], undefined, 'no hereda la revisión de otra identidad');
+    state = setReview(state, key, { owner: `owner-${index}` }, 'operator', '2026-10-22T00:00:00Z');
+  }
+  assert.equal(Object.keys(state.records).length, 3);
+  assert.equal(Object.keys(state.baselines).length, 3);
+  state = applyRun(state, {
+    id: 'retire-second', connection: 'a', collection: 'b/c', scope: 'all',
+    completeness: 'complete', observedAt: '2026-10-23T00:00:00Z', observations: [],
+  });
+  for (const [index, item] of cases.entries()) {
+    const key = recordKey(item.connection, item.collection, item.externalId);
+    assert.equal(state.records[key].attributes.name, `record-${index}`);
+    assert.equal(state.records[key].status, index === 1 ? 'retired' : 'active');
+    assert.equal(state.reviews[key].owner, `owner-${index}`);
+  }
+  assert.notEqual(recordKey('a/b', 'c', 'd'), recordKey('a%2Fb', 'c', 'd'));
 });
 
 test('la decisión humana sobrevive a cambios, parciales y bajas de otros registros', () => {

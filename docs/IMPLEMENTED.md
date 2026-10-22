@@ -6,6 +6,23 @@ revisado: 2026-10-22
 
 # Entregas y evidencia
 
+## Correcciones de la revisión de merge — 22/10
+
+| ID | Fecha UTC | Entrega | Evidencia y límite |
+|---|---|---|---|
+| `PROD-MERGE-001` | 2026-10-22 | Aislamiento inequívoco de claves de registros y líneas base; fechas según captura; búsqueda por columnas visibles y vínculos sin alterar atributos crudos; atribución de fuentes corregida; retiradas afirmaciones de código abierto del sitio y login mientras no se decida licencia. | Regresión de IDs opacos, revisión humana y retiro aislado; modelos del experimento (18) y web (6). `maintenance/v1` conserva `f6a7acc` en el checkout original; el producto se integra en `main` desde su worktree. No modifica servicios, credenciales, bases ni despliegue público. |
+
+Verificación final: 11 e2e de web (43,9 s) y 16 del experimento (39,7 s),
+todos correctos; typecheck/build de ambos paquetes y documentación correctos.
+La primera corrida simultánea agotó 30 segundos en los casos largos de axe,
+sin reportar violaciones; la corrida final fue en serie con un worker y
+60 segundos por caso. Las opciones son de ejecución local, sin cambiar los
+límites de la suite. Web usó Chromium 1248 mediante `CUSTODIA_CHROMIUM_PATH`,
+con bibliotecas temporales mediante `LD_LIBRARY_PATH` y sin instalar paquetes.
+El informe del workspace `reviews/custodia-merge-2026-10-22/report.md`
+registra la integración local y sus referencias Git.
+Los pendientes de Go, autenticación, distribución y paridad siguen abiertos.
+
 ## Aceptación de la base — 22/10
 
 El dueño revisó Faro Digital y acepta avanzar desde esta base. Pide una

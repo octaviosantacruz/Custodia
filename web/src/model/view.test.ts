@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { accounts, company, coverage, coverageSummary, devices, people, personSummary, safes } from './company.ts';
-import { allDevices, insights, personView } from './view.ts';
+import { allDevices, insights, personView, sourceRun } from './view.ts';
+import { netskopeVersions } from './tools.ts';
 
 test('one fictional company: people, equipment and privileged accounts resolve consistently', () => {
   assert.equal(company.fictional, true);
@@ -22,10 +23,13 @@ test('contrasting cases and no fabricated identity match', () => {
   assert.equal(personSummary(people[1]).tools.pam.status, 'unmatched');
 });
 
-test('cross-tool insights need two sources and name their rule', () => {
+test('findings cite only the sources used and name their rule', () => {
   const list = insights('complete');
   assert.deepEqual(list.map(i => [i.tone, i.person.name]), [['gap', 'Alice Morgan'], ['partial', 'Bob Chen'], ['unknown', 'Eve Taylor']]);
-  for (const i of list) { assert.ok(i.sources.length >= 2); assert.ok(i.rule.length > 0); }
+  for (const i of list) {
+    assert.deepEqual(i.sources, i.id.startsWith('dup-') ? ['pam'] : ['pam', 'sse']);
+    assert.ok(i.rule.length > 0);
+  }
 });
 
 test('a stale or partial capture never produces a gap', () => {
@@ -41,4 +45,13 @@ test('a stale capture holds no signal newer than itself', () => {
   const capture = Date.parse('2026-10-19T13:00:00Z');
   assert.ok(allDevices('stale').every(d => Date.parse(d.lastSignalAt) <= capture));
   assert.equal(allDevices('complete').filter(d => d.recent).length, 5);
+});
+
+test('client version observations belong to the selected capture', () => {
+  for (const mode of ['complete', 'stale', 'partial'] as const) {
+    const capture = sourceRun('sse', mode).completed_at;
+    const versions = netskopeVersions(mode);
+    assert.ok(versions.length > 0);
+    assert.ok(versions.every(version => version.raw.observed_at === capture));
+  }
 });

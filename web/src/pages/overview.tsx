@@ -66,8 +66,8 @@ export function Overview() {
 
         <section className="findings" aria-labelledby="findings-title">
           <header className="section-head">
-            <h2 id="findings-title">Hallazgos cruzados</h2>
-            <p className="muted">Lo que aparece sólo al juntar las fuentes. Ordenados por gravedad.</p>
+            <h2 id="findings-title">Hallazgos y cruces</h2>
+            <p className="muted">Observaciones de cada fuente y conclusiones al cruzarlas. Ordenados por gravedad.</p>
           </header>
           <ol className="finding-list">
             {found.map(item => (

@@ -44,7 +44,7 @@ fuentes commiteadas.
 Dos planos separados en la navegación:
 
 - **Cruces** (lo que Custodia concluye): Resumen (cobertura, inventario con
-  procedencia, hallazgos cruzados, puntos ciegos), Personas y la ficha de
+  procedencia, hallazgos de fuentes y cruces, puntos ciegos), Personas y la ficha de
   persona con su trama y el veredicto con evidencia.
 - **Herramientas** (lo que cada una dice, sin veredictos): CyberArk ·
   Identidades, Roles, Safes, Cuentas, Plataformas; Netskope · Usuarios,
@@ -83,10 +83,16 @@ deshabilitado: Switchboard u OIDC genérico están diseñados, no implementados.
 
 ## Verificación
 
-`npm run verify:web`: typecheck, build, 5 pruebas del modelo y 9 e2e en
+`npm run verify:web`: typecheck, build, 6 pruebas del modelo y 11 e2e en
 Chromium (sitio estático y bilingüe sin JavaScript ni pedidos externos,
 acceso, hallazgos, brecha frente a identidad ambigua, capturas desactualizada
 y parcial, tablas por herramienta con atributos y vínculo, filtros, axe WCAG
-A/AA en el sitio y quince pantallas de la demo, 390 px sin desplazamiento
+A/AA en el sitio y quince pantallas de la demo, búsqueda por columnas visibles,
+fechas coherentes al cambiar de captura y 390 px sin desplazamiento
 lateral). Puertos locales efímeros: 4184 (dev/preview) y
 4185 (e2e), igual que las demos anteriores, sin entrada en `ports.json`.
+
+Cada hallazgo atribuye sólo las fuentes que usa: la colisión de identidades
+se observa en CyberArk; la brecha y la cobertura parcial cruzan CyberArk y
+Netskope. El sitio y el login no declaran una licencia de código abierto;
+esa decisión sigue pendiente en PROD-DIST-001.

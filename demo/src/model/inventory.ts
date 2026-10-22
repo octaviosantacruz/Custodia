@@ -107,8 +107,11 @@ export interface State {
 
 export class ModelError extends Error {}
 
+// Escapar también '%' evita confundir un separador literal con uno codificado.
+const identityKey = (...parts: string[]) => parts.map(encodeURIComponent).join('/');
+
 export function recordKey(connection: string, collection: string, externalId: string): string {
-  return `${connection}/${collection}/${externalId}`;
+  return identityKey(connection, collection, externalId);
 }
 
 export function emptyState(connections: Connection[]): State {
@@ -137,7 +140,7 @@ export function applyRun(current: State, run: Run): State {
   }
 
   const state = structuredClone(current);
-  const lineKey = `${run.connection}/${run.collection}`;
+  const lineKey = identityKey(run.connection, run.collection);
   const baseline = state.baselines[lineKey];
   const comparable = baseline !== undefined && baseline.scope === run.scope;
   const summary: RunSummary = {
