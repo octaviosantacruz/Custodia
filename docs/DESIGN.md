@@ -64,6 +64,24 @@ Cada cambio explica antes/después, conexión, corrida y estado de completitud.
 La revisión humana se distingue de un hallazgo calculado; el ejemplo no
 calcula un score de riesgo universal ni combina hallazgos incompatibles.
 
+### Reglas que fija el ejemplo
+
+El [fixture](../fixtures/lab/scenario.json) y su modelo (`demo/src/model/`)
+hacen explícitas reglas que el guion sólo sugería; el backend Go las hereda:
+
+- La identidad de un registro es conexión + colección + ID externo.
+- La primera corrida de una línea base observa sin registrar altas; los
+  cambios empiezan a contarse desde la segunda.
+- Una corrida parcial actualiza lo que sí devolvió (el cambio queda marcado
+  «parcial»), nunca retira y no reemplaza la línea base.
+- Una baja exige una corrida completa del mismo alcance que la línea base y
+  que la última observación del registro. Un alcance nuevo inicia otra línea
+  base y no retira nada de lo observado con el anterior.
+- Un registro retirado que reaparece vuelve como alta y conserva su primera
+  corrida. Un ID repetido en una misma corrida la invalida entera.
+- La revisión (responsable, nota) es una capa aparte con su historial; ninguna
+  corrida la modifica, tampoco cuando el registro se retira.
+
 ## Estados y accesibilidad
 
 Diseñar estados inicial, cargando, sin resultados por filtro, sin conexión,

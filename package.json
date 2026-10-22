@@ -2,6 +2,7 @@
   "name": "custodia-product",
   "private": true,
   "scripts": {
-    "verify": "node scripts/check-docs.mjs"
+    "verify": "node scripts/check-docs.mjs && npm run test:model",
+    "test:model": "node --test demo/src/model/*.test.ts"
   }
 }

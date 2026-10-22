@@ -12,8 +12,7 @@ con Portfolio y Switchboard vive en los trackers del workspace.
 
 | ID | Estado / dependencia | Entrega y aceptación |
 |---|---|---|
-| `PROD-FIX-001` | Listo; próximo lote | Fixture sintético y transiciones del [guion](DESIGN.md#guion-determinista-del-laboratorio): dos conexiones del mismo tipo con IDs iguales, decisión humana conservada, alta/cambio/retiro completo, parcial sin bajas y reset exacto. Sin APIs ni datos reales. |
-| `PROD-DEMO-001` | Bloqueado por PROD-FIX-001 | UI de Conexiones, Inventario y Cambios con detalle/historia. Build independiente sin `.env`; navegación por teclado, foco, estados de error y lectura pública en pantalla estrecha. Recorrido completo probado, sin afirmar backend real. |
+| `PROD-DEMO-001` | En curso; usa el modelo y el fixture de PROD-FIX-001 | UI de Conexiones, Inventario y Cambios con detalle/historia. Build independiente sin `.env`; navegación por teclado, foco, estados de error y lectura pública en pantalla estrecha. Recorrido completo probado, sin afirmar backend real. |
 | `PROD-DIST-001` | Listo; antes de compartir/publicar | Registrar procedencia de código/assets nuevos o reutilizados, revisar material del árbol e historia Git y decidir licencia/distribución con el dueño. La historia laboral no se publica automáticamente con la demo. |
 | `PROD-SHOW-001` | Bloqueado por PROD-DEMO-001 y PROD-DIST-001 | Entregar caso ES/EN, capturas originales, artifact reproducible y límites a Portfolio bajo CROSS-009. Build local y enlaces/claims revisados; publicación requiere pedido explícito. |
 | `PROD-GO-001` | Bloqueado por aceptación local de PROD-DEMO-001 | Módulo Go, API/worker con apagado ordenado, PostgreSQL independiente, roles mínimos y migrador explícito con status/up. Versiones fijadas, instalación vacía y gate propio. No espera publicación de Portfolio. |

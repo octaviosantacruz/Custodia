@@ -1,0 +1,186 @@
+{
+  "about": "Datos de ejemplo del laboratorio (DESIGN.md, guion determinista). Ficticios: ningún nombre, valor o cantidad describe una instalación real. El conector lab.inventory es simulado y no acredita soporte de un fabricante.",
+  "version": 1,
+  "connections": [
+    {
+      "id": "norte",
+      "name": "Laboratorio Norte",
+      "connector": "lab.inventory",
+      "collections": ["resources"]
+    },
+    {
+      "id": "sur",
+      "name": "Laboratorio Sur",
+      "connector": "lab.inventory",
+      "collections": ["resources"]
+    }
+  ],
+  "runs": [
+    {
+      "id": "norte-1",
+      "connection": "norte",
+      "collection": "resources",
+      "scope": "all",
+      "completeness": "complete",
+      "observedAt": "2026-03-02T09:00:00Z",
+      "observations": [
+        { "externalId": "r-17", "attributes": { "name": "srv-lab-17", "type": "server", "environment": "test" } },
+        { "externalId": "r-18", "attributes": { "name": "db-lab-18", "type": "database", "environment": "test" } }
+      ]
+    },
+    {
+      "id": "sur-1",
+      "connection": "sur",
+      "collection": "resources",
+      "scope": "all",
+      "completeness": "complete",
+      "observedAt": "2026-03-02T09:05:00Z",
+      "observations": [
+        { "externalId": "r-17", "attributes": { "name": "gw-sur-17", "type": "gateway", "environment": "test" } }
+      ]
+    },
+    {
+      "id": "norte-2",
+      "connection": "norte",
+      "collection": "resources",
+      "scope": "all",
+      "completeness": "complete",
+      "observedAt": "2026-03-03T09:00:00Z",
+      "observations": [
+        { "externalId": "r-17", "attributes": { "name": "srv-lab-17", "type": "server", "environment": "staging" } },
+        { "externalId": "r-18", "attributes": { "name": "db-lab-18", "type": "database", "environment": "test" } },
+        { "externalId": "r-19", "attributes": { "name": "app-lab-19", "type": "application", "environment": "test" } }
+      ]
+    },
+    {
+      "id": "norte-3",
+      "connection": "norte",
+      "collection": "resources",
+      "scope": "all",
+      "completeness": "partial",
+      "observedAt": "2026-03-04T09:00:00Z",
+      "observations": [
+        { "externalId": "r-17", "attributes": { "name": "srv-lab-17", "type": "server", "environment": "staging" } }
+      ]
+    },
+    {
+      "id": "norte-4",
+      "connection": "norte",
+      "collection": "resources",
+      "scope": "all",
+      "completeness": "complete",
+      "observedAt": "2026-03-05T09:00:00Z",
+      "observations": [
+        { "externalId": "r-17", "attributes": { "name": "srv-lab-17", "type": "server", "environment": "staging" } },
+        { "externalId": "r-19", "attributes": { "name": "app-lab-19", "type": "application", "environment": "test" } }
+      ]
+    }
+  ],
+  "initialRuns": ["norte-1", "sur-1"],
+  "steps": [
+    {
+      "id": 1,
+      "title": { "es": "Abrir Conexiones", "en": "Open Connections" },
+      "action": { "type": "view", "view": "connections" },
+      "expect": {
+        "inventory": {
+          "norte": { "r-17": "active", "r-18": "active" },
+          "sur": { "r-17": "active" }
+        },
+        "changes": [],
+        "reviews": {}
+      }
+    },
+    {
+      "id": 2,
+      "title": { "es": "Abrir Norte y el registro r-17", "en": "Open North and record r-17" },
+      "action": { "type": "view", "view": "record", "record": "norte/resources/r-17" },
+      "expect": {
+        "records": {
+          "norte/resources/r-17": { "firstRun": "norte-1", "lastSeenRun": "norte-1", "attributes": { "name": "srv-lab-17", "type": "server", "environment": "test" } }
+        },
+        "changes": [],
+        "reviews": {}
+      }
+    },
+    {
+      "id": 3,
+      "title": { "es": "Asignar responsable y nota", "en": "Assign an owner and a note" },
+      "action": {
+        "type": "review",
+        "record": "norte/resources/r-17",
+        "owner": "Ana Ejemplo",
+        "note": "Confirmar si sigue en uso antes de la próxima revisión.",
+        "actor": "operador.demo",
+        "at": "2026-03-02T10:00:00Z"
+      },
+      "expect": {
+        "changes": [],
+        "reviews": {
+          "norte/resources/r-17": { "owner": "Ana Ejemplo", "note": "Confirmar si sigue en uso antes de la próxima revisión.", "events": 2 }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": { "es": "Sincronización completa de Norte", "en": "Complete sync of North" },
+      "action": { "type": "sync", "run": "norte-2" },
+      "expect": {
+        "inventory": {
+          "norte": { "r-17": "active", "r-18": "active", "r-19": "active" },
+          "sur": { "r-17": "active" }
+        },
+        "records": {
+          "norte/resources/r-17": { "attributes": { "name": "srv-lab-17", "type": "server", "environment": "staging" } },
+          "sur/resources/r-17": { "attributes": { "name": "gw-sur-17", "type": "gateway", "environment": "test" } }
+        },
+        "changes": [
+          { "run": "norte-2", "kind": "changed", "record": "norte/resources/r-17", "fields": ["environment"] },
+          { "run": "norte-2", "kind": "added", "record": "norte/resources/r-19" }
+        ],
+        "reviews": {
+          "norte/resources/r-17": { "owner": "Ana Ejemplo", "note": "Confirmar si sigue en uso antes de la próxima revisión.", "events": 2 }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": { "es": "Corrida parcial: sólo devuelve r-17", "en": "Partial run: only r-17 comes back" },
+      "action": { "type": "sync", "run": "norte-3" },
+      "expect": {
+        "inventory": {
+          "norte": { "r-17": "active", "r-18": "active", "r-19": "active" },
+          "sur": { "r-17": "active" }
+        },
+        "changes": [],
+        "run": { "id": "norte-3", "completeness": "partial", "retained": 2, "retired": 0, "baseline": "norte-2" }
+      }
+    },
+    {
+      "id": 6,
+      "title": { "es": "Corrida completa sin r-18", "en": "Complete run without r-18" },
+      "action": { "type": "sync", "run": "norte-4" },
+      "expect": {
+        "inventory": {
+          "norte": { "r-17": "active", "r-18": "retired", "r-19": "active" },
+          "sur": { "r-17": "active" }
+        },
+        "records": {
+          "norte/resources/r-18": { "retiredByRun": "norte-4", "lastSeenRun": "norte-2" }
+        },
+        "changes": [
+          { "run": "norte-4", "kind": "retired", "record": "norte/resources/r-18" }
+        ],
+        "reviews": {
+          "norte/resources/r-17": { "owner": "Ana Ejemplo", "note": "Confirmar si sigue en uso antes de la próxima revisión.", "events": 2 }
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": { "es": "Reiniciar ejemplo", "en": "Reset the example" },
+      "action": { "type": "reset" },
+      "expect": { "equalsStep": 1 }
+    }
+  ]
+}
