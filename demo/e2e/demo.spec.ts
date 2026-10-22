@@ -102,6 +102,49 @@ test('el guion no le quita el foco al botón Siguiente', async ({ page }) => {
   await expect(page.getByText('Paso 3 de 7')).toBeVisible();
 });
 
+test('el filtro descarta un detalle que pertenece a otra conexión', async ({ page }) => {
+  await open(page);
+  await tab(page, 'Inventario').click();
+  await page.getByRole('button', { name: 'Abrir detalle: Laboratorio Norte r-17' }).click();
+  await page.locator('#connection-filter').focus();
+  await page.locator('#connection-filter').selectOption('sur');
+  const detail = page.getByRole('complementary');
+  await expect(detail).not.toContainText('Laboratorio Norte');
+  await expect(detail).toContainText('Elige un registro');
+  await expect(page.locator('#connection-filter')).toBeFocused();
+});
+
+test('la completa sustituye el aviso parcial sin borrar su evidencia histórica', async ({ page }) => {
+  await open(page);
+  await page.getByRole('button', { name: /^5 Corrida parcial/ }).click();
+  const note = page.getByText(/Corrida parcial: no puede retirar nada/);
+  await expect(note).toBeVisible();
+  await next(page);
+  await expect(note).toHaveCount(0);
+  await expect(page.getByRole('row', { name: /Baja.*r-18/ })).toBeVisible();
+  await expect(page.getByRole('row', { name: /norte-3 Laboratorio Norte.*Parcial/ })).toBeVisible();
+});
+
+test('volver al guion tras abrir un detalle manualmente conserva el foco', async ({ page }) => {
+  await open(page);
+  await tab(page, 'Inventario').click();
+  await page.getByRole('button', { name: 'Abrir detalle: Laboratorio Norte r-17' }).click();
+  await page.getByRole('button', { name: /^6 Corrida completa/ }).click();
+  const step = page.getByRole('button', { name: /^2 Abrir Norte/ });
+  await step.click();
+  await expect(step).toBeFocused();
+  // También al cambiar una vista o volver de un estado simulado.
+  await tab(page, 'Cambios').click();
+  const inventory = tab(page, 'Inventario');
+  await inventory.click();
+  await expect(inventory).toBeFocused();
+  const simulation = page.getByLabel('Estado de ejemplo');
+  await simulation.focus();
+  await simulation.selectOption('loading');
+  await simulation.selectOption('ok');
+  await expect(simulation).toBeFocused();
+});
+
 test('inglés: interfaz y pasos traducidos', async ({ page }) => {
   await open(page, 'en');
   await expect(page.getByRole('note')).toContainText('Demo with sample data');
@@ -169,6 +212,37 @@ test('reproduce los estados vacío, cargando, sin conexión, sin permiso y error
   await expect(page.getByRole('status').filter({ hasText: 'Cargando' })).toHaveCount(0);
 });
 
+test('cada estado de ejemplo pasa axe en ambos idiomas', async ({ page }) => {
+  test.setTimeout(90_000);
+  for (const lang of ['es', 'en'] as const) {
+    await open(page, lang);
+    const selector = page.locator('#sim-state');
+    for (const state of ['loading', 'empty', 'offline', 'forbidden', 'error', 'ok']) {
+      await selector.selectOption(state);
+      const result = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+      expect(result.violations.map(v => `${v.id}: ${v.nodes.map(n => n.target.join(' ')).join(' | ')}`), `${lang}/${state}`).toEqual([]);
+    }
+  }
+});
+
+test('el guion móvil permite desplegar pasos y deja visible el comienzo del inventario', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await open(page);
+  await tab(page, 'Inventario').click();
+  const steps = page.getByRole('list', { name: 'Guion del laboratorio' });
+  await expect(steps).toBeHidden();
+  await expect(page.getByRole('heading', { name: 'Inventario', exact: true })).toBeInViewport();
+  await page.getByRole('button', { name: 'Ver todos los pasos' }).click();
+  await expect(steps).toBeVisible();
+  await page.getByRole('button', { name: /^3 Asignar responsable/ }).click();
+  await expect(page.getByText('Paso 3 de 7')).toBeVisible();
+  await expect(steps).toBeHidden();
+  await expect(page.getByRole('complementary')).toContainText('Ana Ejemplo');
+  await expect(page.getByRole('button', { name: 'Ver todos los pasos' })).toBeFocused();
+  await page.getByRole('button', { name: 'Cerrar detalle' }).click();
+  await expect(page.locator('#connection-filter')).toBeFocused();
+});
+
 test('no hace ninguna petición fuera de su propio origen', async ({ page }) => {
   const external: string[] = [];
   page.on('request', r => {
@@ -179,4 +253,16 @@ test('no hace ninguna petición fuera de su propio origen', async ({ page }) => 
   for (let i = 0; i < 6; i++) await next(page);
   await page.waitForLoadState('networkidle');
   expect(external).toEqual([]);
+});
+
+test('el build entrega los avisos de las dependencias y fuentes', async ({ page }) => {
+  await open(page);
+  const link = page.getByRole('link', { name: 'Licencias de terceros' });
+  const href = await link.getAttribute('href');
+  const response = await page.request.get(new URL(href!, page.url()).href);
+  expect(response.ok()).toBe(true);
+  const notices = await response.text();
+  for (const name of ['react ', 'react-dom ', 'scheduler ', '@fontsource-variable/manrope ', '@fontsource/ibm-plex-mono ']) {
+    expect(notices).toContain(name);
+  }
 });

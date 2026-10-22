@@ -9,6 +9,8 @@ const es = {
   nav: 'Vistas',
   views: { connections: 'Conexiones', inventory: 'Inventario', changes: 'Cambios' },
   script: 'Guion del laboratorio',
+  showSteps: 'Ver todos los pasos',
+  hideSteps: 'Ocultar pasos',
   stepOf: (n: number, total: number) => `Paso ${n} de ${total}`,
   prev: 'Anterior',
   next: 'Siguiente',
@@ -115,6 +117,7 @@ const es = {
     retry: 'Reintentar',
   },
   footer: 'Datos de ejemplo. El conector lab.inventory es simulado y no acredita soporte de ningún fabricante.',
+  thirdParty: 'Licencias de terceros',
 };
 
 export type Strings = typeof es;
@@ -126,6 +129,8 @@ const en: Strings = {
   nav: 'Views',
   views: { connections: 'Connections', inventory: 'Inventory', changes: 'Changes' },
   script: 'Lab script',
+  showSteps: 'Show all steps',
+  hideSteps: 'Hide steps',
   stepOf: (n, total) => `Step ${n} of ${total}`,
   prev: 'Previous',
   next: 'Next',
@@ -232,6 +237,7 @@ const en: Strings = {
     retry: 'Retry',
   },
   footer: 'Sample data. The lab.inventory connector is simulated and does not show support for any vendor.',
+  thirdParty: 'Third-party licenses',
 };
 
 export const strings: Record<Lang, Strings> = { es, en };

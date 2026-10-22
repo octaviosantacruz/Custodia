@@ -1,0 +1,33 @@
+/* NSK-RBAC-001: administrators and roles. Dense desktop layout using the shared theme tokens. */
+
+.netskope-admins { display: grid; gap: 12px; padding: 20px 24px 24px; }
+.netskope-admins-heading .section-title { align-items: center; display: flex; gap: 8px; }
+.netskope-admins-toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; }
+.netskope-admins-search { flex: 1; min-width: 260px; }
+.netskope-admins-search input { min-width: 0; }
+.netskope-admins-note { color: var(--text-muted); font-size: 11px; margin: 0; }
+
+.netskope-admins-table { border-collapse: collapse; table-layout: fixed; width: 100%; }
+.netskope-admins-table th, .netskope-admins-table td { border-bottom: 1px solid var(--border-soft); color: var(--text-primary); font-size: 11px; overflow-wrap: anywhere; padding: 8px 10px; text-align: left; vertical-align: top; }
+.netskope-admins-table thead th { color: var(--text-secondary); font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.netskope-admins-table th:nth-child(1) { width: 30%; }
+/* Row headers carry names and emails: keep their case instead of the column-header capitals. */
+.netskope-admins-table tbody th { font-weight: 700; letter-spacing: 0; text-transform: none; }
+.netskope-admins-permissions th:nth-child(1), .netskope-admins-permissions td:nth-child(1) { width: 14%; }
+.netskope-admins-permissions th:nth-child(2) { width: 26%; }
+
+.netskope-admins-chip { border-radius: 999px; display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 8px; }
+.netskope-admins-chip.is-ok, .netskope-admins-chip.is-read { background: color-mix(in srgb, var(--success, #3fae6a) 18%, transparent); color: var(--success, #3fae6a); }
+.netskope-admins-chip.is-off, .netskope-admins-chip.is-other { background: var(--bg-elevated); color: var(--text-muted); }
+.netskope-admins-chip.is-locked, .netskope-admins-chip.is-admin { background: color-mix(in srgb, var(--danger, #d64545) 18%, transparent); color: var(--danger, #d64545); }
+.netskope-admins-chip.is-write { background: color-mix(in srgb, var(--warning, #d9a441) 18%, transparent); color: var(--warning, #d9a441); }
+
+.netskope-admins-link { background: none; border: 0; color: var(--accent-strong); cursor: pointer; font: inherit; font-weight: 700; padding: 0; text-align: left; }
+.netskope-admins-link:hover { text-decoration: underline; }
+.netskope-admins-none { color: var(--text-muted); }
+
+.netskope-admins-role-head { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; }
+.netskope-admins-role-head h3 { font-size: 15px; margin: 0; }
+.netskope-admins-holders { display: flex; flex-wrap: wrap; gap: 6px 14px; list-style: none; margin: 0; padding: 0; }
+.netskope-admins-holders li { color: var(--text-secondary); font-size: 11px; }
+.netskope-admins-holders small { color: var(--text-muted); }

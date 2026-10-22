@@ -1,0 +1,24 @@
+export type FindingStatus = 'open' | 'acknowledged' | 'resolved' | 'excepted';
+export type FindingSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type FindingCategory = 'review' | 'non_compliance' | 'data_quality';
+export type Finding = {
+  finding_id: number;
+  rule_id: string;
+  rule_version: string;
+  source_system: 'cyberark' | 'identity_administration' | 'sia';
+  subject_type: string;
+  subject_id: string;
+  title: string;
+  severity: FindingSeverity;
+  category: FindingCategory;
+  status: FindingStatus;
+  evidence: Record<string, unknown>;
+  source_run_id: string | null;
+  first_detected_at: string;
+  last_detected_at: string;
+  resolved_at: string | null;
+  exception_reason: string | null;
+  exception_until: string | null;
+  updated_at: string;
+};
+export type FindingListResponse = { rows: Finding[]; total: number; limit: number; offset: number };

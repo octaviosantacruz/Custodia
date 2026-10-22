@@ -1,0 +1,9 @@
+/* One footer for every list: summary + context on the left, controls on the
+   right. TablePagination and LoadMore differ only in their controls. */
+.pagination.table-footer, .load-more-footer.table-footer { align-items: center; border-top: 1px solid var(--border-soft); color: var(--text-secondary); display: flex; font-size: 12px; gap: 14px; justify-content: space-between; min-height: 52px; padding: 10px 24px; }
+.table-footer-info { align-items: center; display: flex; flex-wrap: wrap; gap: 4px 14px; min-width: 0; font-variant-numeric: tabular-nums; }
+.table-footer-summary { color: var(--text-primary); font-weight: 600; }
+.table-footer-meta { color: var(--text-muted); }
+.table-footer-progress { background: var(--bg-muted); border-radius: 999px; display: inline-block; height: 4px; overflow: hidden; width: 96px; }
+.table-footer-progress > span { background: var(--accent); display: block; height: 100%; }
+.table-footer .button { min-height: 30px; }

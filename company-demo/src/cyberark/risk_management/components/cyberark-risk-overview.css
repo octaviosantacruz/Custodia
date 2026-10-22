@@ -1,0 +1,99 @@
+/* Resumen de Risk Management: hero (totales · evolución · progreso) + top de tipos. */
+.risk-overview { display: grid; gap: 16px; }
+.risk-muted { color: var(--text-muted); font-size: 11px; }
+
+.risk-hero {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 7%, var(--bg-panel)), var(--bg-panel) 55%);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.6fr) minmax(200px, 0.6fr);
+  padding: 22px 24px;
+}
+
+.risk-hero-title { color: var(--text-primary); display: grid; gap: 2px; margin: 0; }
+.risk-hero-title span { color: var(--text-secondary); font-size: 12px; font-weight: 700; }
+.risk-hero-title strong { font-size: 30px; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1.1; }
+.risk-hero-totals { display: grid; align-content: start; gap: 14px; min-width: 0; }
+
+.risk-severity-chips { display: flex; flex-wrap: wrap; gap: 6px 14px; list-style: none; margin: 0; padding: 0; }
+.risk-severity-chips li { align-items: center; color: var(--text-secondary); display: inline-flex; font-size: 12px; gap: 5px; }
+.risk-severity-chips li strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.risk-severity-chips .tone-danger svg { color: var(--danger); }
+.risk-severity-chips .tone-warning svg { color: var(--warning); }
+.risk-severity-chips .tone-info svg { color: var(--chart-1); }
+.risk-severity-chips .tone-neutral svg { color: var(--text-muted); }
+
+.risk-entity-cards { border: 1px solid var(--border-soft); border-radius: var(--radius-md); display: grid; overflow: hidden; }
+.risk-entity-card { background: var(--bg-surface, var(--bg-panel)); display: grid; gap: 6px; padding: 12px 14px; }
+.risk-entity-card + .risk-entity-card { border-top: 1px solid var(--border-soft); }
+.risk-entity-name { color: var(--text-secondary); font-size: 11px; font-weight: 700; }
+.risk-entity-total { color: var(--text-secondary); font-size: 12px; }
+.risk-entity-total strong { color: var(--text-primary); font-size: 20px; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.risk-entity-bar { background: var(--bg-muted); border-radius: 999px; display: block; height: 5px; max-width: 220px; overflow: hidden; }
+.risk-entity-bar i { background: var(--danger); border-radius: inherit; display: block; height: 100%; }
+.risk-entity-card small { color: var(--text-muted); font-size: 10px; }
+
+.risk-hero-trend { display: grid; align-content: start; gap: 10px; min-width: 0; }
+.risk-hero-heading { align-items: baseline; display: flex; gap: 12px; justify-content: space-between; }
+.risk-hero-heading h3 { align-items: center; display: flex; font-size: 14px; gap: 6px; margin: 0; }
+
+.risk-trend { margin: 0; }
+.risk-trend-plot { display: grid; gap: 8px; grid-template-columns: auto minmax(0, 1fr); }
+.risk-trend-y { color: var(--text-muted); display: flex; flex-direction: column; font-size: 10px; font-variant-numeric: tabular-nums; height: 170px; justify-content: space-between; text-align: right; transform: translateY(-5px); }
+.risk-trend-canvas { min-width: 0; position: relative; }
+.risk-trend-canvas svg { display: block; height: 170px; overflow: visible; width: 100%; }
+.risk-trend-grid { stroke: var(--border-soft); stroke-width: 1; }
+.risk-trend-line { fill: none; stroke-linejoin: round; stroke-width: 2; }
+.risk-trend-dot { stroke-linecap: round; stroke-width: 7; }
+.risk-trend-series.is-primary :is(.risk-trend-line, .risk-trend-dot) { stroke: var(--accent); }
+.risk-trend-series.is-secondary :is(.risk-trend-line, .risk-trend-dot) { stroke: var(--chart-5); }
+.risk-trend-series.is-primary .risk-trend-area { fill: color-mix(in srgb, var(--accent) 16%, transparent); }
+.risk-trend-series.is-secondary .risk-trend-area { fill: color-mix(in srgb, var(--chart-5) 12%, transparent); }
+.risk-trend-x { color: var(--text-muted); font-size: 10px; height: 16px; margin-top: 6px; position: relative; }
+.risk-trend-x span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.risk-trend-x span:first-child { transform: none; }
+.risk-trend-x span:last-child { transform: translateX(-100%); }
+.risk-trend-legend { color: var(--text-secondary); display: flex; font-size: 11px; gap: 16px; justify-content: center; margin-top: 6px; }
+.risk-trend-legend span { align-items: center; display: inline-flex; gap: 6px; }
+.risk-trend-legend i { border-radius: 2px; display: inline-block; height: 10px; width: 4px; }
+.risk-trend-legend i.is-primary { background: var(--accent); }
+.risk-trend-legend i.is-secondary { background: var(--chart-5); }
+.risk-trend-values summary { color: var(--text-secondary); cursor: pointer; font-size: 11px; }
+.risk-trend-values .compact-table-wrap { margin-top: 8px; max-height: 220px; }
+
+.risk-hero-kpis { align-content: start; background: var(--bg-surface, var(--bg-app)); border: 1px solid var(--border-soft); border-radius: var(--radius-md); display: grid; gap: 18px; margin: 0; padding: 16px 18px; }
+.risk-hero-kpis div { display: grid; gap: 2px; }
+.risk-hero-kpis dt { color: var(--text-secondary); font-size: 11px; }
+.risk-hero-kpis dd { color: var(--text-primary); font-size: 22px; font-variant-numeric: tabular-nums; font-weight: 800; margin: 0; }
+.risk-hero-kpis dd small { color: var(--text-muted); display: block; font-size: 10px; font-weight: 400; margin-top: 4px; }
+
+.risk-top-types { padding: 18px 24px 8px; }
+.risk-top-types-head { align-items: baseline; display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 10px; }
+.risk-top-types-head h3 { font-size: 15px; margin: 0; }
+.risk-show-all { align-items: center; background: none; border: 0; color: var(--accent-strong); cursor: pointer; display: inline-flex; font: inherit; font-size: 12px; font-weight: 700; gap: 2px; margin-left: auto; padding: 0; }
+.risk-show-all:hover { text-decoration: underline; }
+.risk-show-all:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.risk-top-table { min-width: 760px; }
+.risk-top-table tbody tr { cursor: default; }
+.risk-top-table th:nth-child(1) { width: 38%; }
+.risk-top-table th:nth-child(4) { width: 20%; }
+
+@media (max-width: 1180px) {
+  .risk-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .risk-hero-trend { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Totales compactos sobre la lista de hallazgos. */
+.risk-strip { align-items: center; border-bottom: 1px solid var(--border-soft); display: flex; flex-wrap: wrap; gap: 14px 28px; padding: 16px 18px; }
+.risk-strip-total { display: grid; gap: 2px; }
+.risk-strip-total span { color: var(--text-secondary); font-size: 11px; font-weight: 700; }
+.risk-strip-total strong { color: var(--text-primary); font-size: 24px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.risk-strip-entities { display: flex; flex: 1 1 320px; gap: 10px; max-width: 520px; }
+.risk-strip-entities > div { display: grid; flex: 1; gap: 6px; }
+.risk-strip-entities span { color: var(--text-secondary); font-size: 12px; }
+.risk-strip-entities strong { color: var(--text-primary); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.risk-strip-entities i { background: var(--bg-muted); border-radius: 999px; display: block; height: 5px; overflow: hidden; }
+.risk-strip-entities b { background: var(--chart-5); border-radius: inherit; display: block; height: 100%; }
+.risk-strip .risk-severity-chips { border-left: 1px solid var(--border-soft); padding-left: 24px; }

@@ -1,0 +1,206 @@
+/* ============================================================
+   Design tokens — single source of truth.
+   Was: 4 conflicting :root blocks (accent defined as teal, blue
+   AND green simultaneously) plus 3 tokens (--border, --bg-panel,
+   --danger-strong) referenced 30+ times but never declared, so
+   they resolved to currentcolor / transparent. Effective values
+   below were computed from the last-winning declaration of each.
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --bg-app: #0a0b0c;
+  --bg-elevated: #111214;
+  --bg-panel: #111214;      /* alias for --bg-elevated (was undefined) */
+  --bg-muted: #161719;
+  --bg-subtle: #1b1c1e;
+  --bg-hover: #1a1b1d;
+  --bg-surface: #1d2125;
+
+  /* Text */
+  --text-primary: #f2f4f5;
+  --text-secondary: #9ba1a6;
+  --text-muted: #838890;
+
+  /* Borders */
+  --border-strong: #232426;
+  --border-soft: #1a1b1d;
+  --border: #232426;        /* alias for --border-strong (was undefined) */
+
+  /* Accent — the single Custodia operational green */
+  --accent: #35c477;
+  --accent-strong: #6ee7a8;
+
+  /* Semantic */
+  --success: #35c477;
+  --warning: #d7a44b;
+  --danger: #d76d62;
+  --danger-strong: #e8897f; /* was undefined */
+
+  /* Elevation — one recipe per role. Embedded surfaces stay flat in
+     both themes (--shadow-elevated: none); a card is a hairline border
+     on --bg-elevated, nothing more. Only detached layers cast:
+     --shadow-popover / --shadow-modal / --shadow-drawer. */
+  --shadow-elevated: none;
+  --shadow-popover: 0 12px 30px rgba(0, 0, 0, .32);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, .44);
+  --shadow-drawer: -16px 0 44px rgba(0, 0, 0, .32);
+  --overlay-scrim: rgba(4, 6, 10, .66);
+  --focus-ring: 0 0 0 2px color-mix(in srgb, var(--accent) 42%, transparent);
+
+  /* Workflow status pills */
+  --status-pending-bg: #3a2d16; --status-pending-text: #ffd88a; --status-pending-border: #6a5226;
+  --status-progress-bg: #1d3047; --status-progress-text: #b8d7ff; --status-progress-border: #35577f;
+  --status-blocked-bg: #472622; --status-blocked-text: #ffc4bb; --status-blocked-border: #7a4139;
+  --status-resolved-bg: #1f3527; --status-resolved-text: #bde7cd; --status-resolved-border: #376148;
+  --status-retired-bg: #2a2f34; --status-retired-text: #d0d5da; --status-retired-border: #444c54;
+  --status-identity-bg: #2b2447; --status-identity-text: #cdbff4; --status-identity-border: #493c78;
+
+  /* Chart series */
+  --chart-1: #5ba2ff; --chart-2: #46b07a; --chart-3: #d7a44b;
+  --chart-4: #d76d62; --chart-5: #9b7fd4; --chart-6: #4bc3c9; --chart-7: #d98cb3; --chart-8: #9cb85a;
+
+  /* Corner radius */
+  --radius-sm: 6px; --radius-md: 8px; --radius-lg: 10px; --radius-xl: 14px;
+
+  /* Typography (see "Typography foundation" block below) */
+  --font-sans: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono',
+    'JetBrains Mono', Menlo, Consolas, monospace;
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-lg: 15px;
+  --text-xl: 19px;
+  --text-2xl: 24px;
+
+  color: var(--text-primary);
+  background: var(--bg-app);
+  color-scheme: dark;
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  line-height: 1.45;
+}
+
+:root[data-theme='light'] {
+  --bg-app: #f7f7f5;
+  --bg-elevated: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-muted: #fbfbfa;
+  --bg-subtle: #f1f1ef;
+  --bg-hover: #f5f4f1;
+  --bg-surface: #ffffff;
+
+  --text-primary: #37352f;
+  --text-secondary: #5f5b53;
+  --text-muted: #6f6b63;
+
+  --border-strong: #e7e6e2;
+  --border-soft: #ebe9e4;
+  --border: #e7e6e2;
+
+  --accent: #1f9d61;
+  --accent-strong: #167a4b;
+
+  --success: #26734d;
+  --warning: #8a5a12;
+  --danger: #9a3f35;
+  --danger-strong: #8a2f26;
+  --shadow-elevated: none; /* light: cards are hairline-only too, matching dark (P4-A) */
+  --shadow-popover: 0 8px 24px rgba(20, 20, 15, .12);
+  --shadow-modal: 0 22px 54px rgba(20, 20, 15, .18);
+  --shadow-drawer: -14px 0 36px rgba(20, 20, 15, .12);
+  --overlay-scrim: rgba(24, 24, 20, .32);
+  --focus-ring: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+
+  --status-pending-bg: #f8efd8; --status-pending-text: #8a5a12; --status-pending-border: #eed9a8;
+  --status-progress-bg: #dfeaf8; --status-progress-text: #2f5f8a; --status-progress-border: #c7d8ec;
+  --status-blocked-bg: #f8dfdb; --status-blocked-text: #9a3f35; --status-blocked-border: #efc3bc;
+  --status-resolved-bg: #deefe3; --status-resolved-text: #2f6a46; --status-resolved-border: #c4dec9;
+  --status-retired-bg: #ecebea; --status-retired-text: #66635c; --status-retired-border: #d7d4cf;
+  --status-identity-bg: #ece7f8; --status-identity-text: #5b3fa0; --status-identity-border: #d8cef0;
+
+  --chart-1: #2383e2; --chart-2: #2f6a46; --chart-3: #8a5a12;
+  --chart-4: #9a3f35; --chart-5: #6a4fb0; --chart-6: #1f8c92; --chart-7: #a23d7a; --chart-8: #5d7a1f;
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+.app-shell { max-width: 100%; min-height: 100vh; overflow-x: clip; }
+
+/* Account-type chip colors (moved from styles.css; FE-CSS-001). */
+:root {
+  --accttype-cyberark-bg: #1d3047;
+  --accttype-cyberark-text: #b8d7ff;
+  --accttype-cyberark-border: #35577f;
+  --accttype-nominal-bg: #3a2a47;
+  --accttype-nominal-text: #dcc0f5;
+  --accttype-nominal-border: #6a4a82;
+  --accttype-nonominal-bg: #2a2f34;
+  --accttype-nonominal-text: #d0d5da;
+  --accttype-nonominal-border: #444c54;
+}
+:root[data-theme='light'] {
+  --accttype-cyberark-bg: #dfeaf8;
+  --accttype-cyberark-text: #2f5f8a;
+  --accttype-cyberark-border: #c7d8ec;
+  --accttype-nominal-bg: #efe0f8;
+  --accttype-nominal-text: #7a3f9a;
+  --accttype-nominal-border: #ddc4ec;
+  --accttype-nonominal-bg: #ecebea;
+  --accttype-nonominal-text: #66635c;
+  --accttype-nonominal-border: #d7d4cf;
+}
+
+/* Consistent color-coded controls for assignments and next actions. */
+:root:not([data-theme='light']) {
+  --select-unit-bg: #183326;
+  --select-unit-border: #3d8f5d;
+  --select-unit-text: #c2ecd0;
+  --select-responsible-bg: #2d2638;
+  --select-responsible-border: #705b8f;
+  --select-responsible-text: #e4d8f3;
+  --select-action-default-bg: #202124;
+  --select-action-default-border: #cfd4da;
+  --select-action-default-text: #f2f4f5;
+  --select-action-migrate-bg: #17382c;
+  --select-action-migrate-border: #4da978;
+  --select-action-migrate-text: #c4f0d2;
+  --select-action-rotate-bg: #3a2d16;
+  --select-action-rotate-border: #d0a64c;
+  --select-action-rotate-text: #ffe0a0;
+  --select-action-consult-bg: #1d3047;
+  --select-action-consult-border: #5f8fca;
+  --select-action-consult-text: #c8e0ff;
+  --select-action-retire-bg: #472622;
+  --select-action-retire-border: #bd766d;
+  --select-action-retire-text: #ffd1ca;
+}
+:root[data-theme='light'] {
+  --select-unit-bg: #e5f3eb;
+  --select-unit-border: #78b894;
+  --select-unit-text: #276443;
+  --select-responsible-bg: #f0e9f7;
+  --select-responsible-border: #b79ad0;
+  --select-responsible-text: #69448a;
+  --select-action-default-bg: #f8f8f7;
+  --select-action-default-border: #c8c9c7;
+  --select-action-default-text: #37352f;
+  --select-action-migrate-bg: #e1f2e7;
+  --select-action-migrate-border: #83c39a;
+  --select-action-migrate-text: #286946;
+  --select-action-rotate-bg: #fff1d2;
+  --select-action-rotate-border: #dfbd6d;
+  --select-action-rotate-text: #815918;
+  --select-action-consult-bg: #e5effb;
+  --select-action-consult-border: #9bbbe0;
+  --select-action-consult-text: #315e8d;
+  --select-action-retire-bg: #f8e5e1;
+  --select-action-retire-border: #dfa29a;
+  --select-action-retire-text: #91463d;
+}

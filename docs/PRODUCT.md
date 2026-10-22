@@ -10,7 +10,11 @@ Entrada nueva, independiente de la historia de la instalación laboral.
 Decisión del dueño: **presentación en Portfolio → producto autohospedado →
 evaluar SaaS si tiene éxito**. El backend del producto será Go. La extensión
 a otras herramientas forma parte de la dirección; cada integración necesita
-su propio contrato probado. Todavía no existe ese backend ni una demo nueva.
+su propio contrato probado. La demo empresarial Faro Digital está aceptada
+como base, con refinamiento de estilo pendiente; todavía no hay backend Go.
+Aclaración del dueño el 22/10: preservar la UI y experiencia anteriores,
+inventariar Netskope/CyberArk/CrowdStrike y otras herramientas y permitir
+cruces e inferencias. Ver [la revisión de la base existente](EXISTING-PRODUCT.md).
 
 ## Qué queremos resolver
 
@@ -18,6 +22,9 @@ Un operador tiene inventario y señales repartidos entre herramientas de
 seguridad. Necesita saber qué observó cada una, qué cambió, qué información
 falta y quién debe revisar una situación. Custodia conserva esa evidencia y
 las decisiones del equipo sin obligarlo a mantener planillas paralelas.
+Los cruces entre herramientas y las inferencias son parte central del
+producto, sobre evidencias que conservan origen, reglas y vigencia. Las
+vistas existentes de Personas, cobertura y postura ya expresan esa dirección.
 
 Propuesta de presentación: **«Tus herramientas, un inventario explicable y
 un historial de decisiones»**. Es posicionamiento propuesto, no una promesa
@@ -31,7 +38,7 @@ un cambio y toma una acción; después ampliar conectores y automatizaciones.
 
 | Etapa | Entrega | Qué demuestra |
 |---|---|---|
-| Portfolio | Demo estática e interactiva con datos ficticios y caso ES/EN. | Cómo se usaría Custodia. No acredita integración real ni backend Go completo. |
+| Portfolio | Mostrar la experiencia original con datos ficticios y caso ES/EN. | El producto que se está estandarizando. La demo reducida no sustituye esa experiencia ni acredita integración real. |
 | Autohospedado | Go + PostgreSQL, UI React, conexión configurada por el operador y sincronización read-only. | Instalación reproducible y un recorrido real con historia, permisos y recuperación. |
 | SaaS condicionado | Evaluación comercial y de aislamiento después de uso recurrente. | Una necesidad observada de operación alojada. Hoy no se implementan facturación ni infraestructura multiempresa. |
 

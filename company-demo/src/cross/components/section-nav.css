@@ -1,0 +1,64 @@
+.section-nav {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+}
+.section-nav a {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  display: inline-flex;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 12px;
+  position: relative;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.section-nav a svg { flex: 0 0 auto; height: 15px; width: 15px; }
+.section-nav a:hover { background: var(--bg-hover); color: var(--text-primary); }
+.section-nav a[aria-current="page"] {
+  background: var(--bg-muted);
+  border-color: var(--border-strong);
+  color: var(--accent-strong);
+}
+.section-nav a:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+/* Smaller sibling of the home tool cards: name and the question the view answers. */
+.section-nav-card {
+  background: color-mix(in srgb, var(--bg-elevated) 94%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border-soft));
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 24px color-mix(in srgb, #000 24%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  left: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 7px 10px 7px 12px;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  transform: translateY(4px);
+  transition: opacity var(--motion-fast) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out), visibility 0s linear var(--motion-base);
+  visibility: hidden;
+  white-space: normal;
+  width: 220px;
+  z-index: 20;
+}
+.section-nav-card::before { background: var(--accent); content: ""; height: 100%; left: 0; opacity: .75; position: absolute; top: 0; width: 2px; }
+.section-nav-card strong { color: var(--text-primary); font-size: 12px; font-weight: 650; line-height: 1.2; }
+.section-nav-card small { color: var(--text-secondary); font-size: 11px; font-weight: 500; line-height: 1.35; }
+.section-nav a:is(:hover, :focus-visible) .section-nav-card {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 120ms, 120ms, 0s;
+  visibility: visible;
+}

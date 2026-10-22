@@ -1,0 +1,6 @@
+.pam-data-reading { font-size: 11px; line-height: 1.4; }
+.pam-data-reading > span { color: var(--text-secondary); }
+.pam-data-reading dl { display: grid; gap: 8px; margin: 10px 0; }
+.pam-data-reading dt { color: var(--text-primary); font-weight: 600; }
+.pam-data-reading dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.pam-data-reading > p { font-size: 11px; }

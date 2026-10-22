@@ -1,0 +1,1 @@
+export type AuthStatus = { mode: 'local' | 'oidc' | 'hybrid'; authenticated: boolean; setup_available?: boolean; permissions: string[]; api_docs_enabled?: boolean; user: { actor_id: string; name?: string | null; email?: string | null; roles?: string[]; role_names?: string[]; must_change_password?: boolean; auth_source?: 'local' | 'oidc' } | null };

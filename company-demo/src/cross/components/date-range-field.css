@@ -1,0 +1,47 @@
+/* DateRangeField: the trigger reads like CompactSelect's; the calendar uses the popover surface and the green
+   Custodia accent for the chosen range. React Aria sets data-* states (selected, selection-start/end, outside-month,
+   disabled, unavailable, focus-visible) that the rules below key on. */
+.date-range-field { display: inline-flex; }
+.date-range-field-group { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); display: inline-flex; font-size: 13px; gap: 2px; min-height: 36px; padding: 0 4px 0 9px; transition: background-color .16s ease, border-color .16s ease, box-shadow .16s ease; }
+.date-range-field-group:hover { background: var(--bg-hover); border-color: var(--border-strong); }
+.date-range-field-group[data-focus-within] { border-color: var(--accent); box-shadow: var(--focus-ring); }
+.date-range-field-group[data-invalid] { border-color: var(--danger, #d03b3b); }
+.date-range-field-input { display: inline-flex; font-variant-numeric: tabular-nums; }
+.date-range-field-segment { border-radius: 3px; color: var(--text-primary); padding: 0 1px; }
+.date-range-field-segment[data-type='literal'] { color: var(--text-muted); }
+.date-range-field-segment[data-placeholder] { color: var(--text-muted); }
+.date-range-field-segment[data-focused] { background: var(--accent); color: var(--bg-panel); outline: none; }
+.date-range-field-dash { color: var(--text-muted); padding: 0 6px; }
+.date-range-field-trigger { align-items: center; background: transparent; border: 0; border-radius: var(--radius-sm); color: var(--text-muted); cursor: pointer; display: inline-flex; margin-left: 6px; padding: 5px; }
+.date-range-field-trigger[data-hovered], .date-range-field-trigger[data-pressed] { background: var(--bg-hover); color: var(--text-primary); }
+.date-range-field-trigger[data-focus-visible] { box-shadow: var(--focus-ring); outline: none; }
+
+.date-range-field-popover { animation: date-range-field-in .14s ease-out; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-popover); padding: 12px; }
+.date-range-field-dialog { outline: none; }
+.date-range-field-header { align-items: center; display: flex; gap: 8px; justify-content: space-between; margin-bottom: 8px; }
+.date-range-field-heading { color: var(--text-primary); font-size: 13px; font-weight: 600; margin: 0; }
+.date-range-field-heading::first-letter { text-transform: uppercase; }
+.date-range-field-nav { align-items: center; background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; display: inline-flex; padding: 5px; }
+.date-range-field-nav[data-hovered] { background: var(--bg-hover); color: var(--text-primary); }
+.date-range-field-nav[data-disabled] { cursor: default; opacity: .35; }
+.date-range-field-nav[data-focus-visible] { box-shadow: var(--focus-ring); outline: none; }
+/* The calendar grid is a table: reset the app-wide table look (row borders, header band, full width). */
+.date-range-field-grid { border-collapse: separate; border-spacing: 0 2px; min-width: 0; width: auto; }
+.date-range-field-grid thead, .date-range-field-grid tr, .date-range-field-grid th, .date-range-field-grid td { background: none; border: 0; letter-spacing: 0; padding: 0; position: static; }
+.date-range-field-weekday { color: var(--text-muted); font-size: 11px; font-weight: 500; height: 26px; text-align: center; text-transform: uppercase; width: 34px; }
+.date-range-field-cell { align-items: center; border-radius: var(--radius-sm); color: var(--text-primary); cursor: pointer; display: flex; font-size: 12px; font-variant-numeric: tabular-nums; height: 32px; justify-content: center; outline: none; width: 34px; }
+.date-range-field-cell[data-hovered] { background: var(--bg-hover); }
+.date-range-field-cell[data-outside-month] { display: none; }
+.date-range-field-cell[data-disabled], .date-range-field-cell[data-unavailable] { color: var(--text-muted); cursor: default; opacity: .4; }
+.date-range-field-cell[data-selected] { background: color-mix(in srgb, var(--accent) 18%, transparent); border-radius: 0; }
+.date-range-field-cell[data-selection-start], .date-range-field-cell[data-selection-end] { background: var(--accent); color: var(--bg-panel); font-weight: 600; }
+.date-range-field-cell[data-selection-start] { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.date-range-field-cell[data-selection-end] { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.date-range-field-cell[data-selection-start][data-selection-end] { border-radius: var(--radius-sm); }
+.date-range-field-cell[data-focus-visible] { box-shadow: var(--focus-ring); }
+.date-range-field-presets { border-top: 1px solid var(--border-soft); display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; padding-top: 10px; }
+.date-range-field-preset { background: transparent; border: 1px solid var(--border-soft); border-radius: 999px; color: var(--text-secondary); cursor: pointer; font: inherit; font-size: 12px; padding: 3px 10px; }
+.date-range-field-preset:hover { border-color: var(--border-strong); color: var(--text-primary); }
+.date-range-field-preset:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+@keyframes date-range-field-in { from { opacity: 0; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .date-range-field-popover { animation: none; } .date-range-field-group { transition: none; } }

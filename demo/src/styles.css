@@ -260,6 +260,10 @@ button.primary:disabled {
   min-width: 0;
 }
 
+.step-toggle {
+  display: none;
+}
+
 .step-body {
   display: grid;
   gap: 0.25rem;
@@ -511,6 +515,13 @@ footer {
   margin-top: 2rem;
   color: var(--fg-muted);
   font-size: 0.8125rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+footer a {
+  color: var(--accent);
+  text-underline-offset: 3px;
 }
 
 @media (min-width: 64rem) {
@@ -521,8 +532,50 @@ footer {
 }
 
 @media (max-width: 40rem) {
+  .script {
+    gap: 0.75rem;
+  }
+
+  .steps {
+    display: none;
+  }
+
+  .steps.expanded {
+    display: grid;
+  }
+
+  .step-toggle {
+    display: block;
+    justify-self: start;
+    padding-block: 0.25rem;
+    min-height: 2rem;
+    font-size: 0.8125rem;
+  }
+
   .top {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1rem;
+    padding-block: 1rem 0.75rem;
+  }
+
+  .brand {
+    display: contents;
+  }
+
+  .brand h1 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .brand p {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .lang {
+    grid-column: 2;
+    grid-row: 1;
   }
 
   .brand h1 {

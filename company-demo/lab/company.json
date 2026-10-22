@@ -1,0 +1,28 @@
+{
+  "company": {"name":"Faro Digital","industry":"Servicios de software y pagos","sites":["Asunción","Remoto"],"areas":["Infraestructura","Finanzas","Ingeniería"],"asOf":"2026-10-22T14:00:00Z","capturedAt":"2026-10-22T13:00:00Z","fictional":true},
+  "people": [
+    {"id":1,"name":"Ana Soto","email":"ana.soto@faro.example","area":"Infraestructura","site":"Asunción","identityIds":[101],"netskopeId":201,"pamId":301,"safeIds":[1],"case":"Acceso a producción y dos equipos: uno reciente y otro sin señal desde hace 12 días. Revisar, sin asumir abandono."},
+    {"id":2,"name":"Bruno Ruiz","email":"bruno.ruiz@faro.example","area":"Finanzas","site":"Asunción","identityIds":[102],"netskopeId":202,"pamId":null,"safeIds":[],"case":"Equipo con actividad reciente y sin registro PAM. Caso de referencia con cobertura observada."},
+    {"id":3,"name":"Carla Vega","email":"carla.vega@faro.example","area":"Infraestructura","site":"Remoto","identityIds":[103],"netskopeId":203,"pamId":303,"safeIds":[2],"case":"Acceso a desarrollo y usuario Netskope, pero ningún equipo observado en una captura completa. Brecha para revisar."},
+    {"id":4,"name":"Diego Paz","email":"diego.paz@faro.example","area":"Ingeniería","site":"Remoto","identityIds":[104],"netskopeId":204,"pamId":null,"safeIds":[],"case":"Equipo reciente. La ausencia de PAM no implica que deba tener acceso privilegiado."},
+    {"id":5,"name":"Elena Ríos","email":"elena.rios@faro.example","area":"Finanzas","site":"Asunción","identityIds":[105,106],"netskopeId":205,"pamId":null,"safeIds":[],"case":"Dos identidades activas comparten correo. No unirlas automáticamente; cobertura desconocida."},
+    {"id":6,"name":"Federico Luna","email":"federico.luna@faro.example","area":"Ingeniería","site":"Remoto","identityIds":[107],"netskopeId":206,"pamId":null,"safeIds":[],"case":"Equipo reciente. Netskope no demuestra cobertura EDR: CrowdStrike necesita su propia evidencia."}
+  ],
+  "devices": [
+    {"id":501,"deviceId":"faro-device-001","hostname":"FARO-INF-001","personId":1,"os":"Windows","osVersion":"11","clientVersion":"110.0.1","lastSignalAt":"2026-10-22T12:30:00Z"},
+    {"id":502,"deviceId":"faro-device-002","hostname":"FARO-INF-ANTERIOR","personId":1,"os":"Windows","osVersion":"10","clientVersion":"109.0.0","lastSignalAt":"2026-10-10T12:30:00Z"},
+    {"id":503,"deviceId":"faro-device-003","hostname":"FARO-FIN-001","personId":2,"os":"Windows","osVersion":"11","clientVersion":"110.0.1","lastSignalAt":"2026-10-22T12:45:00Z"},
+    {"id":504,"deviceId":"faro-device-004","hostname":"FARO-ING-001","personId":4,"os":"Mac OS X","osVersion":"15","clientVersion":"110.0.1","lastSignalAt":"2026-10-22T12:40:00Z"},
+    {"id":505,"deviceId":"faro-device-005","hostname":"FARO-FIN-002","personId":5,"os":"Windows","osVersion":"11","clientVersion":"110.0.1","lastSignalAt":"2026-10-22T12:35:00Z"},
+    {"id":506,"deviceId":"faro-device-006","hostname":"FARO-ING-002","personId":6,"os":"Mac OS X","osVersion":"15","clientVersion":"110.0.1","lastSignalAt":"2026-10-22T12:50:00Z"}
+  ],
+  "safes": [
+    {"id":1,"name":"FARO-PROD-PLATAFORMA","area":"Infraestructura","responsibleId":1,"scope":"business","quality":"clean","workflow":"in_progress","note":"Revisar el equipo anterior de Ana antes de cerrar el caso. Decisión humana de ejemplo."},
+    {"id":2,"name":"FARO-DEV-SERVICIOS","area":"Ingeniería","responsibleId":3,"scope":"business","quality":"pending","workflow":"pending","note":"Confirmar el equipo de Carla antes de completar la revisión."}
+  ],
+  "accounts": [
+    {"id":"faro-account-001","safeId":1,"name":"prod-api-admin","userName":"svc_api_admin","address":"192.0.2.10","platform":"Unix","automaticManagement":true},
+    {"id":"faro-account-002","safeId":1,"name":"prod-db-admin","userName":"dbadmin","address":"192.0.2.20","platform":"PostgreSQL","automaticManagement":true},
+    {"id":"faro-account-003","safeId":2,"name":"dev-services-admin","userName":"svc_dev","address":"192.0.2.30","platform":"Unix","automaticManagement":false}
+  ]
+}

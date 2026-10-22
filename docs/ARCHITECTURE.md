@@ -11,11 +11,18 @@ decididos por el dueño; la selección técnica siguiente es una recomendación
 para implementar y verificar por lotes. No hay servidor Go de Custodia en
 este checkout todavía.
 
+**Corrección del dueño, 22/10:** la UI original y la lógica Python existente
+definen la experiencia y los contratos que deben preservarse. Las carpetas y
+modelos propuestos aquí se ajustan a esa paridad, sin convertir Safes,
+Personas, cobertura y postura en una sola tabla genérica. Cruces e inferencias
+son capacidad central; ver [revisión existente](EXISTING-PRODUCT.md).
+
 ## Límites y distribución
 
 Un monolito modular, un backend Go y PostgreSQL como autoridad. Mantener
-React/TypeScript/Vite para la UI; la demo inicial funciona con fixtures sin
-un backend. Después, un mismo binario puede ofrecer comandos de servidor,
+React/TypeScript/Vite y la experiencia existentes para la UI, preservando los
+contratos HTTP durante la migración. El laboratorio debe usar fixtures de
+esos contratos. Después, un mismo binario puede ofrecer comandos de servidor,
 worker y migración, con procesos supervisados por separado cuando haga falta.
 No introducir Redis, Kafka ni un servicio por proveedor para el primer flujo.
 
@@ -89,8 +96,12 @@ cierran con el primer recorrido, no en esta revisión.
 ## Reglas de escritura y concurrencia
 
 Una extracción larga escribe staging acotado; no mantiene una transacción
-abierta mientras espera la red. Sólo se publica y reconcilia el conjunto que
-acredita completitud y alcance comparables. Un cambio de filtro, credencial
+abierta mientras espera la red. El modelo de la demo permite actualizar lo
+observado en una parcial, marcando su evidencia y cambios como parciales,
+sin reemplazar la última línea base completa. Sólo un conjunto completo y de
+alcance comparable respalda reconciliar ausentes como retirados. Este contrato
+debe contrastarse con el flujo Python correspondiente antes de adoptarlo en
+Go: el fixture reducido no gobierna toda la migración. Un cambio de filtro, credencial
 o configuración crea una nueva generación; no elimina por comparación con
 otro universo. Una colección completa puede avanzar sin retirar datos de una
 colección incompleta de la misma conexión.

@@ -1,0 +1,68 @@
+/* NSK-DLP-001: styles owned by the minimal DLP alerts workspace. */
+
+.netskope-dlp { display: grid; gap: 16px; }
+
+.netskope-dlp-header {
+  align-items: flex-end;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  padding: 16px 4px;
+}
+.netskope-dlp-header h2 { color: var(--text-primary); font-size: 20px; margin: 4px 0 5px; }
+.netskope-dlp-header .database-caption { display: block; margin-bottom: 0; max-width: 720px; }
+
+.netskope-dlp-alert {
+  align-items: center;
+  background: color-mix(in srgb, var(--warning) 10%, var(--bg-panel));
+  border: 1px solid var(--warning);
+  color: var(--text-primary);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+}
+
+.netskope-dlp-table-heading { align-items: flex-end; display: flex; gap: 20px; justify-content: space-between; padding: 16px 18px 10px; }
+.netskope-dlp-table-heading h3 { color: var(--text-primary); font-size: 14px; margin: 0 0 3px; }
+.netskope-dlp-table-heading .database-caption { display: block; margin-bottom: 0; max-width: 720px; }
+
+.netskope-dlp-table td code { overflow-wrap: anywhere; }
+
+.netskope-dlp .section-title { align-items: center; display: flex; gap: 6px; }
+
+.netskope-dlp-muted { color: var(--text-muted); }
+.netskope-dlp-number { font-variant-numeric: tabular-nums; font-weight: 700; }
+.netskope-dlp-policy-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 600;
+  gap: 6px;
+  max-width: 420px;
+  padding: 2px 0;
+  text-align: left;
+}
+.netskope-dlp-policy-toggle span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.netskope-dlp-policy-toggle:hover { color: var(--accent); }
+.netskope-dlp-policy-toggle:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.netskope-dlp-chevron { flex: none; transition: transform .12s; }
+.netskope-dlp-policy-toggle[aria-expanded="true"] .netskope-dlp-chevron { transform: rotate(90deg); }
+.netskope-dlp-mix { display: inline-flex; flex-wrap: wrap; gap: 4px 10px; }
+.netskope-dlp-mix-item { color: var(--text-secondary); font-size: 12px; white-space: nowrap; }
+.netskope-dlp-mix-item strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.netskope-dlp-trend { align-items: baseline; display: inline-flex; gap: 6px; }
+.netskope-dlp-trend small { color: var(--text-muted); font-size: 11px; }
+.netskope-dlp-trend.up small { color: var(--warning); }
+.netskope-dlp-trend.new small { color: var(--warning); }
+.netskope-dlp-trend.down small { color: var(--success); }
+.netskope-dlp-drill > td { background: var(--bg-muted); padding: 10px 18px 14px 36px; }
+.netskope-dlp-incidents { display: grid; gap: 6px; }
+.netskope-dlp-incidents .database-caption { margin: 0; }
+.netskope-dlp-unnamed { padding: 10px 18px 14px; }

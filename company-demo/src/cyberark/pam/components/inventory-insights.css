@@ -1,0 +1,18 @@
+.inventory-insights { margin: 12px 0 0; }
+.inventory-insights details { background: var(--bg-subtle); border: 1px solid var(--border-soft); }
+.inventory-insights summary { align-items: center; color: var(--text-secondary); cursor: pointer; display: flex; gap: 10px; list-style: none; min-height: 42px; padding: 0 14px; }
+.inventory-insights summary::-webkit-details-marker { display: none; }
+.inventory-insights summary > svg { color: var(--text-muted); margin-left: auto; transition: transform .16s ease; }
+.inventory-insights details[open] summary > svg { transform: rotate(180deg); }
+.inventory-insights-title { color: var(--text-primary); font-size: 11px; font-weight: 700; }
+.inventory-insights-summary { color: var(--text-muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.inventory-insights-body { border-top: 1px solid var(--border-soft); display: grid; gap: 22px; padding: 18px 20px 20px; }
+.inventory-insights-body .safe-health-section,
+.inventory-insights-body .account-platform-section { margin: 0; }
+.inventory-insights-body .section-heading { margin-bottom: 12px; }
+.inventory-insights-body .section-heading h2 { font-size: 15px; }
+.inventory-insights-body .database-caption { margin-bottom: 0; }
+.inventory-insights-body .metrics { margin-bottom: 0; }
+@media (max-width: 700px) {
+  .inventory-insights-summary { max-width: 46vw; }
+}

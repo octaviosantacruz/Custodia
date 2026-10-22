@@ -1,0 +1,111 @@
+/* Login: one centered card for every state over a decorative night sky
+   (stars, two soft glows and a bridge between two node clusters that stays
+   below the card). Notices sit above the form, informational ones neutral. */
+.auth-shell {
+  --auth-sky-top: #040907;
+  --auth-sky-bottom: #0a1510;
+  --auth-glow-a: color-mix(in srgb, var(--accent) 16%, transparent);
+  --auth-glow-b: color-mix(in srgb, #2bb3a3 12%, transparent);
+  --auth-star: #d9f7e6;
+  --auth-line: color-mix(in srgb, var(--accent) 45%, transparent);
+  --auth-node: var(--accent-strong);
+  background:
+    radial-gradient(ellipse 55% 45% at 18% 12%, var(--auth-glow-a), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 88% 70%, var(--auth-glow-b), transparent 70%),
+    linear-gradient(180deg, var(--auth-sky-top) 0%, var(--auth-sky-bottom) 100%);
+  box-sizing: border-box;
+  color: var(--text-primary);
+  display: grid;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 40px 24px;
+  place-items: center;
+  position: relative;
+}
+:root[data-theme='light'] .auth-shell {
+  --auth-sky-top: #eef5f0;
+  --auth-sky-bottom: #f7f7f5;
+  --auth-glow-a: color-mix(in srgb, var(--accent) 14%, transparent);
+  --auth-glow-b: color-mix(in srgb, #2bb3a3 10%, transparent);
+  --auth-star: #1f7a4c;
+  --auth-line: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.auth-backdrop { height: 100%; inset: 0; pointer-events: none; position: absolute; width: 100%; z-index: 0; }
+.auth-star { fill: var(--auth-star); }
+:root[data-theme='light'] .auth-stars { opacity: .45; }
+.auth-bridge { fill: none; stroke: var(--auth-line); stroke-width: 1.4; }
+.auth-bridge-glow { fill: none; opacity: .5; stroke: var(--accent); stroke-width: 5; }
+.auth-pulse { display: none; fill: var(--accent-strong); }
+.auth-network line { stroke: var(--auth-line); stroke-width: 1; }
+.auth-node { fill: var(--auth-sky-bottom); stroke: var(--auth-node); stroke-width: 1.6; }
+.auth-node-halo { fill: var(--accent); opacity: .35; }
+
+.auth-card { background: var(--bg-panel); border: 1px solid var(--border-soft); border-radius: var(--radius-xl); box-shadow: var(--shadow-modal); box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; max-width: 400px; padding: 32px; position: relative; width: 100%; z-index: 1; }
+.auth-card-header { display: flex; flex-direction: column; gap: 6px; }
+.auth-brand { align-items: center; display: flex; gap: 10px; margin-bottom: 18px; }
+.auth-logo { align-items: center; background: var(--accent); border-radius: var(--radius-md); color: #08110d; display: flex; flex: 0 0 40px; height: 40px; justify-content: center; width: 40px; }
+.auth-card .auth-logo .custodia-mark { height: 30px; width: 30px; }
+.auth-wordmark { color: var(--text-primary); font-size: 14px; font-weight: 750; letter-spacing: .01em; }
+.auth-step-label { color: var(--accent-strong); font-size: 10px; font-weight: 800; letter-spacing: .08em; margin: 0; }
+.auth-card-header h1 { font-size: 24px; letter-spacing: -.02em; line-height: 1.15; margin: 0; }
+.auth-card-detail { color: var(--text-secondary); font-size: 13px; line-height: 1.45; margin: 0; overflow-wrap: anywhere; }
+
+.auth-notice,
+.auth-error { align-items: flex-start; border: 1px solid var(--border-soft); border-radius: var(--radius-md); display: flex; font-size: 12px; gap: 8px; line-height: 1.4; padding: 10px 12px; }
+.auth-notice { background: var(--bg-elevated); color: var(--text-secondary); }
+.auth-error { background: color-mix(in srgb, var(--danger) 8%, var(--bg-panel)); border-color: color-mix(in srgb, var(--danger) 40%, var(--border-soft)); color: var(--danger-strong); }
+.auth-notice svg,
+.auth-error svg { flex: 0 0 auto; margin-top: 1px; }
+
+.auth-form { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+.auth-form label { color: var(--text-secondary); display: flex; flex-direction: column; font-size: 12px; font-weight: 700; gap: 7px; }
+.auth-form input { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-md); color: var(--text-primary); font: inherit; font-size: 13px; min-height: 42px; padding: 10px 12px; transition: background-color var(--motion-fast) var(--motion-ease-out), border-color var(--motion-fast) var(--motion-ease-out), box-shadow var(--motion-fast) var(--motion-ease-out); }
+.auth-form input:hover { border-color: var(--border-strong); }
+.auth-form input:focus { border-color: var(--accent); box-shadow: var(--focus-ring); outline: 0; }
+.auth-form small { color: var(--text-muted); font-size: 11px; font-weight: 400; line-height: 1.4; }
+.auth-form-stage { display: flex; flex-direction: column; gap: 14px; }
+.button.auth-submit { justify-content: center; min-height: 42px; width: 100%; }
+.auth-submit { overflow: hidden; position: relative; }
+.auth-submit-content { align-items: center; display: inline-flex; gap: 8px; justify-content: center; }
+.auth-submit-spinner { animation: auth-spinner .72s linear infinite; border: 2px solid color-mix(in srgb, #08110d 28%, transparent); border-radius: 50%; border-top-color: #08110d; height: 13px; width: 13px; }
+.auth-link { align-self: center; background: none; border: 0; color: var(--accent-strong); cursor: pointer; font: inherit; font-size: 12px; padding: 2px; text-align: center; text-decoration: none; }
+.auth-link:hover { text-decoration: underline; }
+.auth-provider-hint { color: var(--text-muted); font-size: 11px; line-height: 1.4; margin: 0; text-align: center; }
+
+.password-field { align-items: center; display: flex; position: relative; }
+.password-field input { padding-right: 38px; width: 100%; }
+.password-visibility { align-items: center; background: transparent; border: 0; color: var(--text-secondary); cursor: pointer; display: inline-flex; height: 100%; justify-content: center; padding: 0 10px; position: absolute; right: 0; }
+.password-visibility:hover { color: var(--text-primary); }
+.password-strength { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
+.password-strength-bar { background: var(--bg-muted); border-radius: var(--radius-sm); height: 4px; overflow: hidden; }
+.password-strength-bar span { background: var(--accent); display: block; height: 100%; transition: width .25s ease; }
+.password-strength small { color: var(--text-muted); font-size: 10px; font-weight: 400; }
+.password-checks { display: grid; gap: 4px 10px; grid-template-columns: 1fr 1fr; margin-top: 5px; }
+.password-checks span { color: var(--text-muted); font-size: 10px; font-weight: 400; }
+.password-checks span.valid { color: var(--accent-strong); }
+
+.auth-state-card { gap: 16px; }
+.auth-state-card p.auth-error-reference { color: var(--text-muted, var(--text-secondary)); font-family: var(--font-mono, monospace); font-size: 11px; margin: -8px 0 0; overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .auth-backdrop { animation: auth-backdrop-arrive .8s var(--motion-ease-out) both; }
+  .auth-star.twinkle { animation: auth-star-twinkle 4.8s ease-in-out infinite; }
+  .auth-pulse { animation: auth-bridge-pulse 7s ease-in-out 1.2s infinite; display: block; offset-path: path('M430 775 C520 705 620 700 720 700 C820 700 920 705 1010 775'); offset-rotate: 0deg; }
+  .auth-card { animation: auth-card-arrive var(--motion-panel) var(--motion-ease-out) 40ms both; }
+  .auth-form-stage { animation: auth-form-arrive var(--motion-base) var(--motion-ease-out) both; }
+}
+@keyframes auth-card-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes auth-backdrop-arrive { from { opacity: 0; } to { opacity: 1; } }
+@keyframes auth-bridge-pulse { 0% { offset-distance: 0%; opacity: 0; } 12% { opacity: .9; } 88% { opacity: .9; } 100% { offset-distance: 100%; opacity: 0; } }
+@keyframes auth-star-twinkle { 0%, 100% { opacity: .2; } 50% { opacity: .85; } }
+@keyframes auth-form-arrive { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes auth-spinner { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .auth-backdrop,
+  .auth-star.twinkle,
+  .auth-pulse,
+  .auth-card,
+  .auth-form-stage,
+  .auth-submit-spinner { animation: none; }
+  .auth-form input { transition: none; }
+}

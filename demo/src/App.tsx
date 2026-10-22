@@ -72,6 +72,8 @@ export function App() {
     const clamped = Math.min(TOTAL, Math.max(1, next));
     const target = viewFor(scenario.steps[clamped - 1]);
     setStep(clamped);
+    setFocusTick(0);
+    returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setSim('ok');
     setView(target.view);
     setSelected(target.record ?? null);
@@ -85,7 +87,20 @@ export function App() {
   };
   const close = () => {
     setSelected(null);
-    returnFocus.current?.focus();
+    setFocusTick(0);
+    if (returnFocus.current?.isConnected && returnFocus.current.getClientRects().length > 0 && !returnFocus.current.matches(':disabled')) {
+      returnFocus.current.focus();
+    } else {
+      document.getElementById('connection-filter')?.focus();
+    }
+  };
+  const filter = (next: string) => {
+    setConnection(next);
+    if (selected && next !== 'all' && state.records[selected]?.connection !== next) {
+      setSelected(null);
+      setFocusTick(0);
+      returnFocus.current = null;
+    }
   };
 
   const fmt = dateFormat(lang);
@@ -114,11 +129,11 @@ export function App() {
         </div>
       </header>
 
-      <ScriptPanel t={t} lang={lang} step={step} current={current} onGo={go} sim={sim} onSim={setSim} />
+      <ScriptPanel t={t} lang={lang} step={step} current={current} onGo={go} sim={sim} onSim={next => { setFocusTick(0); setSim(next); }} />
 
       <nav className="tabs" aria-label={t.nav}>
         {VIEWS.map(v => (
-          <button key={v} type="button" aria-current={view === v ? 'page' : undefined} onClick={() => setView(v)}>
+          <button key={v} type="button" aria-current={view === v ? 'page' : undefined} onClick={() => { setFocusTick(0); setView(v); }}>
             {t.views[v]}
           </button>
         ))}
@@ -134,7 +149,7 @@ export function App() {
               state={state}
               fmt={fmt}
               connection={connection}
-              onConnection={setConnection}
+              onConnection={filter}
               selected={selected}
               onOpen={open}
             />
@@ -145,12 +160,23 @@ export function App() {
           <Detail t={t} state={state} fmt={fmt} recordKey={selected} focusTick={focusTick} onClose={close} />
         )}
       </div>
-      <footer>{t.footer}</footer>
+      <footer>
+        <p>{t.footer}</p>
+        <a href="./THIRD-PARTY-NOTICES.txt">{t.thirdParty}</a>
+      </footer>
     </>
   );
 }
 
 function ScriptPanel({ t, lang, step, current, onGo, sim, onSim }: { t: Strings; lang: Lang; step: number; current: Step; onGo: (n: number) => void; sim: Sim; onSim: (s: Sim) => void }) {
+  const [showSteps, setShowSteps] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
+  const chooseStep = (id: number) => {
+    onGo(id);
+    setShowSteps(false);
+    // Al plegar la lista móvil, su botón deja de estar visible.
+    if (window.matchMedia('(max-width: 40rem)').matches) toggle.current?.focus();
+  };
   return (
     <section className="script" aria-labelledby="script-title">
       <div className="script-head">
@@ -159,10 +185,13 @@ function ScriptPanel({ t, lang, step, current, onGo, sim, onSim }: { t: Strings;
           {t.stepOf(step, TOTAL)}
         </p>
       </div>
-      <ol className="steps" aria-label={t.script}>
+      <button ref={toggle} className="step-toggle" type="button" aria-expanded={showSteps} aria-controls="script-steps" onClick={() => setShowSteps(value => !value)}>
+        {showSteps ? t.hideSteps : t.showSteps}
+      </button>
+      <ol id="script-steps" className={`steps${showSteps ? ' expanded' : ''}`} aria-label={t.script}>
         {scenario.steps.map(s => (
           <li key={s.id}>
-            <button type="button" aria-current={s.id === step ? 'step' : undefined} onClick={() => onGo(s.id)}>
+            <button type="button" aria-current={s.id === step ? 'step' : undefined} onClick={() => chooseStep(s.id)}>
               <span className="mono">{s.id}</span>
               <span className="step-title">{s.title[lang]}</span>
             </button>
@@ -376,12 +405,13 @@ const KIND_MARK = { added: '+ ', changed: '~ ', retired: '− ' } as const;
 
 function Changes({ t, state, fmt }: { t: Strings; state: State; fmt: Intl.DateTimeFormat }) {
   const name = (id: string) => state.connections.find(c => c.id === id)?.name ?? id;
-  const partial = state.runs.filter(r => r.completeness === 'partial' && r.retained > 0 && r.baseline).at(-1);
+  const latest = new Map(state.runs.map(run => [`${run.connection}/${run.collection}`, run]));
+  const partials = [...latest.values()].filter(run => run.completeness === 'partial' && run.retained > 0 && run.baseline);
   const changes = [...state.changes].reverse();
   return (
     <section aria-labelledby="h-changes">
       <h2 id="h-changes">{t.views.changes}</h2>
-      {partial && <p className="note">{t.changes.partialNote(partial.retained, partial.baseline!)}</p>}
+      {partials.map(run => <p className="note" key={run.id}>{t.changes.partialNote(run.retained, run.baseline!)}</p>)}
       <div className="scroll">
         <table>
           <caption className="sr">{t.changes.caption}</caption>

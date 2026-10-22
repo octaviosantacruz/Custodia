@@ -1,0 +1,6 @@
+.access-workspace-preview { border-top: 1px solid var(--border-soft); padding-top: 12px; }
+.access-workspace-preview h3 { color: var(--text-primary); font-size: 12px; margin: 0 0 10px; }
+.access-workspace-preview dl { display: grid; gap: 10px; margin: 0; }
+.access-workspace-preview dt { color: var(--text-primary); font-size: 11px; font-weight: 650; }
+.access-workspace-preview dd { color: var(--text-secondary); display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; line-height: 1.5; margin: 3px 0 0; }
+.access-workspace-preview p { color: var(--text-secondary); font-size: 11px; line-height: 1.5; margin: 10px 0 0; }

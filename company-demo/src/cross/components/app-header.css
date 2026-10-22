@@ -1,0 +1,69 @@
+.topbar { align-items: center; border-bottom: 1px solid #d9e0e6; display: flex; justify-content: space-between; }
+.brand, .topbar-actions { align-items: center; display: flex; }
+.brand-mark { align-items: center; display: inline-flex; height: 32px; justify-content: center; width: 32px; }
+.brand strong, .brand span { display: block; }
+.brand strong { font-size: 15px; letter-spacing: .01em; }
+.brand div span { color: #63707d; font-size: 11px; margin-top: 1px; }
+/* Notion-like database surface. */
+.topbar { box-shadow: none; padding: 0 28px; }
+.brand-mark { background: #37352f; }
+.topbar {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-elevated);
+}
+.topbar {
+  background: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+}
+.brand strong {
+  color: var(--text-primary);
+}
+.brand div span {
+  color: var(--text-secondary);
+}
+.brand-mark {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+@media (max-width: 700px) {
+  .topbar { align-items: stretch; flex-direction: column; gap: 12px; min-height: 0; }
+  .topbar-leading { min-width: 0; width: 100%; }
+  .brand { min-width: 0; }
+  .brand div { min-width: 0; }
+  .brand strong, .brand div span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .topbar-actions { align-items: center; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; width: 100%; }
+  .topbar-actions .button.primary { flex: 1 1 180px; min-width: 0; }
+}
+.topbar-leading {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+.brand-mark {
+  border-radius: var(--radius-md);
+}
+/* Mockup's launcherBtn is green-bordered/green-icon at rest, not only on
+   hover — it reads as a permanent accent affordance in the reference
+   screenshot, not an interaction state. */
+/* Mockup's topbarShield ornament: brand-mark already fills that role
+   structurally, it was just missing the border + green icon tint. */
+.brand-mark {
+  color: var(--accent-strong);
+}
+
+.sync-status-control {
+  align-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  display: inline-flex;
+  font-size: 11px;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.sync-status-control.is-running { border-color: var(--accent); color: var(--text-primary); }
+.sync-status-dot { background: var(--text-muted); border-radius: 50%; height: 7px; width: 7px; }
+.sync-status-control.is-running .sync-status-dot { animation: sync-status-pulse 1.4s ease-in-out infinite; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); }

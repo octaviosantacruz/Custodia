@@ -1,0 +1,36 @@
+.bar-list { padding: 18px 24px 22px; }
+.bar-row { background: transparent; border: 0; display: block; font: inherit; margin-bottom: 15px; padding: 0; text-align: left; width: 100%; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-row.interactive { cursor: pointer; }
+.bar-row.interactive:hover:not(:disabled) .bar-label span,
+.bar-row.interactive:focus-visible .bar-label span { color: var(--text-primary); }
+.bar-row.interactive:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.bar-row.interactive:disabled { cursor: not-allowed; opacity: .55; }
+.bar-label { align-items: center; color: #63707d; display: flex; font-size: 12px; justify-content: space-between; gap: 12px; text-transform: capitalize; }
+.bar-label strong { color: #17212b; font-variant-numeric: tabular-nums; }
+.bar-track { height: 8px; margin-top: 7px; overflow: hidden; }
+.bar-track span { display: block; height: 100%; min-width: 2px; }
+.bar-label strong {
+  color: var(--text-primary);
+}
+.bar-label {
+  color: var(--text-secondary);
+}
+.bar-track {
+  background: var(--bg-subtle);
+}
+.chart-empty-hint { color: var(--text-secondary); font-size: 11px; padding: 20px 0; }
+/* Operational-green accent applied to healthy-action affordances
+   (accent tokens themselves live in the canonical :root block). */
+.bar-track span {
+  color: var(--accent-strong);
+}
+.bar-track span { background: var(--accent); }
+.bar-track,
+.bar-track span {
+  border-radius: var(--radius-sm);
+}
+.bar-label strong {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}

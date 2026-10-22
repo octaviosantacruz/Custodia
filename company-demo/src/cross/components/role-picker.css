@@ -1,0 +1,32 @@
+/* Role picker and role chips, shared by people and Okta group administration. */
+.role-picker { min-width: 0; position: relative; }
+.role-picker-trigger { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 999px; color: var(--text-secondary); display: flex; font: inherit; gap: 8px; justify-content: space-between; min-height: 32px; overflow: hidden; padding: 5px 9px; text-align: left; transition: background-color .16s ease, border-color .16s ease, color .16s ease; width: 100%; }
+.role-picker-trigger:hover, .role-picker-trigger.open { background: var(--bg-subtle); border-color: var(--border-strong); color: var(--text-primary); }
+.role-picker-trigger:focus-visible { border-color: var(--accent); box-shadow: var(--focus-ring); outline: 0; }
+.role-picker-trigger > svg { color: var(--text-muted); flex: 0 0 auto; }
+.role-picker-current { align-items: center; display: flex; gap: 7px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.role-picker-dot { background: var(--accent); border-radius: 50%; flex: 0 0 auto; height: 6px; width: 6px; }
+.role-picker-dot.planned { background: #d5a34f; }
+.role-picker-menu { animation: custom-select-in .14s ease-out; background: var(--bg-elevated); border: 1px solid var(--border-strong); box-shadow: var(--shadow-popover); max-height: min(360px, calc(100vh - 120px)); min-width: 260px; overflow-y: auto; padding: 6px; position: absolute; right: 0; top: calc(100% + 6px); width: max-content; z-index: 130; }
+.role-picker-search { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-muted); display: flex; gap: 7px; margin-bottom: 6px; padding: 6px 8px; }
+.role-picker-search input { background: transparent; border: 0; color: var(--text-primary); font: inherit; min-width: 0; outline: 0; width: 100%; }
+.role-picker-group + .role-picker-group { border-top: 1px solid var(--border-soft); margin-top: 5px; padding-top: 5px; }
+.role-picker-group-label { color: var(--text-secondary); display: block; font-size: 9px; font-weight: 750; letter-spacing: .08em; padding: 5px 8px 4px; text-transform: uppercase; }
+.role-picker-option { align-items: center; background: transparent; border: 0; color: var(--text-secondary); display: flex; font: inherit; gap: 10px; justify-content: space-between; padding: 7px 8px; text-align: left; width: 100%; }
+.role-picker-option:hover, .role-picker-option.selected { background: color-mix(in srgb, var(--accent) 10%, var(--bg-elevated)); color: var(--text-primary); }
+.role-picker-option.selected { color: var(--accent-strong); }
+.role-picker-option > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.role-picker-option strong { font-size: 11px; font-weight: 650; }
+.role-picker-option small { color: var(--text-secondary); font-size: 9px; }
+.role-picker-empty { color: var(--text-muted); display: block; font-size: 10px; padding: 12px 8px; }
+.role-picker-menu { border-radius: var(--radius-lg); }
+/* ACCESS-UI-001: one chip per role; only Custodia roles have a remove button. */
+.role-chip-list { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 10px; padding: 0; }
+.role-chip { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 999px; color: var(--text-primary); display: inline-flex; font-size: 12px; gap: 6px; min-height: 28px; padding: 3px 6px 3px 10px; }
+.role-chip small { color: var(--text-muted); font-size: 10px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+.role-chip.is-oidc { border-style: dashed; padding-right: 10px; }
+.role-chip.is-manual small { color: var(--accent-strong); }
+.role-chip-remove { align-items: center; background: transparent; border: 0; border-radius: 999px; color: var(--text-muted); cursor: pointer; display: inline-flex; height: 20px; justify-content: center; padding: 0; width: 20px; }
+.role-chip-remove:hover { background: var(--bg-elevated, var(--bg-subtle)); color: var(--text-primary); }
+.role-chip-remove:focus-visible { box-shadow: var(--focus-ring); outline: 0; }
+.role-chip-remove:disabled { cursor: wait; opacity: .5; }

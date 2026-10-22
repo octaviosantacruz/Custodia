@@ -10,12 +10,14 @@ El orden decidido es demo para Portfolio, autohospedado y evaluación SaaS
 si funciona. Los IDs y estados viven sólo en el [tracker](TO_IMPLEMENT.md).
 No hay fechas de lanzamiento comprometidas ni usuarios externos registrados.
 
-## Demo: comprensión del producto
+## Laboratorio: experiencia original y comprensión del producto
 
-Aceptar el [guion](DESIGN.md#guion-determinista-del-laboratorio)
-completo: dos conexiones del mismo tipo, cambios trazables, decisión humana
-conservada, corrida parcial sin bajas falsas y reset determinista. Build
-aislado de configuración privada; recorrido por teclado y presentación ES/EN.
+Preservar la UI original y los recorridos relevados en
+[la revisión existente](EXISTING-PRODUCT.md), con respuestas sintéticas de sus
+contratos HTTP. Verificar Personas/cobertura: origen, enlace único o ambiguo,
+evidencia incompleta o vieja, permisos de ambas fuentes y decisión humana.
+La demo reducida conserva sus pruebas como experimento; no es criterio de
+paridad ni su aceptación bloquea Go. Build y datos separados del entorno laboral.
 
 Observar si una persona puede explicar qué cambió, de dónde viene el dato y
 por qué una corrida parcial no prueba una baja. Registrar dudas y ayuda del

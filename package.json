@@ -2,8 +2,11 @@
   "name": "custodia-product",
   "private": true,
   "scripts": {
-    "verify": "node scripts/check-docs.mjs && npm run test:model",
+    "verify": "node scripts/check-docs.mjs && npm run test:model && npm run test:company",
     "test:model": "node --test demo/src/model/*.test.ts",
-    "verify:demo": "cd demo && npm ci && npm run build && npm run test:e2e"
+    "verify:demo": "cd demo && npm ci && npm run build && npm run test:e2e",
+    "package:demo": "npm --prefix demo run build && node scripts/package-demo.mjs",
+    "test:company": "node --test company-demo/lab/*.test.ts",
+    "verify:company": "npm --prefix company-demo run build && npm --prefix company-demo run test:e2e"
   }
 }

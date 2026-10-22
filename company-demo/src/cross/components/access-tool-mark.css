@@ -1,0 +1,6 @@
+.access-tool-mark { align-items: center; color: var(--text-secondary); display: inline-flex; flex: 0 0 auto; height: 26px; justify-content: center; width: 40px; }
+.access-tool-mark img { height: 100%; object-fit: contain; width: 100%; }
+.access-tool-mark.is-compact img { width: 23px; }
+.access-tool-mark .access-tool-mark-light { display: none; }
+:root[data-theme=light] .access-tool-mark .access-tool-mark-dark { display: none; }
+:root[data-theme=light] .access-tool-mark .access-tool-mark-light { display: block; }
