@@ -1,40 +1,17 @@
-.ca_secret
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
 .secrets/
-*.env
-*.env.local
-# Local Docker deployment files may contain environment-specific secrets.
-.env.docker
-safes_with_members.json
-test5.json
+
+# Local build and development output
 node_modules/
-guia.md
-safes_members_findings.md
-cyberark_api.sh
-
-backend/.venv/
-frontend/dist/
-frontend/test-results/
-/test-results/
-__pycache__/
-*.pyc
-# Hypothesis example database written by the property tests (TEST-PROP-001).
-.hypothesis/
-.legacy/
-*.xlsx
-*.csv
-
-
-backups/
-docs/history/
-
-.claude/settings.local.json
-
-itr_report_itti_demo.html
-TO_CODEX.md
-TO_CLAUDE.md
-.playwright-mcp/
-.tmp-verify/
-
-# Informes del piloto automático (efímeros)
-.opencode/runs/
-.local/
+dist/
+bin/
+coverage/
+playwright-report/
+test-results/
+*.log
+.DS_Store

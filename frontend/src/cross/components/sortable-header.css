@@ -1,4 +1,0 @@
-.sortable-header { align-items: center; background: none; border: 0; color: inherit; cursor: pointer; display: inline-flex; font: inherit; gap: 4px; letter-spacing: inherit; padding: 0; text-transform: inherit; }
-.sortable-header svg { opacity: .45; }
-.sortable-header:hover, .sortable-header.active { color: var(--text-primary); }
-.sortable-header:hover svg, .sortable-header.active svg { opacity: 1; }

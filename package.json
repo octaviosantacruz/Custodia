@@ -1,30 +1,7 @@
 {
-  "name": "custodia",
+  "name": "custodia-product",
   "private": true,
-  "type": "module",
   "scripts": {
-    "web": "concurrently -k \"npm run web:backend\" \"npm run web:frontend\"",
-    "web:backend": "backend/.venv/bin/python scripts/run_with_database_secret.py -- backend/.venv/bin/uvicorn app.main:app --app-dir backend --env-file .env.local --host 0.0.0.0 --port 8000 --reload",
-    "web:frontend": "npm --prefix frontend run dev",
-    "web:build": "npm --prefix frontend run build",
-    "web:prod": "backend/.venv/bin/python scripts/run_with_database_secret.py -- backend/.venv/bin/uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000",
-    "web:frontend:prod": "npm --prefix frontend run preview",
-    "deploy": "bash scripts/deploy.sh",
-    "agent-access": "backend/.venv/bin/python scripts/run_with_database_secret.py -- backend/.venv/bin/python scripts/agent_access.py",
-    "schema:baseline": "backend/.venv/bin/python scripts/build_schema_baseline.py",
-    "harness:check": "node scripts/check-task-trackers.mjs",
-    "harness:test": "node --test scripts/check-task-trackers.test.mjs",
-    "docs:check": "node scripts/check-docs.mjs",
-    "docs:test": "node --test scripts/check-docs.test.mjs",
-    "verify": "scripts/verify.sh",
-    "verify:e2e": "npm --prefix frontend run test:e2e",
-    "verify:supply-chain": "scripts/verify_supply_chain.sh",
-    "verify:full": "npm run verify && npm run verify:e2e && npm run verify:supply-chain"
-  },
-  "devDependencies": {
-    "concurrently": "^10.0.4"
-  },
-  "engines": {
-    "node": ">=24 <25"
+    "verify": "node scripts/check-docs.mjs"
   }
 }

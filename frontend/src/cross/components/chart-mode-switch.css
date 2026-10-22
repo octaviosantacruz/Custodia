@@ -1,6 +1,0 @@
-.chart-mode-switch { background: var(--bg-subtle); border: 1px solid var(--border-soft); border-radius: 8px; display: inline-flex; padding: 2px; }
-.chart-mode-switch button { align-items: center; background: transparent; border: 0; border-radius: 6px; color: var(--text-secondary); cursor: pointer; display: inline-flex; font: inherit; font-size: 11px; gap: 5px; min-height: 26px; padding: 3px 10px; }
-.chart-mode-switch button:hover:not(:disabled) { color: var(--text-primary); }
-.chart-mode-switch button.selected { background: var(--bg-elevated); color: var(--text-primary); font-weight: 650; }
-.chart-mode-switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.chart-mode-switch button:disabled { cursor: default; opacity: .6; }
