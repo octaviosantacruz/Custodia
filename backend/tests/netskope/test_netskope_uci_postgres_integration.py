@@ -29,8 +29,8 @@ class NetskopeUciPostgresTests(PostgresIntegrationTestCase):
             await conn.execute("DELETE FROM public.cyberark_inventory_objects WHERE source_id LIKE %s", (PREFIX + "%",))
             await conn.commit()
 
-    async def listing(self, rating="", search="", order="score", limit=50, offset=0):
-        return await list_netskope_user_uci(self.pool, rating, search, order, limit, offset)
+    async def listing(self, rating="", search="", order="score", limit=50, offset=0, company=""):
+        return await list_netskope_user_uci(self.pool, rating, search, order, limit, offset, company=company)
 
     async def test_replace_drops_users_that_are_no_longer_listed(self):
         await replace_netskope_user_uci(self.pool, uuid4(), [row("a@x.test", "Poor", 100), row("b@x.test", "Moderate", 500, 600)])
@@ -72,6 +72,17 @@ class NetskopeUciPostgresTests(PostgresIntegrationTestCase):
         self.assertEqual((by_email["ana@x.test"]["name"], by_email["ana@x.test"]["user_id"]), ("Ana Uno", PREFIX + "1"))
         self.assertEqual((by_email["dup@x.test"]["name"], by_email["dup@x.test"]["user_id"]), (None, None))
         self.assertEqual((by_email["none@x.test"]["name"], by_email["none@x.test"]["user_id"]), (None, None))
+
+    async def test_company_filter_keeps_only_that_companys_users_and_reports_their_company(self):
+        await sync_inventory_snapshot(self.pool, [
+            InventoryObject("user", PREFIX + "f1", "A", "netskope", attributes={"company": "UCI-FA", "email": "fa@x.test"}),
+            InventoryObject("user", PREFIX + "f2", "B", "netskope", attributes={"company": "UCI-FB", "email": "fb@x.test"}),
+        ], [], source_run_id=str(uuid4()), source_system="netskope", reconcile_object_types=frozenset())
+        await replace_netskope_user_uci(self.pool, uuid4(), [row("fa@x.test", "Poor", 100), row("fb@x.test", "Poor", 200), row("nouser@x.test", "Poor", 300)])
+        result = await self.listing(company="UCI-FA")
+        self.assertEqual([(r["email"], r["company"]) for r in result["rows"]], [("fa@x.test", "UCI-FA")])
+        self.assertEqual(result["total"], 1)
+        self.assertEqual(len((await self.listing())["rows"]), 3)
 
     async def test_company_share_counts_only_users_with_an_email_and_ranks_by_risk(self):
         def user(n, name, email, company):

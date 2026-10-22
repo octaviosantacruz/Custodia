@@ -33,3 +33,6 @@
 .netskope-uci-companies h3 { font-size: 14px; margin: 0; }
 .netskope-uci-companies td:not(:first-child), .netskope-uci-companies th:not(:first-child) { text-align: right; }
 .netskope-uci-empty { color: var(--text-secondary); }
+.netskope-uci-review { background: none; border: 0; border-radius: var(--radius-md); color: inherit; cursor: pointer; display: block; font: inherit; padding: 2px 4px; text-align: left; width: 100%; }
+.netskope-uci-review:hover { background: var(--bg-subtle); }
+.netskope-uci-review:focus-visible { box-shadow: var(--focus-ring); outline: none; }

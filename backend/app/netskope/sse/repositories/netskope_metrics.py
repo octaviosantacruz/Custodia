@@ -10,7 +10,7 @@ from app.netskope.sse.repositories.netskope_shared import (
     DEVICE_COMPANY, DEVICE_FILTER_EXPRESSIONS, RECENT_DEVICE_CONDITION,
     SOURCE_SYSTEM, STALE_DEVICE_CONDITION, USER_COMPANY, _bucket, get_netskope_source_evidence,
 )
-from app.netskope.sse.metric_contracts import inventory_metric_fields
+from app.netskope.sse.metric_contracts import FLEET_FIELDS, inventory_metric_fields
 
 # VIEW-007: allowlisted per-widget filters. Device filters apply to device
 # rows only; company also applies to user rows (USER_COMPANY), never os or
@@ -244,4 +244,39 @@ async def get_netskope_metrics(
         **distributions,
         **stale,
         **cross,
+        **(await _fleet_health(pool, fields) if fields is not None else {}),
     }
+
+
+async def _fleet_health(pool: AsyncConnectionPool, fields: frozenset[str]) -> dict[str, Any]:
+    """Fleet-health counts of the default population, only when a selected widget needs them.
+
+    A comparison that has no baseline (client releases, OS minimums) is None, never zero.
+    """
+    result: dict[str, Any] = {}
+    if fields & FLEET_FIELDS:
+        from app.netskope.sse.repositories.netskope_fleet_groups import get_netskope_fleet_groups
+        fleet = await get_netskope_fleet_groups(pool, "company")
+        summary = fleet["summary"]
+        result = {
+            "fleet_devices": summary["devices"],
+            "fleet_signal_24h": summary["signal_24h"],
+            "fleet_client_current": summary["client_current"] if fleet["client_baseline"] else None,
+            "fleet_client_evaluated": summary["client_evaluated"] if fleet["client_baseline"] else None,
+            "fleet_os_supported": summary["os_supported"] if fleet["os_baseline"] else None,
+            "fleet_os_evaluated": summary["os_evaluated"] if fleet["os_baseline"] else None,
+            "fleet_on_prem": summary["on_prem"],
+            "fleet_location_reported": summary["location_reported"],
+        }
+    if "devices_duplicate_hostnames" in fields:
+        # The same rule as the inventory's `duplicate=hostname` filter over the default (recent) population.
+        row = await fetch_one(pool, f"""
+            SELECT coalesce(sum(devices), 0)::int AS devices FROM (
+                SELECT count(*) AS devices FROM public.cyberark_inventory_objects
+                WHERE source_system = %s AND object_type = 'device' AND lifecycle_status = 'active'
+                  AND {RECENT_DEVICE_CONDITION} AND nullif(btrim(attributes->>'hostname'), '') IS NOT NULL
+                GROUP BY nullif(btrim(attributes->>'hostname'), '') HAVING count(*) > 1
+            ) repeated
+        """, (SOURCE_SYSTEM,))
+        result["devices_duplicate_hostnames"] = row["devices"] if row else 0
+    return result

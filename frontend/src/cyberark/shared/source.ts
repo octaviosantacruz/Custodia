@@ -22,7 +22,7 @@ export const registration = {
     },
   ],
   domains: [
-    { id: 'pam', order: 1, label: 'CyberArk', blurb: 'PAM, Identity Administration, SIA y Access', status: 'active', access: 'domain', product: { id: 'cyberark', label: 'CyberArk', description: 'PAM, Identity Administration, SIA y Access' } }
+    { id: 'pam', order: 1, label: 'CyberArk', blurb: 'PAM, Identity Administration, SIA y Access', status: 'active', access: 'domain', sectionNav: true, product: { id: 'cyberark', label: 'CyberArk', description: 'PAM, Identity Administration, SIA y Access' } }
   ],
   categories: [
     { id: 'inventory', label: 'Inventario', order: 0 },

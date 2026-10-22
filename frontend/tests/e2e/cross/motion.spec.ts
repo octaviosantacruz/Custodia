@@ -97,8 +97,7 @@ test('FE-MOTION-001: the workspace arrival plays only on real navigation and nev
     };
   });
 
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  await page.getByRole('region', { name: 'Workspaces' }).locator('[data-section="quick-access"]').getByRole('link', { name: /^Safes/ }).click();
+  await page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Safes', exact: true }).click();
   await page.clock.runFor(60);
   await expect(page.getByRole('heading', { name: 'Safes', exact: true })).toBeVisible();
   await expect(page.locator('.workspace-content')).toHaveClass(/is-arriving/);
@@ -158,8 +157,7 @@ test('FE-MOTION-001: reduced motion resolves arrivals, the picker exit, counters
       }).observe(content, { attributes: true, attributeFilter: ['class'] });
     }
   });
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  await page.getByRole('region', { name: 'Workspaces' }).locator('[data-section="quick-access"]').getByRole('link', { name: /^Safes/ }).click();
+  await page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Safes', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Safes', exact: true })).toBeVisible();
   expect(await page.evaluate(() => (window as unknown as { __motionReduce: string | null }).__motionReduce)).toBe('none');
 

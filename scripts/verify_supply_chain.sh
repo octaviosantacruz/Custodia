@@ -12,10 +12,10 @@ fi
 echo "[1/3] pip-audit (backend/requirements.lock.txt)"
 "$PYTHON_BIN" -m pip_audit -r backend/requirements.lock.txt
 
-echo "[2/3] npm audit (raíz)"
-npm audit --omit=dev
+echo "[2/3] npm audit (raíz, incluye desarrollo)"
+npm audit --include=dev
 
-echo "[3/3] npm audit (frontend)"
-npm --prefix frontend audit --omit=dev
+echo "[3/3] npm audit (frontend, incluye desarrollo)"
+npm --prefix frontend audit --include=dev
 
 echo "Auditoría de dependencias completa."

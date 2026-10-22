@@ -4,7 +4,7 @@ import type { FrontendRegistration } from '../../source-contract.ts';
 /** Static declarations; runtime components stay behind a literal lazy import. */
 export const registration = {
   id: 'cyberark/identity_administration',
-  toolLabel: 'CyberArk Identity Administration',
+  toolLabel: 'CyberArk',
   workspaces: [
     {
       id: 'identity', path: '/pam/identity', legacyPaths: ['/roles', '/identity'], domain: 'pam',

@@ -223,10 +223,10 @@ export async function mockAuthenticatedApp(page: Page, options: MockOptions = {}
       },
       '/api/cmdb/netskope/devices/fleet-groups': {
         group_by: 'company', client_baseline: true, os_baseline: false, omitted_groups: 0, omitted_devices: 0,
-        summary: { devices: 10, signal_24h: 5, client_current: 6, client_evaluated: 9, os_supported: 0, os_evaluated: 0, on_prem: 3, location_reported: 8 },
+        summary: { devices: 10, signal_24h: 5, client_current: 6, client_evaluated: 9, client_one_behind: 0, client_two_plus_behind: 0, os_supported: 0, os_evaluated: 0, on_prem: 3, location_reported: 8, uci_low: 0, uci_moderate: 0, uci_evaluated: 0, on_prem_uci_low: 0 },
         groups: [
-          { key: 'EXAMPLE', devices: 7, signal_24h: 4, client_current: 5, client_evaluated: 7, os_supported: 0, os_evaluated: 0, on_prem: 3, location_reported: 6 },
-          { key: 'OTRA', devices: 3, signal_24h: 1, client_current: 1, client_evaluated: 2, os_supported: 0, os_evaluated: 0, on_prem: 0, location_reported: 2 },
+          { key: 'EXAMPLE', devices: 7, signal_24h: 4, client_current: 5, client_evaluated: 7, client_one_behind: 0, client_two_plus_behind: 0, os_supported: 0, os_evaluated: 0, on_prem: 3, location_reported: 6, uci_low: 0, uci_moderate: 0, uci_evaluated: 0, on_prem_uci_low: 0 },
+          { key: 'OTRA', devices: 3, signal_24h: 1, client_current: 1, client_evaluated: 2, client_one_behind: 0, client_two_plus_behind: 0, os_supported: 0, os_evaluated: 0, on_prem: 0, location_reported: 2, uci_low: 0, uci_moderate: 0, uci_evaluated: 0, on_prem_uci_low: 0 },
         ],
       },
       '/api/cmdb/netskope/devices/fleet': {
@@ -241,6 +241,7 @@ export async function mockAuthenticatedApp(page: Page, options: MockOptions = {}
         client_golden_releases: { value: { releases: ['141.0.0', '138.1.0', '135.0.0'] }, note: 'Doc oficial', updated_by: 'ada@example.com', updated_at: '2026-09-20T00:00:00Z' },
         os_minimum_versions: null,
       },
+      '/api/netskope/baselines/client-golden-releases/suggestion': { releases: ['142.0.0', '139.0.0'], source_url: 'https://docs.netskope.com/en/netskope-client-golden-release-updates', fetched_at: '2026-10-16T09:00:00Z' },
       '/api/cmdb/netskope/devices/duplicates': {
         hostname: { groups: 2, devices: 5, largest: 3, top: [{ key: 'NB-100', devices: 3, distinct_other: 2, last_seen_at: '2026-09-22T00:00:00Z' }, { key: 'NB-200', devices: 2, distinct_other: 1, last_seen_at: null }] },
         username: { groups: 1, devices: 4, largest: 4, top: [{ key: 'shared@example.com', devices: 4, distinct_other: 4, last_seen_at: null }] },
@@ -722,7 +723,7 @@ const WORKSPACE_PREFERENCE_ALLOWLIST = new Set([
   'users', 'activity', 'help', 'pamHealth', 'siaConnectors',
    'siaResources', 'siaDatabaseAccounts', 'identityFederations', 'ipInventory',
   'netskope', 'netskopeOperations', 'netskopeChains', 'netskopeInventory', 'netskopeUsers', 'netskopeDevices',
-  'netskopeDlp', 'netskopeDemSites', 'netskopeUci', 'netskopePosture', 'netskopeAdmins',
+  'netskopeDlp', 'netskopeDemSites', 'netskopeUci', 'netskopePosture', 'netskopeAdmins', 'netskopeOfficeExperience',
 ]);
 
 // Audit cases exercise the application's stored theme, not only the browser's

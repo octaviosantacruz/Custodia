@@ -20,9 +20,12 @@
 .nsk-fleet-table td, .nsk-fleet-table th[scope="col"]:not(:first-child) { min-width: 110px; }
 .nsk-fleet-cell, .nsk-fleet-count { background: transparent; border: 0; border-radius: var(--radius-sm); color: inherit; cursor: pointer; font: inherit; padding: 2px 4px; text-align: left; width: 100%; }
 .nsk-fleet-cell:hover, .nsk-fleet-count:hover { background: var(--bg-muted); }
+.nsk-fleet-cell[data-tone="warning"] .bar-cell-track > span { background: var(--warning); }
+.nsk-fleet-cell[data-tone="danger"] .bar-cell-track > span { background: var(--danger); }
 .nsk-fleet-cell:focus-visible, .nsk-fleet-count:focus-visible { box-shadow: var(--focus-ring); outline: none; }
 .nsk-fleet-count { font-variant-numeric: tabular-nums; font-weight: 700; }
 .nsk-fleet-empty { color: var(--text-secondary); font-size: 12px; }
+.nsk-fleet .compact-table-wrap { max-height: none; }
 .nsk-fleet-note { color: var(--text-secondary); font-size: 12px; margin: 0; }
 .nsk-fleet-sync-warning { align-items: center; background: color-mix(in srgb, var(--warning) 8%, var(--bg-subtle)); border: 1px solid color-mix(in srgb, var(--warning) 35%, var(--border-soft)); border-radius: var(--radius-sm); color: var(--text-primary); display: flex; font-size: 12px; gap: 8px; margin: 0; padding: 8px 12px; }
 .nsk-fleet-sync-warning svg { color: var(--warning); flex-shrink: 0; }

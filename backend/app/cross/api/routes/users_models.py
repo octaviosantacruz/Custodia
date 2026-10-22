@@ -61,6 +61,7 @@ class PersonIdentity(BaseModel):
     role_assignments: list[RoleAssignment] = []
     observed_groups: list[str] | None = None
     groups_observed_at: datetime | None = None
+    role_group_sources: dict[str, list[str]] | None = None
 
 
 class PersonRow(BaseModel):

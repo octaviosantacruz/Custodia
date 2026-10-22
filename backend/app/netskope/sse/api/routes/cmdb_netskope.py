@@ -260,6 +260,7 @@ async def netskope_devices(
     observed_user: Annotated[str, Query(max_length=240)] = "",
     onprem_status: Annotated[str, Query(max_length=60)] = "",
     client_config: Annotated[str, Query(max_length=60)] = "",
+    uci_rating: Annotated[str, Query(pattern="^(|Poor|Moderate|Sin alerta|Sin dato)$")] = "",
     coverage_risk: Annotated[str, Query(pattern="^(|1)$")] = "",
     event_age: Annotated[str, Query(pattern="^(|lt_24h|d1_7|d7_30|gt_30d|unknown)$")] = "",
     change: Annotated[str, Query(pattern="^(|added|upgraded|downgraded|version_changed|os_changed|classification_changed)$")] = "",
@@ -279,6 +280,7 @@ async def netskope_devices(
         "hostname": hostname.strip(), "username": username.strip().lower(),
         "observed_user_status": observed_user_status.strip(), "observed_user": observed_user.strip(),
         "onprem_status": onprem_status.strip(), "client_config": client_config.strip(),
+        "uci_rating": uci_rating.strip(),
     }
     try:
         # Drill-downs from posture/quality cards describe the whole active
@@ -327,8 +329,8 @@ async def netskope_fleet(request: Request):
     return await get_netskope_fleet(request.app.state.db)
 
 
-@router.get('/api/cmdb/netskope/devices/fleet-groups', response_model=NetskopeFleetGroupsResponse, summary='Flota Netskope agrupada', description='Por empresa, SO, client config o fabricante: equipos activos con evento en 7 días, con señal en 24 h, cliente al día, SO en o sobre el mínimo y en oficina. Sin línea base, la columna no se evalúa.', dependencies=NETSKOPE_CATALOG_DEPENDENCIES)
-async def netskope_fleet_groups(request: Request, group_by: Annotated[str, Query(pattern="^(company|os|client_config|device_make)$")] = "company"):
+@router.get('/api/cmdb/netskope/devices/fleet-groups', response_model=NetskopeFleetGroupsResponse, summary='Flota Netskope agrupada', description='Por empresa, SO, client config, fabricante, dónde trabaja o UCI: equipos activos con evento en 7 días, con señal en 24 h, cliente al día, SO en o sobre el mínimo, en oficina y con UCI bajo del usuario. Sin línea base, la columna no se evalúa.', dependencies=NETSKOPE_CATALOG_DEPENDENCIES)
+async def netskope_fleet_groups(request: Request, group_by: Annotated[str, Query(pattern="^(company|os|client_config|device_make|onprem_status|uci_rating)$")] = "company"):
     if group_by not in FLEET_GROUPS:
         raise HTTPException(status_code=422, detail="group_by no soportado")
     return await get_netskope_fleet_groups(request.app.state.db, group_by)

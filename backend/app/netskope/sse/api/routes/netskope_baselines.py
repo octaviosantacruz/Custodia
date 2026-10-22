@@ -2,7 +2,8 @@
 
 Reading needs the Netskope catalog permission; changing a baseline needs
 `netskope:admin` and is audited. Baselines are never inferred from the data
-or fetched from the internet."""
+or applied from the internet: the public-documentation reading (NSK-GOLDEN-001)
+is only a suggestion that an admin confirms."""
 
 from typing import Annotated
 
@@ -11,6 +12,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from app.auth import require_any_permission_read, require_permission
 from app.netskope.sse.services.netskope_state import (
+    get_golden_suggestion,
     get_netskope_baselines,
     save_netskope_baseline,
 )
@@ -71,6 +73,11 @@ def _note(value: str | None) -> str | None:
 @router.get("", summary="Líneas base Netskope", description="Releases golden del cliente y versiones mínimas de SO configuradas por un admin, con quién y cuándo las cambió.", dependencies=READ)
 async def netskope_baselines(request: Request):
     return await get_netskope_baselines(request.app.state.db)
+
+
+@router.get("/client-golden-releases/suggestion", summary="Release golden sugerida por la documentación de Netskope", description="Último par de releases golden leído de la documentación pública de Netskope (NSK-GOLDEN-001); null si nunca se leyó. Es sólo una sugerencia: no cambia la línea base hasta que un admin la guarda.", dependencies=READ)
+async def golden_suggestion(request: Request):
+    return await get_golden_suggestion(request.app.state.db)
 
 
 @router.put("/client-golden-releases", summary="Configurar releases golden del cliente Netskope", description="Requiere netskope:admin; queda auditado.")

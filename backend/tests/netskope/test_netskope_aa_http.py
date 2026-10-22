@@ -79,7 +79,7 @@ class AaHttpTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(response.status_code, 503)
         self.assertNotIn("secret@example.test", response.text)
 
-    async def test_registry_exposes_23_semantic_contracts_without_querying_candidates(self):
+    async def test_registry_exposes_28_semantic_contracts_without_querying_candidates(self):
         self.session.set_permissions(["netskope:read"])
         with patch.dict(os.environ, {"NETSKOPE_AA_SEVERITY_APPROVAL_JSON": ""}), patch(
             "app.netskope.sse.services.netskope_aa_metrics.AdvancedAnalyticsClient",
@@ -87,8 +87,8 @@ class AaHttpTests(unittest.IsolatedAsyncioTestCase):
             response = await self.client.get("/api/dashboard/netskope/contracts")
         self.assertEqual(response.status_code, 200)
         contracts = response.json()
-        self.assertEqual(len(contracts), 23)
-        self.assertEqual(sum(row["kind"] == "data" for row in contracts), 11)
+        self.assertEqual(len(contracts), 28)
+        self.assertEqual(sum(row["kind"] == "data" for row in contracts), 16)
         by_id = {row["id"]: row for row in contracts}
         self.assertEqual(by_id["users_total"]["filter_keys"], ["company"])
         self.assertEqual(by_id["devices_by_os"]["top_n"], 8)

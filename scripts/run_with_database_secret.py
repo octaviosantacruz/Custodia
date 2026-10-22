@@ -48,8 +48,10 @@ def recovered_notice(password_file: str) -> str:
     )
     if password_file:
         notice += (
-            f" {password_file} sigue desactualizado: para otras herramientas que lo lean, "
-            "ejecutá scripts/refresh_database_password.sh."
+            f" {password_file} sigue desactualizado para herramientas que lo lean directamente. "
+            "La app y esta migración no requieren actualizarlo. "
+            "El timer custodia-database-password.timer lo mantiene vigente si está habilitado; "
+            "actualización manual opcional: scripts/refresh_database_password.sh"
         )
     return notice
 

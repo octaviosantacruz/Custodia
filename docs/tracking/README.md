@@ -17,11 +17,10 @@ El cruce de una sesión futura es directo entre dos puntas:
 | Documento | Uso | Se actualiza cuando… |
 |---|---|---|
 | [TO_IMPLEMENT.md](TO_IMPLEMENT.md) | Backlog canónico técnico: pendiente, bloqueado o priorizado, con IDs. | Nace, cambia de prioridad o se desbloquea trabajo. |
-| [IMPLEMENTED.md](IMPLEMENTED.md) | Índice del trabajo cerrado: una línea por sección con sus IDs. El detalle (entrega, commit y evidencia) vive en [`done/`](done/), un archivo por periodo. | Se completa una entrega verificable: sección nueva en el archivo de `done/` del periodo en curso y una línea en el índice. |
+| [IMPLEMENTED.md](IMPLEMENTED.md) | Libro del trabajo cerrado: una línea por entrega con sus IDs y una tabla de cierres por ID. Es un solo archivo; el detalle antiguo está en `docs/history/`. | Se completa una entrega verificable: una línea nueva en el índice de la fecha en curso. |
 
 Un ítem no debe estar activo en dos documentos. Al cerrarlo, retirarlo de
-`TO_IMPLEMENT.md` y registrar sólo el cierre resumido en `done/` (con su línea en
-`IMPLEMENTED.md`). `TO_IMPLEMENT.md` abre con un mapa por dominio: leer sólo la
+`TO_IMPLEMENT.md` y registrar sólo el cierre resumido en `IMPLEMENTED.md`. `TO_IMPLEMENT.md` abre con un mapa por dominio: leer sólo la
 sección que se va a tocar.
 
 ## Cómo cruzar contra Jira sin un tercer documento

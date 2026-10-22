@@ -17,8 +17,12 @@ from app.source_contract import RUN_PARTIAL_KEY
 import asyncio
 import logging
 
-from app.netskope.sse.integrations.netskope import NetskopeClient, NetskopeError, NetskopeSettings
+from app.netskope.sse.integrations.netskope import NetskopeClient, NetskopeError, NetskopeSettings, netskope_office_experience_configured
+from app.netskope.sse.repositories.netskope_office_experience import office_spans_for_day, pending_office_days, replace_office_experience_day
+from app.netskope.sse.services.netskope_office_experience import MEASURE_LOOKBACK_DAYS, build_spans, span_minutes
 from app.netskope.sse.repositories.netskope_shared import ALERT_AGGREGATE_RETENTION_DAYS, POLICY_CAPTURE_MARKER, POLICY_CAPTURE_MARKER_VALUE
+from app.netskope.sse.integrations.netskope_golden_release import GOLDEN_RELEASE_URL, fetch_golden_releases
+from app.netskope.sse.repositories.netskope_golden_suggestion import save_golden_suggestion
 from app.netskope.sse.repositories.netskope_uci import record_uci_company_snapshot, replace_netskope_user_uci
 from app.netskope.sse.services.netskope_uci import build_uci_rows, previous_score
 from app.netskope.sse.repositories.netskope_mutations import purge_netskope_alert_aggregates, record_alert_aggregates, record_device_snapshots, record_reported_counts
@@ -47,6 +51,13 @@ TASK_INVENTORY = "netskope_inventory"
 TASK_ALERTS = "netskope_alerts"
 TASK_DLP = "netskope_dlp"
 TASK_UCI = "netskope_uci"
+TASK_GOLDEN = "netskope_golden_release"
+TASK_OFFICE_EXPERIENCE = "netskope_office_experience"
+# NSK-EXP-OFFICE-001: a run measures at most this many pending days (backfill spreads over runs),
+# spaces ADEM calls to stay under its 4 req/s and fails the day when too many calls fail.
+OFFICE_DAYS_PER_RUN = 2
+OFFICE_CALL_DELAY_SECONDS = 0.25
+OFFICE_MAX_FAILED_SHARE = 0.1
 UCI_COMPARISON_DAYS = 7
 
 Progress = Callable[[str], Awaitable[None]] | None
@@ -358,9 +369,60 @@ async def sync_netskope_uci(pool: AsyncConnectionPool, run_id: UUID, progress: P
     return {"objects": len(rows), "relationships": 0, "uci_rejected_rows": rejected}
 
 
+async def sync_netskope_office_experience(pool: AsyncConnectionPool, run_id: UUID, progress: Progress = None) -> dict[str, int]:
+    """NSK-EXP-OFFICE-001: ADEM score of each office-goer's office and remote span, per complete UTC day.
+
+    Measures the oldest pending days of the last MEASURE_LOOKBACK_DAYS. A day is stored and marked
+    complete in one transaction; if more than OFFICE_MAX_FAILED_SHARE of its calls fail, the run fails
+    and the day stays pending for the next run. A failed single call is "Sin dato", never a score.
+    """
+    if not netskope_office_experience_configured():
+        raise ValueError("NETSKOPE_OFFICE_EXPERIENCE_PATH no está configurado")
+    today = datetime.now(timezone.utc).date()
+    days = (await pending_office_days(pool, today - timedelta(days=MEASURE_LOOKBACK_DAYS), today - timedelta(days=1)))[:OFFICE_DAYS_PER_RUN]
+    people = calls = failed_total = 0
+    async with NetskopeClient(NetskopeSettings.from_environment()) as client:
+        for day in days:
+            if progress:
+                await progress(f"Midiendo experiencia en oficina del {day.isoformat()}")
+            spans = build_spans(await office_spans_for_day(pool, day))
+            rows, day_calls, failed = [], 0, 0
+            for email, by_status in sorted(spans.items()):
+                row = {"email": email, "office_minutes": 0, "office_score": None, "remote_minutes": 0, "remote_score": None}
+                for status, prefix in (("on-prem", "office"), ("off-prem", "remote")):
+                    if status not in by_status:
+                        continue
+                    start, end = by_status[status]
+                    row[f"{prefix}_minutes"] = span_minutes(start, end)
+                    day_calls += 1
+                    try:
+                        row[f"{prefix}_score"] = await client.get_adem_user_score(email, int(start.timestamp()), int(end.timestamp()))
+                    except NetskopeError:
+                        failed += 1
+                    await asyncio.sleep(OFFICE_CALL_DELAY_SECONDS)
+                rows.append(row)
+            if day_calls and failed > max(2, day_calls * OFFICE_MAX_FAILED_SHARE):
+                raise NetskopeError(f"ADEM falló en {failed} de {day_calls} consultas del {day.isoformat()}; el día queda pendiente")
+            await replace_office_experience_day(pool, run_id, day, rows, failed)
+            people += len(rows)
+            calls += day_calls
+            failed_total += failed
+    return {"objects": people, "relationships": 0, "office_days_measured": len(days), "office_calls": calls, "office_failed_calls": failed_total}
+
+
+async def sync_netskope_golden_release(pool: AsyncConnectionPool, run_id: UUID, progress: Progress = None) -> dict[str, int]:
+    """NSK-GOLDEN-001: store the documented golden pair as a suggestion; baselines and inventory stay untouched."""
+    if progress:
+        await progress("Leyendo las releases golden de la documentación de Netskope")
+    releases = await fetch_golden_releases()
+    await save_golden_suggestion(pool, releases, GOLDEN_RELEASE_URL, run_id)
+    return {"objects": len(releases), "relationships": 0}
+
+
 _TASKS = {
     TASK_INVENTORY: sync_netskope_inventory, TASK_ALERTS: sync_netskope_alerts,
     TASK_DLP: sync_netskope_dlp, TASK_UCI: sync_netskope_uci,
+    TASK_GOLDEN: sync_netskope_golden_release, TASK_OFFICE_EXPERIENCE: sync_netskope_office_experience,
 }
 
 

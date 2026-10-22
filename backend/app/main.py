@@ -76,6 +76,7 @@ _OPENAPI_TAG_PARENTS = {
     "SIA": "CyberArk",
     "Access space": "CyberArk",
     "CyberArk Risk Management": "CyberArk",
+    "CyberArk Connector Manager": "CyberArk",
     "Inventario Netskope": "Netskope",
     "Postura Netskope": "Netskope",
     "Cadenas Netskope": "Netskope",
@@ -103,7 +104,7 @@ _OPENAPI_TAG_GROUPS = [
     },
     {
         "name": "CyberArk",
-        "tags": ["PAM", "Safes", "Catálogos", "Cadenas PAM", "Identity Administration", "Cadenas Persona", "SIA", "Access space", "CyberArk Risk Management"],
+        "tags": ["PAM", "Safes", "Catálogos", "Cadenas PAM", "Identity Administration", "Cadenas Persona", "SIA", "Access space", "CyberArk Risk Management", "CyberArk Connector Manager"],
     },
     {"name": "Netskope", "tags": ["Inventario Netskope", "Postura Netskope", "Cadenas Netskope", "Alertas DLP Netskope", "UCI Netskope", "Administradores Netskope"]},
 ]
@@ -234,6 +235,7 @@ app = FastAPI(
         {"name": "SIA", "description": "Políticas, destinos, conectores y recursos de SIA."},
         {"name": "Access space", "description": "Assets accesibles vía Access space de CyberArk."},
         {"name": "CyberArk Risk Management", "description": "Postura de riesgo calculada por CyberArk, consultada en vivo y en modo sólo lectura."},
+        {"name": "CyberArk Connector Manager", "description": "Pools y redes consultados en vivo, sólo con nombres, fechas y conteos; sin valores de red ni mutaciones."},
         {"name": "Netskope", "description": "Inventario y postura de Netskope (SSE)."},
         {"name": "Inventario Netskope", "description": "Usuarios, dispositivos y agregados de alertas de Netskope."},
         {"name": "Postura Netskope", "description": "Líneas base de postura Netskope configuradas por un administrador."},

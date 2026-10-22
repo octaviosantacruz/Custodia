@@ -1,5 +1,5 @@
 import { platformTypeLabel } from '../lib/pam-platform-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Cable, Monitor, Network, Search, Server, ShieldCheck } from 'lucide-react';
 import { CompactSelect } from '../../../cross/components/compact-select';
 import { formatNumber } from '../../../cross/lib/format';
@@ -35,6 +35,8 @@ type PlatformProps = SharedProps & {
 
 type ConnectorProps = SharedProps & {
   onOpenPlatforms: (query: string) => void;
+  activeSection?: 'psm' | 'sia';
+  inventorySelector?: ReactNode;
 };
 
 function PlatformCatalogsSummary({ catalogs }: { catalogs: PlatformCatalogsResponse | null }) {
@@ -195,10 +197,11 @@ function PsmConnectorTypesSection({ refreshKey, authChecked, authenticated, onUn
 }
 
 export function PamConnectorsWorkspace({
-  authChecked, authenticated, onUnauthorized, onError, onOpenPlatforms, initialQuery = '',
+  authChecked, authenticated, onUnauthorized, onError, onOpenPlatforms, initialQuery = '', activeSection, inventorySelector,
 }: ConnectorProps) {
   const refreshKey = usePamRefreshKey();
-  const [section, setSection] = useState<'psm' | 'sia'>('psm');
+  const [localSection, setSection] = useState<'psm' | 'sia'>('psm');
+  const section = activeSection ?? localSection;
   const {
     search: psmSearch, setSearch: setPsmSearch, rows: psmRows, total: psmTotal, loading: psmLoading,
     error: psmError, loadMore: loadMorePsm, retry: retryPsm, pageSize: psmPageSize,
@@ -224,13 +227,13 @@ export function PamConnectorsWorkspace({
       <div className="pam-platforms-heading">
         <div className="pam-platforms-actions">
           <span className="database-toolbar-count">{section === 'psm' ? `${formatNumber(psmTotal)} servidores PSM` : `${formatNumber(siaTotal)} conectores SIA`}</span>
-          <CompactSelect
+          {inventorySelector ?? <CompactSelect
             className="pam-platforms-section-select"
             value={section}
             ariaLabel="Elegir inventario de conectores"
             options={[{ value: 'psm', label: 'PSM' }, { value: 'sia', label: 'SIA' }]}
             onChange={(value) => setSection(value as 'psm' | 'sia')}
-          />
+          />}
         </div>
       </div>
       <div className="search-row"><label className="search-box"><Search size={16} /><input type="search" aria-label={section === 'psm' ? 'Buscar conectores PSM' : 'Buscar conectores SIA'} placeholder={section === 'psm' ? 'Buscar conector o plataforma' : 'Buscar por id'} value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>

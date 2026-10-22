@@ -53,7 +53,7 @@ test('tool navigation keeps PAM analysis separate from platform administration',
 test('CyberArk groups PAM, Identity and SIA while Netskope remains independent', () => {
   const cyberArk = domainWorkspaces('pam');
   for (const view of ['general', 'identity', 'sia'] as const) assert.ok(cyberArk.includes(view));
-  assert.deepEqual(domainWorkspaces('dlp'), ['netskope', 'netskopePosture', 'netskopeOperations', 'netskopeInventory', 'netskopeDemSites', 'netskopeAdmins']);
+  assert.deepEqual(domainWorkspaces('dlp'), ['netskope', 'netskopePosture', 'netskopeOperations', 'netskopeInventory', 'netskopeDemSites', 'netskopeOfficeExperience', 'netskopeAdmins']);
   assert.equal(WORKSPACE_DESCRIPTIONS.identity.includes('Identity Administration'), true);
   assert.match(WORKSPACE_DESCRIPTIONS.sia, /\bSIA\b/);
 });
@@ -152,7 +152,7 @@ test('Netskope DLP is a navigable, non-planned domain gated by access:manage or 
   // The retired /netskope/alerts deep link redirects to the Resumen view
   // (canonicalized by useWorkspaceRoute), never to Investigación.
   assert.equal(workspaceFromPath('/netskope/alerts'), 'netskope');
-  assert.deepEqual(domainWorkspaces('dlp'), ['netskope', 'netskopePosture', 'netskopeOperations', 'netskopeInventory', 'netskopeDemSites', 'netskopeAdmins']);
+  assert.deepEqual(domainWorkspaces('dlp'), ['netskope', 'netskopePosture', 'netskopeOperations', 'netskopeInventory', 'netskopeDemSites', 'netskopeOfficeExperience', 'netskopeAdmins']);
   assert.equal(domainOf('netskope'), 'dlp');
   assert.equal(domainOf('netskopeOperations'), 'dlp');
   assert.equal(domainOf('netskopeInventory'), 'dlp');
@@ -205,6 +205,17 @@ test('NSK-RBAC-001 Administradores is strict: only netskope:admin_inventory_read
     assert.equal(hasWorkspaceAccess('netskopeAdmins', [permission]), false, permission);
   }
   assert.equal(domainAccessible('dlp', ['netskope:admin_inventory_read']), true);
+});
+
+test('NSK-EXP-OFFICE-001 Rendimiento is strict: only netskope:uba_read unlocks it', () => {
+  assert.equal(workspacePath('netskopeOfficeExperience'), '/netskope/office');
+  assert.equal(workspaceFromPath('/netskope/office'), 'netskopeOfficeExperience');
+  assert.equal(domainOf('netskopeOfficeExperience'), 'dlp');
+  assert.equal(hasWorkspaceAccess('netskopeOfficeExperience', ['netskope:uba_read']), true);
+  // Per-person experience: neither access:manage, netskope:read nor the other strict reads open it.
+  for (const permission of ['access:manage', 'netskope:read', 'netskope:dlp_read', 'netskope:admin_inventory_read']) {
+    assert.equal(hasWorkspaceAccess('netskopeOfficeExperience', [permission]), false, permission);
+  }
 });
 
 test('canonicalRecentWorkspace maps Netskope inventory deep links to Inventario', () => {

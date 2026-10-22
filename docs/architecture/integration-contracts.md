@@ -1,12 +1,12 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-09
+revisado: 2026-10-19
 ---
 
 # Contratos de integración
 
-Qué datos externos consume Custodia y bajo qué reglas. Este documento cubre **CyberArk** (PAM, Identity Administration, SIA, Access space, Risk Management), los **puentes entre fuentes** y la capa de **Conexiones**. Los contratos de Netskope, su evidencia y sus allowlists están en [`netskope-api.md`](netskope-api.md). El trabajo pendiente vive en [`TO_IMPLEMENT.md`](../tracking/TO_IMPLEMENT.md).
+Qué datos externos consume Custodia y bajo qué reglas. Este documento cubre **CyberArk** (PAM, Identity Administration, SIA, Access space, Risk Management y Connector Manager), los **puentes entre fuentes** y la capa de **Conexiones**. Los contratos de Netskope, su evidencia y sus allowlists están en [`netskope-api.md`](netskope-api.md). El trabajo pendiente vive en [`TO_IMPLEMENT.md`](../tracking/TO_IMPLEMENT.md).
 
 Reglas generales: ninguna fuente se habilita porque exista una URL; los clientes no tienen endpoints por defecto y una configuración parcial hace fallar la sincronización con un mensaje claro; no se inventan endpoints, scopes, payloads ni relaciones; cada fuente conserva su `source_system` y ninguna corrida reconcilia objetos de otra; los objetos ausentes sólo se retiran tras una corrida completa y exitosa. Los probes versionados (`scripts/probe_cyberark_endpoint.sh`, `probe_sia_endpoint.sh`, `probe_cyberark_risk_contract.sh`) leen los secretos de `.env.local`, `.ca_secret` o un archivo, usan HTTPS, limitan las URLs a la base configurada y sólo muestran metadatos JSON; un probe observa y no autoriza persistencia (`PROBE_RAW=1` / `SIA_PROBE_RAW=1` quedan para inspección local controlada).
 
@@ -137,6 +137,58 @@ Todas son de sólo lectura, **nunca** persisten aristas entre fuentes, no alimen
 - **Sin migración ni persistencia:** deriva la evidencia de los objetos normalizados y del historial de corridas, leídos en una transacción read-only `REPEATABLE READ`. El esquema no ofrece una snapshot transversal inmutable: la corrida determina frescura y completitud de la fuente, no la atribución histórica fila por fila.
 
 **Infraestructura, repositorios y riesgo (diseño, sin fuentes aprobadas).** Antes de medir cobertura de infraestructura o repositorios hace falta una fuente autoritativa del universo esperado (CMDB corporativa, inventario cloud, SCM u otra aprobada); Wiz, Tenable o Cortex pueden aportar observaciones pero no definen el denominador y hoy **no son fuentes aprobadas** (este documento no autoriza endpoints, credenciales, payloads, workspaces ni afirmaciones de cobertura para ellos). Las claves de correlación son identificadores estables y contractuales (ID CMDB, ID cloud/ARN, ID de agente, repositorio más organización); hostname e IP sólo con semántica aprobada. Una entidad (repositorio o servidor) y no la herramienta es la fila principal. Los findings no se suman entre herramientas: Riesgos mostraría por entidad findings por severidad y fuente, antigüedad, cobertura de las fuentes esperadas, evidencia navegable según permisos y duplicados sólo con una clave verificable (sujeto, control o CVE, componente y ubicación), conservando los valores originales; una puntuación agregada exige una fórmula acordada, visible y versionada. `cyberark_inventory_objects` no se convierte en un almacén universal; si el piloto prueba la necesidad de persistencia transversal, el diseño candidato es una capa neutral (`coverage_subjects`, `coverage_subject_keys`, `coverage_observations`, `coverage_metric_snapshots`) que no se crea antes de justificar historia, rendimiento o explicabilidad. Un cruce nunca filtra información de una fuente que el actor no puede leer (permisos en el backend antes de calcular; se evaluará un `coverage:read` propio antes de generalizar).
+
+## Connector Manager (`CMGR-001`)
+
+Catálogos en vivo, independientes de PAM y SIA, con `source_system` fijo
+`cyberark_connector_manager`. El propietario es `cyberark/connector_manager/`
+en backend y frontend; registra rutas, sin sincronizador, tablas ni nueva
+fuente de reconciliación. La composición vive en Servicio → Conectores,
+con un selector único PSM / SIA / Pools / Redes y una sola tabla visible.
+
+Contrato de lectura confirmado en el tenant el 2026-10-19:
+
+- Base HTTPS `https://{subdominio}.connectormanagement.cyberark.cloud`,
+  derivada de `CA_PVWA_URL`, con el OAuth compartido de `CA_IDENTITY_URL`,
+  `CA_CLIENT_ID` y `CA_CLIENT_SECRET` o `CA_SECRET_FILE` (por defecto `.ca_secret`).
+  No se decodifican tokens para elegir hosts ni se siguen URLs remotas.
+- Sólo `GET /api/pool-service/pools` y `/api/pool-service/networks`, siempre
+  `projection=EXTENDED` y `page_size=100`. No se invocan endpoints de componentes, identificadores,
+  instalación, alta, edición ni baja.
+- Respuesta `resources[]` y `page.{continuationToken,totalResourcesCount,pageSize}`
+  en el tenant. El cliente contempla también las claves snake_case del SDK
+  (`continuation_token`, `total_resources_count`) y rechaza alias contradictorios.
+  La continuación se envía como parámetro `continuation_token`, codificado y en
+  el mismo endpoint HTTPS. Un total declarado debe ser consistente y coincidir
+  con las filas al finalizar. IDs repetidos, formato inválido, fallo de una
+  página, cursor repetido o límites de 200 páginas / 20.000 registros abortan la
+  lectura completa; no se anuncia un inventario parcial como completo.
+- Allowlist de pool: ID opaco de registro (no se muestra como dato de red),
+  nombre, descripción, fechas UTC, cantidad de redes asignadas, cantidad de
+  identificadores y conteos de `PLATFORM_CONNECTOR` / `ACCESS_CONNECTOR`.
+  Red: ID opaco, nombre, fechas y cantidad de pools asignados. Se excluyen
+  `assignedNetworkIds`, los objetos de `assignedPools`, valores de red,
+  hostnames/IPs, identificadores de destinos, componentes y payloads crudos.
+  Los arrays sólo aportan su longitud; no generan vínculos PAM/SIA ni KPIs.
+  Conteo ausente o inválido = `null` / «Sin dato»; una lista vacía o un cero
+  confirmado se conservan como cero. Las fechas ausentes o inválidas quedan
+  sin dato. `queried_at` es la hora de finalizar la consulta, no una fecha de sync.
+
+`GET /api/connector-manager/pools` y `/networks` requieren `pam:catalogs_read`
+o `access:manage`, igual que el inventario técnico de conectores existente;
+`inventory:read`, `sia:catalogs_read` y `netskope:read` solos no lo abren. La
+configuración incompleta responde 503 y el fallo remoto/contractual 502, sin
+errores ni payloads externos. El botón «Consultar ahora» vuelve a leer el catálogo;
+no escribe en CyberArk. La paginación y la búsqueda de la tabla operan sobre
+la lectura completa acotada, sin nuevas consultas por fila.
+
+Evidencia reproducible: `backend/.venv/bin/python scripts/probe_connector_manager_contract.py --page-size 2`
+imprime sólo fuente, fecha, total y nombres de campos públicos. No imprime
+credenciales, IDs, nombres, descripciones ni respuestas crudas. Referencia
+oficial: [cliente CMGR](https://github.com/cyberark/ark-sdk-python/blob/main/ark_sdk_python/services/cmgr/ark_cmgr_service.py),
+[pool](https://github.com/cyberark/ark-sdk-python/blob/main/ark_sdk_python/models/services/cmgr/ark_cmgr_pool.py)
+y [red](https://github.com/cyberark/ark-sdk-python/blob/main/ark_sdk_python/models/services/cmgr/ark_cmgr_network.py)
+del SDK de CyberArk (leído como referencia, sin incorporarlo como dependencia).
 
 ## Risk Management (`RISK-001`)
 

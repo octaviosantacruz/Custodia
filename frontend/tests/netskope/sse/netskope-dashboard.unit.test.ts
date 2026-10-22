@@ -61,23 +61,22 @@ describe('Netskope dashboard selection', () => {
     const groups = groupNetskopeWidgetDefinitions(definitions);
     const groupedIds = groups.flatMap((group) => group.options.map((option) => option.id));
 
-    assert.deepEqual(groups.map((group) => group.id), ['inventory', 'alerts']);
+    // The aggregate alert cards left the picker; only the inventory group is offered.
+    assert.deepEqual(groups.map((group) => group.id), ['inventory']);
     assert.equal(groups.every((group) => group.options.length > 0), true);
-    assert.equal(groupedIds.length, 11);
+    assert.equal(groupedIds.length, 14);
     assert.equal(new Set(groupedIds).size, groupedIds.length);
     // Every registered widget is either offered once or explicitly hidden: none is silently dropped.
     assert.deepEqual(definitions.map((definition) => definition.id).filter((id) => !groupedIds.includes(id)), [...NETSKOPE_PICKER_HIDDEN_WIDGETS]);
     assert.deepEqual(
       groups.find((group) => group.id === 'inventory')?.options.map((option) => option.id),
       [
-        'users_recent_activity', 'devices_total', 'devices_stale_30d', 'devices_observed_user_unmatched',
+        'users_total', 'users_recent_activity', 'devices_total', 'devices_stale_30d', 'devices_observed_user_unmatched',
+        'fleet_signal_24h', 'fleet_client_current', 'fleet_os_supported', 'fleet_on_prem', 'devices_duplicate_hostnames',
         'devices_by_os', 'devices_by_classification', 'devices_by_company', 'users_by_company',
       ],
     );
-    assert.deepEqual(
-      groups.find((group) => group.id === 'alerts')?.options.map((option) => option.id),
-      ['alerts_7d', 'alerts_30d', 'alerts_90d'],
-    );
+    assert.equal(groups.find((group) => group.id === 'alerts'), undefined);
     assert.deepEqual(groupNetskopeWidgetDefinitions([]), []);
   });
 
@@ -383,5 +382,23 @@ describe('chart presentation (donut or bars)', () => {
     assert.equal(ids.includes('alerts_by_type'), false);
     assert.equal(ids.includes('alerts_by_action'), false);
     assert.equal((DEFAULT_NETSKOPE_CHART_WIDGETS as string[]).includes('alerts_by_type'), false);
+  });
+});
+
+describe('fleet-health cards and the retired alert cards', () => {
+  it('offers the fleet cards, keeps users_total and no longer offers the aggregate alerts', () => {
+    const offered = NETSKOPE_DATA_WIDGETS.map((widget) => widget.id);
+    for (const id of ['users_total', 'fleet_signal_24h', 'fleet_client_current', 'fleet_os_supported', 'fleet_on_prem', 'devices_duplicate_hostnames'] as const) assert.ok(offered.includes(id), id);
+    for (const id of ['alerts_7d', 'alerts_30d', 'alerts_90d'] as const) {
+      assert.equal(offered.includes(id), false, id);
+      // A saved view that still holds one keeps resolving its definition.
+      assert.ok(netskopeWidgetDefinition(id), id);
+    }
+  });
+
+  it('only the duplicate and office cards drill into the device list', () => {
+    assert.deepEqual(netskopeDataWidgetDrill('devices_duplicate_hostnames'), { view: 'devices', query: { ...EMPTY_NETSKOPE_DEVICE_QUERY, duplicate: 'hostname' } });
+    assert.equal(netskopeDataWidgetDrill('fleet_signal_24h'), null);
+    assert.equal(netskopeDataWidgetDrill('fleet_client_current'), null);
   });
 });

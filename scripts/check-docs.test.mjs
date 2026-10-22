@@ -5,7 +5,7 @@ import { brokenLinks, checkDocs, frontmatterProblems, headingAnchors, missingPat
 const front = (estado = 'vigente', revisado = '2026-10-01') => `---\nestado: ${estado}\ndueño: Ana\nrevisado: ${revisado}\n---\n\n`;
 const TODAY = '2026-10-09';
 
-const existing = new Set(['docs/a.md', 'docs/b/c.md', 'backend/app/main.py', 'docs/tracking/TO_IMPLEMENT.md', 'docs/tracking/done/2026.md']);
+const existing = new Set(['docs/a.md', 'docs/b/c.md', 'backend/app/main.py', 'docs/tracking/TO_IMPLEMENT.md', 'docs/tracking/IMPLEMENTED.md']);
 const exists = (path) => existing.has(path);
 
 test('heading anchors follow GitHub slugs, including accents, punctuation and repeated headings', () => {
@@ -38,7 +38,7 @@ test('cited repository paths must exist, except globs, placeholders, allowed pat
 test('tracker IDs cited in docs must exist in a tracker; templates and tracker files themselves are skipped', () => {
   const docs = {
     'docs/tracking/TO_IMPLEMENT.md': '| `AAA-001` | Listo |',
-    'docs/tracking/done/2026.md': '| `BBB-001` | commit |',
+    'docs/tracking/IMPLEMENTED.md': '| `BBB-001` | commit |',
     'docs/architecture/x.md': 'Cierra `AAA-001` y `BBB-001`; falta `CCC-001`; fecha `YYYY-MM-DD`.',
     'docs/history/old.md': front('histórico') + 'Antes `ZZZ-999`.',
   };

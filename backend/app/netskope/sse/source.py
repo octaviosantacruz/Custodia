@@ -1,19 +1,23 @@
 """netskope/sse owns its source contract, adapters and router registration."""
 
 from __future__ import annotations
-from app.source_contract import ScheduledTask, SourceSpec, ToolRegistration
+from app.source_contract import ScheduledTask, SourceSpec, SyncPolicy, ToolRegistration
 from app.netskope.sse.netskope_sync import (
     TASK_ALERTS,
     TASK_DLP,
+    TASK_GOLDEN,
     TASK_INVENTORY,
+    TASK_OFFICE_EXPERIENCE,
     TASK_UCI,
     dispatch_netskope_run,
 )
+from app.netskope.sse.integrations.netskope_golden_release import netskope_golden_release_configured
 from app.netskope.sse.integrations.netskope import (
     NetskopeNotConfigured,
     NetskopeSettings,
     netskope_alerts_configured,
     netskope_dlp_incidents_configured,
+    netskope_office_experience_configured,
     netskope_uci_configured,
 )
 
@@ -26,6 +30,13 @@ NETSKOPE_TASKS = (
     ScheduledTask(TASK_ALERTS, "netskope-alerts-api", is_configured=netskope_alerts_configured),
     ScheduledTask(TASK_DLP, "netskope-dlp-api", is_configured=netskope_dlp_incidents_configured),
     ScheduledTask(TASK_UCI, "netskope-uci-api", is_configured=netskope_uci_configured),
+    # NSK-GOLDEN-001: public documentation page, daily; only a suggestion for the admin baseline.
+    ScheduledTask(TASK_GOLDEN, "netskope-golden-docs", policy=SyncPolicy(interval_minutes=1440, timeout_seconds=60),
+                  is_configured=netskope_golden_release_configured),
+    # NSK-EXP-OFFICE-001: ADEM score of each office span; every 3 h it measures up to two pending days.
+    ScheduledTask(TASK_OFFICE_EXPERIENCE, "netskope-office-experience-api",
+                  policy=SyncPolicy(interval_minutes=180, timeout_seconds=3600),
+                  is_configured=netskope_office_experience_configured),
 )
 
 

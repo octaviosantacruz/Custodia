@@ -34,7 +34,7 @@ export function checkTrackers(activeText, closedText) {
   return { active: active.length, closed: closed.length };
 }
 
-// IMPLEMENTED.md is an index; the closure rows live in docs/tracking/done/*.md.
+// IMPLEMENTED.md is the closed ledger; a done/ folder, if present, is also read.
 export function readClosedTrackers(root) {
   const tracking = resolve(root, 'docs/tracking');
   const detail = resolve(tracking, 'done');

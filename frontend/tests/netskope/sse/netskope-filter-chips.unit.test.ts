@@ -55,5 +55,5 @@ test('group counters count only criteria belonging to each disclosure', () => {
     eventAge: 'unknown',
     filters: { user_status: 'enabled', company: 'EXAMPLE', last_seen_event: 'connect' },
   }));
-  assert.deepEqual(counts, { identity: 2, activity: 2, diagnosis: 0 });
+  assert.deepEqual(counts, { identity: 2, activity: 2, place: 0, diagnosis: 0 });
 });

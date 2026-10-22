@@ -10,6 +10,7 @@ import { EMPTY_NETSKOPE_USERS_FILTERS } from '../lib/netskope-device-filters';
 import { UCI_EXPLANATION, UCI_SCALE, UCI_RATING_LABELS, uciDelta, uciDeltaLabel } from '../lib/netskope-uci';
 import { NetskopeUserDevices } from './netskope-user-devices';
 import { NetskopeUserAnomalies } from './netskope-user-anomalies';
+import { NetskopeUserWeek } from './netskope-user-week';
 import './netskope-user-drawer.css';
 
 export type NetskopeUserSelection = { userId: number | null; email: string; name: string };
@@ -51,6 +52,7 @@ export function NetskopeUserDrawer({ user, refreshKey, canReadUba, onUnauthorize
             <p>Lectura: <DateTime value={reading.scored_at} /> · Cambio respecto de hace aproximadamente 7 días.</p></>
           : <p>Sin lectura de confianza para esta persona en la lista consultada. Su ausencia no confirma que esté libre de riesgo.</p>}
       </section> : null}
+      {canReadUba && user.email ? <NetskopeUserWeek email={user.email} refreshKey={refreshKey} onUnauthorized={onUnauthorized} /> : null}
       {userId !== null ? <>
         <NetskopeUserDevices userId={userId} refreshKey={refreshKey} onUnauthorized={onUnauthorized} />
         {canReadUba ? <NetskopeUserAnomalies userId={userId} refreshKey={refreshKey} onUnauthorized={onUnauthorized} /> : null}

@@ -76,7 +76,7 @@ test('NSK-UBA-002 Usuarios shows the share of at-risk users per company with its
   await page.route('**/api/cmdb/netskope/uci/companies', (route) => route.fulfill({ json: { omitted_users: 30, previous_week: '2026-10-05', companies: [
     { company: 'ALFA', users: 200, poor: 10, moderate: 30, previous: { users: 200, poor: 5, moderate: 20 } }, { company: 'BETA', users: 50, poor: 0, moderate: 0, previous: null },
   ] } }));
-  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, rows: [] } }));
+  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, performance_rows: [], summary: { adem_listed: 0, office_listed: 0, office_poor: 0, office_fair: 0, remote_listed: 0, unknown_presence: 0 }, rows: [] } }));
   await page.goto('/netskope/experience');
 
   await page.getByRole('tab', { name: 'Para revisar' }).focus();
@@ -101,6 +101,24 @@ test('NSK-UBA-002 Usuarios shows the share of at-risk users per company with its
     expect(axe.violations.map(({ id }) => id), `${theme} companies axe`).toEqual([]);
     await page.screenshot({ path: test.info().outputPath(`users-companies-${theme}.png`) });
   }
+  // The "A revisar" cell opens the review queue already filtered to that company.
+  const attentionCompanies: string[] = [];
+  await page.route('**/api/cmdb/netskope/experience/attention?*', (route) => {
+    attentionCompanies.push(new URL(route.request().url()).searchParams.get('company') ?? '');
+    return route.fulfill({ json: { adem_available: true, performance_rows: [], summary: { adem_listed: 0, office_listed: 0, office_poor: 0, office_fair: 0, remote_listed: 0, unknown_presence: 0 }, rows: [
+      { email: 'alfa.user@example.com', name: 'Alfa User', user_id: null, company: 'ALFA', uci_rating: 'Poor', uci_score: 90, uci_previous: null, adem_score: null, reasons: ['uci'], presence: 'unknown', performance_band: null },
+    ] } });
+  });
+  await companies.getByRole('button', { name: /Revisar a las 40 personas de ALFA/ }).click();
+  await expect(page.getByRole('tab', { name: 'Para revisar' })).toHaveAttribute('aria-selected', 'true');
+  const queue = page.getByRole('region', { name: 'Personas para revisar' });
+  await expect(queue.getByRole('row', { name: /Alfa User/ })).toBeVisible();
+  expect(attentionCompanies).toEqual(['ALFA']);
+  await queue.getByRole('button', { name: 'Quitar filtro de empresa ALFA' }).click();
+  await expect(queue.getByRole('button', { name: /Quitar filtro de empresa/ })).toHaveCount(0);
+  await expect(queue.getByRole('row', { name: /Alfa User/ })).toHaveCount(0);
+  expect(attentionCompanies).toEqual(['ALFA']);
+  await page.getByRole('tab', { name: 'Por empresa' }).click();
   await page.getByRole('button', { name: 'Ver usuarios con señales de riesgo' }).click();
   await expect(page).toHaveURL(/\/netskope\/uci$/);
 });

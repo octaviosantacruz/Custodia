@@ -132,6 +132,9 @@ export type DomainRegistration = {
   status: 'active' | 'coming-soon';
   access: 'workspaces' | 'domain';
   alternatePermissions?: readonly string[];
+  /* A tool with few views shows them as a visible bar above the title instead
+     of the header's view picker (UX-NAV-001). */
+  sectionNav?: boolean;
   product: { id: string; label: string; description: string };
 };
 

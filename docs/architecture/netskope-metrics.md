@@ -163,3 +163,43 @@ El booleano `heart_beat` del snapshot de dispositivos **ya no es un estado ni un
 **Observación frente a evaluación.** Los buckets de frescura y `devices_stale_30d` son una *observación* del último inventario y siguen mostrándose con un sync vencido, parcial, fallido o en curso, con la vigencia indicada. «Candidatos a revisar» es una *evaluación*: sin sync vigente `review_candidates` es `null` («Evaluación no disponible: sin sync vigente») y su drill es el estado `review`, la misma población que el número. La tarjeta `devices_stale_30d` cuenta por antigüedad y su drill es el filtro de antigüedad (`event_age=gt_30d`, todo el inventario) con los filtros del widget, de modo que el total del inventario abierto coincide con la tarjeta. Esa tarjeta lee el inventario actual, no una corrida, así que dice «último inventario observado» y explica el estado del sync.
 
 **Tableros guardados.** Los IDs retirados (`RETIRED_WIDGETS`) se descartan al leer preferencias y plantillas por rol (`RETIRED_WIDGETS`), conservando orden, tamaños y filtros del resto; sólo si una vista no vacía queda vacía vuelve a los valores por defecto, y una vista guardada vacía a propósito sigue vacía. El `PUT` sigue rechazando IDs retirados o desconocidos.
+
+## Equipos sin eventos (`NSK-DEVREV-001`, `NSK-INV-002`)
+
+El diseño original (clasificación humana por equipo, sugerencias y lotes) quedó en
+`docs/history/architecture/netskope-device-review.md`. Vigente desde 2026-10-13
+(`NSK-INV-002`, decisión del dueño):
+
+- **Candidato:** equipo activo con último evento válido de más de 30 días y una
+  corrida Netskope completa de las últimas 24 h; `devices_stale_30d` cuenta la
+  antigüedad aun cuando la evaluación no esté disponible, indicando la vigencia del sync.
+- **Sin clasificación manual en pantalla:** con miles de equipos sin señal y sin una
+  fuente corporativa de uso (`NSK-DEVREV-003`, **Externo**: JumpCloud MDM y Cortex
+  son candidatos, sin contrato aprobado), decidir equipo por equipo no es viable.
+  Postura agrupa los equipos sin señal por lo que explica Netskope (desinstalación
+  informada, reemplazo, registro histórico, sin explicación) en **solo lectura**; cada
+  grupo abre exactamente sus equipos.
+- **Retirado:** formulario, lote de sugerencias, columna y filtros de diagnóstico, y los
+  widgets `devices_stale_unclassified` y `devices_stale_by_diagnosis`. La tabla
+  `netskope_device_reviews` y sus decisiones se conservan; el sync no las toca.
+- **Evidencia medida (2026-10-05, no valores fijos):** de 4.037 equipos con esa
+  antigüedad, 158 (3,9 %) tenían desinstalación o deshabilitación informada; 57 (1,4 %)
+  un registro reciente con el mismo hostname y usuario; 0 compartían `guid` (distinto en
+  cada registro, no sirve para unir reinstalaciones). La gran mayoría no tiene causa
+  declarada.
+- **Reglas de datos:** ninguna sugerencia usa heartbeat, `user_status` ni ADEM; hostname
+  y usuario solo sugieren, nunca confirman ni fusionan registros; un sync no vigente o una
+  coincidencia ambigua no producen sugerencia; nada da de baja un equipo en Netskope.
+
+## Cruce oficina × experiencia (NSK-EXP-UCI-001)
+
+Equipos cruza el usuario de cada dispositivo (`username`, coincidencia exacta en minúsculas) con `netskope_user_uci`.
+La tabla solo guarda usuarios Bajo (`Poor`) o Moderado; por eso «Sin alerta» significa «no figura Bajo/Moderado»
+únicamente cuando existe alguna captura de UCI. Sin captura el valor es «Sin dato» y nunca se presenta como sano.
+Filtro `uci_rating` (`Poor`, `Moderate`, `Sin alerta`, `Sin dato`), agrupaciones `onprem_status` y `uci_rating` en
+`/api/cmdb/netskope/devices/fleet-groups`, y conteos `uci_low`, `uci_moderate`, `uci_evaluated`, `on_prem_uci_low`.
+ADEM no participa: `getentities` solo devuelve los 100 peores y no se persiste, así que no puede cruzarse con la flota.
+
+## Salud de la flota y retiro de alertas del selector (2026-10-16)
+
+Las tarjetas `alerts_7d/30d/90d` salen del selector y de los valores por defecto (las vistas guardadas que las contienen siguen renderizando; ver `RETIRED_NETSKOPE_WIDGET_IDS`). `users_total` vuelve al selector. Se agregan cinco tarjetas de inventario calculadas sólo cuando se piden, reutilizando el resumen de `get_netskope_fleet_groups`: `fleet_signal_24h`, `fleet_client_current`, `fleet_os_supported`, `fleet_on_prem` y `devices_duplicate_hostnames`. Sin línea base de cliente o SO el valor es `null` («Sin línea base»), nunca 0. El contador de contratos pasa a 28 (16 de datos).

@@ -62,4 +62,19 @@ describe('NSK-USR-001 the enabled/disabled split is only stated when every user 
     assert.equal(netskopeUsersSplit({ users_total: 10, users_enabled: null, users_disabled: 3 }), null);
     assert.equal(netskopeUsersSplit({ users_total: 5, users_enabled: 4, users_disabled: 3 }), null);
   });
+
+  it('fleet-health cards read against their own denominator and never invent a zero without a baseline', () => {
+    const metrics = {
+      devices_total: 4000, fleet_devices: 4000, fleet_signal_24h: 3000,
+      fleet_client_current: 900, fleet_client_evaluated: 3600, fleet_os_supported: null, fleet_os_evaluated: null,
+      fleet_on_prem: 500, fleet_location_reported: 2000, devices_duplicate_hostnames: 40,
+    };
+    assert.equal(netskopeCardShare('fleet_signal_24h', metrics)?.share, '75 %');
+    assert.equal(netskopeCardShare('fleet_client_current', metrics)?.share, '25 %');
+    assert.equal(netskopeCardShare('fleet_on_prem', metrics)?.share, '25 %');
+    assert.equal(netskopeCardShare('devices_duplicate_hostnames', metrics)?.share, '1 %');
+    // No OS minimums configured: no share at all (the card says it is not evaluated), never 0 %.
+    assert.equal(netskopeCardShare('fleet_os_supported', metrics), null);
+  });
 });
+

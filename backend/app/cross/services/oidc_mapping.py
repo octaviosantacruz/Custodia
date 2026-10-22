@@ -86,3 +86,12 @@ def observed_mapped_groups(user: dict[str, Any], pairs: list[tuple[str, str]] | 
         return None
     mapped = {group for group, _ in _pairs(pairs)}
     return sorted({group for group in groups if isinstance(group, str) and group in mapped})
+
+
+def role_group_sources(user: dict[str, Any], pairs: list[tuple[str, str]]) -> dict[str, list[str]]:
+    """Snapshot the exact map used at login; an empty list identifies fallback."""
+    observed = set(observed_mapped_groups(user, pairs) or [])
+    return {
+        role: sorted({group for group, mapped_role in pairs if mapped_role == role and group in observed})
+        for role in roles_from_claims(user, pairs)
+    }

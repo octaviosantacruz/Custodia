@@ -77,7 +77,7 @@ export function NetskopeEditableItem({ instance, index, count, saving, facets, s
   >{children}</DashboardEditItem>;
 }
 
-const NETSKOPE_RECOMMENDED_IDS = new Set(['devices_total', 'devices_stale_30d', 'alerts_7d', 'devices_by_os', 'devices_by_classification']);
+const NETSKOPE_RECOMMENDED_IDS = new Set(['devices_total', 'devices_stale_30d', 'fleet_signal_24h', 'devices_by_os', 'devices_by_classification']);
 
 export function NetskopeAddWidget({ kind, definitions, addedIds, disabled, limitReached, openRequest, metrics, alertWindows, aaPreviews, onAdd, onVisibleOptionsChange, activityChecked = true }: {
   kind: 'data' | 'chart';

@@ -191,7 +191,7 @@ test('Netskope zero populations and incomplete activity stay explicit', async ({
 
 test('NSK-FLEET-001 Equipos with an empty population reads Sin dato instead of a fabricated 0 %', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read'] });
-  const zero = { devices: 0, signal_24h: 0, client_current: 0, client_evaluated: 0, os_supported: 0, os_evaluated: 0, on_prem: 0, location_reported: 0 };
+  const zero = { devices: 0, signal_24h: 0, client_current: 0, client_evaluated: 0, client_one_behind: 0, client_two_plus_behind: 0, os_supported: 0, os_evaluated: 0, on_prem: 0, location_reported: 0, uci_low: 0, uci_moderate: 0, uci_evaluated: 0, on_prem_uci_low: 0 };
   await page.route('**/api/cmdb/netskope/devices/fleet-groups*', (route) => route.fulfill({ json: {
     group_by: 'company', client_baseline: true, os_baseline: false, summary: zero, groups: [], omitted_groups: 0, omitted_devices: 0,
   } }));

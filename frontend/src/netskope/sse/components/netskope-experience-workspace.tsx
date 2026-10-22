@@ -27,6 +27,7 @@ type Props = {
 
 export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authenticated, canReadUba, onUnauthorized, onError, onNavigate }: Props) {
   const [search, setSearch] = useState('');
+  const [company, setCompany] = useState('');
   const [selectedUser, setSelectedUser] = useState<NetskopeUserSelection | null>(null);
   const [tab, setTab] = useState<'attention' | 'companies'>('attention');
   const searchRef = useRef<HTMLInputElement>(null);
@@ -54,9 +55,9 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
     setSelectedUser({ userId: id !== null && Number.isSafeInteger(id) && id > 0 ? id : null, email: row.email, name: row.name || row.email });
   }
 
-  return <section className="netskope-workspace nsk-users-workspace" aria-label="Revisión de usuarios Netskope">
+  return <section className="netskope-workspace nsk-users-workspace" aria-label="Riesgo de personas en Netskope">
     <section className="list-panel database-surface nsk-users-search" aria-label="Consultar una persona">
-      <div className="nsk-users-search-heading"><h2>Consultar una persona</h2><p>Abrí su ficha para revisar confianza, rendimiento, anomalías y equipos.</p></div>
+      <div className="nsk-users-search-heading"><h2>Consultar una persona</h2><p>Abrí su ficha para revisar confianza, últimos 7 días, anomalías y equipos.</p></div>
       <label className="search-box"><Search size={16} aria-hidden /><input ref={searchRef}
         type="search" aria-label="Buscar usuario por nombre o correo" placeholder="Nombre o correo (mínimo 2 caracteres)"
         maxLength={160} value={search} onChange={(event) => setSearch(event.target.value)}
@@ -75,7 +76,7 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
         {users.data.total > users.data.rows.length ? <p>Se muestran los primeros {users.data.rows.length} resultados. Refiná la búsqueda para encontrar otro usuario.</p> : null}
       </div> : null}
     </section>
-    <nav className="workspace-subnav workspace-subnav-nested" role="tablist" aria-label="Secciones de Usuarios" onKeyDown={handleTablistKeyDown}>
+    <nav className="workspace-subnav workspace-subnav-nested" role="tablist" aria-label="Secciones de Riesgo" onKeyDown={handleTablistKeyDown}>
       {tabs.map(([id, label]) => <button
         key={id} type="button" role="tab" id={`nsk-users-tab-${id}`} aria-controls={`nsk-users-panel-${id}`}
         aria-selected={tab === id} tabIndex={tab === id ? 0 : -1} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}
@@ -83,10 +84,10 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
     </nav>
     {tabs.map(([id]) => <div key={id} role="tabpanel" id={`nsk-users-panel-${id}`} aria-labelledby={`nsk-users-tab-${id}`} hidden={tab !== id}>
       {tab === id ? <>
-      {!canReadUba ? <StateBlock variant="empty" title="Revisión de riesgo no disponible para tu rol" hint="Podés buscar una persona para consultar sus equipos y su rendimiento digital." />
-        : tab === 'attention' ? <NetskopeAttentionQueue enabled={enabled} refreshKey={refreshKey} onUnauthorized={onUnauthorized} onPick={openQueueUser} />
+      {!canReadUba ? <StateBlock variant="empty" title="Revisión de riesgo no disponible para tu rol" hint="Podés buscar una persona para consultar sus equipos." />
+        : tab === 'attention' ? <NetskopeAttentionQueue company={company} onClearCompany={() => setCompany('')} enabled={enabled} refreshKey={refreshKey} onUnauthorized={onUnauthorized} onPick={openQueueUser} />
         : <section className="list-panel database-surface nsk-users-companies" aria-label="Resumen de riesgo por empresa">
-          <NetskopeUciCompanies refreshKey={refreshKey} enabled={enabled} onUnauthorized={onUnauthorized} />
+          <NetskopeUciCompanies refreshKey={refreshKey} enabled={enabled} onUnauthorized={onUnauthorized} onReview={(name) => { setCompany(name); setTab('attention'); }} />
           <button type="button" className="button subtle" onClick={() => onNavigate('netskopeUci')}>Ver usuarios con señales de riesgo</button>
         </section>}
       </> : null}

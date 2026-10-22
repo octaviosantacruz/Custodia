@@ -66,6 +66,8 @@ ANOMALIES_PATH = "/api/v2/incidents/users/getanomalies"
 ANOMALIES_TIMEFRAME_DAYS = 30
 ANOMALIES_LIMIT = 1000
 ADEM_ENTITIES_PATH = "/api/v2/adem/users/getentities"
+# NSK-EXP-OFFICE-001: the daily office measurement scores each span with getinfo.
+ADEM_USER_INFO_PATH = "/api/v2/adem/users/getinfo"
 UCI_RATINGS = ("Poor", "Moderate")
 UCI_BATCH_SIZE = 250
 
@@ -92,6 +94,11 @@ def netskope_dem_sites_configured() -> bool:
 def netskope_uci_configured() -> bool:
     """NSK-UBA-002: the UCI task runs only with the approved ranked route."""
     return os.getenv("NETSKOPE_UCI_PATH", "").strip() == UCI_ACTIVE_PATH
+
+
+def netskope_office_experience_configured() -> bool:
+    """NSK-EXP-OFFICE-001: the daily office measurement runs only with the approved getinfo route."""
+    return os.getenv("NETSKOPE_OFFICE_EXPERIENCE_PATH", "").strip() == ADEM_USER_INFO_PATH
 
 
 def netskope_policy_groups_configured() -> bool:
@@ -741,7 +748,7 @@ class NetskopeClient:
             raise NetskopeError(str(exc)) from exc
 
     async def get_adem_user_score(self, user: str, starttime: int, endtime: int) -> int | float | None:
-        payload = await self._adem_device_query('/api/v2/adem/users/getinfo', user, starttime, endtime)
+        payload = await self._adem_device_query(ADEM_USER_INFO_PATH, user, starttime, endtime)
         try:
             return map_adem_user_score(payload)
         except ValueError as exc:

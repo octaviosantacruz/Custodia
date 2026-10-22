@@ -14,7 +14,7 @@ sus reglas.
 | Quiero… | Leer |
 |---|---|
 | Saber qué falta y qué sigue | [Trabajo pendiente](tracking/TO_IMPLEMENT.md) |
-| Saber qué ya se hizo | [Trabajo cerrado (índice)](tracking/IMPLEMENTED.md); detalle por periodo en `tracking/done/` |
+| Saber qué ya se hizo | [Trabajo cerrado (libro de cierres)](tracking/IMPLEMENTED.md); el detalle viejo está en `history/` |
 | Consultar lo aparcado o descartado | [Trabajo diferido](tracking/BACKLOG_ARCHIVE.md) |
 | Registrar tareas y relacionarlas con Jira | [Guía de seguimiento](tracking/README.md) |
 | Instalar, actualizar u operar el servicio | [Despliegue](operations/deployment.md) |
@@ -23,8 +23,7 @@ sus reglas.
 | Consultar inventario desde PostgreSQL | [Vistas SQL y permisos](operations/reporting-views.md) |
 | Saber qué datos externos podemos consumir | [Contratos de integración](architecture/integration-contracts.md) |
 | Saber qué APIs de Netskope existen y cuáles usamos | [API de Netskope](architecture/netskope-api.md) |
-| Entender las métricas Netskope, AA y la carga | [Métricas Netskope](architecture/netskope-metrics.md) |
-| Entender la clasificación de equipos Netskope sin eventos (NSK-DEVREV-001) | [Revisión operativa de equipos Netskope](architecture/netskope-device-review.md) |
+| Entender las métricas Netskope, AA, la carga y los equipos sin eventos | [Métricas Netskope](architecture/netskope-metrics.md) |
 | Saber dónde pertenece cada parte del código | [Modularidad](architecture/modularity.md) |
 | Ver qué endpoints existen y qué acceso exige cada uno (generado) | [Referencia de la API](architecture/api-reference.md) |
 | Ver qué roles existen y qué permisos reúne cada uno (generado) | [Catálogo de roles y permisos](architecture/access-catalog.md) |
@@ -50,7 +49,7 @@ revisado: 2026-10-09   # AAAA-MM-DD de la última revisión del contenido
   actualizar `revisado`, el chequeo avisa (no falla): revisarlo o marcarlo histórico.
 - `histórico`: registro de una fecha (planes, cierres, handoffs, revisiones). Puede citar rutas e
   IDs que ya no existen; los agentes lo ignoran salvo que se pida el contexto. Todo lo de
-  `history/` y `tracking/done/` es histórico.
+  `history/` es histórico.
 - `revisado` se actualiza al revisar el contenido, no por cada edición menor.
   Los valores iniciales salen de la fecha del último cambio en git (o del archivo, en `history/`).
 

@@ -11,7 +11,8 @@ multiple tools, all isolated by `source_system`:
 
 - **CyberArk**: Privilege Cloud/PAM (`cyberark` — Safes, members, accounts,
   platforms, PSM/connectors), Identity Administration
-  (`identity_administration`), SIA (`sia`) and Access space (`access`).
+  (`identity_administration`), SIA (`sia`), Access space (`access`) and
+  Connector Manager (read-only pools and networks).
 - **Netskope**: SSE inventory (`netskope` — users, devices, alert aggregates
   and DLP incidents).
 
@@ -84,6 +85,12 @@ memory/environment and must never be logged or written back to an env file. The 
 PostgreSQL and writes it atomically (mode 0600, never printed) to
 `DATABASE_PASSWORD_FILE` for tools that read the file directly; the app and
 `migrate.sh` never need it.
+For unattended file consumers, `deploy/custodia-database-password.timer` runs that
+same opt-in refresh command every five minutes and after boot; installation is
+documented in `docs/operations/deployment.md`. It does not restart the app.
+The same oneshot service then runs `scripts/migrate.sh` for pending migrations
+in this checkout, only if credential refresh succeeds; the migration runner's
+advisory lock serializes it with deploy. It does not pull code or build it.
 That preflight only runs once, at process startup; the running backend also
 carries a `DatabaseCredentialProvider` (`app.state.database_credential_provider`,
 wired in `lifecycle.py`) as the pool's live `conninfo`, so a password rotated
@@ -107,6 +114,7 @@ cyberark/
   sia/
   access/
   risk_management/
+  connector_manager/
   shared/
 netskope/
   sse/
@@ -262,7 +270,7 @@ write-only `APP_WRITE_TOKEN` contract. See `docs/operations/authentication.md`.
 `public.schema_migrations` by `scripts/migrate.py`. Never edit an already-
 applied migration; add a new numbered file instead. The runner takes a
 Postgres advisory lock; for an empty schema it applies the consolidated
-`migrations/baseline.sql` (currently 001–065, controlled by
+`migrations/baseline.sql` (currently 001–109, controlled by
 `USE_SCHEMA_BASELINE`, default true), and it auto-baselines 001–013 only for
 a legacy pre-existing schema with no tracking rows.
 
@@ -273,8 +281,7 @@ architecture, product, and operational decisions. Check
 `docs/architecture/integration-contracts.md` (CyberArk) or
 `docs/architecture/netskope-api.md` (Netskope) before touching any integration
 work and `docs/tracking/TO_IMPLEMENT.md` for the canonical pending-work
-tracker (`IMPLEMENTED.md` indexes closed work; its detail lives in
-`docs/tracking/done/`). Skip docs whose frontmatter says `estado: histórico`
+tracker (`IMPLEMENTED.md` is the single ledger of closed work). Skip docs whose frontmatter says `estado: histórico`
 unless the task asks for that context. Known CyberArk data-shape
 quirks are summarized in the "Product context" section of this file.
 

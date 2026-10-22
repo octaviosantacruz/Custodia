@@ -14,7 +14,6 @@ from app.cross.repositories.dashboard_templates import (
 from app.cross.repositories.workspace_preferences import (
     MAX_RECENT,
     MAX_VISIBLE,
-    MAX_VISIBLE_PER_DOMAIN,
     get_workspace_preferences,
     save_workspace_preferences,
 )
@@ -22,7 +21,6 @@ from app.cross.repositories.workspace_preferences import (
 __all__ = [
     "MAX_RECENT",
     "MAX_VISIBLE",
-    "MAX_VISIBLE_PER_DOMAIN",
     "get_workspace_preferences",
     "list_actor_dashboard_templates",
     "publish_dashboard_template",

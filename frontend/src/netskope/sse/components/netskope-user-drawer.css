@@ -5,3 +5,12 @@
 .nsk-user-confidence p { color: var(--text-secondary); font-size: 12px; line-height: 1.6; margin: 8px 0 0; }
 .nsk-user-confidence-score strong { color: var(--text-primary); font-size: 20px; }
 .nsk-user-drawer .nsk-user-devices, .nsk-user-drawer .nsk-user-anomalies { border-bottom: 1px solid var(--border-soft); padding-bottom: 20px; }
+
+/* NSK-EXP-OFFICE-001: last 7 days strip. */
+.nsk-user-week-table th small { color: var(--text-secondary); display: block; font-size: 10px; font-weight: 400; }
+.nsk-user-week-table td { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.nsk-user-week-table td small { color: var(--text-secondary); font-size: 10px; }
+.nsk-user-week-place.is-office { color: var(--status-progress-text); font-weight: 600; }
+.nsk-user-week-place.is-no_signal { color: var(--text-secondary); }
+.nsk-user-week > p { color: var(--text-secondary); font-size: 12px; margin: 0 0 8px; }
+.nsk-user-week-empty { color: var(--text-secondary); }

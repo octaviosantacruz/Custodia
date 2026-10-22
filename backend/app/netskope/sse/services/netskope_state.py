@@ -11,6 +11,7 @@ from app.netskope.sse.repositories.netskope_baselines import (
     get_netskope_baselines,
     save_netskope_baseline,
 )
+from app.netskope.sse.repositories.netskope_golden_suggestion import get_golden_suggestion
 from app.netskope.sse.repositories.netskope_dashboard_preferences import (
     get_netskope_dashboard_preferences,
     save_netskope_dashboard_preferences,
@@ -20,6 +21,7 @@ from app.netskope.sse.repositories.netskope_device_reviews import (
 )
 
 __all__ = [
+    "get_golden_suggestion",
     "get_device_review_summary",
     "get_netskope_baselines",
     "get_netskope_dashboard_preferences",

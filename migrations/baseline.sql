@@ -3004,8 +3004,136 @@ CREATE TABLE IF NOT EXISTS public.connection_coverage_snapshots (
 COMMIT;
 -- END 105_connection_coverage_snapshots.sql
 
--- BEGIN 106_rename_custodia.sql
--- Migration 106: the product is now Custodia. Earlier migrations stay immutable, so the catalog texts they seeded with
+-- BEGIN 106_netskope_golden_suggestion.sql
+-- Migration 106: NSK-GOLDEN-001. Last golden release pair read from the public Netskope documentation. It is only a
+-- suggestion: it never changes netskope_baselines (an admin confirms it through the existing audited PUT).
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_golden_suggestion (
+  singleton   BOOLEAN PRIMARY KEY DEFAULT TRUE CHECK (singleton),
+  releases    JSONB NOT NULL,
+  source_url  TEXT NOT NULL,
+  fetched_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  source_run_id UUID
+);
+
+COMMIT;
+-- END 106_netskope_golden_suggestion.sql
+
+-- BEGIN 107_oidc_role_group_sources.sql
+-- ACCESS-UI-001: evidence of the exact group-to-role map used at login.
+-- NULL means no historical evidence; never backfill from today's mapping.
+-- A role with [] was granted by OIDC_DEFAULT_ROLE rather than a mapped group.
+BEGIN;
+ALTER TABLE public.access_oidc_users
+    ADD COLUMN IF NOT EXISTS role_group_sources JSONB;
+COMMIT;
+-- END 107_oidc_role_group_sources.sql
+
+-- BEGIN 108_netskope_device_presence_days.sql
+-- NSK-EXP-PRESENCE-001: the days each device reported from the office or from outside,
+-- as Netskope's On-Premises Detection classified its last client event. One row per
+-- device, UTC event day and status, written by every inventory sync next to the device
+-- snapshots, so "who went to the office this week" reads a few hundred rows instead of
+-- the ~30-minute snapshots. Only the category is kept: no IP, POP, match_ip or location.
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.netskope_device_presence_days (
+    device_id TEXT NOT NULL,
+    event_day DATE NOT NULL,
+    onprem_status TEXT NOT NULL CHECK (onprem_status IN ('on-prem', 'off-prem')),
+    recorded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (device_id, event_day, onprem_status)
+);
+
+CREATE INDEX IF NOT EXISTS netskope_device_presence_days_day_idx
+    ON public.netskope_device_presence_days (event_day);
+
+-- Backfill from the stored snapshots (onprem_status exists since 2026-10-10). The day is the
+-- one of the device's last event, so a switched-off device repeating an old status does not
+-- create later days; an event later than its capture plus one hour is not trusted.
+-- The nested CASE keeps the numeric cast on JSON numbers only (WHERE has no evaluation order).
+INSERT INTO public.netskope_device_presence_days (device_id, event_day, onprem_status)
+SELECT DISTINCT device_id, (to_timestamp(event_epoch) AT TIME ZONE 'UTC')::date, onprem_status
+FROM (
+    SELECT device_id, attributes->>'onprem_status' AS onprem_status,
+           CASE WHEN jsonb_typeof(attributes->'last_event_timestamp') = 'number' THEN
+               CASE WHEN (attributes->>'last_event_timestamp')::numeric > 0
+                         AND (attributes->>'last_event_timestamp')::numeric <= extract(epoch FROM captured_at) + 3600
+                    THEN (attributes->>'last_event_timestamp')::numeric END
+           END AS event_epoch
+    FROM public.netskope_device_snapshots
+    WHERE attributes->>'onprem_status' IN ('on-prem', 'off-prem')
+) AS classified
+WHERE event_epoch IS NOT NULL
+ON CONFLICT DO NOTHING;
+
+COMMIT;
+-- END 108_netskope_device_presence_days.sql
+
+-- BEGIN 109_netskope_office_experience.sql
+-- NSK-EXP-OFFICE-001: digital experience measured while people were in the office.
+-- 1) Each presence day of 108 gains the first and last client event of that device,
+--    day and status, so the daily measurement knows each person's office and remote
+--    spans without reading the snapshots. Rows the old sync left out since 108 are
+--    added here from the snapshots, and existing rows get their spans.
+-- 2) netskope_office_experience_days keeps one row per person and UTC day: minutes and
+--    ADEM score in the office span and in the remote span. Only minutes and scores:
+--    no IP, POP, location or device identifier.
+-- 3) netskope_office_experience_measured marks a day as completely measured, so a
+--    failed run is retried and a day with nobody in the office is a measured zero.
+BEGIN;
+
+ALTER TABLE public.netskope_device_presence_days
+    ADD COLUMN IF NOT EXISTS first_event_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS last_event_at TIMESTAMPTZ;
+
+-- The nested CASE keeps the numeric cast on JSON numbers only (WHERE has no evaluation order);
+-- an event later than its capture plus one hour is not trusted, as in 108 and the sync.
+INSERT INTO public.netskope_device_presence_days (device_id, event_day, onprem_status, first_event_at, last_event_at)
+SELECT device_id, (to_timestamp(event_epoch) AT TIME ZONE 'UTC')::date, onprem_status,
+       to_timestamp(min(event_epoch)), to_timestamp(max(event_epoch))
+FROM (
+    SELECT device_id, attributes->>'onprem_status' AS onprem_status,
+           CASE WHEN jsonb_typeof(attributes->'last_event_timestamp') = 'number' THEN
+               CASE WHEN (attributes->>'last_event_timestamp')::numeric > 0
+                         AND (attributes->>'last_event_timestamp')::numeric <= extract(epoch FROM captured_at) + 3600
+                    THEN (attributes->>'last_event_timestamp')::numeric END
+           END AS event_epoch
+    FROM public.netskope_device_snapshots
+    WHERE attributes->>'onprem_status' IN ('on-prem', 'off-prem')
+) AS classified
+WHERE event_epoch IS NOT NULL
+GROUP BY 1, 2, 3
+ON CONFLICT (device_id, event_day, onprem_status) DO UPDATE
+    SET first_event_at = LEAST(netskope_device_presence_days.first_event_at, EXCLUDED.first_event_at),
+        last_event_at = GREATEST(netskope_device_presence_days.last_event_at, EXCLUDED.last_event_at);
+
+CREATE TABLE IF NOT EXISTS public.netskope_office_experience_days (
+    event_day DATE NOT NULL,
+    email_key TEXT NOT NULL CHECK (email_key = lower(email_key) AND email_key <> ''),
+    office_minutes INTEGER NOT NULL DEFAULT 0 CHECK (office_minutes >= 0),
+    office_score NUMERIC(5, 2) CHECK (office_score BETWEEN 0 AND 100),
+    remote_minutes INTEGER NOT NULL DEFAULT 0 CHECK (remote_minutes >= 0),
+    remote_score NUMERIC(5, 2) CHECK (remote_score BETWEEN 0 AND 100),
+    source_run_id UUID,
+    measured_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (event_day, email_key)
+);
+
+CREATE TABLE IF NOT EXISTS public.netskope_office_experience_measured (
+    event_day DATE PRIMARY KEY,
+    people INTEGER NOT NULL CHECK (people >= 0),
+    failed_calls INTEGER NOT NULL DEFAULT 0 CHECK (failed_calls >= 0),
+    source_run_id UUID,
+    measured_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+COMMIT;
+-- END 109_netskope_office_experience.sql
+
+-- BEGIN 110_rename_custodia.sql
+-- Migration 110: the product is now Custodia. Earlier migrations stay immutable, so the catalog texts they seeded with
 -- the old name are updated here.
 BEGIN;
 
@@ -3017,4 +3145,4 @@ UPDATE public.access_permissions
 COMMENT ON SCHEMA reporting IS 'Explicit operational read models; PostgreSQL grants do not inherit Custodia permissions.';
 
 COMMIT;
--- END 106_rename_custodia.sql
+-- END 110_rename_custodia.sql

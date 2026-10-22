@@ -72,28 +72,311 @@ test('NSK-EXP-UEBA-001: the selected user lists anomalies by severity and hides 
   await expect(page.getByRole('region', { name: 'Anomalías del usuario' })).toHaveCount(0);
 });
 
-test('NSK-EXP-UEBA-001: the attention queue joins UCI and ADEM, says "Sin dato" for the missing side and opens the user', async ({ page }) => {
+/* NSK-EXP-OFFICE-001: the office measurement response; `days` measured days in the window and the last two weeks. */
+function officeExperience({ configured = true, days = 7, measurement = null }: { configured?: boolean; days?: number; measurement?: { status: string; started_at: string | null; completed_at: string | null } | null } = {}) {
+  const week = (start: string, measured: number | null, poor = 0, fair = 0, worse = 0, daysMeasured = 7, office: number | null = 88, remote: number | null = 89) => ({
+    week_start: start, days_measured: measured === null ? 0 : daysMeasured, office_people: measured, measured, poor: measured === null ? null : poor,
+    fair: measured === null ? null : fair, worse_in_office: measured === null ? null : worse,
+    office_avg: measured === null ? null : office, remote_avg: measured === null ? null : remote,
+  });
+  const person = (email: string, name: string | null, office: number | null, band: string | null, remote: number | null, worse: boolean, officeDays: number) => ({
+    email, name, company: name ? 'ACME' : null, office_days: officeDays, office_minutes: officeDays * 480, office_score: office, office_band: band, remote_score: remote, worse_in_office: worse,
+  });
+  return {
+    configured, measurement, window_start: '2026-10-12', window_end: '2026-10-18', last_measured_at: days ? '2026-10-19T03:00:00Z' : null, office_gap: 15,
+    summary: days ? { office_people: 4, measured: 3, poor: 1, fair: 1, good: 1, worse_in_office: 1, days_measured: days, office_avg: 57.3, remote_avg: 81.7, paired: 3 }
+      : { office_people: 0, measured: 0, poor: 0, fair: 0, good: 0, worse_in_office: 0, days_measured: 0, office_avg: null, remote_avg: null, paired: 0 },
+    people: days ? [
+      person('poor@example.com', 'Poor Office', 22, 'poor', 88, true, 2), person('fair@example.com', null, 60, 'fair', 66, false, 1),
+      person('good@example.com', 'Good Office', 90, 'good', 91, false, 5), person('nodata@example.com', null, null, null, 80, false, 1),
+    ] : [],
+    people_total: days ? 4 : 0,
+    weekdays: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((name, weekday) => weekday < 5
+      ? { weekday, name, days_measured: 2, office_people_per_day: 400 + weekday, office_avg: 88 + weekday / 10, flagged_person_days: weekday === 0 ? 2 : 0 }
+      : { weekday, name, days_measured: 0, office_people_per_day: null, office_avg: null, flagged_person_days: null }),
+    companies: { rows: [{ company: 'ACME', office_people: 2, measured: 2, flagged: 1, worse_in_office: 1, office_avg: 56 }, { company: 'Sin empresa', office_people: 2, measured: 1, flagged: 1, worse_in_office: 0, office_avg: 60 }], omitted_people: 0 },
+    series: days ? [week('2026-09-14', null), week('2026-09-21', 40, 0, 2), week('2026-09-28', null), week('2026-10-05', 30, 1, 3, 0, 4), week('2026-10-12', 3, 1, 1, 1), week('2026-10-19', null)]
+      : [week('2026-10-12', null), week('2026-10-19', null)],
+  };
+}
+
+test('NSK-EXP-OFFICE-001: Rendimiento answers how many had a poor or fair score in the office, with its weekly evolution', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
   await mockEmptyScore(page);
-  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, rows: [
-    { email: 'qa.user@example.com', name: 'QA User', user_id: '601', uci_rating: 'Poor', uci_score: 120, uci_previous: 300, adem_score: 52, reasons: ['uci', 'adem'] },
-    { email: 'solo.uci@example.com', name: null, user_id: null, uci_rating: 'Moderate', uci_score: 500, uci_previous: null, adem_score: null, reasons: ['uci'] },
-    { email: 'solo.adem@example.com', name: null, user_id: null, uci_rating: null, uci_score: null, uci_previous: null, adem_score: 60, reasons: ['adem'] },
+  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, rows: [], performance_rows: [],
+    summary: { adem_listed: 0, office_listed: 0, office_poor: 0, office_fair: 0, remote_listed: 0, unknown_presence: 0 } } }));
+  await page.route('**/api/cmdb/netskope/experience/office**', (route) => route.fulfill({ json: officeExperience() }));
+  await page.goto('/netskope/office');
+  const view = page.getByRole('region', { name: 'Rendimiento en la oficina' });
+  const headline = view.getByRole('group', { name: 'Resumen de los últimos 7 días' });
+  await expect(headline).toContainText('2 de 3 personas medidas en la oficina tuvieron rendimiento malo o regular');
+  await expect(headline).toContainText('Peor en oficina que en remoto 1');
+  await expect(headline).toContainText('Sin dato 1');
+  await expect(view).toContainText('7 de 7 días medidos');
+  // One chart: a value label per measured week; a gap between measured weeks is never drawn as zero, and weeks
+  // before the first measurement or after the last one are not drawn at all.
+  const chart = view.getByRole('img', { name: /Evolución semanal/ });
+  await expect(chart).toContainText('4 de 30');
+  await expect(chart).toContainText('2 de 3');
+  await expect(chart).toContainText('Sin medición');
+  await expect(chart).not.toContainText('14–20 sept');
+  await expect(chart).not.toContainText('19–25 oct');
+  await view.getByRole('img', { name: /Semana del 5–11 oct/ }).first().hover();
+  await expect(view.getByRole('tooltip')).toContainText('4 de 7 días medidos');
+  await view.getByRole('region', { name: 'Personas con rendimiento malo o regular por semana' }).getByRole('button', { name: 'Ver como tabla' }).click();
+  await expect(view.getByRole('row', { name: /5–11 oct/ }).first()).toContainText('30');
+  await expect(view.getByRole('row', { name: /28 sept?–4 oct/ }).first()).toContainText('Sin medición');
+  // People: poor or fair first by default, worst first; a missing score is "Sin dato", never good.
+  const rows = view.locator('.nsk-office-table tbody tr');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.first()).toContainText('Poor Office');
+  await expect(rows.first()).toContainText('Peor en oficina -66');
+  await expect(view.getByRole('button', { name: /Malo, regular o peor en oficina/ })).toHaveAttribute('aria-pressed', 'true');
+  await view.getByRole('button', { name: /Todas en oficina/ }).click();
+  await expect(rows).toHaveCount(4);
+  await expect(view.getByRole('row', { name: /nodata@example.com/ })).toContainText('Sin dato');
+  // One detail table at a time: an unmeasured weekday is "Sin medición", never zero; companies with their denominator.
+  const detail = view.getByRole('group', { name: 'Detalle' });
+  await detail.getByRole('button', { name: 'Por día' }).click();
+  await expect(view.locator('.nsk-office-table')).toHaveCount(0);
+  await expect(view.getByRole('region', { name: 'Por día de la semana' }).getByRole('row', { name: /Domingo/ })).toContainText('Sin medición');
+  await detail.getByRole('button', { name: 'Por empresa' }).click();
+  await expect(view.getByRole('region', { name: 'Por día de la semana' })).toHaveCount(0);
+  await expect(view.getByRole('region', { name: 'Por empresa' }).getByRole('row', { name: /ACME/ })).toContainText('1 de 2');
+  await view.getByRole('group', { name: 'Métrica de la evolución' }).getByRole('button', { name: 'Promedio' }).click();
+  await expect(view.getByRole('region', { name: 'Personas con rendimiento malo o regular por semana' })).toHaveCount(0);
+  await expect(view.getByRole('region', { name: 'Puntaje promedio por semana' })).toContainText('88');
+  const axe = await new AxeBuilder({ page }).include('.nsk-office').analyze();
+  expect(axe.violations).toEqual([]);
+  await view.getByRole('group', { name: 'Detalle' }).getByRole('button', { name: 'Personas' }).click();
+  await view.getByRole('group', { name: 'Métrica de la evolución' }).getByRole('button', { name: 'Malo o regular' }).click();
+  for (const theme of ['dark', 'light'] as const) {
+    await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    await page.screenshot({ path: test.info().outputPath(`office-${theme}.png`), fullPage: true });
+  }
+});
+
+test('NSK-EXP-OFFICE-001: the people table pages in place instead of an inner scroll', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
+  await mockEmptyScore(page);
+  const base = officeExperience();
+  const people = Array.from({ length: 45 }, (_, index) => ({ email: `p${index}@example.com`, name: `Persona ${index}`, company: 'ACME', office_days: 2, office_minutes: 960, office_score: 50, office_band: 'fair', remote_score: 80, worse_in_office: true }));
+  await page.route('**/api/cmdb/netskope/experience/office**', (route) => route.fulfill({ json: { ...base, people, people_total: 45 } }));
+  await page.goto('/netskope/office');
+  const view = page.getByRole('region', { name: 'Rendimiento en la oficina' });
+  const rows = view.locator('.nsk-office-table tbody tr');
+  await expect(rows).toHaveCount(20);
+  await expect(view.locator('.nsk-office-table').locator('xpath=ancestor::div[contains(@class,"compact-table-wrap")]')).toHaveCSS('max-height', 'none');
+  await view.getByRole('button', { name: 'Ver 20 más' }).click();
+  await expect(rows).toHaveCount(40);
+  await view.getByRole('button', { name: 'Ver 5 más' }).click();
+  await expect(rows).toHaveCount(45);
+  await expect(view.getByRole('button', { name: /más$/ })).toHaveCount(0);
+});
+
+test('NSK-EXP-OFFICE-001: while the first measurement runs, the tab says so and how many days are in', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
+  await mockEmptyScore(page);
+  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, rows: [], performance_rows: [],
+    summary: { adem_listed: 0, office_listed: 0, office_poor: 0, office_fair: 0, remote_listed: 0, unknown_presence: 0 } } }));
+  await page.route('**/api/cmdb/netskope/experience/office**', (route) => route.fulfill({ json: officeExperience({
+    days: 0, measurement: { status: 'running', started_at: '2026-10-19T15:19:41Z', completed_at: null } }) }));
+  await page.goto('/netskope/office');
+  const status = page.getByRole('region', { name: 'Rendimiento en la oficina' }).getByRole('status');
+  await expect(status).toContainText('Midiendo ahora');
+  await expect(status).toContainText('0 de 7 días medidos');
+  await expect(status).toContainText('se actualiza sola');
+});
+
+test('NSK-EXP-OFFICE-001: a person ficha shows the last 7 days as office, remote, no signal or pending', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
+  await mockEmptyScore(page);
+  await page.route('**/api/cmdb/netskope/experience/office?**', (route) => route.fulfill({ json: officeExperience() }));
+  const person = { email: 'poor@example.com', window_start: '2026-10-12', window_end: '2026-10-18', days: [
+    { day: '2026-10-12', place: 'office', measured: true, office_minutes: 480, office_score: 22, remote_minutes: 0, remote_score: null },
+    { day: '2026-10-13', place: 'remote', measured: true, office_minutes: 0, office_score: null, remote_minutes: 300, remote_score: 88 },
+    { day: '2026-10-14', place: 'no_signal', measured: true, office_minutes: 0, office_score: null, remote_minutes: 0, remote_score: null },
+    ...['2026-10-15', '2026-10-16', '2026-10-17', '2026-10-18'].map((day) => ({ day, place: 'office', measured: false, office_minutes: 0, office_score: null, remote_minutes: 0, remote_score: null })),
+  ] };
+  const asked: string[] = [];
+  await page.route('**/api/cmdb/netskope/experience/office/person**', (route) => { asked.push(new URL(route.request().url()).searchParams.get('email') ?? ''); return route.fulfill({ json: person }); });
+  await page.goto('/netskope/office');
+  await page.getByRole('region', { name: 'Rendimiento en la oficina' }).getByRole('button', { name: /Poor Office/ }).click();
+  const week = page.getByRole('dialog').getByRole('region', { name: 'Últimos 7 días de la persona' });
+  await expect(week.getByRole('row', { name: /Lugar/ })).toContainText('OficinaRemotoSin señal');
+  await expect(week.getByRole('row', { name: /Puntaje/ })).toContainText('22 · 8 h');
+  await expect(week.getByRole('row', { name: /Puntaje/ })).toContainText('Pendiente');
+  expect(asked).toEqual(['poor@example.com']);
+});
+
+/* NSK-EXP-OFFICE-002: the timeline response; the person's fields only come when a person was asked for. */
+function officeTimeline(url: URL) {
+  const company = url.searchParams.get('company');
+  const email = url.searchParams.get('email');
+  const point = (day: string, measured: boolean, office: number | null, officePeople: number | null, remote: number | null, remotePeople: number | null, own?: number | null) => ({
+    day, measured, office_avg: office, office_people: officePeople, remote_avg: remote, remote_people: remotePeople,
+    ...(email ? { person_office: own ?? null, person_office_minutes: own == null ? 0 : 480, person_remote: null, person_remote_minutes: 0 } : {}),
+  });
+  const start = url.searchParams.get('start');
+  const end = url.searchParams.get('end');
+  return {
+    first: start ?? '2026-09-19', last: end ?? '2026-10-18', company, min_people: 5,
+    companies: [{ company: 'ACME', people: 582 }, { company: 'Sin empresa', people: 3 }],
+    person: email ? { email, name: 'QA User', company: 'ACME' } : null,
+    points: [
+      point('2026-10-12', true, company ? 80 : 88, company ? 300 : 439, 90, 400, 40),
+      point('2026-10-13', true, 86, 503, 89, 380, 45),
+      point('2026-10-14', false, null, null, null, null),
+      point('2026-10-18', true, 70, 3, 88, 120, null),
+    ].filter((row) => !start || (row.day >= start && row.day <= (end ?? row.day))),
+  };
+}
+
+test('NSK-EXP-OFFICE-002: the daily timeline filters by company and overlays one person, with gaps and thin days marked', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
+  await mockEmptyScore(page);
+  await page.route('**/api/cmdb/netskope/experience/office?**', (route) => route.fulfill({ json: officeExperience() }));
+  const asked: string[] = [];
+  await page.route('**/api/cmdb/netskope/experience/office/timeline?**', (route) => {
+    const url = new URL(route.request().url());
+    asked.push(url.search);
+    return route.fulfill({ json: officeTimeline(url) });
+  });
+  await page.goto('/netskope/office');
+  await page.getByRole('tab', { name: 'Evolución diaria' }).click();
+  const view = page.getByRole('region', { name: 'Evolución diaria' });
+  // Everyone by default, office and remote: a day without measurement is a gap, a thin day says so.
+  await expect(view.getByRole('group', { name: 'Evolución diaria del puntaje promedio, Todas las empresas' })).toBeVisible();
+  await expect(view.getByRole('button', { name: /14 oct: sin medición/ })).toBeVisible();
+  await view.getByRole('button', { name: /18 oct:/ }).hover();
+  await expect(view.getByRole('tooltip')).toContainText('3 personas (pocas)');
+  await expect(view.locator('circle.is-few')).toHaveCount(1);
+  expect(asked.at(-1)).toBe('?days=30');
+  // The summary names the measured span, not the requested 30 days.
+  const summary = view.getByLabel('Resumen del período');
+  await expect(summary).toContainText('12 oct al 18 oct · promedio de 3 días medidos');
+  // Choosing days on the chart: a click, Ctrl + click for loose days, a drag for a run, the keyboard too.
+  const day = (label: RegExp) => view.getByRole('button', { name: label });
+  await day(/^12 oct:/).click();
+  await expect(summary).toContainText('Día elegido: lun 12 oct');
+  await expect(summary).toContainText('Oficina · Todas las empresas 88 · 439 personas');
+  await expect(day(/^12 oct:/)).toHaveAttribute('aria-pressed', 'true');
+  await day(/^18 oct:/).click({ modifiers: ['ControlOrMeta'] });
+  await expect(summary).toContainText('2 días elegidos: 12 oct y 18 oct · promedio de 2 días medidos');
+  await day(/^18 oct:/).click({ modifiers: ['ControlOrMeta'] });
+  await expect(summary).toContainText('Día elegido: lun 12 oct');
+  const from = await day(/^12 oct:/).boundingBox();
+  const to = await day(/^14 oct:/).boundingBox();
+  if (!from || !to) throw new Error('Sin días en el gráfico');
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 5 });
+  await page.mouse.up();
+  await expect(summary).toContainText('3 días elegidos: 12 oct, 13 oct y 14 oct · promedio de 2 días medidos');
+  await page.screenshot({ path: test.info().outputPath('timeline-selection.png'), fullPage: true });
+  await day(/^18 oct:/).focus();
+  await page.keyboard.press('Enter');
+  await expect(summary).toContainText('Día elegido: dom 18 oct');
+  await expect(summary).toContainText('3 personas');
+  await summary.getByRole('button', { name: 'Quitar selección' }).click();
+  await expect(summary).toContainText('12 oct al 18 oct');
+  // Company filter.
+  await view.locator('.custom-select-trigger').click();
+  await page.getByRole('option', { name: 'ACME · 582' }).click();
+  await expect.poll(() => asked.at(-1)).toBe('?days=30&company=ACME');
+  await expect(view.getByRole('group', { name: 'Evolución diaria del puntaje promedio, ACME' })).toBeVisible();
+  // A person on top of the company average, with a way back to their ficha.
+  await view.getByRole('searchbox', { name: 'Buscar una persona para comparar' }).fill('qa');
+  await view.getByRole('option', { name: 'QA User qa.user@example.com' }).click();
+  await expect.poll(() => asked.at(-1)).toBe('?days=30&company=ACME&email=qa.user%40example.com');
+  await expect(view.getByLabel('Resumen del período')).toContainText('QA User en oficina');
+  await expect(view.getByRole('button', { name: 'Abrir ficha de QA User' })).toBeVisible();
+  await expect(view.getByRole('button', { name: /Comparar con su empresa/ })).toHaveCount(0);
+  await page.screenshot({ path: test.info().outputPath('timeline-person.png'), fullPage: true });
+  // Office only, then as a table: an unmeasured day reads "Sin medición", a missing score "Sin dato", never zero.
+  await view.getByRole('group', { name: 'Lugar' }).getByRole('button', { name: 'Oficina', exact: true }).click();
+  await expect(view.getByLabel('Resumen del período')).not.toContainText('Remoto');
+  await view.getByRole('button', { name: 'Ver como tabla' }).click();
+  await expect(view.getByRole('row', { name: /14 oct/ })).toContainText('Sin medición');
+  await expect(view.getByRole('row', { name: /18 oct/ })).toContainText('Sin dato');
+  await view.getByRole('group', { name: 'Período' }).getByRole('button', { name: '90 días' }).click();
+  await expect.poll(() => asked.at(-1)).toBe('?days=90&company=ACME&email=qa.user%40example.com');
+  await view.getByRole('button', { name: 'Quitar a QA User' }).click();
+  await expect(view.getByRole('searchbox', { name: 'Buscar una persona para comparar' })).toBeVisible();
+  // A chosen date: the summary answers that day with its averages and how many people they cover.
+  await view.getByRole('group', { name: 'Lugar' }).getByRole('button', { name: 'Oficina y remoto' }).click();
+  await view.getByRole('group', { name: 'Período' }).getByRole('button', { name: 'Fechas' }).click();
+  await expect.poll(() => asked.at(-1)).toMatch(/^\?days=30&start=\d{4}-\d{2}-\d{2}&end=\d{4}-\d{2}-\d{2}&company=ACME$/);
+  // Custodia's own calendar (not the browser's): the same day twice is that date alone.
+  await view.getByRole('button', { name: 'Abrir calendario' }).click();
+  const calendar = page.getByRole('dialog', { name: 'Fechas' });
+  await expect(calendar.getByRole('heading')).toContainText(/octubre/i);
+  for (const theme of ['dark', 'light'] as const) {
+    await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    await page.screenshot({ path: test.info().outputPath(`calendar-${theme}.png`) });
+  }
+  await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+  await calendar.locator('.date-range-field-cell', { hasText: /^12$/ }).click();
+  await calendar.locator('.date-range-field-cell', { hasText: /^12$/ }).click();
+  await expect.poll(() => asked.at(-1)).toBe('?days=30&start=2026-10-12&end=2026-10-12&company=ACME');
+  await expect(summary).toContainText('12 oct');
+  await expect(summary).toContainText('Oficina · ACME 80 · 300 personas');
+  await expect(summary).toContainText('Remoto · ACME 90 · 400 personas');
+  // Typing a start after the end asks for a valid range and never reads it.
+  const startDay = view.locator('.date-range-field-input').first().locator('[data-type="day"]');
+  await startDay.click();
+  await page.keyboard.type('13');
+  await expect(view.getByText('Elegí un rango válido')).toBeVisible();
+  expect(asked.some((search) => search.includes('start=2026-10-13&end=2026-10-12'))).toBe(false);
+  // A preset closes the calendar and reads that range.
+  await view.getByRole('button', { name: 'Abrir calendario' }).click();
+  await page.getByRole('dialog', { name: 'Fechas' }).getByRole('button', { name: 'Ayer' }).click();
+  await expect(page.getByRole('dialog', { name: 'Fechas' })).toHaveCount(0);
+  await expect.poll(() => asked.at(-1)).toMatch(/^\?days=30&start=(\d{4}-\d{2}-\d{2})&end=\1&company=ACME$/);
+  await view.getByRole('button', { name: 'Abrir calendario' }).click();
+  await page.getByRole('dialog', { name: 'Fechas' }).locator('.date-range-field-cell', { hasText: /^12$/ }).click();
+  await page.getByRole('dialog', { name: 'Fechas' }).locator('.date-range-field-cell', { hasText: /^18$/ }).click();
+  // 12–18 oct was read before (the default range), so it comes from the cache: the summary is the proof.
+  await expect(page.getByRole('dialog', { name: 'Fechas' })).toHaveCount(0);
+  await expect(summary).toContainText('promedio de 3 días medidos');
+  const axe = await new AxeBuilder({ page }).include('.nsk-timeline').analyze();
+  expect(axe.violations).toEqual([]);
+  await expect(view.getByRole('group', { name: /Evolución diaria del puntaje promedio/ })).toBeVisible();
+  for (const theme of ['dark', 'light'] as const) {
+    await page.evaluate((value) => { document.documentElement.dataset.theme = value; }, theme);
+    await page.screenshot({ path: test.info().outputPath(`timeline-${theme}.png`), fullPage: true });
+  }
+});
+
+test('NSK-EXP-UEBA-001: the Riesgo queue lists only low or moderate confidence, says "Sin dato" for a missing change and opens the user', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
+  await mockEmptyScore(page);
+  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, performance_rows: [
+    { email: 'qa.user@example.com', name: 'QA User', user_id: '601', uci_rating: 'Poor', uci_score: 120, uci_previous: 300, adem_score: 52, reasons: ['uci', 'adem'], presence: 'office', performance_band: 'fair' },
+    { email: 'solo.adem@example.com', name: null, user_id: null, uci_rating: null, uci_score: null, uci_previous: null, adem_score: 60, reasons: ['adem'], presence: 'remote', performance_band: 'fair' },
+  ], summary: { adem_listed: 2, office_listed: 1, office_poor: 0, office_fair: 1, remote_listed: 1, unknown_presence: 0 }, rows: [
+    { email: 'qa.user@example.com', name: 'QA User', user_id: '601', uci_rating: 'Poor', uci_score: 120, uci_previous: 300, adem_score: 52, reasons: ['uci', 'adem'], presence: 'office', performance_band: 'fair' },
+    { email: 'solo.uci@example.com', name: null, user_id: null, uci_rating: 'Moderate', uci_score: 500, uci_previous: null, adem_score: null, reasons: ['uci'], presence: 'unknown', performance_band: null },
   ] } }));
   await page.route('**/api/cmdb/netskope/uci?*', (route) => route.fulfill({ json: {
     configured: true, captured_at: '2026-10-11T00:00:00Z', total: 1, by_rating: { Poor: 1, Moderate: 0 },
     rows: [{ email: 'qa.user@example.com', user_id: '601', name: 'QA User', rating: 'Poor', score: 120, previous_score: 300, scored_at: '2026-10-11T00:00:00Z' }],
   } }));
   await page.goto('/netskope/experience');
-  const queue = page.getByRole('region', { name: 'Usuarios para revisar' });
-  await expect(queue.getByRole('row', { name: /QA User/ })).toContainText('Entre los menores puntajes de rendimiento');
+  const queue = page.getByRole('region', { name: 'Personas para revisar' });
   await expect(queue.getByRole('row', { name: /QA User/ })).toContainText('Empeora −180');
-  await expect(queue.getByText('De 0 a 1000: menor puntaje, mayor riesgo.', { exact: false })).toBeVisible();
+  // Performance lives in Rendimiento: no reason, location or score column here.
+  await expect(queue.getByRole('row', { name: /QA User/ })).not.toContainText('Entre los menores puntajes de rendimiento');
+  for (const column of [/Motivo/, /Ubicación/, /Rendimiento/]) await expect(queue.getByRole('columnheader', { name: column })).toHaveCount(0);
   const soloUci = queue.getByRole('row', { name: /solo.uci@example.com/ });
   await expect(soloUci).toContainText('Sin dato');
   await expect(soloUci).not.toContainText(/\b0\b/);
-  await expect(queue.getByRole('row', { name: /solo.adem@example.com/ })).toContainText('Sin dato');
   const axe = await new AxeBuilder({ page }).include('.nsk-attention').analyze();
   expect(axe.violations).toEqual([]);
   for (const theme of ['dark', 'light'] as const) {
@@ -248,8 +531,8 @@ test('NSK-IA-001: a linked device beyond the first inventory page is still merge
 test('Usuarios resolves a missing inventory ID only through a complete unique exact email and never opens another account', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
   await mockEmptyScore(page);
-  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, rows: [
-    { email: 'qa.user@example.com', name: 'QA User', user_id: null, uci_rating: null, uci_score: null, uci_previous: null, adem_score: 75, reasons: ['adem'] },
+  await page.route('**/api/cmdb/netskope/experience/attention', (route) => route.fulfill({ json: { adem_available: true, summary: { adem_listed: 0, office_listed: 0, office_poor: 0, office_fair: 0, remote_listed: 0, unknown_presence: 0 }, rows: [
+    { email: 'qa.user@example.com', name: 'QA User', user_id: null, uci_rating: null, uci_score: null, uci_previous: null, adem_score: 75, reasons: ['adem'], presence: 'unknown', performance_band: null },
   ] } }));
   const similar = { object_id: 999, display_name: 'Other user', attributes: { email: 'qa.user@example.com.other' } };
   const exact = { object_id: 601, display_name: 'QA User', attributes: { email: 'QA.User@Example.com' } };
@@ -266,7 +549,7 @@ test('Usuarios resolves a missing inventory ID only through a complete unique ex
       : kind === 'incomplete' ? { rows: [exact], total: 51 } : { rows: [similar], total: 1 };
     deviceReads.length = 0;
     await page.goto('/netskope/experience');
-    await page.getByRole('region', { name: 'Usuarios para revisar' }).getByRole('button', { name: /QA User/ }).click();
+    await page.getByRole('region', { name: 'Personas para revisar' }).getByRole('button', { name: /QA User/ }).click();
     const drawer = page.getByRole('dialog', { name: 'QA User' });
     await expect(drawer).toBeVisible();
     if (kind === 'unique') {
@@ -280,18 +563,19 @@ test('Usuarios resolves a missing inventory ID only through a complete unique ex
   }
 });
 
-test('Usuarios keeps empty and failed sources explicit and retries the review list', async ({ page }) => {
+test('Riesgo keeps empty and failed sources explicit and retries the review list', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'netskope:uba_read'] });
   let failed = true;
   await page.route('**/api/cmdb/netskope/experience/attention', (route) => failed
     ? route.fulfill({ status: 503, json: { detail: 'Unavailable' } })
-    : route.fulfill({ json: { adem_available: false, rows: [] } }));
+    : route.fulfill({ json: { adem_available: false, summary: { adem_listed: 0, office_listed: 0, office_poor: 0, office_fair: 0, remote_listed: 0, unknown_presence: 0 }, rows: [] } }));
   await page.goto('/netskope/experience');
-  await expect(page.getByText('No se pudieron leer los usuarios para revisar')).toBeVisible();
+  await expect(page.getByText('No se pudieron leer las personas para revisar')).toBeVisible();
   failed = false;
   await page.getByRole('button', { name: 'Reintentar revisión' }).click();
-  await expect(page.getByText('Sin usuarios en la lista de revisión')).toBeVisible();
-  await expect(page.getByText('Rendimiento no disponible')).toBeVisible();
+  await expect(page.getByText('Sin personas en la lista de revisión')).toBeVisible();
+  // An ADEM outage belongs to Rendimiento; the risk queue does not depend on it.
+  await expect(page.getByText('Rendimiento no disponible')).toHaveCount(0);
   await page.route('**/api/cmdb/netskope/uci/companies', (route) => route.fulfill({ json: { companies: [], previous_week: null, omitted_users: 0 } }));
   await page.getByRole('tab', { name: 'Por empresa' }).click();
   await expect(page.getByText('Sin empresas para comparar')).toBeVisible();

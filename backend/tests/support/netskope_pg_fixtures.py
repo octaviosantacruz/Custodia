@@ -87,6 +87,7 @@ async def seed_snapshot(pool, run_id, device_id: str, attributes: dict, captured
 async def reset_netskope_runs(pool) -> None:
     async with pool.connection() as conn:
         await conn.execute("DELETE FROM public.netskope_device_snapshots")
+        await conn.execute("DELETE FROM public.netskope_device_presence_days")
         await conn.execute("DELETE FROM public.netskope_reported_counts")
         await conn.execute("DELETE FROM public.cyberark_ingestion_runs WHERE source_system = 'netskope' AND triggered_by = 'test-suite'")
 

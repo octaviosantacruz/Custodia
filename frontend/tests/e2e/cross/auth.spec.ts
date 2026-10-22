@@ -225,7 +225,8 @@ test('top navigation separates tool selection from workspace selection', async (
   await page.goto('/pam');
 
   await expect(page.getByRole('button', { name: /Cambiar herramienta. Actual: CyberArk$/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Cambiar workspace.*Métricas/ })).toBeVisible();
+  await expect(page.getByRole('banner').getByRole('button', { name: /Cambiar workspace/ })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Métricas', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('button', { name: /Cambiar herramienta/ }).locator('.tool-logo img:visible')).toHaveAttribute('src', '/cyberark-logo-white.png');
   await page.getByRole('button', { name: /Cambiar herramienta/ }).click();
 
@@ -266,7 +267,7 @@ test('home marks only Inicio as the current navigation destination', async ({ pa
 test('split navigation remains accessible in light theme', async ({ page }) => {
   await page.addInitScript(() => window.localStorage.setItem('custodia-theme:v1', 'light'));
   await mockAuthenticatedApp(page);
-  await page.goto('/pam/safes');
+  await page.goto('/chains/person');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
   await page.getByRole('button', { name: /Cambiar herramienta/ }).click();
@@ -491,11 +492,15 @@ test('ACCESS-UI-001 an admin adds and removes Custodia roles on an Okta person; 
   await expect(drawer.getByRole('button', { name: /Quitar Lector de plataforma/ })).toHaveCount(0);
 
   await drawer.getByRole('button', { name: /Quitar .* de Ana Okta/ }).click();
+  const removalViews = page.getByRole('alertdialog', { name: 'Quitar rol' }).getByRole('region', { name: 'Vistas después del cambio' });
+  await expect(removalViews).not.toContainText('Netskope');
+  await expect(removalViews).toContainText('CyberArk');
   await page.getByRole('alertdialog', { name: 'Quitar rol' }).getByRole('button', { name: 'Quitar rol' }).click();
   await expect.poll(() => calls.at(-1)).toBe('DELETE /api/auth/users/okta-sub-2/roles/netskope_reader');
   await drawer.getByRole('button', { name: 'Agregar rol a Ana Okta' }).click();
   await expect(page.getByRole('option', { name: /Lector de plataforma/ })).toHaveCount(0);
   await page.getByRole('option', { name: /Lectura de seguridad/ }).click();
+  await expect(page.getByRole('alertdialog', { name: 'Asignar rol' }).getByRole('region', { name: 'Vistas después del cambio' })).toContainText('Netskope');
   await page.getByRole('alertdialog', { name: 'Asignar rol' }).getByRole('button', { name: 'Asignar rol' }).click();
   await expect.poll(() => calls.at(-1)).toBe('POST /api/auth/users/okta-sub-2/roles {"role_code":"security_reader"}');
   const accessibility = await new AxeBuilder({ page }).include('.user-access-drawer').analyze();
@@ -622,7 +627,9 @@ test('top navigation exposes context and keeps its controls accessible', async (
   await expect(topbar.locator('.topbar-leading > *').nth(3)).toHaveClass(/global-search-trigger/);
   await expect(topbar.locator('.topbar-location')).toContainText('Cobertura');
   await expect(topbar.getByRole('button', { name: 'Cambiar herramienta. Actual: CyberArk', exact: true })).toBeVisible();
-  await expect(topbar.getByRole('button', { name: /Cambiar workspace.*Cobertura/ })).toBeVisible();
+  await expect(topbar.getByRole('button', { name: /Cambiar workspace/ })).toHaveCount(0);
+  await expect(topbar.getByRole('button', { name: 'Abrir accesos rápidos', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Cobertura', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(topbar.getByRole('button', { name: 'Abrir notificaciones' })).toBeVisible();
   await expect(topbar.getByRole('switch', { name: 'Incluir internos CyberArk' })).toHaveCount(0);
 
@@ -657,10 +664,11 @@ test('profile and workspace menus retain their controls and accessibility', asyn
   expect(profileResults.violations).toEqual([]);
   await topbar.getByRole('button', { name: 'Abrir menú de usuario' }).click();
 
+  await page.goto('/chains/person');
   await topbar.getByRole('button', { name: /Cambiar workspace/ }).click();
   const workspaceMenu = page.locator('.workspace-menu');
   await expect(workspaceMenu.locator('.workspace-menu-heading')).toHaveCount(0);
-  await expect(workspaceMenu.locator('.workspace-menu-header')).toContainText('Vistas de CyberArk');
+  await expect(workspaceMenu.locator('.workspace-menu-header')).toContainText('Vistas de Conexiones');
 
   const menuResults = await new AxeBuilder({ page })
     .include('.workspace-menu')
@@ -841,63 +849,52 @@ test('Netskope device row opens a short card without unnecessary technical ident
   await expect(signal).toContainText('connect');
 });
 
-test('workspace selector scopes shortcuts and recents to the active tool while keeping its full catalog', async ({ page }) => {
+test('UX-NAV-001 quick access is edited from the remaining view picker and covers every tool', async ({ page }) => {
   let savedVisibleWorkspaces: string[] = [];
   page.on('request', (request) => {
     if (new URL(request.url()).pathname === '/api/workspaces/preferences' && request.method() === 'PUT') {
       savedVisibleWorkspaces = (request.postDataJSON() as { visible_workspaces: string[] }).visible_workspaces;
     }
   });
-  await mockAuthenticatedApp(page, {
-    initialVisibleWorkspaces: ['safes', 'users'],
-    initialRecentWorkspaces: ['posture', 'activity', 'netskopeDemSites', 'general'],
-  });
+  await mockAuthenticatedApp(page, { initialVisibleWorkspaces: ['safes', 'users'] });
+  // CyberArk and Netskope show their views as a bar; their header menu keeps
+  // pinned and recent views of every tool instead of repeating the bar.
   await page.goto('/pam');
+  await expect(page.getByRole('banner').getByRole('button', { name: /Cambiar workspace/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Abrir accesos rápidos', exact: true }).click();
+  const quick = page.getByRole('region', { name: 'Workspaces' });
+  await expect(quick.locator('.workspace-menu-header')).toContainText('Accesos rápidos');
+  await expect(quick.locator('[data-section="tool-workspaces"]')).toHaveCount(0);
+  await expect(quick.locator('[data-section="quick-access"]').getByRole('link', { name: /^CyberArk · Safes/ })).toBeVisible();
+  await quick.locator('[data-section="quick-access"]').getByRole('link', { name: /^CyberArk · Safes/ }).click();
+  await expect(page).toHaveURL(/\/pam\/safes$/);
+  await page.goto('/netskope');
+  await page.getByRole('button', { name: 'Abrir accesos rápidos', exact: true }).click();
+  await expect(quick.locator('[data-section="quick-access"]').getByRole('link', { name: /^CyberArk · Safes/ })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.goto('/chains/person');
   await page.getByRole('button', { name: /Cambiar workspace/ }).click();
   const menu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(menu.locator('.workspace-menu-header')).toContainText('Vistas de CyberArk');
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link', { name: 'Safes' })).toBeVisible();
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link', { name: 'Usuarios y permisos' })).toHaveCount(0);
-  await expect(menu.locator('[data-section="recent"]').getByRole('link')).toHaveCount(1);
-  await expect(menu.locator('[data-section="recent"]').getByRole('link').getByText('Postura', { exact: true })).toBeVisible();
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link')).toContainText(['Métricas', 'Postura', 'Acceso', 'Safes', 'Identidades', 'SIA']);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: 'Métricas' })).toHaveAttribute('aria-current', 'page');
-  await menu.getByRole('button', { name: 'Editar vistas rápidas' }).click();
+  await expect(menu.locator('.workspace-menu-header')).toContainText('Vistas de Conexiones');
+  await menu.getByRole('button', { name: /Fijar vistas rápidas/ }).click();
   const editor = menu.getByRole('dialog', { name: 'Accesos rápidos' });
   await expect(editor).toBeFocused();
   await expect(editor.getByText('2 seleccionados')).toBeVisible();
-  await expect(editor.getByText('Hasta 6 por herramienta')).toBeVisible();
-  await expect(editor.getByText('Postura', { exact: true }).first()).toBeVisible();
-  await editor.getByRole('checkbox', { name: /CyberArk PAM.*Postura/ }).check();
-  await editor.getByRole('checkbox', { name: /CyberArk PAM.*Métricas/ }).check();
-  await editor.getByRole('checkbox', { name: /^CyberArk PAM Acceso ¿Quién llega a qué Safe y por qué\?$/ }).check();
-  await editor.getByRole('checkbox', { name: /CyberArk Identity Administration.*Identidades/ }).check();
+  // One total (three per active platform: six today), spread freely across tools.
+  await expect(editor.getByText('Hasta 6', { exact: true })).toBeVisible();
+  // Tool labels name the platform only, never the internal CyberArk tool.
+  await expect(editor.getByText('CyberArk PAM', { exact: true })).toHaveCount(0);
+  await expect(editor.getByText('CyberArk Identity Administration', { exact: true })).toHaveCount(0);
+  await editor.getByRole('checkbox', { name: /^CyberArk Postura/ }).check();
+  await editor.getByRole('checkbox', { name: /^CyberArk Acceso ¿Quién llega a qué Safe y por qué\?$/ }).check();
+  await editor.getByRole('checkbox', { name: /^CyberArk Identidades/ }).check();
   await editor.getByRole('checkbox', { name: /^Netskope Inventario/ }).check();
-  await editor.getByRole('checkbox', { name: /CyberArk SIA SIA ¿Qué cubre SIA/ }).check();
-  await expect(editor.getByText('8 seleccionados')).toBeVisible();
+  await expect(editor.getByText('6 seleccionados')).toBeVisible();
+  await expect(editor.getByRole('checkbox', { name: /^CyberArk SIA ¿Qué cubre SIA/ })).toBeDisabled();
   await editor.getByRole('button', { name: 'Guardar', exact: true }).click();
-  await expect.poll(() => savedVisibleWorkspaces).toEqual(['safes', 'users', 'posture', 'general', 'graph', 'identity', 'netskopeInventory', 'sia']);
+  await expect.poll(() => savedVisibleWorkspaces).toEqual(['safes', 'users', 'posture', 'graph', 'identity', 'netskopeInventory']);
   await expect(editor).not.toBeVisible();
   await expect(page.getByRole('button', { name: /Cambiar workspace/ })).toBeFocused();
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link', { name: 'Postura' })).toBeVisible();
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link', { name: /^Inventario\b/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link')).toHaveCount(6);
-
-  await page.getByRole('button', { name: /Cambiar herramienta/ }).click();
-  await page.getByRole('region', { name: 'Herramientas' }).getByRole('button', { name: /^Netskope / }).click();
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  await expect(menu.locator('.workspace-menu-header')).toContainText('Vistas de Netskope');
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link', { name: /^Inventario\b/ })).toBeVisible();
-  await expect(menu.locator('[data-section="quick-access"]').getByRole('link', { name: 'Safes' })).toHaveCount(0);
-
-  await menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /^Inventario\b/ }).click();
-  await expect(page).toHaveURL(/\/netskope\/inventory$/);
-
-  await page.getByRole('button', { name: 'Abrir command center' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Command center' });
-  const relations = dialog.getByRole('group', { name: 'CyberArk', exact: true }).getByRole('option', { name: /^Acceso/ });
-  await expect(relations).toBeVisible();
-  await expect(relations.locator('svg')).toHaveCount(1);
 });
 
 /* UX-SEARCH-001: Command-K v2. Navigation commands come from the workspace
@@ -1067,7 +1064,7 @@ for (const authMode of ['local', 'hybrid', 'oidc'] as const) {
   });
 }
 
-test('ACCESS-UI-001 an Okta account reads just "Okta", without observed group names', async ({ page }) => {
+test('ACCESS-UI-001 legacy Okta accounts never infer role sources from observed groups', async ({ page }) => {
   await mockAuthenticatedApp(page, { authMode: 'hybrid', userRows: [
     { actor_id: 'observed-1', email: 'observed@example.com', display_name: 'Miembro observado', auth_source: 'oidc', is_active: true, must_change_password: false, roles: ['reader'], last_login_at: null, observed_groups: ['sg_ds-hub_lectores'], groups_observed_at: '2026-10-03T03:00:00Z' },
   ] });
@@ -1078,8 +1075,69 @@ test('ACCESS-UI-001 an Okta account reads just "Okta", without observed group na
   await row.getByRole('button', { name: 'Gestionar acceso de Miembro observado' }).click();
   const drawer = page.getByRole('dialog', { name: 'Miembro observado' });
   await expect(drawer.getByText('sg_ds-hub_lectores')).toHaveCount(0);
+  await expect(drawer.getByRole('region', { name: 'Origen de roles de Okta' })).toContainText('Sin detalle del grupo');
   await expect(drawer.locator('.access-areas [title="inventory:read"]')).toContainText('Inventario PAM');
   expect((await new AxeBuilder({ page }).include('.user-admin').analyze()).violations).toEqual([]);
+});
+
+for (const canReadMappings of [true, false]) {
+  test(`ACCESS-UI-001 role provenance is specific to the last login and mapping access ${canReadMappings}`, async ({ page }) => {
+    await page.addInitScript((theme) => localStorage.setItem('custodia-theme:v1', theme), test.info().project.use.colorScheme || 'dark');
+    await mockAuthenticatedApp(page, { permissions: canReadMappings ? ['access:manage'] : ['access:directory_read', 'access:roles_read'], userRows: [{
+      actor_id: 'provenance', email: 'sources@example.com', display_name: 'Origen de acceso', auth_source: 'oidc', is_active: true,
+      must_change_password: false, roles: ['reader', 'admin', 'netskope_reader'], last_login_at: '2026-10-19T12:00:00Z',
+      role_assignments: [{ role_code: 'reader', source: 'oidc' }, { role_code: 'admin', source: 'manual' }, { role_code: 'netskope_reader', source: 'oidc' }],
+      role_group_sources: { reader: ['team-old', 'team-shared'], admin: ['never-attribute-manual'], netskope_reader: [] },
+    }] });
+    await page.goto('/admin/access');
+    await page.getByRole('button', { name: 'Gestionar acceso de Origen de acceso' }).click();
+    const drawer = page.getByRole('dialog', { name: 'Origen de acceso' });
+    const source = drawer.getByRole('region', { name: 'Origen de roles de Okta' });
+    if (canReadMappings) {
+      await expect(source.locator('dl > div').filter({ hasText: 'Lector de plataforma' })).toContainText('team-old · team-shared');
+      await expect(source).toContainText('Rol predeterminado de inicio de sesión');
+      await expect(source).toContainText('No confirma pertenencia actual');
+      await expect(source).not.toContainText('never-attribute-manual');
+      await expect(drawer.getByRole('list', { name: 'Roles de Origen de acceso' }).getByRole('button', { name: /Quitar Lector/ })).toHaveCount(0);
+    } else {
+      await expect(source).toHaveCount(0);
+      await expect(drawer).not.toContainText('team-old');
+    }
+    await expect(drawer.getByRole('region', { name: 'Vistas del menú' })).toContainText('Netskope');
+    expect((await new AxeBuilder({ page }).include('.user-access-drawer').analyze()).violations).toEqual([]);
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Gestionar acceso de Origen de acceso' })).toBeFocused();
+  });
+}
+
+test('ACCESS-UI-001 draft views follow direct permissions and linked levels without granting access', async ({ page }) => {
+  const writes: string[] = [];
+  await page.addInitScript((theme) => localStorage.setItem('custodia-theme:v1', theme), test.info().project.use.colorScheme || 'dark');
+  await mockAuthenticatedApp(page, { onRequest: (path) => writes.push(path) });
+  await page.goto('/admin/access');
+  await page.getByRole('tab', { name: /Roles y permisos/ }).click();
+  await page.getByRole('button', { name: 'Nuevo rol', exact: true }).click();
+  const preview = page.getByRole('region', { name: 'Vistas del menú', exact: true });
+  await expect(preview).not.toContainText('Netskope');
+  await page.getByRole('checkbox', { name: 'Habilitar Ingresar a Netskope DLP', exact: true }).check();
+  await expect(preview).not.toContainText('Netskope');
+  await page.getByRole('checkbox', { name: 'Habilitar Inventario, postura y métricas', exact: true }).check();
+  await expect(preview).toContainText('Netskope');
+  await expect(preview).toContainText('Equipos');
+  await expect(preview).not.toContainText('Administradores');
+  await expect(preview).not.toContainText('CyberArk');
+  await page.getByRole('checkbox', { name: 'Habilitar Inventario, postura y métricas', exact: true }).uncheck();
+  await expect(preview).not.toContainText('Netskope');
+  await page.getByRole('checkbox', { name: 'Habilitar Acceso total (superadmin)', exact: true }).check();
+  await expect(preview).toContainText('Netskope');
+  await expect(preview).not.toContainText('Administradores');
+  await page.getByRole('checkbox', { name: 'Habilitar Acceso total (superadmin)', exact: true }).uncheck();
+  await page.getByRole('radio', { name: /Niveles vinculados/ }).check();
+  await page.getByRole('button', { name: 'Nivel para Netskope DLP' }).click();
+  await page.getByRole('option', { name: 'Lector', exact: true }).click();
+  await expect(preview).toContainText('Equipos');
+  expect(writes).not.toContain('/api/access/roles/composite');
+  expect((await new AxeBuilder({ page }).include('.role-admin').analyze()).violations).toEqual([]);
 });
 
 test('ACCESS-UI-001 a role lists its members and adds or removes them from the role itself', async ({ page }) => {
@@ -1259,6 +1317,7 @@ test('editing a saved composition retains its levels until an area is explicitly
   await page.getByRole('button', { name: 'Filtrar roles' }).click();
   await page.getByRole('option', { name: 'Preparados', exact: true }).click();
   await page.getByRole('button', { name: /Lectura de seguridad Niveles vinculados/ }).click();
+  await expect(page.getByRole('region', { name: 'Vistas del menú' })).toHaveText(/Rol preparado: sin acceso efectivo/);
   await expect(page.getByText('legacy_group')).toBeVisible();
   await page.getByRole('button', { name: 'Editar rol', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Nivel para Plataforma' })).toContainText('Lector');
@@ -1269,6 +1328,7 @@ test('editing a saved composition retains its levels until an area is explicitly
   await page.getByRole('button', { name: 'Nivel para Plataforma' }).click();
   await page.getByRole('option', { name: 'Sin participación', exact: true }).click();
   await expect(page.locator('.role-review-changes')).toContainText('Inventario PAM');
+  await expect(page.getByRole('region', { name: 'Vistas del menú' })).toContainText('Netskope');
   await expect(page.locator('.role-impact')).toContainText('El cambio alcanza a todas las identidades con este rol.');
   await page.getByRole('button', { name: 'Guardar cambios', exact: true }).click();
   await page.getByRole('alertdialog', { name: 'Revisar cambios del rol' }).getByRole('button', { name: 'Guardar cambios', exact: true }).click();

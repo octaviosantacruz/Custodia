@@ -47,6 +47,21 @@ export function domainOf(view: WorkspaceView): Domain {
   return CATALOG_BY_ID[view].routingDomain ?? areaOf(view);
 }
 
+/* Quick access grows with the platforms Custodia integrates: three slots per
+   active platform set the total (CyberArk and Netskope today, so six), and the
+   person spreads them freely, even all in one tool. The neutral Conexiones and
+   Administración areas do not add room. The backend keeps a wider guard. */
+export const QUICK_ACCESS_PER_PLATFORM = 3;
+export function quickAccessLimit(): number {
+  const platforms = REGISTERED_DOMAINS.filter((domain) => domain.status === 'active' && domain.access === 'domain').length;
+  return QUICK_ACCESS_PER_PLATFORM * Math.max(platforms, 1);
+}
+
+/** UX-NAV-001: the tool shows its views as a bar, so the header picker is not repeated. */
+export function domainHasSectionNav(id: Domain): boolean {
+  return REGISTERED_DOMAINS.some((domain) => domain.id === id && domain.sectionNav === true);
+}
+
 export function domainLanding(id: Domain): WorkspaceView {
   return DOMAIN_WORKSPACES[id][0] ?? 'general';
 }

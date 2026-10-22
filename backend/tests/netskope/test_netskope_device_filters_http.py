@@ -22,7 +22,7 @@ EMPTY_PAGE = {
 EMPTY_FACETS = {
     key: [] for key in (
         "os", "client_version", "classification_status", "user_status",
-        "company", "last_seen_event", "device_make", "device_model",
+        "company", "last_seen_event", "device_make", "device_model", "onprem_status", "uci_rating",
     )
 }
 
@@ -126,7 +126,7 @@ class NetskopeDeviceFiltersHttpTests(unittest.IsolatedAsyncioTestCase):
             "user_status": "enabled", "company": "ITTI", "last_seen_event": "Uninstalled",
             "device_make": "", "device_model": "", "hostname": "", "username": "",
             "observed_user_status": "", "observed_user": "",
-            "onprem_status": "off-prem", "client_config": "Default tenant config",
+            "onprem_status": "off-prem", "client_config": "Default tenant config", "uci_rating": "",
         })
         self.assertEqual(args[6], "gt_30d")
         self.assertEqual(listing.await_args.kwargs["coverage_risk"], "")

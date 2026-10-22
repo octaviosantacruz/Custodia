@@ -7,16 +7,15 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from fastapi import HTTPException
+from pydantic import ValidationError
 from app.cross.api.routes.workspace_preferences import (
     ALLOWED_WORKSPACES,
-    QUICK_ACCESS_WORKSPACES_BY_DOMAIN,
     WorkspacePreferencesUpdate,
     _validate,
-    _validate_visible_per_domain,
     workspace_preferences,
     workspace_preferences_update,
 )
-from app.cross.repositories.workspace_preferences import save_workspace_preferences
+from app.cross.repositories.workspace_preferences import MAX_VISIBLE, save_workspace_preferences
 
 FRONTEND_SRC = Path(__file__).resolve().parents[3] / "frontend" / "src"
 
@@ -31,7 +30,9 @@ def _catalog_entries() -> list[dict]:
     entries = []
     for path in sorted(FRONTEND_SRC.glob("**/source.ts")):
         text = path.read_text(encoding="utf-8")
-        for match in re.finditer(r"\n    \{\s*\n\s*id:\s*'([^']+)'(.*?)\n    \},", text, re.DOTALL):
+        # A block comment may sit between the brace and `id:` (it did for netskopeOfficeExperience and the
+        # entry slipped past this contract); skip it instead of missing the workspace.
+        for match in re.finditer(r"\n    \{\s*\n(?:\s*/\*.*?\*/\s*\n)?\s*id:\s*'([^']+)'(.*?)\n    \},", text, re.DOTALL):
             body = match.group(2)
             domain = re.search(r"domain:\s*'([^']+)'", body)
             entries.append({
@@ -53,12 +54,8 @@ class WorkspaceCatalogContractTests(unittest.TestCase):
         self.assertGreater(len(catalog_ids), 20)
         self.assertEqual(catalog_ids - ALLOWED_WORKSPACES, set())
 
-    def test_quick_access_domains_mirror_the_switcher_workspaces(self):
-        expected: dict[str, set[str]] = {}
-        for entry in _catalog_entries():
-            if entry["switcher"]:
-                expected.setdefault(entry["domain"], set()).add(entry["id"])
-        self.assertEqual(QUICK_ACCESS_WORKSPACES_BY_DOMAIN, expected)
+    def test_a_commented_registration_is_still_parsed(self):
+        self.assertIn("netskopeOfficeExperience", {entry["id"] for entry in _catalog_entries()})
 
     def test_chain_workspaces_added_by_the_catalog_are_accepted(self):
         for view in ("graph", "person", "netskopeChains"):
@@ -124,18 +121,15 @@ class WorkspacePreferencesRouteTests(unittest.TestCase):
             ))
         self.assertEqual(overlap.exception.status_code, 422)
 
-    def test_quick_access_allows_six_pam_workspaces_plus_a_custodia_shortcut(self):
-        six_pam = ["general", "posture", "graph", "safes", "identity", "sia"]
-        combined = [*six_pam, "person"]
-        self.assertEqual(WorkspacePreferencesUpdate(visible_workspaces=combined).visible_workspaces, combined)
-        self.assertEqual(_validate_visible_per_domain(combined), combined)
-        # Inventario became a seventh CyberArk destination (2026-10-10); like
-        # Netskope, the domain now has more destinations than the per-tool cap,
-        # so pinning all of them is rejected.
-        self.assertEqual(QUICK_ACCESS_WORKSPACES_BY_DOMAIN["pam"], {*six_pam, "assets"})
-        with self.assertRaises(HTTPException) as over_cap:
-            _validate_visible_per_domain([*six_pam, "assets"])
-        self.assertEqual(over_cap.exception.status_code, 422)
+    def test_quick_access_has_no_per_tool_cap_only_a_total(self):
+        # UX-NAV-001: a person may pin every quick access in one tool.
+        seven_pam = ["general", "posture", "graph", "safes", "identity", "sia", "assets"]
+        self.assertEqual(_validate(seven_pam, "visible_workspaces"), seven_pam)
+        self.assertEqual(WorkspacePreferencesUpdate(visible_workspaces=seven_pam).visible_workspaces, seven_pam)
+        too_many = [*seven_pam, "person", "help", "users", "activity", "netskope", "netskopePosture"]
+        self.assertGreater(len(too_many), MAX_VISIBLE)
+        with self.assertRaises(ValidationError):
+            WorkspacePreferencesUpdate(visible_workspaces=too_many)
 
     def test_saves_only_allowlisted_preferences_for_current_actor(self):
         payload = WorkspacePreferencesUpdate(
@@ -269,6 +263,19 @@ class WorkspacePreferencesRouteTests(unittest.TestCase):
             (["inventory:read", "netskope:read"], ["netskope"]),
             (["inventory:read", "access:manage", "netskope:read", "netskope:dlp_read"], ["netskope"]),
             (["inventory:read", "netskope:read", "netskope:uba_read"], ["netskope", "netskopeUci"]),
+        ):
+            with patch("app.cross.api.routes.workspace_preferences.get_workspace_preferences", new=AsyncMock(return_value=saved)), patch(
+                "app.cross.api.routes.workspace_preferences.get_actor_permissions", new=AsyncMock(return_value=permissions),
+            ):
+                result = asyncio.run(workspace_preferences(self.request, "reader"))
+            self.assertEqual(result["visible_workspaces"], expected, permissions)
+
+    def test_office_workspace_is_opened_only_by_the_strict_uba_permission(self):
+        saved = {"visible_workspaces": ["netskope", "netskopeOfficeExperience"], "hidden_workspaces": [], "recent_workspaces": ["netskopeOfficeExperience"]}
+        from app.cross.api.routes.workspace_preferences import workspace_preferences
+        for permissions, expected in (
+            (["inventory:read", "access:manage", "netskope:read", "netskope:dlp_read", "netskope:admin_inventory_read"], ["netskope"]),
+            (["inventory:read", "netskope:read", "netskope:uba_read"], ["netskope", "netskopeOfficeExperience"]),
         ):
             with patch("app.cross.api.routes.workspace_preferences.get_workspace_preferences", new=AsyncMock(return_value=saved)), patch(
                 "app.cross.api.routes.workspace_preferences.get_actor_permissions", new=AsyncMock(return_value=permissions),

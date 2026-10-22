@@ -82,7 +82,7 @@ export type NetskopeListResponse = {
    charts group by, including the literal 'Sin dato' for missing values.
    NSK-XMET-001 adds the observed-user drills: the status of the exact
    NSK-DEV-001 match and the resolved user's source_id. */
-export type NetskopeDeviceFilterKey = 'os' | 'client_version' | 'classification_status' | 'user_status' | 'company' | 'last_seen_event' | 'device_make' | 'device_model' | 'hostname' | 'username' | 'observed_user_status' | 'observed_user' | 'onprem_status' | 'client_config';
+export type NetskopeDeviceFilterKey = 'os' | 'client_version' | 'classification_status' | 'user_status' | 'company' | 'last_seen_event' | 'device_make' | 'device_model' | 'hostname' | 'username' | 'observed_user_status' | 'observed_user' | 'onprem_status' | 'client_config' | 'uci_rating';
 export type NetskopeDeviceFilters = Record<NetskopeDeviceFilterKey, string>;
 export type NetskopeRetiredActivityUser = { object_id: number; source_id: string | null; display_name: string | null; email: string | null; device_count: number; latest_event: string | null; latest_device: string | null };
 export type NetskopeRetiredActivity = { days: number; total: number; rows: NetskopeRetiredActivityUser[] };
@@ -181,6 +181,16 @@ export type NetskopeMetrics = {
   users_by_device_count: NetskopeMetricBucket[];
   users_by_recent_device_age: NetskopeMetricBucket[];
   coverage_risk_devices_by_user: NetskopeMetricBucket[];
+  /** Fleet health of the default device population. A comparison without a baseline is null, never 0. */
+  fleet_devices: number;
+  fleet_signal_24h: number;
+  fleet_client_current: number | null;
+  fleet_client_evaluated: number | null;
+  fleet_os_supported: number | null;
+  fleet_os_evaluated: number | null;
+  fleet_on_prem: number;
+  fleet_location_reported: number;
+  devices_duplicate_hostnames: number;
 };
 
 /** Selection responses omit data whose SQL was not requested. */
@@ -203,6 +213,11 @@ export type NetskopeDataWidgetId =
   | 'devices_observed_user_matched'
   | 'devices_observed_user_unmatched'
   | 'users_without_observed_devices'
+  | 'fleet_signal_24h'
+  | 'fleet_client_current'
+  | 'fleet_os_supported'
+  | 'fleet_on_prem'
+  | 'devices_duplicate_hostnames'
   | 'alerts_7d'
   | 'alerts_30d'
   | 'alerts_90d';
@@ -262,6 +277,7 @@ export type NetskopeDeviceChanges = {
   samples: Record<NetskopeDeviceChangeKind, Array<{ device_id: string; hostname: string | null; before_value: string | null; after_value: string | null }>>;
 };
 
+export type NetskopeGoldenSuggestion = { releases: string[]; source_url: string; fetched_at: string } | null;
 export type NetskopeBaselineRecord<T> = { value: T; note: string | null; updated_by: string; updated_at: string };
 export type NetskopeBaselines = {
   client_golden_releases: NetskopeBaselineRecord<{ releases: string[] }> | null;
@@ -425,11 +441,50 @@ export type NetskopeAnomalies = {
 };
 
 export type NetskopeAttentionRow = {
-  email: string; name: string | null; user_id: string | null;
+  email: string; name: string | null; user_id: string | null; company?: string | null;
   uci_rating: NetskopeUciRating | null; uci_score: number | null; uci_previous: number | null;
   adem_score: number | null; reasons: ('uci' | 'adem')[];
+  presence: NetskopePresence; office_days?: number; performance_band: NetskopePerformanceBand | null;
 };
-export type NetskopeAttention = { rows: NetskopeAttentionRow[]; adem_available: boolean };
+export type NetskopePerformanceBand = 'poor' | 'fair' | 'good';
+export type NetskopePresence = 'office' | 'remote' | 'unknown';
+export type NetskopeAttentionSummary = { adem_listed: number; office_listed: number; office_poor: number; office_fair: number; remote_listed: number; unknown_presence: number };
+/* NSK-EXP-OFFICE-001: ADEM score measured only while people were in the office. */
+export type NetskopeOfficePerson = {
+  email: string; name: string | null; company: string | null; office_days: number; office_minutes: number;
+  office_score: number | null; office_band: NetskopePerformanceBand | null; remote_score: number | null; worse_in_office: boolean;
+};
+export type NetskopeOfficeSummary = {
+  office_people: number; measured: number; poor: number; fair: number; good: number; worse_in_office: number; days_measured: number;
+  office_avg: number | null; remote_avg: number | null; paired: number;
+};
+export type NetskopeOfficeWeek = {
+  week_start: string; days_measured: number; office_people: number | null; measured: number | null;
+  poor: number | null; fair: number | null; worse_in_office: number | null; office_avg: number | null; remote_avg: number | null;
+};
+export type NetskopeOfficeWeekday = { weekday: number; name: string; days_measured: number; office_people_per_day: number | null; office_avg: number | null; flagged_person_days: number | null };
+export type NetskopeOfficeCompany = { company: string; office_people: number; measured: number; flagged: number; worse_in_office: number; office_avg: number | null };
+export type NetskopeOfficePlace = 'office' | 'remote' | 'no_signal';
+export type NetskopeOfficePersonDay = { day: string; place: NetskopeOfficePlace; measured: boolean; office_minutes: number; office_score: number | null; remote_minutes: number; remote_score: number | null };
+export type NetskopeOfficePerson7d = { email: string; window_start: string; window_end: string; days: NetskopeOfficePersonDay[] };
+/* NSK-EXP-OFFICE-002: one point per day; a person's fields only come when a person was asked for. */
+export type NetskopeOfficeTimelinePoint = {
+  day: string; measured: boolean; office_avg: number | null; office_people: number | null; remote_avg: number | null; remote_people: number | null;
+  person_office?: number | null; person_office_minutes?: number; person_remote?: number | null; person_remote_minutes?: number;
+};
+export type NetskopeOfficeTimeline = {
+  first: string; last: string; company: string | null; min_people: number;
+  companies: { company: string; people: number }[];
+  person: { email: string; name: string | null; company: string | null } | null;
+  points: NetskopeOfficeTimelinePoint[];
+};
+export type NetskopeOfficeExperience = {
+  configured: boolean; window_start: string; window_end: string; last_measured_at: string | null; office_gap: number;
+  summary: NetskopeOfficeSummary; people: NetskopeOfficePerson[]; people_total: number; series: NetskopeOfficeWeek[];
+  measurement?: { status: string; started_at: string | null; completed_at: string | null } | null;
+  weekdays?: NetskopeOfficeWeekday[]; companies?: { rows: NetskopeOfficeCompany[]; omitted_people: number } | null;
+};
+export type NetskopeAttention = { rows: NetskopeAttentionRow[]; performance_rows: NetskopeAttentionRow[]; adem_available: boolean; summary: NetskopeAttentionSummary };
 
 /* NSK-POSTURE-001: checks evaluated at read time; each count is its inventory drill. */
 export type NetskopePostureSeverity = 'high' | 'medium' | 'low';
@@ -476,12 +531,15 @@ export type NetskopePresenceResponse = {
 };
 
 /* NSK-FLEET-001: grouped fleet reading for Equipos. Counts are over active devices with an event in 7 days. */
-export type NetskopeFleetGroupBy = 'company' | 'os' | 'client_config' | 'device_make';
+export type NetskopeFleetGroupBy = 'company' | 'os' | 'client_config' | 'device_make' | 'onprem_status' | 'uci_rating';
 export type NetskopeFleetCounts = {
   devices: number; signal_24h: number;
   client_current: number; client_evaluated: number;
   os_supported: number; os_evaluated: number;
   on_prem: number; location_reported: number;
+  /* NSK-EXP-UCI-001: users with Poor / Moderate UCI, devices whose UCI is known at all, office devices of Poor users. */
+  client_one_behind: number; client_two_plus_behind: number;
+  uci_low: number; uci_moderate: number; uci_evaluated: number; on_prem_uci_low: number;
 };
 export type NetskopeFleetGroups = {
   group_by: NetskopeFleetGroupBy;

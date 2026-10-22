@@ -41,30 +41,19 @@ test('readers find PAM views without seeing restricted workspaces', async ({ pag
   await mockAuthenticatedApp(page, { permissions: ['inventory:read'] });
   await page.goto('/pam');
 
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const menu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Postura ¿Qué hallazgos requieren atención\?/ })).toBeVisible();
-  await expect(menu.getByRole('link', { name: /Usuarios y permisos Cuentas, roles y acceso a Custodia/ })).toHaveCount(0);
-  await expect(menu.getByRole('link', { name: /Acceso ¿Quién llega a qué Safe y por qué\?/ })).toHaveCount(0);
-  await expect(menu.getByRole('link', { name: /Plataformas Safes y cuentas por plataforma/ })).toHaveCount(0);
-  await expect(menu.getByRole('link', { name: /Conectores PSM PSM y plataformas vinculadas/ })).toHaveCount(0);
+  const menu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
+  await expect(menu.getByRole('link', { name: /^Postura$/ })).toBeVisible();
+  await expect(menu.getByRole('link', { name: /^Usuarios y permisos$/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /^Acceso$/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /^Plataformas$/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /^Conectores PSM/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Salud PAM/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Activos de Access/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Conectores SIA/ })).toHaveCount(0);
   await expect(menu.getByRole('link', { name: /Máquinas virtuales SIA/ })).toHaveCount(0);
 
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(menu).toBeVisible();
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Postura ¿Qué hallazgos requieren atención\?/ })).toBeVisible();
-  await expect.poll(() => menu.evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    return rect.left >= 0 && rect.right <= window.innerWidth;
-  })).toBe(true);
-
-  await page.goto('/pam');
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const pamMenu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(pamMenu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /SIA.*¿Qué cubre SIA: políticas, máquinas, bases\?/ })).toBeVisible();
+  const pamMenu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
+  await expect(pamMenu.getByRole('link', { name: /^SIA$/ })).toBeVisible();
 });
 
 test('readers see metrics without synchronization controls', async ({ page }) => {
@@ -82,10 +71,9 @@ test('readers see metrics without synchronization controls', async ({ page }) =>
 test('infrastructure inventory explains Safe and SIA coverage for a migrated connection (UX-AUD2-009)', async ({ page }) => {
   await mockAuthenticatedApp(page);
   await page.goto('/pam');
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
   // The migrated-connection inventory is its own CyberArk destination
   // (2026-10-10), no longer a Cobertura tab inside the SIA hub.
-  await page.getByRole('region', { name: 'Workspaces' }).locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Cobertura.*¿Dónde aparecen las conexiones migradas\?/ }).click();
+  await page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Cobertura', exact: true }).click();
 
   await expect(page).toHaveURL(/\/pam\/assets$/);
   await expect(page.getByRole('heading', { name: 'Cobertura', exact: true, level: 1 })).toBeVisible();
@@ -133,11 +121,7 @@ test('Cadenas PAM walks the map column by column, swaps a branch and reaches inv
   await page.goto('/pam/graph');
 
   await expect(page.getByRole('heading', { name: 'Acceso', exact: true, level: 1 })).toBeVisible();
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const workspaceMenu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(workspaceMenu.locator('[data-section="quick-access"]').getByRole('link', { name: /Acceso.*De personas y roles/ })).toHaveCount(0);
-  await page.keyboard.press('Escape');
-  await expect(workspaceMenu).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Acceso', exact: true })).toHaveAttribute('aria-current', 'page');
 
   await page.getByRole('searchbox', { name: 'Buscar nodos de la cadena PAM' }).fill('Ada');
   await page.getByRole('option', { name: /^Ada u-8/ }).click();
@@ -384,9 +368,13 @@ test('connectors workspace unifies PSM and SIA inventories without joining their
   await expect(page.getByText('PSM-01', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /Unix/ })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Elegir inventario de conectores' })).toBeVisible();
+  await page.getByRole('searchbox', { name: 'Buscar conectores PSM' }).fill('PSM-01');
   await page.getByRole('button', { name: 'Elegir inventario de conectores' }).click();
   await page.getByRole('option', { name: 'SIA' }).click();
   await expect(page.getByText('connector-1', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Elegir inventario de conectores' }).click();
+  await page.getByRole('option', { name: 'PSM', exact: true }).click();
+  await expect(page.getByRole('searchbox', { name: 'Buscar conectores PSM' })).toHaveValue('PSM-01');
 });
 
 test('posture workspace exposes evidence and administrative status action', async ({ page }) => {
@@ -489,11 +477,10 @@ test('Access assets is no longer a destination and Inventario is its own CyberAr
   await mockAuthenticatedApp(page);
   await page.goto('/pam');
 
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const menu = page.getByRole('region', { name: 'Workspaces' });
+  const menu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
   await expect(menu.getByRole('link', { name: /Activos de Access/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Cobertura.*¿Dónde aparecen las conexiones migradas\?/ })).toHaveCount(1);
-  await expect(menu.getByRole('link', { name: /SIA.*¿Qué cubre SIA: políticas, máquinas, bases\?/ })).toHaveCount(1);
+  await expect(menu.getByRole('link', { name: /^Cobertura$/ })).toHaveCount(1);
+  await expect(menu.getByRole('link', { name: /^SIA$/ })).toHaveCount(1);
 });
 
 test('an out-of-order SIA VM search response never clobbers a newer search result', async ({ page }) => {
@@ -549,15 +536,14 @@ test('admins discover the unified connectors workspace from the Safes infrastruc
   await page.goto('/pam/connectors');
   await expect(page.getByRole('tablist', { name: 'Secciones de Servicio' }).getByRole('tab', { name: 'Conectores' })).toHaveAttribute('aria-selected', 'true');
 
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const menu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Conectores PSM y SIA.*Conectores de Privilege Cloud y SIA/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Plataformas Safes y cuentas por plataforma/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Salud PAM/ })).toHaveCount(0);
+  const menu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
+  await expect(menu.getByRole('link', { name: /^Conectores PSM y SIA$/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /^Plataformas$/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /Salud PAM/ })).toHaveCount(0);
   // IDENTITY_SIA_CONSOLIDATION_PLAN_2026-09-12.md §3.2 (Fase 2): SIA
   // Resources is no longer a separate switcher destination -- it's the
   // default Recursos section inside the single SIA hub.
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Máquinas virtuales SIA/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /Máquinas virtuales SIA/ })).toHaveCount(0);
 });
 
 test('legacy SIA connectors URL lands on the unified workspace and shows status without host data', async ({ page }) => {
@@ -587,16 +573,15 @@ test('SIA database accounts is reachable inside the SIA hub, not a separate swit
   await mockAuthenticatedApp(page);
   await page.goto('/pam');
 
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const menu = page.getByRole('region', { name: 'Workspaces' });
+  const menu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
   // IDENTITY_SIA_CONSOLIDATION_PLAN_2026-09-12.md §3.1/§3.2: neither
   // Federaciones (Identidades' Fase 1) nor Cuentas de base de datos SIA
   // (SIA's Fase 2) are separate switcher destinations anymore -- both
   // live as tabs inside their single hub.
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Cuentas de base de datos SIA/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Federaciones/ })).toHaveCount(0);
-  await expect(menu.getByRole('link', { name: /Identidades.*¿Quién existe en Identity y en qué grupos\?/ })).toHaveCount(1);
-  await expect(menu.getByRole('link', { name: /SIA.*¿Qué cubre SIA: políticas, máquinas, bases\?/ })).toHaveCount(1);
+  await expect(menu.getByRole('link', { name: /Cuentas de base de datos SIA/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /Federaciones/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /^Identidades$/ })).toHaveCount(1);
+  await expect(menu.getByRole('link', { name: /^SIA$/ })).toHaveCount(1);
 });
 
 test('SIA database accounts workspace shows platform/database without account credentials', async ({ page }) => {

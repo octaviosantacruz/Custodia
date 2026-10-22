@@ -2,7 +2,7 @@ import { api } from './api';
 
 /** ACCESS-UI-001: 'oidc' roles come from the identity's Okta groups; 'manual' ones were assigned in Custodia. */
 export type RoleAssignment = { role_code: string; source: 'oidc' | 'manual' };
-export type User = { actor_id: string; email: string; display_name: string; is_active: boolean; must_change_password: boolean; roles: string[]; role_assignments?: RoleAssignment[]; auth_source: 'local' | 'oidc'; last_login_at: string | null; observed_groups?: string[] | null; groups_observed_at?: string | null };
+export type User = { actor_id: string; email: string; display_name: string; is_active: boolean; must_change_password: boolean; roles: string[]; role_assignments?: RoleAssignment[]; auth_source: 'local' | 'oidc'; last_login_at: string | null; observed_groups?: string[] | null; groups_observed_at?: string | null; role_group_sources?: Record<string, string[]> | null };
 export type Person = { key: string; email: string; display_name: string; identities: User[] };
 
 export type UserListFilters = { search: string; roleFilter: string; statusFilter: string; page: number; pageSize: number };

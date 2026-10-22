@@ -95,7 +95,7 @@ async def find_people(pool: AsyncConnectionPool, q: str, role: str, status: str,
         by_actor = {row["actor_id"]: row for row in observations}
         for identity in identities:
             observation = by_actor.get(identity["actor_id"], {})
-            identity.update({key: observation.get(key) for key in ("observed_groups", "groups_observed_at")})
+            identity.update({key: observation.get(key) for key in ("observed_groups", "groups_observed_at", "role_group_sources")})
     return result
 
 

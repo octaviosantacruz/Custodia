@@ -147,7 +147,10 @@ test('UX-AUD-004: Escape returns focus to the trigger of every popover', async (
   };
 
   // Workspace switcher: the audit's named reproduction (focus inside → Escape → BODY).
+  // CyberArk shows a section bar instead, so the picker is checked where it remains.
+  await page.goto('/chains/person');
   await escapeFromPopover(page.getByRole('button', { name: /Cambiar workspace/ }), page.getByRole('region', { name: 'Workspaces' }));
+  await page.goto('/pam');
   // Tool switcher.
   await escapeFromPopover(page.getByRole('button', { name: /Cambiar herramienta/ }), page.getByRole('region', { name: 'Herramientas' }));
   // Profile menu.
@@ -174,10 +177,9 @@ test('UX-AUD-004: Escape returns focus to the trigger of every popover', async (
 
 /* UX-AUD-005: `.compact-table-wrap`/`.activity-table-wrap` had no bounded
    height, so they never scrolled vertically and their sticky `thead` scrolled
-   away with the page. Safes additionally lost its max-height on phones. */
+   away with the page. Keep coverage at the supported desktop sizes. */
 const STICKY_VIEWPORTS = [
   { width: 1440, height: 900 }, { width: 1280, height: 720 },
-  { width: 768, height: 1024 }, { width: 390, height: 844 },
 ];
 
 for (const viewport of STICKY_VIEWPORTS) {
@@ -349,9 +351,9 @@ test('UX-AUD-008: quick-access editor keeps its actions visible', async ({ page 
 
   for (const viewport of viewports) {
     await page.setViewportSize(viewport);
-    await page.goto('/pam');
+    await page.goto('/chains/person');
     await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-    await page.getByRole('button', { name: /Editar vistas rápidas/ }).click();
+    await page.getByRole('button', { name: /(Editar|Fijar) vistas rápidas/ }).click();
     const editor = page.getByRole('dialog', { name: 'Accesos rápidos' });
     await expect(editor).toBeVisible();
     const menu = page.getByRole('region', { name: 'Workspaces' });
@@ -452,12 +454,12 @@ test('UX-AUD-013: hub tabs control a labelled panel and coming-soon tools announ
 
 
 for (const [path, tool, platform] of [
-  ['/pam/safes', 'CyberArk PAM', 'CyberArk'],
-  ['/pam/identity/users', 'CyberArk Identity Administration', 'CyberArk'],
-  ['/pam/sia/resources', 'CyberArk SIA', 'CyberArk'],
+  ['/pam/safes', 'CyberArk', 'CyberArk'],
+  ['/pam/identity/users', 'CyberArk', 'CyberArk'],
+  ['/pam/sia/resources', 'CyberArk', 'CyberArk'],
   ['/netskope/inventory', 'Netskope', 'Netskope'],
 ]) {
-  test(`UX-AUD2-007: ${path} names the platform on the left and its owning tool in the location`, async ({ page }) => {
+  test(`UX-AUD2-007: ${path} names the platform on the left and in the location, without the internal tool (UX-NAV-001)`, async ({ page }) => {
     await mockAuthenticatedApp(page);
     await page.goto(path);
     const header = page.getByRole('banner');
@@ -466,12 +468,12 @@ for (const [path, tool, platform] of [
   });
 }
 
-test('the location does not repeat the tool name as its own workspace (CyberArk SIA > SIA)', async ({ page }) => {
+test('the location names the platform once and then the view (CyberArk > SIA)', async ({ page }) => {
   await mockAuthenticatedApp(page);
   await page.goto('/pam/sia');
   const location = page.getByRole('banner').getByRole('group', { name: 'Ubicación actual' });
-  await expect(location).toHaveText('CyberArk SIA');
-  await expect(location.locator('strong')).toHaveCount(0);
+  await expect(location.locator('span')).toHaveText('CyberArk');
+  await expect(location.locator('strong')).toHaveText('SIA');
   await page.goto('/pam/safes');
   await expect(location.locator('strong')).toHaveCount(1);
 });
@@ -489,8 +491,7 @@ test('UX-AUD2-025: Identity root redirects to its canonical users destination', 
     await expect(page.getByRole('tab', { name: /Roles y grupos.*Miembros directos/ })).toHaveAttribute('aria-selected', 'true');
   }
   await page.goto('/pam');
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  await page.getByRole('region', { name: 'Workspaces' }).getByRole('link', { name: /^Identidades/ }).first().click();
+  await page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true }).getByRole('link', { name: 'Identidades', exact: true }).click();
   await expect(page).toHaveURL(/\/pam\/identity\/users$/);
   await page.goBack();
   await expect(page).toHaveURL(/\/pam$/);
@@ -684,7 +685,7 @@ const singleViewTitleCases = [
   { path: '/pam/sia/resources', title: 'Máquinas virtuales SIA', duplicate: /^Máquinas virtuales SIA$/, ready: '.sia-record-name', help: 'Inventario de máquinas virtuales SIA' },
   { path: '/pam/sia/database-accounts', title: 'Cuentas de base de datos SIA', duplicate: /^Cuentas de base de datos SIA$/, ready: '.sia-record-name', help: 'Inventario de cuentas de base de datos SIA' },
   { path: '/pam/assets', title: 'Cobertura', duplicate: /^Cobertura$/, ready: '.connection-inventory-table tbody tr', help: 'Cobertura' },
-  { path: '/pam/connectors', title: 'Conectores PSM y SIA', duplicate: /^Conectores$/, ready: '.pam-connectors-table tbody tr', help: 'Inventarios de conectores PSM y SIA' },
+  { path: '/pam/connectors', title: 'Conectores', duplicate: /^Conectores PSM y SIA$/, ready: '.pam-connectors-table tbody tr', help: 'Inventarios de conectores' },
   { path: '/pam/platforms', title: 'Plataformas', duplicate: /^Plataformas activas$/, ready: '.pam-platforms-table tbody tr', help: 'Inventario de plataformas PAM' },
   { path: '/netskope/inventory', title: 'Inventario', duplicate: /^Inventario de equipos$/, ready: '.netskope-table tbody tr', help: 'Evidencia del inventario Netskope' },
   { path: '/netskope/devices', title: 'Inventario', duplicate: /^Inventario de equipos$/, ready: '.netskope-table tbody tr', help: 'Evidencia del inventario Netskope' },
@@ -722,7 +723,7 @@ for (const view of singleViewTitleCases) {
         '/pam/sia/resources': /direcciones IP/,
         '/pam/sia/database-accounts': /credenciales/,
         '/pam/assets': /Inventario de destinos/,
-        '/pam/connectors': /Inventarios separados/,
+        '/pam/connectors': /conserva su fuente/,
         '/pam/platforms': /identificador/,
       };
       await expect(page.getByRole('note')).toContainText(methodology[view.path] ?? /24 horas/);

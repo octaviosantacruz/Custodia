@@ -322,6 +322,16 @@ class NetskopeMetricsResponse(BaseModel):
     users_by_device_count: list[NetskopeBucket] | None = None
     users_by_recent_device_age: list[NetskopeBucket] | None = None
     coverage_risk_devices_by_user: list[NetskopeBucket] | None = None
+    # Fleet health of the default device population; a comparison without a baseline is null, never 0.
+    fleet_devices: int | None = None
+    fleet_signal_24h: int | None = None
+    fleet_client_current: int | None = None
+    fleet_client_evaluated: int | None = None
+    fleet_os_supported: int | None = None
+    fleet_os_evaluated: int | None = None
+    fleet_on_prem: int | None = None
+    fleet_location_reported: int | None = None
+    devices_duplicate_hostnames: int | None = None
 
 
 class NetskopeAlertWindow(BaseModel):
@@ -403,6 +413,8 @@ class NetskopeDeviceFacetsResponse(BaseModel):
     last_seen_event: list[NetskopeBucket]
     device_make: list[NetskopeBucket]
     device_model: list[NetskopeBucket]
+    onprem_status: list[NetskopeBucket] = []
+    uci_rating: list[NetskopeBucket] = []
 
 
 class NetskopeFreshnessBucket(BaseModel):
@@ -511,10 +523,16 @@ class NetskopeFleetCounts(BaseModel):
     signal_24h: int
     client_current: int
     client_evaluated: int
+    client_one_behind: int
+    client_two_plus_behind: int
     os_supported: int
     os_evaluated: int
     on_prem: int
     location_reported: int
+    uci_low: int
+    uci_moderate: int
+    uci_evaluated: int
+    on_prem_uci_low: int
 
 
 class NetskopeFleetGroup(NetskopeFleetCounts):

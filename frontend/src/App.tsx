@@ -12,6 +12,7 @@ import { AppHeader } from './cross/components/app-header';
 import { AuthView } from './cross/components/auth-view';
 import { useIngestion } from './cross/hooks/use-ingestion';
 import { WorkspaceIntro } from './cross/components/workspace-intro';
+import { SectionNav } from './cross/components/section-nav';
 import { StaleDataBanner } from './cross/components/stale-data-banner';
 import { useSyncFreshness } from './cross/hooks/use-sync-freshness';
 import { staleTasksForSources } from './cross/lib/sync-freshness';
@@ -22,7 +23,7 @@ import { SyncToast } from './cross/components/sync-toast';
 import { canonicalRecentWorkspace, firstAuthorizedSiaResourceWorkspace, hasWorkspaceAccess } from './cross/lib/workspaces';
 import { firstAccessibleDomainWorkspace } from './cross/lib/domains';
 import { CATALOG_BY_ID } from './cross/lib/workspace-catalog';
-import { areaOf, domainOf } from './cross/lib/domains';
+import { areaOf, domainHasSectionNav, domainOf } from './cross/lib/domains';
 import { workspaceLabels } from './cross/lib/workspace-meta';
 import { WORKSPACE_DESCRIPTIONS } from './cross/lib/workspace-registry';
 
@@ -297,6 +298,7 @@ export function App() {
     /></NotificationProvider></AuthProvider>
     <main className="workspace-shell">
       <div className={'workspace-content' + workspaceTransitionClass}>
+        {isAuthenticated && domainHasSectionNav(areaOf(workspaceView)) ? <SectionNav workspaceView={workspaceView} permissions={actorPermissions} onNavigate={selectWorkspace} /> : null}
         <WorkspaceIntro
           key={workspaceView}
           title={workspaceLabels[workspaceView]}

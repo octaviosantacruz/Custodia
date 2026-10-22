@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
    run it whenever shared code or both platforms change. */
 export const E2E_GROUPS = {
   cyberark: [
+    'cyberark/connector_manager/connector-manager.spec.ts',
     'cyberark/identity_administration/identity.spec.ts', 'cyberark/pam/coverage-import.spec.ts', 'cyberark/pam/pam-cleanup.spec.ts', 'cyberark/pam/pam.spec.ts',
     'cyberark/risk_management/posture.spec.ts', 'cyberark/pam/safes.spec.ts', 'cyberark/sia/sia.spec.ts',
   ],

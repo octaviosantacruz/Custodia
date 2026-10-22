@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 export const STATES = ['vigente', 'histórico'];
 export const STALE_AFTER_DAYS = 90;
 // Carpetas cuyos docs siempre son registros históricos.
-const HISTORICAL_FOLDERS = [/^docs\/history\//, /^docs\/tracking\/done\//];
+const HISTORICAL_FOLDERS = [/^docs\/history\//];
 // Rutas citadas que no existen por una razón explícita.
 export const ALLOWED_MISSING_PATHS = new Map([
   ['backend/Dockerfile', 'diseño futuro: Docker no está reintroducido (docs/operations/deployment.md)'],
@@ -132,14 +132,14 @@ export function unknownTrackerIds(docs, trackerPaths) {
     if (isHistorical(docs, path) || trackerPaths.includes(path) || path.startsWith('docs/tracking/')) continue;
     for (const match of text.matchAll(ID_PATTERN)) {
       if (PLACEHOLDER_IDS.has(match[1]) || known.has(match[1])) continue;
-      problems.push(`${path}:${lineOf(text, match.index)} cita el ID ${match[1]}, que no existe en TO_IMPLEMENT, BACKLOG_ARCHIVE ni docs/tracking/done/. Corregí el ID o registralo en el tracker.`);
+      problems.push(`${path}:${lineOf(text, match.index)} cita el ID ${match[1]}, que no existe en TO_IMPLEMENT, BACKLOG_ARCHIVE ni IMPLEMENTED. Corregí el ID o registralo en el tracker.`);
     }
   }
   return problems;
 }
 
 export function trackerFiles(paths) {
-  return paths.filter((path) => /^docs\/tracking\/(TO_IMPLEMENT|BACKLOG_ARCHIVE|IMPLEMENTED|UX_AUD2_CHECKPOINT|DEM_ADEM_HANDOFF)\.md$/.test(path) || /^docs\/tracking\/done\/.+\.md$/.test(path));
+  return paths.filter((path) => /^docs\/tracking\/(TO_IMPLEMENT|BACKLOG_ARCHIVE|IMPLEMENTED)\.md$/.test(path));
 }
 
 export function checkDocs(docs, exists, today = new Date().toISOString().slice(0, 10)) {

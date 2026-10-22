@@ -20,6 +20,35 @@ const ALERT_WIDGET_PREFERENCES = {
   is_default: false,
 };
 
+test('Netskope exposes its main sections and both inventories without opening a picker', async ({ page }) => {
+  await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'access:manage'] });
+  await page.goto('/netskope');
+  const navigation = page.getByRole('navigation', { name: 'Secciones de Netskope', exact: true });
+  await expect(navigation.getByRole('link', { name: 'Métricas', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(navigation.getByRole('link', { name: 'Administradores', exact: true })).toHaveCount(0);
+  await expect(navigation.getByRole('link', { name: 'Alertas DLP', exact: true })).toHaveCount(0);
+  await navigation.getByRole('link', { name: 'Equipos', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Cómo está la flota' })).toBeVisible();
+  await navigation.getByRole('link', { name: 'Inventario', exact: true }).click();
+  const inventory = page.getByRole('navigation', { name: 'Tipo de inventario Netskope', exact: true });
+  await expect(navigation.getByRole('link', { name: 'Riesgo', exact: true })).toBeVisible();
+  await expect(inventory.getByRole('link', { name: 'Registro de equipos', exact: true })).toHaveAttribute('aria-current', 'page');
+  await inventory.getByRole('link', { name: 'Registro de usuarios', exact: true }).click();
+  await expect(page).toHaveURL(/\/netskope\/users$/);
+  await expect(page.getByRole('searchbox', { name: 'Buscar usuarios Netskope' })).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Inventario', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(inventory.getByRole('link', { name: 'Registro de usuarios', exact: true })).toHaveAttribute('aria-current', 'page');
+  await inventory.getByRole('link', { name: 'Registro de equipos', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('searchbox', { name: 'Buscar dispositivos Netskope' })).toBeVisible();
+
+  await mockAuthenticatedApp(page, { permissions: ['netskope:read', 'netskope:admin_inventory_read'] });
+  await page.goto('/netskope');
+  await navigation.getByRole('link', { name: 'Administradores', exact: true }).click();
+  await expect(page).toHaveURL(/\/netskope\/admins$/);
+  await expect(page.getByRole('tab', { name: 'Administradores', exact: true })).toBeVisible();
+});
+
 test('NSK-ALR-001: the retired /netskope/alerts deep link lands on Métricas with count-only aggregates', async ({ page }) => {
   const retiredRequests: string[] = [];
   page.on('request', (request) => {
@@ -84,7 +113,11 @@ test('Netskope metrics drill into the inventory with the selected chart bucket',
   await page.getByRole('button', { name: 'Windows' }).click();
   await expect(page).toHaveURL(/\/netskope\/devices(?:\\?|$)/);
   await expect.poll(() => deviceRequests.at(-1)?.get('os')).toBe('Windows');
-  await expect(page.getByRole('button', { name: /Cambiar workspace\. Actual: Inventario/ })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Secciones de Netskope', exact: true }).getByRole('link', { name: 'Inventario', exact: true })).toHaveAttribute('aria-current', 'page');
+  const filteredUrl = page.url();
+  await page.getByRole('navigation', { name: 'Secciones de Netskope', exact: true }).getByRole('link', { name: 'Inventario', exact: true }).click();
+  await expect(page).toHaveURL(filteredUrl);
+  await expect(page.getByRole('group', { name: 'Filtros de dispositivos' })).toContainText('Windows');
 });
 
 test('NSK-MET-DENOM-001: Top-N bars show population-based percentages and a separate valid remainder', async ({ page }) => {
@@ -387,22 +420,29 @@ test('NSK-XMET-001: cross user-device KPIs drill into the filtered inventory', a
   await expect(page.getByRole('button', { name: /Quitar filtro Dispositivos: Sin dispositivos/ })).toBeVisible();
 });
 
-test('Netskope exposes Métricas, Equipos and Inventario in the vertical workspace selector', async ({ page }) => {
+test('UX-NAV-001 Netskope shows its views as a bar above the title, each question on hover, and no view picker', async ({ page }) => {
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read'], initialVisibleWorkspaces: [] });
   await page.goto('/netskope/inventory');
 
-  await page.getByRole('button', { name: /Cambiar workspace\. Actual: Inventario/ }).click();
-  const views = page.locator('.workspace-menu');
-  // The inventory is one table. Historical device/user paths and the retired
-  // investigation view are not switcher destinations.
+  await expect(page.getByRole('banner').getByRole('button', { name: /Cambiar workspace/ })).toHaveCount(0);
+  const views = page.getByRole('navigation', { name: 'Secciones de Netskope', exact: true });
+  // The bar sits above the page title, so the title describes the chosen view.
+  const navBox = await views.boundingBox();
+  const titleBox = await page.getByRole('heading', { level: 1, name: 'Inventario' }).boundingBox();
+  expect(navBox!.y).toBeLessThan(titleBox!.y);
+  // Historical device/user paths and the retired investigation view are not destinations.
   for (const [name, href] of [['Métricas', '/netskope'], ['Equipos', '/netskope/operations'], ['Inventario', '/netskope/inventory']] as const) {
-    await expect(views.locator(`a[href="${href}"]`)).toContainText(name);
+    await expect(views.getByRole('link', { name, exact: true })).toHaveAttribute('href', href);
   }
   await expect(views.locator('a[href="/netskope/alerts"]')).toHaveCount(0);
   await expect(views.locator('a[href="/netskope/devices"]')).toHaveCount(0);
   await expect(views.locator('a[href="/netskope/users"]')).toHaveCount(0);
   await expect(views.getByText('Investigación')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Fijar vistas rápidas' })).toBeVisible();
+  // The question each view answers stays available to auditors and managers.
+  const equipos = views.getByRole('link', { name: 'Equipos', exact: true });
+  await expect(equipos).toHaveAccessibleDescription(/¿Cómo está la flota y qué cambió\?/);
+  await equipos.hover();
+  await expect(page.getByRole('tooltip').filter({ hasText: '¿Cómo está la flota y qué cambió?' })).toBeVisible();
 });
 
 test('retired DLP investigation UI and endpoints stay unreachable', async ({ page }) => {
@@ -584,16 +624,13 @@ test('NSK-MET-UX-001: metric picker groups verified options and shows source, pe
   await page.keyboard.press('Enter');
   await expect(page.getByRole('dialog', { name: 'Elegí un dato para tu tablero' })).toBeVisible();
   const picker = page.locator('.dashboard-widget-picker');
-  await expect(picker.getByRole('button', { name: /Inventario y cobertura/ })).toBeVisible();
-  await expect(picker.getByRole('button', { name: /Alertas y protección/ })).toBeVisible();
+  // The aggregate alert cards left the picker; with a single category left there are no category chips.
+  await expect(picker.getByRole('button', { name: /Alertas y protección/ })).toHaveCount(0);
   await expect(picker.getByRole('button', { name: /Políticas y uso/ })).toHaveCount(0);
   expect(aaRequests).toBe(0);
   const categoryAxe = await new AxeBuilder({ page }).include('.dashboard-widget-picker').analyze();
   expect(categoryAxe.violations).toEqual([]);
 
-  const inventoryGroup = picker.getByRole('button', { name: /Inventario y cobertura/ });
-  await inventoryGroup.focus();
-  await page.keyboard.press('Enter');
   const inventoryOption = picker.locator('.dashboard-widget-picker-card').filter({ has: page.getByRole('heading', { name: 'Dispositivos', exact: true }) });
   // Source, period and availability are reference: one click away behind a "?", not three lines on every card.
   await expect(inventoryOption).not.toContainText('Fuente: Inventario Netskope');
@@ -609,20 +646,10 @@ test('NSK-MET-UX-001: metric picker groups verified options and shows source, pe
   const inventoryAxe = await new AxeBuilder({ page }).include('.dashboard-widget-picker').disableRules(['aria-allowed-role']).analyze();
   expect(inventoryAxe.violations).toEqual([]);
 
-  await picker.getByRole('button', { name: /Alertas y protección/ }).click();
-  const incompleteOption = picker.locator('.dashboard-widget-picker-card').filter({ has: page.getByRole('heading', { name: 'Alertas Netskope agregadas · 7 días', exact: true }) });
-  const incompleteNote = await sourceNote(incompleteOption);
-  await expect(incompleteNote).toContainText('Fuente: Captura de alertas Netskope');
-  await expect(incompleteNote).toContainText('Período: Captura de 7 días');
-  await expect(incompleteNote).toContainText('Datos incompletos');
-  await incompleteOption.getByRole('button', { name: /^Ayuda: Fuente y período de / }).click();
-  await expect(incompleteOption.locator('.dashboard-widget-picker-value')).toHaveText('Sin dato · Datos incompletos');
-  const staleOption = picker.locator('.dashboard-widget-picker-card').filter({ has: page.getByRole('heading', { name: 'Alertas Netskope agregadas · 90 días', exact: true }) });
-  await expect(staleOption).toContainText('Captura vencida');
-  const staleNote = await sourceNote(staleOption);
-  await expect(staleNote).toContainText('período');
-  await expect(staleNote).toContainText('capturada');
-  await staleOption.getByRole('button', { name: /^Ayuda: Fuente y período de / }).click();
+  // The fleet-health cards are offered next to the inventory ones, and the retired alert cards are not.
+  await expect(picker.getByRole('heading', { name: 'Equipos con señal en 24 h', exact: true })).toBeVisible();
+  await expect(picker.getByRole('heading', { name: 'Cliente al día', exact: true })).toBeVisible();
+  await expect(picker.getByRole('heading', { name: /Alertas Netskope agregadas/ })).toHaveCount(0);
 
   await picker.getByRole('button', { name: 'Cerrar selector' }).click();
   await expect(picker).toHaveCount(0);
@@ -640,7 +667,6 @@ test('NSK-MET-UX-001: metric picker groups verified options and shows source, pe
 
   await chartPicker.getByRole('button', { name: 'Cerrar selector' }).click();
   await addData.click();
-  await picker.getByRole('button', { name: /Inventario y cobertura/ }).click();
   await page.getByRole('button', { name: 'Agregar Sin usuario resuelto' }).click();
   await page.getByRole('button', { name: 'Guardar vista' }).click();
   await expect.poll(() => preferencePuts.length).toBe(1);
@@ -663,10 +689,6 @@ test('NSK-MET-UX-001: a denied alert source does not hide the loaded inventory o
   await page.getByRole('button', { name: 'Agregar dato' }).click();
   await expect(page.getByRole('dialog', { name: 'Elegí un dato para tu tablero' })).toBeVisible();
   const picker = page.locator('.dashboard-widget-picker');
-  await picker.getByRole('button', { name: /Alertas y protección/ }).click();
-  const missingAlert = picker.locator('.dashboard-widget-picker-card').filter({ has: page.getByRole('heading', { name: 'Alertas Netskope agregadas · 7 días', exact: true }) });
-  await expect(await sourceNote(missingAlert)).toContainText('Disponibilidad: Sin snapshot disponible');
-  await picker.getByRole('button', { name: /Inventario y cobertura/ }).click();
   const inventory = picker.locator('.dashboard-widget-picker-card').filter({ has: page.getByRole('heading', { name: 'Sin usuario resuelto', exact: true }) });
   await expect(await sourceNote(inventory)).toContainText('Disponibilidad: Inventario observado');
   await expect(inventory.getByRole('button', { name: 'Agregar Sin usuario resuelto' })).toBeEnabled();
@@ -822,7 +844,7 @@ test('NSK-INVENTORY-UX-001: grouped device filters restore deep links, remain re
 
   const filters = page.getByRole('group', { name: 'Filtros de dispositivos' });
   const identity = filters.locator('details').nth(0);
-  const activity = filters.locator('details').nth(1);
+  const activity = filters.locator('details').nth(2);
   await expect(identity).toHaveAttribute('open', '');
   await expect(activity).toHaveAttribute('open', '');
   await expect(filters.getByRole('button', { name: 'Filtrar por sistema operativo' })).toContainText('Windows');
@@ -1189,7 +1211,7 @@ test('NSK-EMPTY-001: an empty board offers adding data, charts or the recommende
   await page.getByRole('button', { name: 'Usar vista recomendada' }).click();
   await expect.poll(() => preferencePuts.length).toBe(1);
   expect(preferencePuts[0].widgets.map((widget) => widget.id)).toEqual([
-    'devices_total', 'devices_stale_30d', 'devices_observed_user_unmatched', 'alerts_7d', 'devices_by_os', 'devices_by_classification',
+    'devices_total', 'devices_stale_30d', 'devices_observed_user_unmatched', 'fleet_signal_24h', 'devices_by_os', 'devices_by_classification',
   ]);
   await expect(page.getByRole('heading', { name: 'Todavía no elegiste qué seguir' })).toHaveCount(0);
   await expect(page.locator('.netskope-data-strip')).toContainText('Dispositivos');
@@ -1310,10 +1332,9 @@ test('NSK-PICKER-002: reaching six data blocks disables the add trigger and expl
   await page.goto('/netskope');
   await expect(page.getByRole('heading', { name: 'Datos clave' })).toBeVisible();
   await page.getByRole('button', { name: 'Editar vista' }).click();
-  for (const [title, group] of [['Equipos sin señal hace más de 30 días', /Inventario y cobertura/], ['Sin usuario resuelto', /Inventario y cobertura/], ['Alertas Netskope agregadas · 30 días', /Alertas y protección/], ['Alertas Netskope agregadas · 90 días', /Alertas y protección/]] as const) {
+  for (const title of ['Equipos sin señal hace más de 30 días', 'Sin usuario resuelto', 'Cliente al día', 'SO en el mínimo exigido']) {
     await page.getByRole('button', { name: 'Agregar dato' }).click();
     const picker = page.locator('.dashboard-widget-picker');
-    await picker.getByRole('button', { name: group }).click();
     await picker.getByRole('button', { name: `Agregar ${title}` }).click();
     await expect(picker).toHaveCount(0);
   }
@@ -1482,8 +1503,7 @@ test('single inventory: review evidence, URL restoration and keyboard detail wor
   }
   // History restoration must also work when the inventory hook is still
   // mounted on Métricas, not only after a full document reload.
-  await page.getByRole('button', { name: /Cambiar workspace\. Actual: Inventario/ }).click();
-  await page.locator('.workspace-menu a[href="/netskope"]').click();
+  await page.getByRole('navigation', { name: 'Secciones de Netskope', exact: true }).getByRole('link', { name: 'Métricas', exact: true }).click();
   await page.getByRole('button', { name: /^Windows\b/ }).click();
   await expect.poll(() => requests.at(-1)?.get('os')).toBe('Windows');
   await page.goBack();
@@ -1554,7 +1574,7 @@ test('VIEW-003: a Netskope preset only replaces the saved view after confirmatio
   await resetDialog.getByRole('button', { name: 'Restablecer' }).click();
   await expect.poll(() => preferencePuts.length).toBe(3);
   const resetIds = preferencePuts[2].widgets.map((widget) => widget.id);
-  expect(resetIds).toEqual(['users_recent_activity', 'devices_total', 'devices_stale_30d', 'alerts_7d', 'devices_by_os', 'devices_by_company', 'devices_by_classification']);
+  expect(resetIds).toEqual(['users_recent_activity', 'devices_total', 'devices_stale_30d', 'fleet_signal_24h', 'devices_by_os', 'devices_by_company', 'devices_by_classification']);
 
   // "Vaciar vista" asks first, then saves an empty view.
   await page.getByRole('button', { name: 'Vistas iniciales' }).click();
@@ -1624,10 +1644,16 @@ test('editing loads one metrics preview request for the tiles the picker shows',
   await expect(picker.locator('.dashboard-widget-picker-card').filter({ hasText: 'Usuarios con actividad reciente' }).getByText('Datos actuales')).toBeVisible();
   await expect.poll(() => requests.length).toBe(2);
   expect(requests[1].searchParams.getAll('widgets')).toEqual([
+    'devices_duplicate_hostnames',
     'devices_observed_user_unmatched',
     'devices_stale_30d',
     'devices_total',
+    'fleet_client_current',
+    'fleet_on_prem',
+    'fleet_os_supported',
+    'fleet_signal_24h',
     'users_recent_activity',
+    'users_total',
   ]);
 });
 

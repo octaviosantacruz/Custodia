@@ -45,7 +45,7 @@ from app.netskope.sse.repositories.netskope_queries import (
     parse_version,
 )
 from app.netskope.sse.repositories.netskope_fleet_groups import GROUP_EXPRESSIONS as FLEET_GROUPS, get_netskope_fleet_groups
-from app.netskope.sse.repositories.netskope_presence import get_netskope_presence
+from app.netskope.sse.repositories.netskope_presence import get_netskope_presence, get_users_presence
 from app.netskope.sse.repositories.netskope_shared import (
     get_netskope_source_evidence,
 )
@@ -86,6 +86,7 @@ __all__ = [
     "get_netskope_fleet_groups",
     "get_netskope_metrics",
     "get_netskope_presence",
+    "get_users_presence",
     "get_netskope_source_evidence",
     "list_netskope_dem_sites",
     "list_netskope_dlp_alerts",

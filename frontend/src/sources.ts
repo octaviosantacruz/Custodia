@@ -10,6 +10,7 @@ import { registration as cyberark_identity_administration } from './cyberark/ide
 import { registration as cyberark_sia } from './cyberark/sia/source.ts';
 import { registration as cyberark_access } from './cyberark/access/source.ts';
 import { registration as cyberark_risk_management } from './cyberark/risk_management/source.ts';
+import { registration as cyberark_connector_manager } from './cyberark/connector_manager/source.ts';
 import { registration as cyberark_shared } from './cyberark/shared/source.ts';
 import { registration as netskope_sse } from './netskope/sse/source.ts';
 import { registration as cross } from './cross/source.ts';
@@ -21,6 +22,7 @@ export const FRONTEND_SOURCES = [
   cyberark_sia,
   cyberark_access,
   cyberark_risk_management,
+  cyberark_connector_manager,
   cyberark_shared,
   netskope_sse,
   cross,

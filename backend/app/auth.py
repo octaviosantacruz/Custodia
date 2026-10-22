@@ -23,7 +23,7 @@ from app.cross.repositories.security_events import (
     MECHANISM_TOKEN, record_security_event_for_request,
 )
 from app.cross.services.api_tokens import API_TOKEN_PREFIX, digest_api_token
-from app.cross.services.oidc_mapping import effective_role_pairs, observed_mapped_groups, role_map_from_environment, roles_from_claims
+from app.cross.services.oidc_mapping import effective_role_pairs, observed_mapped_groups, role_group_sources, role_map_from_environment, roles_from_claims
 # Re-exported deliberately: routes (auth_session, user_admin) and tests import
 # these from app.auth; the redundant aliases keep the linter from treating
 # them as dead code.
@@ -362,6 +362,7 @@ async def finish_oidc_login(request: Request):
             email=str(user.get("email") or "").strip(),
             display_name=str(user.get("name") or "").strip() or str(user.get("email") or "").strip() or actor_id,
             mapped_groups=observed_mapped_groups(dict(user), pairs),
+            role_groups=role_group_sources(dict(user), pairs),
         )
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc

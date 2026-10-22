@@ -3,7 +3,7 @@ import type { FrontendRegistration } from '../../source-contract.ts';
 /** Access space only keeps its sync; its asset catalog is no longer a workspace. */
 export const registration = {
   id: 'cyberark/access',
-  toolLabel: 'CyberArk Access space',
+  toolLabel: 'CyberArk',
   workspaces: [],
   domains: [],
   categories: [],

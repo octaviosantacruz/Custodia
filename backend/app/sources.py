@@ -22,6 +22,7 @@ from app.netskope.sse.source import (
     register as register_sse,
 )
 from app.cyberark.risk_management.source import register as register_risk_management
+from app.cyberark.connector_manager.source import register as register_connector_manager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ TOOLS = (
     register_access(),
     register_sse(),
     register_risk_management(),
+    register_connector_manager(),
 )
 
 SOURCES: tuple[SourceSpec, ...] = tuple(

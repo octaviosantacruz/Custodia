@@ -24,6 +24,13 @@ POLICY_CAPTURE_MARKER_VALUE = "captured"
 # so a chart bucket and the table filter it drills into always agree.
 COMPANY_FROM_EMAIL = "upper(split_part(split_part(lower(coalesce(nullif(btrim(attributes->>'email'), ''), '')), '@', 2), '.', 1))"
 COMPANY_FROM_DEVICE_USER = "upper(split_part(split_part(lower(coalesce(nullif(btrim(attributes->>'username'), ''), nullif(btrim(attributes->>'user_key'), ''), '')), '@', 2), '.', 1))"
+# NSK-EXP-UCI-001: the user's UCI rating joined by the device's exact username. The table only lists users rated Poor or
+# Moderate, so an absent user is "Sin alerta" only when a UCI capture exists at all; with no capture the value is NULL
+# ("Sin dato"), never a fabricated clean bill.
+UCI_RATING_SQL = (
+    "CASE WHEN EXISTS (SELECT 1 FROM public.netskope_user_uci) THEN coalesce("
+    "(SELECT u.rating FROM public.netskope_user_uci u WHERE u.email_key = lower(btrim(attributes->>'username'))), 'Sin alerta') END"
+)
 DEVICE_COMPANY = f"coalesce(nullif(attributes->>'company', ''), {COMPANY_FROM_DEVICE_USER})"
 USER_COMPANY = f"coalesce(nullif(attributes->>'company', ''), {COMPANY_FROM_EMAIL})"
 
@@ -45,8 +52,9 @@ DEVICE_FILTER_EXPRESSIONS = {
     # NSK-EXP-ONPREM-001 drills (Netskope's On-Premises Detection and the client configuration applied).
     "onprem_status": "attributes->>'onprem_status'",
     "client_config": "attributes->>'client_config'",
+    "uci_rating": UCI_RATING_SQL,
 }
-FACET_KEYS = ("os", "client_version", "classification_status", "user_status", "company", "last_seen_event", "device_make", "device_model")
+FACET_KEYS = ("os", "client_version", "classification_status", "user_status", "company", "last_seen_event", "device_make", "device_model", "onprem_status", "uci_rating")
 FACET_LIMIT = 200
 
 # NSK-EVT-001: exact `last_seen_event` literals observed in the tenant on

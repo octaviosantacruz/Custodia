@@ -13,7 +13,7 @@ import { useNotificationContext } from '../context/notification-context';
 import type { WorkspaceView } from '../lib/workspaces';
 import { workspaceLabels } from '../lib/workspace-meta';
 import { syncForWorkspace, WORKSPACE_TOOL_LABELS } from '../../sources';
-import { areaOf } from '../lib/domains';
+import { areaOf, domainHasSectionNav } from '../lib/domains';
 import { CustodiaMark } from './home-workspace';
 import type { SearchResult } from '../lib/search-api';
 import type { CommandCenterCommand } from '../lib/command-center';
@@ -95,6 +95,7 @@ export function AppHeader({
         onHome={onHome}
       />
       {!isHome && <WorkspaceSwitcher
+        crossTool={domainHasSectionNav(areaOf(workspaceView))}
         isHome={isHome}
         workspaceView={workspaceView}
         permissions={authStatus.permissions || []}

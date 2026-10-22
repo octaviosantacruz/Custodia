@@ -524,11 +524,10 @@ test('Safes offers internal navigation to platforms without leaving the subnav v
   await expect(page.getByRole('tablist', { name: 'Secciones de Servicio' }).getByRole('tab', { name: 'Conectores' })).toHaveAttribute('aria-selected', 'true');
 
   // The switcher no longer duplicates those destinations.
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const menu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Plataformas Safes y cuentas por plataforma/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Conectores PSM y SIA/ })).toHaveCount(0);
-  await expect(menu.locator('[data-section="tool-workspaces"]').getByRole('link', { name: /Salud PAM/ })).toHaveCount(0);
+  const menu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
+  await expect(menu.getByRole('link', { name: /^Plataformas$/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /Conectores PSM y SIA/ })).toHaveCount(0);
+  await expect(menu.getByRole('link', { name: /Salud PAM/ })).toHaveCount(0);
 
   // General/Posture (unrelated workspaces) never show this subnav.
   await page.goto('/pam');

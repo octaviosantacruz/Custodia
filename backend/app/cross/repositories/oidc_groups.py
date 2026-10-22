@@ -7,7 +7,7 @@ async def observed_groups_for_identities(pool, *, issuer: str, actor_ids: list[s
         return []
     return await fetch_all(
         pool,
-        """SELECT actor_id, observed_groups, groups_observed_at
+        """SELECT actor_id, observed_groups, groups_observed_at, role_group_sources
            FROM public.access_oidc_users
            WHERE issuer = %s AND actor_id = ANY(%s)""",
         (issuer, actor_ids),

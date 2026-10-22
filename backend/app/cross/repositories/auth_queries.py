@@ -19,6 +19,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from psycopg.types.json import Jsonb
+
 from app.db import fetch_all, fetch_one
 from app.cross.repositories.audit import record_audit
 
@@ -44,6 +46,7 @@ async def get_actor_permissions(pool: Any, actor_id: str) -> list[str]:
 async def sync_oidc_role_assignments(
     pool: Any, actor_id: str, roles: list[str], *, issuer: str, email: str, display_name: str,
     mapped_groups: list[str] | None = None,
+    role_groups: dict[str, list[str]] | None = None,
 ) -> None:
     """Replace the roles this actor's OIDC groups grant with the claims just observed.
 
@@ -84,10 +87,10 @@ async def sync_oidc_role_assignments(
                     [(actor_id, role_code) for role_code in roles],
                 )
                 await cursor.execute(
-                    """UPDATE public.access_oidc_users SET observed_groups = %s,
+                    """UPDATE public.access_oidc_users SET observed_groups = %s, role_group_sources = %s,
                        groups_observed_at = CASE WHEN %s::text[] IS NULL THEN NULL ELSE now() END
                        WHERE actor_id = %s""",
-                    (mapped_groups, mapped_groups, actor_id),
+                    (mapped_groups, Jsonb(role_groups) if role_groups is not None else None, mapped_groups, actor_id),
                 )
                 await record_audit(
                     pool, connection=conn, actor_id=actor_id, action="oidc_groups_observed",

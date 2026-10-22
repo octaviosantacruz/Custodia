@@ -102,6 +102,24 @@ class OidcGroupsPostgresTests(PostgresIntegrationTestCase):
         self.assertIsNone(identity["observed_groups"])
         self.assertIsNone(identity["groups_observed_at"])
 
+    async def test_role_sources_keep_login_mapping_until_next_login_and_hide_without_permission(self):
+        with patch.dict(os.environ, {"OIDC_ROLE_MAP_JSON": json.dumps({"team-a": "reader", "team-b": "reader", "operators": "operator"})}):
+            await self.login({"team_groups": ["team-b", "team-a", "operators", "not-mapped"]})
+        # The current map no longer describes the login that granted these roles.
+        with patch.dict(os.environ, {"OIDC_ROLE_MAP_JSON": '{}'}):
+            shown = await find_people(self.pool, "observed@example.test", "", "", 1, 0, include_oidc_groups=True)
+            identity = shown["rows"][0]["identities"][0]
+            self.assertEqual(identity["role_group_sources"], {"reader": ["team-a", "team-b"], "operator": ["operators"]})
+            hidden = await find_people(self.pool, "observed@example.test", "", "", 1, 0)
+            self.assertNotIn("role_group_sources", hidden["rows"][0]["identities"][0])
+        await self.login({"team_groups": []})
+        shown = await find_people(self.pool, "observed@example.test", "", "", 1, 0, include_oidc_groups=True)
+        self.assertEqual(shown["rows"][0]["identities"][0]["role_group_sources"], {"reader": []})
+        legacy = await find_people(self.pool, "Legacy reader", "", "", 1, 0, include_oidc_groups=True)
+        self.assertIsNone(legacy["rows"][0]["identities"][0]["role_group_sources"])
+        other = await find_people(self.pool, "Other issuer", "", "", 1, 0, include_oidc_groups=True)
+        self.assertIsNone(other["rows"][0]["identities"][0]["role_group_sources"])
+
     async def test_member_limit_preserves_total_and_observation_dates(self):
         self.extra_actors = [f"{self.actor}-{index}" for index in range(101)]
         async with self.pool.connection() as conn:
@@ -122,11 +140,11 @@ class OidcGroupsPostgresTests(PostgresIntegrationTestCase):
 
     async def test_failed_audit_rolls_back_membership_and_role_refresh(self):
         await self.login({"team_groups": ["team-a"]})
-        before = await fetch_one(self.pool, "SELECT observed_groups, groups_observed_at, last_login_at FROM access_oidc_users WHERE actor_id = %s", (self.actor,))
+        before = await fetch_one(self.pool, "SELECT observed_groups, groups_observed_at, last_login_at, role_group_sources FROM access_oidc_users WHERE actor_id = %s", (self.actor,))
         with patch.dict(os.environ, {"OIDC_DEFAULT_ROLE": "operator"}), patch("app.cross.repositories.auth_queries.record_audit", new=AsyncMock(side_effect=RuntimeError("audit unavailable"))):
             with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
                 await self.login({"team_groups": []})
-        after = await fetch_one(self.pool, "SELECT observed_groups, groups_observed_at, last_login_at FROM access_oidc_users WHERE actor_id = %s", (self.actor,))
+        after = await fetch_one(self.pool, "SELECT observed_groups, groups_observed_at, last_login_at, role_group_sources FROM access_oidc_users WHERE actor_id = %s", (self.actor,))
         self.assertEqual(after, before)
         roles = await fetch_all(self.pool, "SELECT role_code FROM access_user_roles WHERE actor_id = %s", (self.actor,))
         self.assertEqual([r["role_code"] for r in roles], ["reader"])

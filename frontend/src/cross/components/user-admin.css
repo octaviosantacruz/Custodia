@@ -150,4 +150,8 @@
 .user-account-selector { color: var(--text-secondary); display: grid; font-size: 12px; gap: 8px; margin-top: 18px; }
 .user-directory-error { color: var(--text-secondary); font-size: 12px; padding: 0 18px; }
 .user-role-change-dialog { z-index: 400; }
+.user-role-sources h3 { color: var(--text-primary); font-size: 12px; margin: 0 0 8px; }
+.user-role-sources dl { display: grid; gap: 8px; margin: 0 0 10px; }
+.user-role-sources dt { color: var(--text-primary); font-size: 11px; font-weight: 650; }
+.user-role-sources dd { color: var(--text-secondary); font-size: 11px; line-height: 1.5; margin: 3px 0 0; overflow-wrap: anywhere; }
 .user-role-change-dialog .confirm-dialog { max-height: calc(100vh - 48px); overflow-y: auto; max-width: 560px; width: 100%; }

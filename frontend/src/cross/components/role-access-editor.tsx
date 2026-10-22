@@ -10,6 +10,7 @@ import { CompactSelect } from './compact-select';
 import { ConfirmDialog } from './confirm-dialog';
 import { RoleMembers } from './role-members';
 import { RoleGroupLinks } from './role-group-links';
+import { AccessWorkspacePreview } from './access-workspace-preview';
 import './role-access-editor.css';
 
 export type RoleAccessDraft = {
@@ -140,6 +141,7 @@ export function RoleAccessEditor(props: Props) {
       {editing && <>{changes}<p className="role-impact-note">{creating ? 'Crear el rol no lo asigna a ninguna persona.' : 'El cambio alcanza a todas las identidades con este rol.'}</p></>}
       {draft.role_kind === 'composite' && <p className="role-impact-note">Las capacidades se actualizan al cambiar los roles base.</p>}
       {planned && <p className="role-inline-warning">Incluye un área preparada. El rol permanece sin acceso efectivo hasta que esté activo.</p>}
+      <AccessWorkspacePreview codes={effective} unavailable={planned || !editing && role?.lifecycle_status === 'planned' ? 'Rol preparado: sin acceso efectivo.' : undefined} />
       {!creating && has('access:oidc_mappings_read') && <RoleGroupLinks groups={roles.find((item) => item.role_code === role?.role_code)?.oidc_groups || []} />}
     </aside></div>
     {editing && <footer className="role-save-bar"><span>{added.length} permisos agregados · {removed.length} quitados</span><div><button type="button" className="button subtle" disabled={saving} onClick={leave}>Cancelar</button><button type="button" className="button primary" disabled={saving || draft.role_kind === 'composite' && !draft.level_refs.length} onClick={() => void submit()}><Save size={14} /> {saving ? 'Guardando...' : creating ? 'Crear rol' : 'Guardar cambios'}</button></div></footer>}

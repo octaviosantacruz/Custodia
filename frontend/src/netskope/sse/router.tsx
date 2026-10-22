@@ -22,6 +22,7 @@ type NetskopeDomainRouterProps = {
 
 const NetskopeDlpWorkspace = lazyWithRetry(() => import('./components/netskope-dlp-alerts').then((module) => ({ default: module.NetskopeDlpWorkspace })), 'netskope-dlp-alerts');
 const NetskopeAdminsWorkspace = lazyWithRetry(() => import('./components/netskope-admins-workspace').then((module) => ({ default: module.NetskopeAdminsWorkspace })), 'netskope-admins-workspace');
+const NetskopeOfficeWorkspace = lazyWithRetry(() => import('./components/netskope-office-workspace').then((module) => ({ default: module.NetskopeOfficeWorkspace })), 'netskope-office-workspace');
 const NetskopeUciWorkspace = lazyWithRetry(() => import('./components/netskope-uci-workspace').then((module) => ({ default: module.NetskopeUciWorkspace })), 'netskope-uci-workspace');
 const NetskopePostureWorkspace = lazyWithRetry(() => import('./components/netskope-posture-workspace').then((module) => ({ default: module.NetskopePostureWorkspace })), 'netskope-posture-workspace');
 const NetskopeExperienceWorkspace = lazyWithRetry(() => import('./components/netskope-experience-workspace').then((module) => ({ default: module.NetskopeExperienceWorkspace })), 'netskope-experience-workspace');
@@ -61,6 +62,10 @@ export function NetskopeDomainRouter({
   if (workspaceView === 'netskopeAdmins') {
     /* NSK-RBAC-001: strict workspace, unlocked only by netskope:admin_inventory_read. */
     return <NetskopeAdminsWorkspace refreshKey={refreshKey} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} />;
+  }
+  if (workspaceView === 'netskopeOfficeExperience') {
+    /* NSK-EXP-OFFICE-001: strict workspace, unlocked only by netskope:uba_read. */
+    return <NetskopeOfficeWorkspace refreshKey={refreshKey} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} />;
   }
   if (workspaceView === 'netskopeUci') {
     /* NSK-UBA-002: strict workspace, unlocked only by netskope:uba_read. */

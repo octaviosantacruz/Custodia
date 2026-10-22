@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { CATALOG_BY_ID, CATALOG_ENTRIES, type WorkspaceCatalogEntry, type WorkspaceView } from '../../src/cross/lib/workspace-catalog.ts';
 import { hasWorkspaceAccess, workspaceFromPath, workspacePath } from '../../src/cross/lib/workspaces.ts';
 import { WORKSPACE_DESCRIPTIONS } from '../../src/cross/lib/workspace-registry.ts';
-import { areaOf, domainOf, domainWorkspaces, domains } from '../../src/cross/lib/domains.ts';
+import { areaOf, domainHasSectionNav, domainOf, domainWorkspaces, domains, QUICK_ACCESS_PER_PLATFORM, quickAccessLimit } from '../../src/cross/lib/domains.ts';
 
 const ENTRIES: readonly WorkspaceCatalogEntry[] = CATALOG_ENTRIES;
 
@@ -109,4 +109,15 @@ test('PAM cleanup is a Postura tab (not a menu entry) gated by the narrow PAM re
   assert.equal(entry.gate, 'manage');
   assert.equal(entry.alternatePermission, 'pam:catalogs_read');
   assert.equal(runtimeForWorkspace('pamCleanup').id, 'cyberark');
+});
+
+test('UX-NAV-001 the quick-access total grows by three per active platform, and both platforms show a section bar', () => {
+  // CyberArk and Netskope are the active platforms; Conexiones, Administración
+  // and the planned DSPM area add no room.
+  assert.equal(QUICK_ACCESS_PER_PLATFORM, 3);
+  assert.equal(quickAccessLimit(), 6);
+  assert.equal(domainHasSectionNav('pam'), true);
+  assert.equal(domainHasSectionNav('dlp'), true);
+  assert.equal(domainHasSectionNav('cross'), false);
+  assert.equal(domainHasSectionNav('admin'), false);
 });

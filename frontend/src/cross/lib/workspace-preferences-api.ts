@@ -1,8 +1,6 @@
 import { api } from './api';
 import type { WorkspaceView } from './workspaces';
 
-export const MAX_QUICK_ACCESS_PER_DOMAIN = 6;
-
 export type WorkspacePreferences = {
   visible_workspaces: WorkspaceView[];
   hidden_workspaces: WorkspaceView[];

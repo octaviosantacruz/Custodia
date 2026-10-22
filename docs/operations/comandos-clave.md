@@ -185,6 +185,9 @@ curl --fail --silent http://127.0.0.1:8000/api/health/ready
 
 ## 9. Archivos de entorno
 
+El orden de los bloques, los archivos `*_FILE` y la carga del entorno están en
+[Configuración del entorno y secretos](configuration.md).
+
 Comparar `.env.example` con `.env.local` **sin mostrar valores** (sólo qué
 claves faltan de cada lado):
 
@@ -210,7 +213,7 @@ tr '\0' '\n' < /proc/<PID>/environ | grep -c '^NOMBRE_DE_LA_VARIABLE=.\+'     # 
 ## 10. Trackers y agentes (OpenCode)
 
 ```bash
-npm run harness:check                # IDs únicos entre TO_IMPLEMENT.md e IMPLEMENTED.md (índice y done/)
+npm run harness:check                # IDs únicos entre TO_IMPLEMENT.md e IMPLEMENTED.md
 npm run docs:check                   # frontmatter, enlaces, rutas e IDs citados en la documentación
 backend/.venv/bin/python scripts/generate_api_reference.py   # regenera docs/architecture/api-reference.md (el test lo exige al día)
 backend/.venv/bin/python scripts/generate_access_catalog.py   # regenera docs/architecture/access-catalog.md (PostgreSQL efímero + migraciones)

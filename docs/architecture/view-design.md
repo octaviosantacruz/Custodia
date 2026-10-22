@@ -1,7 +1,7 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-12
+revisado: 2026-10-16
 ---
 
 # Diseño de vistas por pregunta
@@ -47,18 +47,20 @@ convivían en la misma pantalla.
 - ¿El nombre del menú describe la respuesta?
 - ¿El texto de la pantalla cabe en una línea por bloque? Los límites y la metodología van tras un «?» (`HelpHint`), no en la página.
 
-## Mapa de Netskope (aprobado en principio, 2026-10-11)
+## Mapa de Netskope (actualizado 2026-10-16)
 
 | Vista | Pregunta | Contenido |
 |---|---|---|
 | Métricas | ¿Cómo estamos en general? | Sin cambios. |
 | **Equipos** (rediseñada el 2026-10-11, `NSK-FLEET-001`) | ¿Cómo está la flota? | Banda con lo crítico y pestañas **Flota** (tabla agrupada) y **Cambios**. Los números de riesgo abren su fila en Postura. |
-| **Usuarios** (hoy Experiencia digital + Confianza de usuarios) | ¿A quién atiendo y cómo está esta persona? | Pestañas «Para revisar» y «Por empresa», búsqueda superior y ficha lateral de la persona (actualizado 2026-10-12). |
+| **Riesgo** (antes «Usuarios»; renombrada el 2026-10-19) | ¿Qué personas tienen señales de riesgo? | Pestañas «Para revisar» (solo UCI bajo o moderado, menor primero) y «Por empresa», búsqueda superior y ficha lateral de la persona (con sus «Últimos 7 días»: Oficina, Remoto, Sin señal o Pendiente). El rendimiento no entra en esta cola. |
+| **Rendimiento** (`NSK-EXP-OFFICE-001`, 2026-10-19) | ¿Cómo funcionan las apps y la red en la oficina? (dueño del servicio, jefatura) | Todo lo de ADEM, en dos pestañas. «Oficina, por semana»: una frase con denominador y una línea de datos; un solo gráfico semanal (selector malo o regular / promedio, solo desde la primera hasta la última semana medida) y una sola tabla (selector personas / por día / por empresa) que pagina de a 20, sin scroll interno. «Evolución diaria» (`NSK-EXP-OFFICE-002`): línea de tiempo diaria oficina/remoto con filtro de empresa, una persona superpuesta, lugar y período (30/90/180 días o fechas «Desde/Hasta»), con un resumen del período que hace de leyenda; los días se eligen sobre el gráfico (clic, arrastre, Ctrl/⌘ + clic para días sueltos, Shift + clic para extender, Enter/Espacio con teclado) y el resumen describe la selección; reemplaza la lista de los 100 menores puntajes de 24 h, que no separaba oficina de remoto y en la práctica mostraba solo puntajes buenos. Ambas abren la misma ficha que Riesgo. Permiso estricto `netskope:uba_read`. |
 | Postura | ¿Qué está mal y qué hago? | Banda por severidad y una sola tabla con todos los chequeos; cada fila se expande con muestra y detalle (último evento, diagnóstico con sugerencias, duplicados). Sin pestañas; «Actividad de políticas» se retiró (2026-10-11). |
-| Alertas DLP | ¿Qué alertas hay? | Sin cambios. |
-| Inventario | ¿Qué hay registrado? | Equipos y usuarios como tablas de datos. |
+| Alertas DLP | ¿Qué alertas hay? | Fuera del menú mientras su publicación siga pausada; accesible por URL con su permiso específico. |
+| Inventario | ¿Qué hay registrado? | «Registro de equipos» y «Registro de usuarios» como listas separadas. |
+| Administradores | ¿Quién administra Netskope y con qué permisos? | Pestañas «Administradores» y «Roles»; detalle de permisos por rol. |
 
-Ficha del usuario: tarjetas arriba (Experiencia, Ubicación, Anomalías, UCI) y
+Ficha del usuario: tarjetas arriba (Rendimiento digital, Ubicación, Anomalías, Confianza UCI) y
 **una** tabla de equipos (ubicación, client config, puntajes general/equipo/
 red/aplicaciones, última señal); el POP informado por ADEM va en la fila
 expandida. «Relaciones (enlace histórico)» deja de ser entrada de menú y su
@@ -113,6 +115,12 @@ Propuesta de menú (el dueño fijó el nombre «Postura» para ambas plataformas
 Las rutas actuales se conservan como `legacyPaths`; no se borra ninguna URL.
 
 ## Estado
+
+Servicio → Conectores incorpora los pools y redes de Connector Manager
+(`CMGR-001`, 2026-10-19) en el selector existente. Cada inventario conserva su
+fuente y una sola tabla: PSM y SIA sincronizados, pools y redes consultados en
+vivo. La consulta muestra fecha, nombres y conteos; no mide salud ni capacidad
+ni infiere asociaciones con los conectores de los otros inventarios.
 
 El criterio está vigente. Las reorganizaciones de Netskope (`NSK-IA-001`) y
 de CyberArk (`CA-IA-001`) están cerradas; el menú real es el de `source.ts`.
@@ -174,3 +182,24 @@ observados y grupos de API por nivel). Abrir un rol reemplaza la tabla por sus
 permisos y las páginas de la consola que abre cada grupo; no se apilan dos tablas.
 La explicación va en un «?» y en la guía. Vista estricta: sólo
 `netskope:admin_inventory_read`. No muestra credenciales ni quién creó o editó un rol.
+
+## Netskope: acceso del panorama al detalle (2026-10-16)
+
+«Usuarios» (hoy «Riesgo») abre la revisión de riesgo; el rendimiento vive en «Rendimiento» desde el 2026-10-19; Inventario distingue «Registro de
+equipos» y «Registro de usuarios», con el estilo compartido de subnavegación y enlaces reales.
+La sección activa conserva los filtros; «Desde la última sync» abre Cambios.
+UCI se presenta como «Confianza (UCI)», separado del rendimiento digital ADEM.
+
+## Barra de secciones por plataforma (2026-10-16, `UX-NAV-001`)
+
+CyberArk y Netskope muestran sus vistas como una barra arriba del título, con la
+sección actual marcada y los permisos del catálogo. Cada pestaña muestra al pasar
+el mouse o enfocarla un cartel chico con la pregunta que responde. Esas plataformas
+no repiten esa lista en el encabezado: ahí el botón «Accesos rápidos» muestra las
+vistas fijadas y recientes de cualquier herramienta, con su marca. En Conexiones y
+Administración el selector conserva todas sus vistas. Los accesos rápidos tienen un
+total que crece con las plataformas (tres por plataforma activa: seis hoy) y la
+persona los reparte como quiera, incluso todos en una herramienta; el backend sólo
+limita el tamaño guardado. La herramienta declara la barra con `sectionNav` en su
+`source.ts`. La ubicación y los accesos rápidos nombran la plataforma («CyberArk»,
+«Netskope»), no la herramienta interna (PAM, Identity Administration, SIA).

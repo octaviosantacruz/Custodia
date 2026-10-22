@@ -37,22 +37,24 @@ async def replace_netskope_user_uci(pool: AsyncConnectionPool, run_id: UUID, row
 
 
 async def list_netskope_user_uci(
-    pool: AsyncConnectionPool, rating: str, search: str, order: str, limit: int, offset: int,
+    pool: AsyncConnectionPool, rating: str, search: str, order: str, limit: int, offset: int, company: str = "",
 ) -> dict[str, Any]:
     """Rows joined to the active Netskope user with that exact email, when exactly one exists."""
     like = f"%{search.lower()}%"
     join = f"""
         FROM public.netskope_user_uci u
         LEFT JOIN LATERAL (
-            SELECT min(o.source_id) AS user_id, min(o.display_name) AS display_name
+            SELECT min(o.source_id) AS user_id, min(o.display_name) AS display_name,
+                   min({_bucket(USER_COMPANY.replace('attributes', 'o.attributes'))}) AS company
             FROM public.cyberark_inventory_objects o
             WHERE o.source_system = 'netskope' AND o.object_type = 'user' AND o.lifecycle_status = 'active'
               AND {person_email_sql("o.attributes->>'email'")} = u.email_key
             HAVING count(*) = 1
         ) n ON TRUE
         WHERE (%s = '' OR u.rating = %s) AND (%s = '' OR u.email_key LIKE %s OR lower(coalesce(n.display_name, '')) LIKE %s)
+          AND (%s = '' OR n.company = %s)
     """
-    params = (rating, rating, search, like, like)
+    params = (rating, rating, search, like, like, company, company)
     summary = await fetch_one(pool, """
         SELECT count(*)::int AS total,
                count(*) FILTER (WHERE u.rating = 'Poor')::int AS poor,
@@ -62,7 +64,7 @@ async def list_netskope_user_uci(
     """, ())
     filtered = await fetch_one(pool, f"SELECT count(*)::int AS total {join}", params)
     rows = await fetch_all(pool, f"""
-        SELECT u.email_key AS email, n.user_id, n.display_name AS name, u.rating, u.score,
+        SELECT u.email_key AS email, n.user_id, n.display_name AS name, n.company, u.rating, u.score,
                u.previous_score, u.scored_at
         {join} ORDER BY {_ORDER.get(order, _ORDER['score'])} LIMIT %s OFFSET %s
     """, (*params, limit, offset))

@@ -30,7 +30,7 @@ RETIRED_WIDGETS = frozenset({
     # NSK-INV-002: manual device classification left the screens; its two widgets retire with it.
     "devices_stale_unclassified", "devices_stale_by_diagnosis",
 })
-DEFAULT_DATA_WIDGETS = ["users_recent_activity", "devices_total", "devices_stale_30d", "alerts_7d"]
+DEFAULT_DATA_WIDGETS = ["users_recent_activity", "devices_total", "devices_stale_30d", "fleet_signal_24h"]
 DEFAULT_CHART_WIDGETS = ["devices_by_os", "devices_by_company", "devices_by_classification"]
 DEFAULT_CHART_WIDGET_SIZE = "md"
 MAX_WIDGETS_PER_KIND = 6

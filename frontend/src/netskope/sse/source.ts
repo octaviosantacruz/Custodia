@@ -1,6 +1,6 @@
 import { NETSKOPE_DEVICE_INVENTORY_HELP, NETSKOPE_USER_INVENTORY_HELP } from './lib/netskope-inventory-help.ts';
 import { NETSKOPE_SYNC_PRESENTATION } from './lib/netskope-sync-evidence.ts';
-import { BarChart3, ListChecks, Monitor, Network, ShieldAlert, ShieldCheck, ShieldHalf, UserCog, Users } from 'lucide-react';
+import { BarChart3, Gauge, ListChecks, Monitor, Network, ShieldAlert, ShieldCheck, ShieldHalf, UserCog, Users } from 'lucide-react';
 import type { FrontendRegistration, RuntimeRegistration } from '../../source-contract.ts';
 
 const runtime: RuntimeRegistration = { id: 'netskope', refreshDomain: 'dlp', load: () => import('./router.tsx').then((module) => ({ default: module.NetskopeDomainRouter })), gateWorkspace: true, suspense: false, clearErrorOnNotice: true };
@@ -91,14 +91,26 @@ export const registration = {
     },
     {
       id: 'netskopeDemSites', path: '/netskope/experience', legacyPaths: ['/netskope/dem/sites'], domain: 'dlp',
-      label: 'Usuarios', detail: '¿Qué usuarios necesitan revisión?', icon: Users,
-      description: 'Priorizá señales de riesgo y consultá el rendimiento digital y los equipos de cada persona.',
+      label: 'Riesgo', detail: '¿Qué personas tienen señales de riesgo?', icon: Users,
+      description: 'Priorizá las señales de riesgo y abrí la ficha de cada persona con su confianza, anomalías y equipos.',
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'netskope:read',
       order: 19,
       runtime: 'netskope',
       category: { id: 'netskope_inventory', order: 5 },
       refreshSources: ['netskope'],
-      command: { tool: 'netskope', platform: 'netskope', aliases: ['adem', 'dem', 'experiencia', 'pops', 'sitios', 'uci', 'confianza', 'riesgo', 'usuarios'], priority: 22 },
+      command: { tool: 'netskope', platform: 'netskope', aliases: ['uci', 'confianza', 'riesgo', 'usuarios', 'personas'], priority: 22 },
+    },
+    {
+      /* NSK-EXP-OFFICE-001/002: the performance (ADEM) measured by Custodia lives here; Riesgo answers only risk. */
+      id: 'netskopeOfficeExperience', path: '/netskope/office', domain: 'dlp',
+      label: 'Rendimiento', detail: '¿Cómo funcionan las apps y la red en la oficina?', icon: Gauge,
+      description: 'Seguí semana a semana el rendimiento medido en la oficina y su evolución diaria, por empresa y por persona.',
+      catalog: true, switcher: true, gate: 'strict', alternatePermission: 'netskope:uba_read',
+      order: 19.2,
+      runtime: 'netskope',
+      category: { id: 'netskope_inventory', order: 5.2 },
+      refreshSources: ['netskope'],
+      command: { tool: 'netskope', platform: 'netskope', aliases: ['oficina', 'experiencia', 'adem', 'dem', 'rendimiento', 'hibrido', 'pops', 'sitios'], priority: 21 },
     },
     {
       id: 'netskopeAdmins', path: '/netskope/admins', domain: 'dlp',
@@ -137,7 +149,7 @@ export const registration = {
     },
   ],
   domains: [
-    { id: 'dlp', order: 2, label: 'Netskope', blurb: 'Inventario, alertas y experiencia de seguridad Netskope', status: 'active', access: 'domain', alternatePermissions: ['access:manage', 'netskope:read', 'netskope:dlp_read', 'netskope:admin_inventory_read'], product: { id: 'netskope', label: 'Netskope', description: 'Inventario, alertas y experiencia de seguridad Netskope' } }
+    { id: 'dlp', order: 2, label: 'Netskope', blurb: 'Inventario, alertas y experiencia de seguridad Netskope', status: 'active', access: 'domain', alternatePermissions: ['access:manage', 'netskope:read', 'netskope:dlp_read', 'netskope:admin_inventory_read'], sectionNav: true, product: { id: 'netskope', label: 'Netskope', description: 'Inventario, alertas y experiencia de seguridad Netskope' } }
   ],
   categories: [
     { id: 'netskope_inventory', label: 'Netskope', order: 7 },

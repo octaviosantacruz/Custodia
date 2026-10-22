@@ -4,7 +4,7 @@ import type { FrontendRegistration } from '../../source-contract.ts';
 /** Static declarations; runtime components stay behind a literal lazy import. */
 export const registration = {
   id: 'cyberark/sia',
-  toolLabel: 'CyberArk SIA',
+  toolLabel: 'CyberArk',
   workspaces: [
     {
       id: 'sia', path: '/pam/sia', legacyPaths: ['/sia'], domain: 'pam',
@@ -20,7 +20,7 @@ export const registration = {
     },
     {
       id: 'siaConnectors', path: '/pam/connectors', domain: 'pam',
-      label: 'Conectores PSM y SIA', detail: 'Conectores de Privilege Cloud y SIA', icon: PlugZap,
+      label: 'Conectores', detail: 'Inventarios de PSM, SIA y Connector Manager', icon: PlugZap,
       description: 'Consultá por separado los conectores PSM de Privilege Cloud y los conectores de Secure Infrastructure Access.',
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'sia:catalogs_read',
       order: 26,

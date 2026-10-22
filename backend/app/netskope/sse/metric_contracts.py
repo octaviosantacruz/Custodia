@@ -61,6 +61,12 @@ def _users(widget, kind="data", *, scope="active_users", grain="user", fields=No
                       "users_total", fields=fields, windows=windows, top_n=top_n)
 
 
+def _fleet(widget, fields, denominator):
+    """Fleet-health counts over the default device population; they take no dashboard filters."""
+    return _inventory(widget, "data", "active_devices_with_event_in_7_days", "device", "devices", (), denominator,
+                      fields=fields, windows=(7,))
+
+
 def _alerts(widget, kind, field, windows, grain, top_n=None):
     return MetricContract(
         widget, kind, MetricAdapter("alert_snapshot", "/api/cmdb/netskope/alerts", (field,),
@@ -81,6 +87,11 @@ _CONTRACTS = (
     _devices("devices_observed_user_matched"),
     _devices("devices_observed_user_unmatched"),
     _users("users_without_observed_devices", scope="active_users_without_exact_matched_device_in_active_inventory"),
+    _fleet("fleet_signal_24h", ("fleet_signal_24h", "fleet_devices"), "fleet_devices"),
+    _fleet("fleet_client_current", ("fleet_client_current", "fleet_client_evaluated"), "fleet_client_evaluated"),
+    _fleet("fleet_os_supported", ("fleet_os_supported", "fleet_os_evaluated"), "fleet_os_evaluated"),
+    _fleet("fleet_on_prem", ("fleet_on_prem", "fleet_location_reported"), "fleet_location_reported"),
+    _fleet("devices_duplicate_hostnames", ("devices_duplicate_hostnames", "devices_total"), "devices_total"),
     _alerts("alerts_7d", "data", "total", (7,), "alert"),
     _alerts("alerts_30d", "data", "total", (30,), "alert"),
     _alerts("alerts_90d", "data", "total", (90,), "alert"),
@@ -106,6 +117,12 @@ _CONTRACTS = (
 METRIC_CONTRACTS = MappingProxyType({contract.id: contract for contract in _CONTRACTS})
 DATA_WIDGETS = frozenset(contract.id for contract in _CONTRACTS if contract.kind == "data")
 CHART_WIDGETS = frozenset(contract.id for contract in _CONTRACTS if contract.kind == "chart")
+
+
+FLEET_FIELDS = frozenset({
+    "fleet_devices", "fleet_signal_24h", "fleet_client_current", "fleet_client_evaluated",
+    "fleet_os_supported", "fleet_os_evaluated", "fleet_on_prem", "fleet_location_reported",
+})
 
 
 def inventory_metric_fields(widgets: list[str]) -> frozenset[str]:

@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import type { NetskopeGoldenSuggestion } from '../types/netskope';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useDialogFocusTrap } from '../../../cross/hooks/use-dialog-focus-trap';
-import { fetchNetskopeBaselines, saveNetskopeGoldenReleases, saveNetskopeOsMinimums } from '../lib/netskope-api';
+import { fetchNetskopeBaselines, fetchNetskopeFleet, fetchNetskopeGoldenSuggestion, saveNetskopeGoldenReleases, saveNetskopeOsMinimums } from '../lib/netskope-api';
 
 export type NetskopeBaselineKind = 'client' | 'os';
 
@@ -12,7 +13,9 @@ type Props = { kind: NetskopeBaselineKind; osOptions: string[]; onClose: () => v
    this form only collects the values. */
 export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Props) {
   const [releases, setReleases] = useState('');
+  const [suggestion, setSuggestion] = useState<NetskopeGoldenSuggestion>(null);
   const [minimums, setMinimums] = useState<Array<{ os: string; version: string }>>([]);
+  const [observed, setObserved] = useState<Array<{ os: string; os_version: string; count: number }>>([]);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -33,6 +36,28 @@ export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Pr
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [isClient, osOptions]);
+
+  useEffect(() => {
+    if (!isClient) return;
+    let cancelled = false;
+    // Best effort: the suggestion is a convenience, so a failed read never blocks the manual form.
+    fetchNetskopeGoldenSuggestion().then((value) => { if (!cancelled) setSuggestion(value); }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [isClient]);
+
+  useEffect(() => {
+    if (isClient) return;
+    let cancelled = false;
+    // Reference only: what the fleet reports today. The minimum is still a decision the admin takes.
+    fetchNetskopeFleet().then((fleet) => { if (!cancelled) setObserved(Array.isArray(fleet?.by_os_version) ? fleet.by_os_version : []); }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [isClient]);
+
+  const suggestedText = Array.isArray(suggestion?.releases) ? suggestion.releases.join(', ') : '';
+  const useSuggestion = () => {
+    setReleases(suggestedText);
+    setNote(`Sugerida por docs.netskope.com (leída ${suggestion?.fetched_at.slice(0, 10)}), confirmada por un admin`);
+  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -57,13 +82,18 @@ export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Pr
       </div>
       <div className="catalog-modal-fields">
         {loading ? <p className="muted">Cargando línea base…</p> : isClient
-          ? <label>Releases golden<input value={releases} onChange={(event) => setReleases(event.target.value)} placeholder="141.0.0, 138.1.0, 135.0.0" required /><small className="muted">Al menos dos, separadas por coma. Se ordenan de la más nueva a la más vieja al guardar.</small></label>
+          ? <><label>Releases golden<input value={releases} onChange={(event) => setReleases(event.target.value)} placeholder="141.0.0, 138.1.0, 135.0.0" required /><small className="muted">Al menos dos, separadas por coma. Se ordenan de la más nueva a la más vieja al guardar.</small></label>
+            {suggestion && suggestedText && suggestedText !== releases ? <p className="muted netskope-golden-suggestion">Sugerida por la documentación pública de Netskope: <strong>{suggestedText}</strong> (leída el {suggestion.fetched_at.slice(0, 10)}). No se aplica sola. <button className="button subtle" type="button" onClick={useSuggestion}>Usar sugerida</button></p> : null}</>
           : <div className="netskope-os-minimums">
             {minimums.map((row, index) => <div className="netskope-os-minimum-row" key={index}>
               <label>Sistema operativo<input list="netskope-os-options" value={row.os} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, os: event.target.value } : item))} placeholder="Windows" /></label>
               <label>Versión mínima<input value={row.version} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, version: event.target.value } : item))} placeholder="10.0.19045" /></label>
               <button className="icon-button" type="button" aria-label={`Quitar ${row.os || 'fila'}`} onClick={() => setMinimums((current) => current.filter((_, i) => i !== index))}><Trash2 size={14} /></button>
             </div>)}
+            {observed.length ? <div className="netskope-os-observed" aria-label="Versiones de SO informadas hoy">
+              <small className="muted">Versiones informadas hoy (referencia, no un mínimo):</small>
+              <ul>{observed.map((row) => <li key={`${row.os}-${row.os_version}`}><strong>{row.os}</strong> {row.os_version} <span className="muted">· {row.count} equipos</span></li>)}</ul>
+            </div> : null}
             <datalist id="netskope-os-options">{osOptions.map((name) => <option key={name} value={name} />)}</datalist>
             <button className="button subtle" type="button" onClick={() => setMinimums((current) => [...current, { os: '', version: '' }])} disabled={minimums.length >= 10}><Plus size={13} aria-hidden="true" /> Agregar sistema operativo</button>
           </div>}

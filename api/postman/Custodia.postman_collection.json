@@ -2197,6 +2197,75 @@
           ]
         },
         {
+          "name": "CyberArk Connector Manager",
+          "item": [
+            {
+              "name": "GET /api/connector-manager/networks",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/connector-manager/networks",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "connector-manager",
+                    "networks"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{read_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Consulta todas las páginas de redes y devuelve nombres, fechas y cantidad de pools asociados. Requiere pam:catalogs_read o access:manage. No devuelve valores de red ni los identificadores o nombres de los pools asociados, y no modifica CyberArk.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+              },
+              "response": []
+            },
+            {
+              "name": "GET /api/connector-manager/pools",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/connector-manager/pools",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "connector-manager",
+                    "pools"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{read_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Consulta todas las páginas del catálogo aprobado y devuelve nombres, descripción, fechas y conteos. Requiere pam:catalogs_read o access:manage. No persiste payloads ni devuelve valores de red, hostnames o identificadores de destinos.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
           "name": "CyberArk Risk Management",
           "item": [
             {
@@ -3502,6 +3571,12 @@
                       "disabled": true
                     },
                     {
+                      "key": "uci_rating",
+                      "value": "",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
                       "key": "coverage_risk",
                       "value": "",
                       "description": "",
@@ -3833,7 +3908,7 @@
                     }
                   ]
                 },
-                "description": "Por empresa, SO, client config o fabricante: equipos activos con evento en 7 días, con señal en 24 h, cliente al día, SO en o sobre el mínimo y en oficina. Sin línea base, la columna no se evalúa.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+                "description": "Por empresa, SO, client config, fabricante, dónde trabaja o UCI: equipos activos con evento en 7 días, con señal en 24 h, cliente al día, SO en o sobre el mínimo, en oficina y con UCI bajo del usuario. Sin línea base, la columna no se evalúa.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
               },
               "response": []
             },
@@ -5485,6 +5560,40 @@
                 "description": "Releases golden del cliente y versiones mínimas de SO configuradas por un admin, con quién y cuándo las cambió.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
               },
               "response": []
+            },
+            {
+              "name": "GET /api/netskope/baselines/client-golden-releases/suggestion",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/netskope/baselines/client-golden-releases/suggestion",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "netskope",
+                    "baselines",
+                    "client-golden-releases",
+                    "suggestion"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{read_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Último par de releases golden leído de la documentación pública de Netskope (NSK-GOLDEN-001); null si nunca se leyó. Es sólo una sugerencia: no cambia la línea base hasta que un admin la guarda.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+              },
+              "response": []
             }
           ]
         },
@@ -6620,7 +6729,14 @@
                     "experience",
                     "attention"
                   ],
-                  "query": [],
+                  "query": [
+                    {
+                      "key": "company",
+                      "value": "",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ],
                   "variable": []
                 },
                 "header": [],
@@ -6634,7 +6750,156 @@
                     }
                   ]
                 },
-                "description": "Cola de hasta 50 usuarios que combina el UCI bajo o moderado guardado y los 100 usuarios de peor puntaje ADEM de las últimas 24 h (límite de Netskope: no hay distribución del tenant completo). Un puntaje de la fuente que no lo listó es null, no 0. Si ADEM falla, devuelve solo UCI con adem_available=false. Requiere netskope:uba_read.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+                "description": "rows: cola de riesgo de hasta 50 personas con UCI bajo o moderado guardado (Poor antes que Moderate, menor puntaje primero); un puntaje ADEM bajo por sí solo no entra. performance_rows: los 100 usuarios de peor puntaje ADEM de las últimas 24 h (límite de Netskope: no hay distribución del tenant completo). Cada persona trae su presencia (office/remote/unknown) de los últimos 7 días según la detección on-prem de Netskope en los snapshots de sus equipos activos, unidos por usuario igual al correo: office si reportó desde la oficina al menos un día (office_days cuenta los días), remote si sólo reportó fuera; sin equipo o sin dato es unknown, nunca remote. performance_rows va peor primero, para la vista Rendimiento. Con company solo se listan personas con UCI de esa empresa (la de su usuario Netskope); ADEM no trae empresa, así que en ese caso no se consulta y no hay filas de rendimiento. Un puntaje de la fuente que no lo listó es null, no 0. Si ADEM falla, devuelve solo UCI con adem_available=false. Requiere netskope:uba_read.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+              },
+              "response": []
+            },
+            {
+              "name": "GET /api/cmdb/netskope/experience/office",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/cmdb/netskope/experience/office",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "cmdb",
+                    "netskope",
+                    "experience",
+                    "office"
+                  ],
+                  "query": [
+                    {
+                      "key": "weeks",
+                      "value": "8",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{read_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Personas que fueron a la oficina en los últimos 7 días completos (UTC, hasta ayer) con su puntaje ADEM medido sólo en sus tramos en la oficina, promediado por minutos, y el de sus tramos remotos para comparar. worse_in_office marca un puntaje en oficina al menos office_gap puntos menor que el remoto. series trae la evolución por semana (lunes a domingo, UTC); una semana sin días medidos tiene conteos null, no cero. Un puntaje ausente es null («Sin dato»), nunca cero. Lista hasta 200 personas, peor puntaje primero. office_avg/remote_avg promedian el puntaje por persona (remoto: sólo quienes también tienen puntaje en oficina). weekdays desglosa por día de la semana los días medidos de la serie; companies agrupa a las personas de la ventana. measurement es la última corrida de esa tarea (queued, running, completed o failed) para mostrar el avance. Sólo lee lo que guardó la tarea netskope_office_experience; no consulta Netskope. Requiere netskope:uba_read.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+              },
+              "response": []
+            },
+            {
+              "name": "GET /api/cmdb/netskope/experience/office/person",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/cmdb/netskope/experience/office/person",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "cmdb",
+                    "netskope",
+                    "experience",
+                    "office",
+                    "person"
+                  ],
+                  "query": [
+                    {
+                      "key": "email",
+                      "value": "",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{read_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Por cada día completo (UTC, hasta ayer): place office si algún equipo activo de la persona (usuario igual al correo) reportó desde la oficina, remote si sólo desde fuera y no_signal si ningún equipo reportó un evento clasificado. measured=false es un día que la tarea todavía no midió: el lugar se conoce, el puntaje no. Los puntajes ausentes son null, nunca cero. No consulta Netskope. Requiere netskope:uba_read.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
+              },
+              "response": []
+            },
+            {
+              "name": "GET /api/cmdb/netskope/experience/office/timeline",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/cmdb/netskope/experience/office/timeline",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "cmdb",
+                    "netskope",
+                    "experience",
+                    "office",
+                    "timeline"
+                  ],
+                  "query": [
+                    {
+                      "key": "days",
+                      "value": "30",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "company",
+                      "value": "REEMPLAZAR",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "email",
+                      "value": "REEMPLAZAR",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "start",
+                      "value": "{{date}}",
+                      "description": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "end",
+                      "value": "{{date}}",
+                      "description": "",
+                      "disabled": true
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{read_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "Un punto por día completo (UTC, hasta ayer) desde el primer hasta el último día medido de los últimos `days` días: puntaje ADEM promedio por persona (todas pesan igual) en sus tramos en la oficina y en remoto, con cuántas personas cubre cada promedio (por debajo de min_people el promedio es poco representativo). Remoto cubre a quienes también van a la oficina, que son los únicos que mide la tarea. Con company, sólo esa empresa (la de su usuario Netskope, unido por correo exacto; «Sin empresa» si no hay uno único). Con email, además los puntajes de esa persona. Con start/end (fechas UTC) se usa ese rango en lugar de days, acotado a los últimos 180 días completos (hasta ayer); un rango vacío o invertido es 422. Un día sin medir tiene measured=false y valores null, nunca cero. No consulta Netskope. Requiere netskope:uba_read.\n\nAutenticación OpenAPI: sessionCookie, apiBearer"
               },
               "response": []
             },

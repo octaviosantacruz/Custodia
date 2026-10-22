@@ -1,17 +1,17 @@
 import { WORKSPACE_TOOL_LABELS } from '../../sources';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import {
-  Check, ChevronDown, LoaderCircle, Save, Settings2, SlidersHorizontal, X,
+  Check, ChevronDown, LoaderCircle, Save, Settings2, SlidersHorizontal, Star, X,
 } from 'lucide-react';
 import { usePopover } from '../hooks/use-popover';
 import { CustodiaMark } from './home-workspace';
-import { areaOf, domainMeta, domains, domainWorkspaces, type Domain } from '../lib/domains';
+import { areaOf, domainMeta, domains, domainWorkspaces, quickAccessLimit, type Domain } from '../lib/domains';
 import {
   canonicalWorkspaceList, hasWorkspaceAccess, workspacePath, type WorkspaceView,
   canonicalRecentWorkspace,
 } from '../lib/workspaces';
 import { WORKSPACE_META } from '../lib/workspace-meta';
-import { MAX_QUICK_ACCESS_PER_DOMAIN, type WorkspacePreferences } from '../lib/workspace-preferences-api';
+import type { WorkspacePreferences } from '../lib/workspace-preferences-api';
 import './workspace-switcher.css';
 
 type WorkspaceSwitcherProps = {
@@ -21,6 +21,9 @@ type WorkspaceSwitcherProps = {
   onWorkspaceChange: (view: WorkspaceView) => void;
   preferences: WorkspacePreferences;
   onPreferencesChange: (next: Partial<Pick<WorkspacePreferences, 'visible_workspaces' | 'hidden_workspaces' | 'recent_workspaces'>>) => Promise<void>;
+  /* UX-NAV-001: the tool shows its own views as a bar, so this menu only keeps
+     pinned and recent views across every tool. */
+  crossTool?: boolean;
 };
 
 // Each logo has a variant per theme (same approach as home-workspace.tsx):
@@ -65,7 +68,7 @@ function WorkspaceLink({ view, active, onSelect, showProduct = false }: { view: 
   </a>;
 }
 
-export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, onWorkspaceChange, preferences, onPreferencesChange }: WorkspaceSwitcherProps) {
+export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, onWorkspaceChange, preferences, onPreferencesChange, crossTool = false }: WorkspaceSwitcherProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const { open, setOpen, ref } = usePopover<HTMLDivElement>({ fallbackFocusRef: triggerRef });
   const menuRef = useRef<HTMLElement>(null);
@@ -87,11 +90,14 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
   const activeProduct = PRODUCT_MARKS[activeDomain];
   const isTopLevelWorkspace = (view: WorkspaceView) => domainWorkspaces(areaOf(view)).includes(view);
   const configuredQuickAccess = canonicalWorkspaceList(preferences.visible_workspaces);
-  const allQuickAccess = configuredQuickAccess.filter((view) => allAvailable.includes(view));
-  const quickAccess = allQuickAccess.filter((view) => available.includes(view));
+  const limit = quickAccessLimit();
+  const allQuickAccess = configuredQuickAccess.filter((view) => allAvailable.includes(view)).slice(0, limit);
+  const scope = crossTool ? allAvailable : available;
+  const quickAccess = allQuickAccess.filter((view) => scope.includes(view));
   const recent = canonicalWorkspaceList(preferences.recent_workspaces)
-    .filter((view) => available.includes(view) && !quickAccess.includes(view) && (isHome || view !== workspaceView))
+    .filter((view) => scope.includes(view) && !quickAccess.includes(view) && (isHome || view !== canonicalRecentWorkspace(workspaceView)))
     .slice(0, 4);
+  const triggerLabel = isHome ? 'Inicio' : WORKSPACE_META[canonicalRecentWorkspace(workspaceView)].label;
   const dirty = draft.length !== allQuickAccess.length || draft.some((view, index) => view !== allQuickAccess[index]);
 
   const beginEditing = () => {
@@ -118,8 +124,7 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
     setSaveError('');
     setDraft((current) => {
       if (current.includes(view)) return current.filter((item) => item !== view);
-      const selectedForProduct = current.filter((item) => areaOf(item) === areaOf(view)).length;
-      return selectedForProduct < MAX_QUICK_ACCESS_PER_DOMAIN ? [...current, view] : current;
+      return current.length < limit ? [...current, view] : current;
     });
   };
   const saveDraft = async () => {
@@ -139,22 +144,22 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
   };
 
   return <div className="workspace-launcher" ref={ref}>
-    <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label={`Cambiar workspace. Actual: ${isHome ? 'Inicio' : WORKSPACE_META[canonicalRecentWorkspace(workspaceView)].label}`} aria-expanded={open} title="Cambiar de workspace" onClick={() => setOpen((current) => !current)}>
-      <span>{isHome ? 'Inicio' : WORKSPACE_META[canonicalRecentWorkspace(workspaceView)].label}</span><ChevronDown size={15} aria-hidden />
-    </button>
+    {crossTool ? <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label="Abrir accesos rápidos" aria-expanded={open} title="Vistas fijadas y recientes de todas las herramientas" onClick={() => setOpen((current) => !current)}>
+      <Star size={14} aria-hidden /><span>Accesos rápidos</span><ChevronDown size={15} aria-hidden />
+    </button> : <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label={`Cambiar workspace. Actual: ${triggerLabel}`} aria-expanded={open} title="Cambiar de workspace" onClick={() => setOpen((current) => !current)}>
+      <span>{triggerLabel}</span><ChevronDown size={15} aria-hidden />
+    </button>}
     {open && <section className="workspace-menu" aria-label="Workspaces" ref={menuRef}>
       {editing ? <div ref={editorRef} className="workspace-preferences-editor" role="dialog" aria-labelledby="workspace-editor-title" tabIndex={-1}>
         <div className="workspace-editor-header">
           <div><strong id="workspace-editor-title">Accesos rápidos</strong><span>Personalizá accesos de todas las herramientas.</span></div>
           <button className="workspace-editor-close" type="button" aria-label="Cancelar edición" onClick={closeEditing} disabled={saving}><X size={16} /></button>
         </div>
-        <div className="workspace-editor-limit"><span>{draft.length} seleccionados</span><small>Hasta {MAX_QUICK_ACCESS_PER_DOMAIN} por herramienta</small></div>
+        <div className="workspace-editor-limit"><span>{draft.length} seleccionados</span><small>Hasta {limit}</small></div>
         <div className="workspace-editor-options">
           {allAvailable.map((view) => {
             const selected = draft.includes(view);
-            const product = areaOf(view);
-            const selectedForProduct = draft.filter((item) => areaOf(item) === product).length;
-            const disabled = !selected && selectedForProduct >= MAX_QUICK_ACCESS_PER_DOMAIN;
+            const disabled = !selected && draft.length >= limit;
             return <label key={view} className={'workspace-editor-option' + (selected ? ' selected' : '') + (disabled ? ' disabled' : '')}>
               <input type="checkbox" checked={selected} disabled={disabled || saving} onChange={() => toggleDraft(view)} />
               <span className="workspace-editor-check" aria-hidden>{selected ? <Check size={13} /> : null}</span>
@@ -172,19 +177,23 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
         </div>
       </div> : <>
         <div className="workspace-menu-header">
-          <div><strong>Vistas de {activeProduct.label}</strong><span>Para cambiar de herramienta, usá el selector anterior.</span></div>
+          {crossTool
+            ? <div><strong>Accesos rápidos</strong><span>Tus vistas de cualquier herramienta.</span></div>
+            : <div><strong>Vistas de {activeProduct.label}</strong><span>Para cambiar de herramienta, usá el selector anterior.</span></div>}
         </div>
         {quickAccess.length ? <>
           <p className="workspace-menu-section-label">Vistas rápidas</p>
           <div className="workspace-domain-nav" data-section="quick-access">
-            {quickAccess.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} />)}
+            {quickAccess.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} showProduct={crossTool} />)}
           </div>
-        </> : <button className="workspace-quick-empty-action" type="button" onClick={beginEditing}><Settings2 size={14} /><span><strong>Fijar vistas rápidas</strong><small>Guardá tus accesos frecuentes de {activeProduct.label}.</small></span></button>}
-        {recent.length ? <><p className="workspace-menu-section-label">Recientes</p><div className="workspace-domain-nav" data-section="recent">{recent.map((view) => <WorkspaceLink key={view} view={view} onSelect={pickWorkspace} />)}</div></> : null}
-        <p className="workspace-menu-section-label">Todas las vistas de {activeProduct.label}</p>
-        <div className="workspace-domain-nav" data-section="tool-workspaces">
-          {available.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} />)}
-        </div>
+        </> : <button className="workspace-quick-empty-action" type="button" onClick={beginEditing}><Settings2 size={14} /><span><strong>Fijar vistas rápidas</strong><small>Guardá tus accesos frecuentes{crossTool ? ' de cualquier herramienta' : ` de ${activeProduct.label}`}.</small></span></button>}
+        {recent.length ? <><p className="workspace-menu-section-label">Recientes</p><div className="workspace-domain-nav" data-section="recent">{recent.map((view) => <WorkspaceLink key={view} view={view} onSelect={pickWorkspace} showProduct={crossTool} />)}</div></> : null}
+        {crossTool ? null : <>
+          <p className="workspace-menu-section-label">Todas las vistas de {activeProduct.label}</p>
+          <div className="workspace-domain-nav" data-section="tool-workspaces">
+            {available.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} />)}
+          </div>
+        </>}
         {quickAccess.length ? <div className="workspace-preferences">
           <button className="workspace-preferences-trigger" type="button" onClick={beginEditing}><Settings2 size={14} /> Editar vistas rápidas</button>
         </div> : null}

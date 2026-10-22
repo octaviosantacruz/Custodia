@@ -6,6 +6,7 @@ import { CompactSelect } from './compact-select';
 import { ConfirmDialog } from './confirm-dialog';
 import { StateBlock } from './state-block';
 import { AccessCapabilities, AccessChanges } from './access-capabilities';
+import { AccessWorkspacePreview } from './access-workspace-preview';
 import { DateTime } from './date-time';
 import { MIN_PASSWORD_LENGTH } from '../lib/password-policy';
 import { TablePagination } from './table-pagination';
@@ -182,22 +183,27 @@ export function UserAdmin({ onNotice, onError, currentActorId, currentUserEmail,
         <ul className="role-chip-list" aria-label={`Roles de ${selectedUser.display_name}`}>{selectedAssignments.map((assignment) => {
           const name = roleByCode.get(assignment.role_code)?.display_name || assignment.role_code;
           const removable = assignment.source === 'manual' && canEditRoles;
-          return <li className={`role-chip is-${assignment.source}`} key={assignment.role_code} title={assignment.source === 'oidc' ? 'Asignado al iniciar sesión: el mapeo se edita en Roles y permisos' : 'Asignado en Custodia'}>
+          return <li className={`role-chip is-${assignment.source}`} key={assignment.role_code} title={assignment.source === 'oidc' ? 'Asignado al iniciar sesión en Okta' : 'Asignado en Custodia'}>
             <span>{name}</span><small>{assignment.source === 'oidc' ? 'Okta' : 'Custodia'}</small>
             {removable ? <button type="button" className="role-chip-remove" disabled={roleBusy} aria-label={`Quitar ${name} de ${selectedUser.display_name}`} onClick={() => setPendingRoleChange({ user: selectedUser, roleCode: assignment.role_code, action: 'revoke' })}><X size={12} /></button> : null}
           </li>;
         })}</ul>
         {canEditRoles ? <RolePicker value="" placeholder="Agregar rol" options={roleOptions.filter((role) => !selectedAssignments.some((assignment) => assignment.role_code === role.role_code))} onChange={(role_code) => setPendingRoleChange({ user: selectedUser, roleCode: role_code, action: 'grant' })} disabled={roleBusy} ariaLabel={`Agregar rol a ${selectedUser.display_name}`} />
           : <p className="user-access-note">{isCurrentUser(selectedUser) ? 'Tus propios roles no se cambian desde tu cuenta.' : 'Solo lectura.'}</p>}
-        {selectedUser.auth_source === 'oidc' ? <p className="user-access-note">Los roles directos se editan acá. El mapeo de grupos se administra en Roles y permisos.</p> : null}
+        {selectedUser.auth_source === 'oidc' && has('access:oidc_mappings_read') && <div className="user-role-sources" role="region" aria-label="Origen de roles de Okta"><h3>Otorgados al iniciar sesión</h3><dl>{selectedAssignments.filter((assignment) => assignment.source === 'oidc').map((assignment) => {
+          const groups = selectedUser.role_group_sources?.[assignment.role_code];
+          return <div key={assignment.role_code}><dt>{roleByCode.get(assignment.role_code)?.display_name || assignment.role_code}</dt><dd>{groups == null ? 'Sin detalle del grupo para este inicio de sesión.' : groups.length ? groups.join(' · ') : 'Rol predeterminado de inicio de sesión (sin grupo asociado).'}</dd></div>;
+        })}</dl><p className="user-access-note">Último inicio de sesión: <DateTime value={selectedUser.last_login_at} />. No confirma pertenencia actual a los grupos.</p></div>}
+        {selectedUser.auth_source === 'oidc' ? <p className="user-access-note">Los roles directos se editan acá. Los grupos se consultan en Roles y permisos; la pertenencia se administra en Okta.</p> : null}
       </section>
       <section className="user-access-drawer-section"><div className="user-access-section-heading"><div><span>QUÉ PUEDE HACER</span><strong>Capacidades de esta cuenta</strong></div></div>{catalogError || !canReadRoles || selectedUser.roles.some((code) => !roleByCode.has(code)) ? <p className="user-access-note">No se pudo resolver el catálogo completo de esta cuenta.</p> : <AccessCapabilities codes={selectedPermissions} permissions={permissions} domains={domains} label={`Accesos de ${selectedUser.display_name}`} />}</section>
+      <AccessWorkspacePreview codes={selectedPermissions} unavailable={!selectedUser.is_active ? 'Cuenta desactivada: sin acceso.' : catalogError || !canReadRoles || selectedUser.roles.some((code) => !roleByCode.has(code)) ? 'No se pudo resolver el catálogo completo de esta cuenta.' : undefined} />
       <footer className="user-access-drawer-actions">{selectedUser.auth_source === 'oidc' ? <span className="user-self-badge">Cuenta de Okta</span> : canManageLocal ? <>{isCurrentUser(selectedUser) ? <span className="user-self-badge">Tu usuario</span> : <button className="button subtle" type="button" onClick={() => void update(selectedUser, { is_active: !selectedUser.is_active })}>{selectedUser.is_active ? <><UserRoundX size={14} /> Desactivar</> : <><UserRound size={14} /> Activar</>}</button>}<button className="button subtle" type="button" disabled={!selectedUser.is_active || reissuingUserId === selectedUser.actor_id} onClick={() => setPendingReissue(selectedUser)}><KeyRound size={14} /> Regenerar acceso</button>{!isCurrentUser(selectedUser) ? <button className="button danger" type="button" disabled={deletingUserId === selectedUser.actor_id} onClick={() => requestRemove(selectedUser)}><Trash2 size={14} /> Eliminar</button> : null}</> : <span className="user-self-badge">Solo lectura</span>}</footer>
     </div></div> : null}
     {pendingRoleChange && <ConfirmDialog fallbackFocusRef={userDrawerRef} icon={<ShieldCheck size={18} />} titleId="change-role-title" title={pendingRoleChange.action === 'grant' ? 'Asignar rol' : 'Quitar rol'} descriptionId="change-role-copy"
       description={<>{pendingRoleChange.action === 'grant' ? 'Asignar' : 'Quitar'} <strong>{roleByCode.get(pendingRoleChange.roleCode)?.display_name || pendingRoleChange.roleCode}</strong> a la cuenta de <strong>{pendingRoleChange.user.display_name}</strong>. Revisá el efecto considerando sus demás roles.</>}
       onClose={() => setPendingRoleChange(null)} closeDisabled={roleBusy} confirmLabel={pendingRoleChange.action === 'grant' ? 'Asignar rol' : 'Quitar rol'} confirmBusyLabel="Guardando..." confirmBusy={roleBusy} confirmTone={pendingRoleChange.action === 'grant' ? 'primary' : 'danger'} backdropClassName="user-role-change-dialog"
-      onConfirm={() => void changeRole(pendingRoleChange.user, pendingRoleChange.roleCode, pendingRoleChange.action)}><AccessChanges before={priorPermissions} after={nextPermissions} permissions={permissions} domains={domains} /></ConfirmDialog>}
+      onConfirm={() => void changeRole(pendingRoleChange.user, pendingRoleChange.roleCode, pendingRoleChange.action)}><AccessChanges before={priorPermissions} after={nextPermissions} permissions={permissions} domains={domains} /><AccessWorkspacePreview codes={nextPermissions} label="Vistas después del cambio" unavailable={!pendingRoleChange.user.is_active ? 'Cuenta desactivada: sin acceso.' : undefined} /></ConfirmDialog>}
     {pendingDelete && <ConfirmDialog
       icon={<Trash2 size={18} />}
       titleId="delete-user-title"

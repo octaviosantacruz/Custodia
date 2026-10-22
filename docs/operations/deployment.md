@@ -172,6 +172,47 @@ tail -f /var/log/custodia/frontend.log      # frontend/Vite
 journalctl -u custodia -f                    # migraciones, build y supervisor
 ```
 
+### Contraseña y migraciones de PostgreSQL automáticas
+
+La app y las migraciones recuperan automáticamente la contraseña desde AWS
+en memoria. Para mantener vigente también `DATABASE_PASSWORD_FILE` para
+clientes SQL y otras herramientas y aplicar migraciones pendientes, instalar
+el timer optativo (ajustar
+`User` y `WorkingDirectory`/`ExecStart` si cambia el checkout):
+
+```bash
+sudo install -m 0644 deploy/custodia-database-password.service deploy/custodia-database-password.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now custodia-database-password.timer
+sudo systemctl start custodia-database-password.service
+systemctl list-timers custodia-database-password.timer
+journalctl -u custodia-database-password.service -n 20 --no-pager
+```
+
+El servicio corre como `ubuntu`, carga `.env.local` con el script existente y
+usa las credenciales AWS del mismo usuario (incluido el rol IAM de la instancia).
+Requiere `DATABASE_SECRET_ID`, `DATABASE_URL`, AWS CLI y permiso
+`secretsmanager:GetSecretValue`; respeta `DATABASE_SECRET_REGION` y
+`DATABASE_PASSWORD_FILE`. No guarda secretos en las units ni los imprime.
+Comprueba el archivo un minuto después del boot y cada cinco minutos desde
+que termina el intento anterior. Sólo consulta AWS si el archivo falta o no
+funciona; valida la contraseña contra PostgreSQL y reemplaza el archivo
+atómicamente con permisos 0600. Si falla, conserva el archivo anterior,
+registra el fallo en el journal y vuelve a intentar en el siguiente intervalo.
+El archivo puede quedar desactualizado hasta el próximo intento; la app y las
+migraciones tienen su propia recuperación y no dependen de ese intervalo.
+Después de actualizar o validar el archivo, systemd ejecuta `scripts/migrate.sh`.
+Si el primer paso falla, no ejecuta el segundo. El runner aplica sólo las
+migraciones pendientes presentes en el checkout, conserva el historial en
+`schema_migrations` y usa su advisory lock para serializar ejecuciones con
+el despliegue. Un fallo deja el servicio en estado fallido y el timer vuelve
+a intentarlo en el siguiente intervalo. El intento completo tiene un límite
+de 15 minutos. Los archivos nuevos de migración se ejecutarán automáticamente
+cuando lleguen a este checkout; el timer no hace `git pull`, build ni reinicio.
+`npm run deploy` sigue aplicando las migraciones antes de arrancar la app.
+Para deshabilitarlo:
+`sudo systemctl disable --now custodia-database-password.timer`.
+
 ### Actualización de dependencias Python
 
 Detener el servicio antes de instalar paquetes en `backend/.venv`. Python
@@ -305,14 +346,16 @@ cadencia; el nombre `cyberark` en `SYNC_SOURCE_INTERVALS` sigue cubriendo a las
 dos y `pam_psm` o `pam_safes` lo ajustan por separado. Las corridas históricas
 de PAM se reasignan por `source_file`/`psm_only`.
 
-Netskope se divide en tareas independientes:
+Netskope se divide en tareas independientes (la tabla lista las cinco):
 
 | `task_key` | Contenido | Se programa si |
 |---|---|---|
 | `netskope_inventory` | Usuarios, dispositivos y DEM; es la única que reconcilia y retira registros | el contrato de Netskope está configurado |
 | `netskope_alerts` | Agregados de alertas (NSK-ALR-001) y su purga a 180 días | `NETSKOPE_ALERT_PATH` está definido |
 | `netskope_uci` | Último UCI de usuarios con calificación baja o moderada (NSK-UBA-002) | `NETSKOPE_UCI_PATH` es la ruta aprobada |
+| `netskope_golden_release` | Release golden desde la documentación pública de Netskope, sólo como sugerencia (NSK-GOLDEN-001); una vez por día | `NETSKOPE_GOLDEN_RELEASE_URL` es la URL aprobada |
 | `netskope_dlp` | Captura de incidentes DLP (NSK-DLP-001); un error de captura falla sólo esta tarea | `NETSKOPE_DLP_INCIDENTS_PATH` es el endpoint aprobado |
+| `netskope_office_experience` | Puntaje ADEM de los tramos en oficina y en remoto de cada persona que fue a la oficina, por día UTC completo (NSK-EXP-OFFICE-001); cada 3 h mide hasta dos días pendientes de los últimos 7 (~1.200 consultas por día hábil) | `NETSKOPE_OFFICE_EXPERIENCE_PATH` es la ruta aprobada (`/api/v2/adem/users/getinfo`) |
 
 `SYNC_SOURCE_INTERVALS` acepta el nombre de la fuente (`"netskope": 30` aplica
 a sus tres tareas) o el de una tarea (`"netskope_dlp": 10`); la entrada de la

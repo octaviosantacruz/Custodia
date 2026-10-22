@@ -43,6 +43,7 @@ import { NetskopeOperationsView } from './netskope-operations-view';
 import { NetskopeAaChart } from './netskope-aa-chart';
 import { NetskopeAaSeverity } from './netskope-aa-severity';
 import './netskope-workspace.css';
+import { navigateInApp } from '../../../cross/components/section-nav';
 
 type Props = { view: NetskopeView; refreshKey?: number; permissions: string[]; authChecked: boolean; authenticated: boolean; onUnauthorized: () => void; onError: (message: string) => void; onNotice: (message: string) => void; onNavigate: (view: NetskopeView) => void; onOpenPosture?: (checks: string[]) => void };
 type UserActivityWindow = 7 | 14 | 30;
@@ -85,6 +86,8 @@ function netskopeDataCardMeta(id: NetskopeDataWidgetId | NetskopeChartWidgetId, 
   if (id === 'devices_with_observed_user' || id === 'devices_observed_user_matched') return { icon: <UserRound size={14} aria-hidden="true" />, tone: id === 'devices_observed_user_matched' ? 'success' : 'neutral', help };
   if (id === 'devices_observed_user_unmatched' || id === 'users_without_observed_devices') return { icon: <UserRound size={14} aria-hidden="true" />, tone: 'warning', help };
   if (id === 'users_total' || id === 'users_recent_activity') return { icon: <UsersRound size={14} aria-hidden="true" />, tone: id === 'users_recent_activity' ? 'success' : 'neutral', help };
+  if (id === 'fleet_signal_24h' || id === 'fleet_client_current' || id === 'fleet_os_supported' || id === 'fleet_on_prem') return { icon: <MonitorSmartphone size={14} aria-hidden="true" />, tone: 'success', help };
+  if (id === 'devices_duplicate_hostnames') return { icon: <MonitorSmartphone size={14} aria-hidden="true" />, tone: 'warning', help };
   if (id === 'devices_total') return { icon: <MonitorSmartphone size={14} aria-hidden="true" />, tone: 'neutral', help };
   return { icon: <CircleGauge size={14} aria-hidden="true" />, tone: 'neutral', help };
 }
@@ -95,6 +98,14 @@ const OBSERVED_USER_STATUS_LABELS: Record<string, string> = { matched: 'Con usua
 const ACCOUNT_STATUS_LABELS: Record<string, string> = { enabled: 'Habilitado', disabled: 'Deshabilitado', unknown: 'Sin dato de cuentas' };
 const DEVICE_COUNT_LABELS: Record<string, string> = { '0': 'Sin dispositivos', '1': '1 dispositivo', '2plus': '2 o más' };
 const DEVICE_AGE_LABELS: Record<string, string> = { lt_24h: 'Menos de 24 h', d1_7: '1 a 7 días', d7_30: '7 a 30 días', gt_30d: 'Más de 30 días', unknown: 'Sin dato' };
+/** One-line reading of the fleet-health cards (their share line carries the denominator). */
+const FLEET_CARD_DETAIL: Record<string, string> = {
+  fleet_signal_24h: 'Reportaron en las últimas 24 horas',
+  fleet_client_current: 'Versión del cliente al día',
+  fleet_os_supported: 'SO en el mínimo exigido',
+  fleet_on_prem: 'Detectados en la oficina por Netskope',
+  devices_duplicate_hostnames: 'Comparten hostname con otro equipo',
+};
 const WIDGET_FILTER_LABELS: Record<string, string> = { os: 'SO', company: 'Empresa', classification_status: 'Clasificación' };
 
 function widgetFilterSuffix(filters?: NetskopeWidgetFilters): string {
@@ -290,6 +301,9 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
         : widgetId === 'users_without_observed_devices'
           ? `${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'} en inventario · con 1 dispositivo ${formatNumber(bucketCount(widgetMetrics.users_by_device_count, '1'))} · con 2+ ${formatNumber(bucketCount(widgetMetrics.users_by_device_count, '2plus'))}${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
         : widgetId === 'devices_stale_30d' ? `Último evento de más de 30 días${widgetFilterSuffix(instance.filters)}`
+        : widgetId === 'fleet_client_current' && rawValue === null ? 'Sin línea base de versiones del cliente: no se evalúa'
+        : widgetId === 'fleet_os_supported' && rawValue === null ? 'Sin mínimos de SO definidos: no se evalúa'
+        : widgetId in FLEET_CARD_DETAIL ? FLEET_CARD_DETAIL[widgetId]
         : widgetId === 'users_total' ? [netskopeUsersSplit(widgetMetrics), typeof widgetMetrics.users_with_device_activity_7d === 'number'
           ? `${formatNumber(widgetMetrics.users_with_device_activity_7d)} con actividad de dispositivo en 7 días`
           : 'Total del último inventario; no implica actividad reciente'].filter(Boolean).join(' · ')
@@ -306,6 +320,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
       : widgetId === 'users_total' ? (netskopeUsersSplit(widgetMetrics)?.replace('deshabilitados', 'deshab.').replace('sin dato de cuentas', 'sin dato') ?? 'Identidades en inventario')
       : widgetId === 'devices_total' ? 'Eventos en los últimos 7 días'
       : widgetId === 'devices_stale_30d' ? 'Último evento > 30 días'
+      : widgetId in FLEET_CARD_DETAIL && typeof rawValue === 'number' ? FLEET_CARD_DETAIL[widgetId]
       : widgetId === 'devices_observed_user_matched' || widgetId === 'devices_observed_user_unmatched' ? `De ${formatNumber(widgetMetrics.devices_total)} con evento en 7 días`
       : widgetId === 'users_without_observed_devices' ? `De ${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'}`
       : detail;
@@ -580,12 +595,17 @@ export function NetskopeWorkspace({ view, refreshKey, permissions, authChecked, 
     }
     drillToDevices(drill.query);
   };
-  return <section className="netskope-workspace" aria-label="Netskope DLP">
+  return <section className="netskope-workspace" aria-label="Netskope SSE">
     {view === 'metrics'
       ? <NetskopeMetricsView onDrill={drillFromDashboard} permissions={permissions} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} onError={onError} onNotice={onNotice} refreshKey={refreshKey} />
       : view === 'operations'
       ? <NetskopeOperationsView refreshKey={refreshKey} canAdminBaselines={permissions.includes('netskope:admin')} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} onNotice={onNotice} onDrill={drillToDevices} onOpenPosture={onOpenPosture} />
       : <section className="netskope-inventory" aria-label="Inventario Netskope">
+        <nav className="workspace-subnav workspace-subnav-nested" aria-label="Tipo de inventario Netskope">
+          {([['devices', 'Registro de equipos'], ['users', 'Registro de usuarios']] as const).map(([id, label]) => <a key={id}
+            href={`/netskope/${id}`} className={listView === id ? 'active' : undefined} aria-current={listView === id ? 'page' : undefined}
+            onClick={(event) => navigateInApp(event, () => { if (listView !== id) onNavigate(id); })}><strong>{label}</strong></a>)}
+        </nav>
         <NetskopeInventoryTable view={listView} rows={inventory.rows} total={inventory.total} search={inventory.search} deviceQuery={inventory.deviceQuery} usersFilters={inventory.usersFilters} facets={inventory.facets} syncText={syncPresentation?.text ?? ''} syncObservedAt={syncPresentation?.observedAt} loading={inventory.loading} error={inventory.loadError} errorInfo={inventory.loadErrorInfo} onSearch={inventory.setSearch} onQueryChange={inventory.updateDeviceQuery} onDeviceFilterChange={inventory.setDeviceFilter} onUsersFilterChange={inventory.updateUsersFilters} onClearFilters={inventory.clearDeviceFilters} onClearUsersFilters={inventory.clearUsersFilters} onRetry={() => void inventory.reload()} onLoadMore={inventory.loadMore} onSelectRow={setSelectedRow} onOpenUser={setUserCard} />
         <NetskopeDetailDrawer row={listView === 'users' ? selectedRow : null} onClose={() => setSelectedRow(null)} />
         {userCard && listView === 'devices' ? <NetskopeUserDrawer key={userCard.userId ?? userCard.email} user={userCard} refreshKey={refreshKey ?? 0} canReadUba={permissions.includes('netskope:uba_read')} onUnauthorized={onUnauthorized} onClose={() => setUserCard(null)} fallbackFocusRef={userCardFocusRef} /> : null}

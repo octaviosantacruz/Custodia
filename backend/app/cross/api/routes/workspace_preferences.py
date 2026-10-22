@@ -5,7 +5,6 @@ from app.auth import get_actor_permissions, require_read_access
 from app.cross.services.workspace_state import (
     MAX_RECENT,
     MAX_VISIBLE,
-    MAX_VISIBLE_PER_DOMAIN,
     get_workspace_preferences,
     save_workspace_preferences,
 )
@@ -25,7 +24,7 @@ ALLOWED_WORKSPACES = {
     "users", "activity", "help", "pamHealth", "siaConnectors",
     "siaResources", "siaDatabaseAccounts", "identityFederations", "ipInventory",
     "netskope", "netskopeOperations", "netskopeChains", "netskopeInventory", "netskopeUsers", "netskopeDevices",
-    "netskopeDlp", "netskopeDemSites", "netskopeUci", "netskopePosture", "netskopeAdmins",
+    "netskopeDlp", "netskopeDemSites", "netskopeUci", "netskopePosture", "netskopeAdmins", "netskopeOfficeExperience",
 }
 
 # Workspace ids retired from the product. They are never accepted in a write
@@ -41,24 +40,6 @@ ALLOWED_WORKSPACES = {
 RETIRED_WORKSPACES = {"netskopeAlerts", "aimApplications", "identityGraph", "accessAssets", "siaTargetSets", "netskopeSteering", "netskopePolicies", "personCoverage"}
 
 router = APIRouter(prefix="/api/workspaces", tags=["Preferencias de workspace"])
-
-QUICK_ACCESS_WORKSPACES_BY_DOMAIN = {
-    # UX-IA-001: Personas lives in the neutral Conexiones area (`cross`) and
-    # the administration views in `admin`; this mirror keeps the per-tool
-    # quick-access cap and the contract test aligned with the UI.
-    # DOCS-PORTAL-001 adds the open "help" guide as a quick-access candidate
-    # of the neutral Conexiones area.
-    "cross": {"person", "help"},
-    "admin": {"users", "activity"},
-    # UX-AUD-013(c): platforms/connectors/pamHealth are Safes hub tabs, not
-    # switcher destinations; this mirrors the frontend catalog.
-    "pam": {
-        "general", "posture", "graph", "safes",
-        "identity", "sia", "assets",
-    },
-    "dlp": {"netskope", "netskopePosture", "netskopeOperations", "netskopeInventory", "netskopeDemSites", "netskopeAdmins"},
-}
-
 
 class WorkspacePreferencesUpdate(BaseModel):
     visible_workspaces: list[str] | None = Field(default=None, max_length=MAX_VISIBLE)
@@ -83,16 +64,6 @@ def _known(values: list[str]) -> list[str]:
     ]
 
 
-def _validate_visible_per_domain(values: list[str]) -> list[str]:
-    for domain_workspaces in QUICK_ACCESS_WORKSPACES_BY_DOMAIN.values():
-        if sum(value in domain_workspaces for value in values) > MAX_VISIBLE_PER_DOMAIN:
-            raise HTTPException(
-                status_code=422,
-                detail=f"visible_workspaces admite hasta {MAX_VISIBLE_PER_DOMAIN} accesos por herramienta",
-            )
-    return values
-
-
 def _accessible(values: list[str], permissions: list[str]) -> list[str]:
     # `restricted` are the access:manage-first workspaces (kept in preferences
     # only for access:manage holders, even when a narrow read permission also
@@ -104,8 +75,8 @@ def _accessible(values: list[str], permissions: list[str]) -> list[str]:
     restricted = {"graph", "platforms", "connectors", "users", "activity"}
     netskope = {"netskope", "netskopePosture", "netskopeOperations", "netskopeInventory", "netskopeUsers", "netskopeDevices", "netskopeChains"}
     dlp_alerts = {"netskopeDlp"}
-    # NSK-UBA-002: strict like DLP; only netskope:uba_read opens the UCI view.
-    uba = {"netskopeUci"}
+    # NSK-UBA-002 / NSK-EXP-OFFICE-001: strict like DLP; only netskope:uba_read opens the UCI and office views.
+    uba = {"netskopeUci", "netskopeOfficeExperience"}
     # NSK-RBAC-001: strict as well; only netskope:admin_inventory_read opens the administrators view.
     admin_inventory = {"netskopeAdmins"}
     can_read_netskope = "access:manage" in permissions or "netskope:read" in permissions
@@ -173,11 +144,12 @@ async def workspace_preferences_update(
     saved_visible = _known(saved["visible_workspaces"])
     saved_hidden = _known(saved["hidden_workspaces"])
     saved_recent = _known(saved["recent_workspaces"])
-    visible = _validate_visible_per_domain(_validate(
+    # UX-NAV-001: quick access has one total, spread freely across tools.
+    visible = _validate(
         _inaccessible(saved_visible, permissions) + _accessible(requested_visible, permissions)
         if requested_visible is not None else saved_visible,
         "visible_workspaces",
-    ))
+    )
     hidden = _validate(
         _inaccessible(saved_hidden, permissions) + _accessible(requested_hidden, permissions)
         if requested_hidden is not None else saved_hidden,

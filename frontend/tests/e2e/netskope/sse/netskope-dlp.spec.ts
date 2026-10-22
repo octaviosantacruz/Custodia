@@ -79,7 +79,7 @@ test('NSK-DLP-001 the DLP alerts workspace is not offered without the narrow per
   // access:manage and netskope:read are present; netskope:dlp_read is not.
   await mockAuthenticatedApp(page, { permissions: ['inventory:read', 'netskope:read', 'access:manage'] });
   await page.goto('/netskope');
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
+  await expect(page.getByRole('navigation', { name: 'Secciones de Netskope', exact: true }).getByRole('link', { name: 'Métricas', exact: true })).toBeVisible();
   await expect(page.getByText('Alertas DLP', { exact: true })).toHaveCount(0);
 });
 

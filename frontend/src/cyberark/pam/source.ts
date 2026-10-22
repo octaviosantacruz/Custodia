@@ -4,7 +4,7 @@ import type { FrontendRegistration } from '../../source-contract.ts';
 /** Static declarations; runtime components stay behind a literal lazy import. */
 export const registration = {
   id: 'cyberark/pam',
-  toolLabel: 'CyberArk PAM',
+  toolLabel: 'CyberArk',
   workspaces: [
     {
       id: 'general', path: '/pam', legacyPaths: ['/', '/operations'], domain: 'pam',
@@ -72,9 +72,9 @@ export const registration = {
       /* UX-AUD-013(c): canonical path is the Safes hub tab (Infraestructura
          PAM → Conectores). */
       id: 'connectors', path: '/pam/connectors', legacyPaths: ['/pam/sia/connectors'], domain: 'pam',
-      label: 'Conectores PSM y SIA', detail: 'Conectores de Privilege Cloud y SIA', icon: PlugZap,
-      description: "Consultá los inventarios independientes de conectores PSM y SIA.",
-      introHelp: { label: "Inventarios de conectores PSM y SIA", paragraphs: ["Inventarios separados de conectores PSM y SIA en una misma vista. La vista PSM se actualiza desde la sincronización PAM; los conectores SIA conservan su propia fuente."] },
+      label: 'Conectores', detail: 'Inventarios de PSM, SIA y Connector Manager', icon: PlugZap,
+      description: "Consultá los inventarios independientes de PSM, SIA y los pools y redes de Connector Manager.",
+      introHelp: { label: "Inventarios de conectores", paragraphs: ["Cada inventario conserva su fuente. PSM y SIA muestran sus sincronizaciones; los pools y redes de Connector Manager se consultan en vivo y sólo muestran nombres, fechas y conteos. No se infieren vínculos entre esos inventarios."] },
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'pam:catalogs_read',
       recentWorkspace: 'pamHealth',
       order: 5,

@@ -66,7 +66,7 @@ export function NetskopeOperationsView({ refreshKey, canAdminBaselines, authChec
         <TriangleAlert size={14} aria-hidden="true" />
         <span>{sync.text} · Cifras del último inventario disponible.</span>
       </p> : null}
-      <NetskopeFleetBand fleet={fleet.data} changes={changes.data} clientEvents={clientEvents.data} diagnosis={diagnosis.data} onDrill={onDrill} onOpenPosture={onOpenPosture} />
+      <NetskopeFleetBand fleet={fleet.data} changes={changes.data} clientEvents={clientEvents.data} diagnosis={diagnosis.data} onDrill={onDrill} onOpenPosture={onOpenPosture} onOpenChanges={() => setTab('changes')} />
       <nav className="workspace-subnav workspace-subnav-nested" aria-label="Secciones de Equipos" role="tablist" onKeyDown={handleTablistKeyDown}>
         {([['fleet', 'Flota'], ['changes', 'Cambios']] as const).map(([id, label]) => <button
           key={id} type="button" role="tab" id={`nsk-equipos-tab-${id}`} aria-controls={`nsk-equipos-panel-${id}`}

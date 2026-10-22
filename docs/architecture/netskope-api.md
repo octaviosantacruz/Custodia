@@ -1,19 +1,20 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-06
+revisado: 2026-10-19
 ---
 
 # API de Netskope: superficie, cobertura y reglas
 
-**Fuente:** exportación completa de la documentación de la API del tenant (2026-10-04): **1.302 operaciones en 49 familias**: GET 612, POST 336, PUT 101, PATCH 117, DELETE 136. La lista cruda se conserva localmente en `docs/history/FULL_API_NSK_LIST.MD` (ignorada por Git; se vuelve a exportar desde `apidocs` del tenant si hace falta).
+**Fuente:** listado del Swagger del tenant (Netskope API 1.0.0, OAS 3.0) capturado el 2026-10-19: **1.356 operaciones en 50 familias**: GET 631, POST 355, PUT 101, PATCH 129, DELETE 140. La exportación anterior (2026-10-04, 1.302 operaciones en 49 familias) se conserva localmente en `docs/history/FULL_API_NSK_LIST.MD` (ignorada por Git; se vuelve a exportar desde `apidocs` del tenant si hace falta). El listado trae método, ruta y título; no trae schemas ni las notas *«still under development»*, que se verifican en el Swagger o con el probe. Cambios entre ambas versiones: [«Cambios del Swagger 2026-10-19»](#cambios-del-swagger-2026-10-19).
 **Estado:** referencia, **no un backlog**: el trabajo vive en [`TO_IMPLEMENT.md`](../tracking/TO_IMPLEMENT.md) y los contratos aprobados en [`integration-contracts.md`](integration-contracts.md). Que una ruta figure aquí no la habilita.
 
 ## Qué es consultable
 
-- **GET (612):** las 611 rutas del catálogo anterior más `marketplace/agent-entitlements/employee-counts` (sin triage). Estado por ruta: ver las marcas y la tabla por familia.
-- **Consultas por POST (69):** 4 ya usadas (`users/getusers`, `users/getgroups`, ADEM `device/getlist` y `device/getdetails`) y 65 candidatas por heurística de nombre (último segmento `get*`, `/query/`, `criteria/schema`, `estimate`). Es una aproximación: `nsiq/urllookup` (envía URLs a Netskope), `atp/*` (suben archivos), `dspm/.../startscan|abortscan`, `analysis/npa` y similares **no** se tratan como lectura aunque parezcan consultas. Cada candidata se revisa a mano antes de un probe.
-- **Escritura, acción o despliegue (621):** crear, reemplazar, borrar, desplegar, revertir, subir, escanear, rotar o resetear. Fuera de alcance: Custodia es de sólo lectura hacia Netskope.
+- **GET (631):** las 612 del 2026-10-04, más las 20 nuevas del 2026-10-19 (sin triage salvo lo indicado en «Cambios»), menos `datalineage/admin/md5exclusions`, que se quitó. Estado por ruta: ver las marcas y la tabla por familia.
+- **Consultas por POST (71):** 4 ya usadas (`users/getusers`, `users/getgroups`, ADEM `device/getlist` y `device/getdetails`) y 67 candidatas por heurística de nombre (último segmento `get*`, `/query/`, `criteria/schema`, `estimate`; incluye las nuevas `services/casbinline/getappinstances` y `skopeit/getapplicationsdata`). Es una aproximación: `nsiq/urllookup` (envía URLs a Netskope), `atp/*` (suben archivos), `dspm/.../startscan|abortscan`, `analysis/npa` y similares **no** se tratan como lectura aunque parezcan consultas. Cada candidata se revisa a mano antes de un probe.
+- **Exportaciones CSV por POST (5, nuevas):** `events/datasearch/{alert,application,network,page,epdlp}` aceptan los parámetros en el body y devuelven **CSV** con eventos crudos. No reemplazan el `GET` JSON que usa Custodia y no se usan: serían un volcado de eventos por usuario.
+- **Escritura, acción o despliegue (649):** crear, reemplazar, borrar, desplegar, revertir, subir, escanear, rotar o resetear. Fuera de alcance: Custodia es de sólo lectura hacia Netskope.
 
 ## Reglas no negociables antes de promover una tarea
 
@@ -52,18 +53,84 @@ revisado: 2026-10-06
 | `/api/v2/adem/poplist`, `POST /api/v2/adem/users/device/getlist`, `.../getdetails` | usado · Experiencia digital (consulta en vivo, sin persistir) |
 | `/api/v2/scim/Groups`, `/api/v2/scim/Users` | probado 200 · `NSK-GRP-001` leyó grupos con `getgroups` |
 | `/api/v2/devices/supportedos` | probado 200 · familia `NSK-CFG-001`/`NSK-DEV-001` |
-| `/api/v2/events/data/audit` | probado 403 · registrado `NSK-AUD-001` |
+| `/api/v2/rbac/roles` (familia) | usado · `NETSKOPE_RBAC_PATH` (`NSK-RBAC-001`; ver «Administradores y roles de Netskope») |
+| `/api/v2/dem/apps`, `/api/v2/dem/appprobes` | probado 200 el 2026-10-19 (antes 403): `{data[], totalCount}`, 2 filas cada una · familia `NSK-DEM-*`, sin tarea propia |
+| `/api/v2/events/data/audit` | probado 400 el 2026-10-19 (antes 403): faltan parámetros/schema, no permiso · registrado `NSK-AUD-001` |
 | `/api/v2/events/datasearch/application` | probado 200 · registrado `NSK-APP-001` |
 | `/api/v2/events/datasearch/incident` | probado 400 · `NSK-DLP-001` usa `dataexport/events/incident` |
 | `/api/v2/events/datasearch/page` | probado 200 · registrado `NSK-WEB-001` |
-| `/api/v2/infrastructure/lbrokers` | probado 403 · registrado `NSK-NPA-001` |
-| `/api/v2/infrastructure/publishers` | probado 403 · registrado `NSK-NPA-001` |
-| `/api/v2/infrastructure/publisherupgradeprofiles` | probado 403 · registrado `NSK-NPA-001` |
+| `/api/v2/infrastructure/lbrokers` | probado 200 (2026-10-01, confirmado 2026-10-19): vacío · registrado `NSK-NPA-001` |
+| `/api/v2/infrastructure/publishers` | probado 200 (2026-10-01, confirmado 2026-10-19): envoltura `data`/`status`/`total` · registrado `NSK-NPA-001` |
+| `/api/v2/infrastructure/publisherupgradeprofiles` | probado 200 (2026-10-01, confirmado 2026-10-19): envoltura `data`/`status`/`total` · registrado `NSK-NPA-001` |
+| `/api/v2/infrastructure/publishers/releases` | probado 200 el 2026-10-19: `{data[], status}`, 5 releases · registrado `NSK-NPA-001` |
 | `/api/v2/policy/npa/policygroups` | usado · `NETSKOPE_POLICY_GROUPS_PATH` (`NSK-POLICY-002`, opt-in; ver «Grupos de políticas») |
-| `/api/v2/policy/npa/rules` | probado 403 · registrado `NSK-NPA-002` |
+| `/api/v2/policy/npa/rules` | probado 200 (2026-10-01, confirmado 2026-10-19): 0 reglas, sólo Private Access · registrado `NSK-NPA-002` |
+| `/api/v2/policy/internetaccess/{rules,rules/applied,groups}` | probado 403 (2026-10-19) · lo habilita Netskope, ver «Rutas bloqueadas» · registrado `NSK-POLICY-003` |
 | `/api/v2/policy/urllist` | probado 200 el 2026-10-12 (antes 403): 23 listas con `id`, `name`, `data.type` (`exact`/`regex`), `data.urls`, `modify_by`, `modify_time`, `pending` · registrado `NSK-CFG-001` |
 | `/api/v2/services/cci/app` | probado 200 (error funcional del servicio) · registrado `NSK-APP-001` |
-| `/api/v2/steering/apps/private` | probado 403 · registrado `NSK-NPA-002` |
+| `/api/v2/services/dlp/profiles` | probado 403 (2026-10-19) · lo habilita Netskope, ver «Rutas bloqueadas» · registrado `NSK-POLICY-003` |
+| `/api/v2/steering/apps/private` | probado 200 (2026-10-01, confirmado 2026-10-19): envoltura `data`/`status`/`total` · registrado `NSK-NPA-002` |
+
+## Rutas bloqueadas: qué reclamar y a quién
+
+Única lista vigente de rutas GET que el token de Custodia no puede leer. Último probe: **2026-10-19 13:24–13:26 UTC** (`NSK-API-001/v3`, sólo GET, sólo forma; salida sin valores). Las listas de `403` de secciones con fecha anterior son históricas. Al repetir el probe, se actualiza esta sección y la fecha.
+
+```bash
+scripts/probe_netskope_api.sh <ruta> [<ruta> ...]   # sólo rutas de la allowlist
+```
+
+**A) Las habilita Netskope (account team / soporte), no un scope del token.** El Swagger del tenant las marca *«still under development and not ready for use. Please work with your account team to learn about them and request access»*. Tarea `NSK-POLICY-003`.
+
+| Ruta | Para qué | Estado |
+|---|---|---|
+| `GET policy/internetaccess/rules` | Reglas de cada grupo de Real-time Protection | `403` |
+| `GET policy/internetaccess/rules/applied` | Reglas aplicadas | `403` |
+| `GET policy/internetaccess/groups` | Grupos de Internet Access | `403` |
+| `GET services/dlp/profiles` | Perfiles DLP (vínculo regla → perfil) | `403` |
+
+**B) Las habilita el administrador del tenant: permiso de lectura del token de Custodia.** Pedir sólo lectura, nunca escritura. Tarea `NSK-SCOPE-REQ-001`.
+
+| Ruta | Para qué | Estado | Prioridad |
+|---|---|---|---|
+| `GET dem/query/definitions` | Métricas DEM (RUM, Traceroute, HTTP) | `403` | Alta: bloquea `NSK-DEM-MET-001` y `NSK-XMET-002` |
+| `GET aig/aiproviders`, `aig/mcpservers`, `aig/appliances` | Inventario de AI Gateway | `403` | Media: `NSK-AI-001` |
+| `GET airt/summary`, `airt/quota` | AI Red Teaming | `403` | Baja, familia sensible |
+| `GET casb/appinstances` | Instancias de apps CASB | `403` | Baja, sin tarea |
+| `GET profiles/networks` | Perfiles de red | `403` | Baja, sin tarea |
+| `GET analysis/npa/jobs` | Jobs de análisis NPA | `403` | Baja, sin tarea |
+| `GET ips/threathuntingconfig` | Configuración de threat hunting IPS | `403` | Baja, sin tarea |
+| `GET events/logstreaming/list` | Destinos de log streaming | `403` | Baja, sin tarea |
+| `GET steering/expressconnect/sites` | Sitios Express Connect | `403` | Baja, sin tarea |
+| `GET events/metrics/transactionevents` | Métricas de eventos de transacción | `401` (rechaza la credencial para esta ruta, no sólo el permiso) | Baja, sin tarea |
+
+**No reclamar.** `auth/tokens` (`403`): no figura en el Swagger del tenant (ni en el del 2026-10-04 ni en el del 2026-10-19), así que no hay ruta que pedir; además Custodia no necesita un inventario de tokens. **`enrollment/tokenset` responde `200` desde el 2026-10-19 (antes `403`) y devuelve `auth_token` y `encrypt_token`**, secretos de enrolamiento del cliente: está excluido por diseño y lo correcto es pedir que se **quite** ese permiso del token de Custodia (mínimo privilegio). Ningún cliente ni probe lo consume.
+
+**Desbloqueadas desde el último reclamo:** `dem/apps` y `dem/appprobes` (`200` el 2026-10-19); `infrastructure/*`, `steering/apps/private` y `policy/npa/rules` (`200` desde el 2026-10-01); `policy/urllist` (`200` desde el 2026-10-12); `events/data/audit` (`400`: falta capturar parámetros, no permiso).
+
+**Rutas del probe que no existen en el Swagger del tenant.** `auth/tokens`, `devices/tags`, `steering/devices`, `steering/globalconfig/clientconfiguration` y `spm/{apps,apps/recentchanges/getstats,policy/rules,saas_posture_score,inventory}` están en la allowlist del probe (venían del SDK o de la documentación pública), pero no aparecen en ninguna de las dos capturas del Swagger. Sus `404` (y el `403` de `auth/tokens`) significan «ruta inexistente en este tenant», no falta de licencia ni de scope: no se reclaman. De `spm` el tenant sólo publica `spm/stats/disconnectedinstances` (`200`) y `spm/{app}/privilegedpermissions`.
+
+## Cambios del Swagger 2026-10-19
+
+Comparación del listado del Swagger del 2026-10-19 contra la exportación del 2026-10-04. **No cambió ninguna ruta que Custodia usa o prueba:** todas siguen publicadas con el mismo método y título; tampoco cambiaron las 10 rutas marcadas como deprecadas. Ninguna ruta nueva desbloquea una tarea por sí sola: todas siguen el camino de «Cómo promover un candidato».
+
+**Nuevas (56 operaciones; 20 GET):**
+
+| Familia | GET nuevos | Otras operaciones | Lectura para Custodia |
+|---|---|---|---|
+| `policy/fallback` | `rules`, `rules/applied`, `rules/capabilities`, `rules/{id}`, `rules/{id}/versions/{versionid}`, `groups`, `groups/{id}` | crear, editar, mover, fijar, desplegar, revertir y borrar | **Candidato.** Reglas y grupos de Fallback Policy: otra vista de reglas configuradas, independiente de `internetaccess` (`403`). Probar `rules`, `rules/applied` y `groups` antes de diseñar nada. |
+| `policy` | `dns/defaults`, `ssldecryption/defaults` | `PATCH` de ambas | `dns/defaults` candidato de configuración; `ssldecryption/defaults` es el certificado de descifrado: excluido. |
+| `profiles/remoteproxies` | lista, `applied`, `{id}`, `{id}/versions/{versionid}` | crear, editar, desplegar, revertir y borrar | Candidato de configuración (sin hosts ni credenciales del proxy). |
+| `services/casbinline` | `data`, `instancesupportedapps` | POST `getappinstances`, `skopeit/getapplicationsdata`; `appinstance` (POST/PUT, escritura) | Candidato de inventario de instancias CASB inline. |
+| `clientconfiguration` | `client/config/swgglobalattributes` | `PATCH` | Candidato de configuración del cliente. |
+| `aig` | `aiproviders/{id}/apikeys`, `.../apikeys/{keyId}` | crear, editar y borrar claves | **Excluido:** son claves de API de proveedores de IA. |
+| `airt` | `prompt/languages` | — | Catálogo de idiomas; sin valor de inventario. |
+| `balkan` (familia nueva) | `notifications` | marcar leída, descartar, reconocer | Excluido (notificaciones de la consola, igual que `ui`). |
+| `events/datasearch` | — | POST CSV de `alert`, `application`, `network`, `page`, `epdlp` | No se usan: exportación de eventos crudos. |
+| `infrastructure` | — | `PATCH lbrokers/{id}` | Escritura. |
+
+**Quitadas (2):** `GET` y `PUT datalineage/admin/md5exclusions`.
+
+**Lo que no trae el listado:** schemas, parámetros y las notas *«still under development»*. Para confirmar si `internetaccess/*` y `services/dlp/profiles` siguen marcadas así, se mira el detalle de la operación en el Swagger o se repite el probe («Rutas bloqueadas»).
 
 ## Cómo promover un candidato
 
@@ -80,22 +147,22 @@ Marcas de las rutas GET según el triage del 2026-09-26. «Escr.» agrupa PUT, P
 
 | Familia | GET | POST | Escr. | Marcas GET | Qué es y qué hacer |
 |---|---:|---:|---:|---|---|
-| `services` | 57 | 49 | 46 | 29 candidato, 13 sensible, 11 registrado, 3 excluido, 2 probado | Configuración de servicios: CCI ya registrado; bandwidth control, cloudtap y EDM/fingerprints son candidatos; certificados y descargas fuera. |
-| `profiles` | 46 | 44 | 30 | 37 candidato, 9 registrado | Inventario de perfiles de configuración (red, DNS, destinos, categorías, service objects, listas): alto valor de postura; el contenido de listas se limita a nombre/ID/conteo. |
-| `policy` | 40 | 34 | 30 | 23 registrado, 14 candidato, 6 probado | Políticas: NPA y URL list ya registradas; fastpath/internetaccess/domainfrontings son candidatos nuevos. |
+| `services` | 59 | 52 | 47 | 29 candidato, 13 sensible, 11 registrado, 3 excluido, 2 probado, 2 sin triage | Configuración de servicios: CCI ya registrado; bandwidth control, cloudtap y EDM/fingerprints son candidatos; certificados y descargas fuera. Nuevo (2026-10-19): `casbinline` (`data`, `instancesupportedapps` y POST `getappinstances`), inventario de instancias CASB inline: candidato, alternativa a `casb/appinstances` (`403`). |
+| `profiles` | 50 | 47 | 32 | 37 candidato, 9 registrado, 4 sin triage | Inventario de perfiles de configuración (red, DNS, destinos, categorías, service objects, listas): alto valor de postura; el contenido de listas se limita a nombre/ID/conteo. Nuevo (2026-10-19): `remoteproxies` (lista, `applied`, detalle y versiones): candidato de configuración. |
+| `policy` | 49 | 41 | 35 | 23 registrado, 14 candidato, 6 probado, 9 sin triage | Políticas: NPA y URL list ya registradas; `internetaccess` registrado como `NSK-POLICY-003` (lo habilita Netskope); fastpath/domainfrontings son candidatos nuevos. Nuevo (2026-10-19): `fallback/{rules,rules/applied,rules/capabilities,groups}` (Fallback Policy), `dns/defaults` y `ssldecryption/defaults` (certificado: excluido). |
 | `nsbrowser` | 25 | 12 | 28 | 19 registrado, 5 excluido, 1 sensible | Enterprise Browser: familia `NSK-EB-001`; descargas, imágenes y plantillas de email quedan fuera. |
 | `dspm` | 31 | 13 | 15 | 27 sensible, 4 excluido | Postura DSPM: alto valor y alta sensibilidad; requiere decisión de privacidad y allowlist antes de cualquier persistencia. |
-| `dem` | 26 | 9 | 19 | 26 registrado | Familia ya registrada en el tracker (`NSK-DEM-*`); el probe read-only es el próximo paso (`NSK-DEM-PROBE-001`). |
-| `events` | 42 | 3 | 3 | 26 sensible, 8 probado, 6 usado, 3 registrado, 3 candidato, 2 excluido, 1 configurado | Familia más grande: los caminos aprobados son `datasearch` count-only y la matriz de probes; los exports crudos requieren contrato separado. |
+| `dem` | 26 | 9 | 19 | 26 registrado | Familia registrada (`NSK-DEM-*`); probe GET cerrado (`NSK-DEM-PROBE-001`), sites en uso (`NSK-DEM-INV-001`). Sólo `query/definitions` sigue en `403` (ver «Rutas bloqueadas»). |
+| `events` | 42 | 8 | 3 | 26 sensible, 8 probado, 6 usado, 3 registrado, 3 candidato, 2 excluido, 1 configurado | Familia más grande: los caminos aprobados son `datasearch` count-only y la matriz de probes; los exports crudos requieren contrato separado. Nuevo (2026-10-19): POST CSV de `datasearch/*`, no se usan (ver «Qué es consultable»). |
 | `platform` | 24 | 8 | 14 | 11 candidato, 6 deprecado, 5 excluido, 2 registrado | Mixto: contratos, settings, IdP SSO y roles deprecados son candidatos; IPs de DNS resolver y MFA por usuario quedan fuera. |
 | `ui` | 29 | 6 | 9 | 29 excluido | API interna de la UI de Netskope; no es la superficie de integración. Los exports PDF/CSV y las notificaciones quedan fuera del CMDB. |
 | `steering` | 17 | 8 | 18 | 10 sensible, 4 registrado, 2 probado, 1 candidato, 1 excluido | Infra de steering (GRE/IPSec/Express Connect/private apps): sólo IDs/estado, sin IPs; tokens fuera. |
-| `aig` | 16 | 7 | 13 | 12 registrado, 4 excluido | Inventario AI Gateway: proveedores, appliances, MCP servers, rate limits. Ya registrado como `NSK-AI-001`; tokens fuera. |
+| `aig` | 18 | 8 | 15 | 12 registrado, 6 excluido | Inventario AI Gateway: proveedores, appliances, MCP servers, rate limits. Ya registrado como `NSK-AI-001`; tokens fuera. Las rutas probadas siguen en `403`. Nuevo: `aiproviders/{id}/apikeys`, claves de API: excluido. |
 | `adem` | 4 | 30 | 0 | 2 sensible, 2 excluido | Experiencia de usuario agregada; las listas de IPs/usuarios individuales están excluidas. |
 | `casbapi` | 25 | 5 | 3 | 12 excluido, 8 sensible, 4 registrado, 1 candidato | Next-Gen CASB: sólo configuración (perfiles eDiscovery) y dominios son candidatos; emails/archivos/chat/usuarios están excluidos. |
 | `marketplace` | 20 | 10 | 3 | 19 excluido | Entitlements comerciales de agentes: fuera del alcance del CMDB salvo decisión de licenciamiento. |
-| `airt` | 20 | 5 | 7 | 18 sensible, 2 deprecado | AI Red Teaming: resúmenes y rounds son candidatos sensibles; prompts/casos requieren decisión. |
-| `infrastructure` | 12 | 8 | 11 | 9 registrado, 6 probado | NPA: publishers, brokers y upgrade profiles ya registrados; alerts config y broker config son candidatos de familia. |
+| `airt` | 21 | 5 | 7 | 18 sensible, 2 deprecado, 1 sin triage | AI Red Teaming: resúmenes y rounds son candidatos sensibles; prompts/casos requieren decisión. |
+| `infrastructure` | 12 | 8 | 12 | 9 registrado, 6 probado | NPA: publishers, brokers y upgrade profiles ya registrados; alerts config y broker config son candidatos de familia. |
 | `vpe` | 12 | 4 | 13 | 11 candidato, 1 excluido | VPE: nodos, templates y grupos. Alias de `vpemanager`; sin imágenes ni tokens. |
 | `vpemanager` | 12 | 4 | 13 | 11 candidato, 1 excluido | Alias de `vpe`: nodos, templates y grupos; sin imágenes ni tokens. |
 | `incidents` | 12 | 9 | 5 | 9 excluido, 3 sensible | Incidentes individuales, forense y malware: excluidos. Watchlists/escenarios: candidatos sensibles. |
@@ -107,13 +174,13 @@ Marcas de las rutas GET según el triage del 2026-09-26. «Escr.» agrupa PUT, P
 | `reporting` | 14 | 4 | 0 | 14 sensible | Reportes y widgets (aa/er): candidato sensible; requiere filtros y allowlist. |
 | `streamingclient` | 8 | 3 | 6 | 6 sensible, 2 excluido | Clientes, destinos y formats de streaming: candidatos; installer y JWT fuera. |
 | `ips` | 7 | 2 | 6 | 7 candidato | Estado y configuración IPS: candidato de postura, sin firmas ni textos de plantillas. |
-| `rbac` | 8 | 2 | 5 | 8 registrado | RBAC v2 (roles/labels/api groups): ya registrado como `NSK-RBAC-PROBE-001`. |
+| `rbac` | 8 | 2 | 5 | 8 registrado | RBAC v2 (roles/labels/api groups): probe `NSK-RBAC-PROBE-001` cerrado; roles, administradores y grupos de API en uso (`NSK-RBAC-001`). |
 | `devices` | 2 | 10 | 2 | 2 probado, 1 excluido | `supportedos` ya probado; `otp` excluido. |
-| `enrollment` | 4 | 2 | 7 | 3 candidato, 1 excluido | Estado de enrollment y notificaciones: candidatos; `tokenset` excluido. |
+| `enrollment` | 4 | 2 | 7 | 3 candidato, 1 excluido | Estado de enrollment y notificaciones: candidatos; `tokenset` excluido (devuelve secretos y hoy responde `200`: pedir quitar el permiso). |
 | `atp` | 8 | 4 | 0 | 8 excluido | Malware analysis (sandbox/URL scan): forense descargable, excluido por diseño. |
 | `nsiq` | 7 | 3 | 0 | 7 candidato | Threat intelligence: reputación y recategorización de URL; sin URLs individuales por defecto. |
 | `epdlp` | 4 | 3 | 3 | 4 candidato | Endpoint DLP: health, constraint profiles y exclusiones de linaje (configuración). |
-| `datalineage` | 6 | 1 | 2 | 6 sensible | Linaje de archivos: sólo la configuración (`stance`, `md5exclusions`) es candidata; el grafo por archivo es sensible. |
+| `datalineage` | 5 | 1 | 1 | 5 sensible | Linaje de archivos: sólo la configuración (`stance`) es candidata; `admin/md5exclusions` se quitó del Swagger (2026-10-19); el grafo por archivo es sensible. |
 | `aiguardrails` | 5 | 2 | 2 | 5 registrado | Guardrails de IA: evaluaciones y settings; familia `NSK-AI-001`. |
 | `proxyagentapi` | 2 | 3 | 1 | 2 excluido | Historial de chat del agente: contenido personal, excluido. |
 | `users` | 3 | 2 | 0 | 2 usado, 2 sensible | `counts` ya se usa; `attributes` es candidato sensible (posible PII). |
@@ -128,20 +195,22 @@ Marcas de las rutas GET según el triage del 2026-09-26. «Escr.» agrupa PUT, P
 | `templates` | 1 | 0 | 0 | 1 candidato | Plantilla de notificaciones de usuario: candidato de configuración. |
 | `aisecurity` | 1 | 0 | 0 | 1 candidato | Uso de AI Security: candidato de agregados. |
 | `integrations` | 1 | 0 | 0 | 1 candidato | Conexiones Microsoft Purview: candidato de inventario. |
-| `clientconfiguration` | 1 | 0 | 0 | 1 sensible | POPs GSLB Elite: candidato; excluir IPs. |
+| `balkan` | 1 | 0 | 5 | 1 excluido | Nueva (2026-10-19): notificaciones del usuario de la consola, mismas operaciones que `ui/notifications`. Excluida como `ui`. |
+| `clientconfiguration` | 2 | 0 | 1 | 1 sensible, 1 sin triage | POPs GSLB Elite: candidato; excluir IPs. Nuevo (2026-10-19): `client/config/swgglobalattributes`, atributos globales de SWG: candidato de configuración. |
 
 Candidatas a lectura por POST por familia: `adem` 28, `services` 9, `dem` 4, `incidents` 4, `devices` 3, `policy` 3, `profiles` 3, `steering` 3, `ui` 2, `airt` 1, `analysis` 1, `datalineage` 1, `dspm` 1, `ips` 1, `nsiq` 1.
 
 ## Alias y solapamientos
 
 - `vpe` y `vpemanager` exponen las mismas rutas de nodos, templates y grupos.
+- `balkan/notifications` repite `ui/notifications` (lista, marcar leída, descartar, reconocer).
 - `scim` y `platform/administration/scim` duplican ResourceTypes, Schemas y Users (los usuarios SCIM sincronizados no son los administradores del tenant).
 - `ui/casbapi` es la API interna de la UI; `casbapi` es la API pública de Next-Gen CASB.
 - `aig`, `policy/aig`, `profiles/aiguardrails` y `aiguardrails` se solapan en la superficie de IA.
 
 ## Excluido por diseño
 
-Aunque la operación sea GET: contenido de archivos, correos, chat o calendario; forense, pcap, capturas, artefactos y malware; diccionarios y archivos descargables; certificados, tokens, JWT, OTP y claves; imágenes de VPE; instaladores; ubicación exacta, IPs, hostnames y filas por usuario; historial de chat del agente; entitlements comerciales (`marketplace`) salvo decisión de licenciamiento. Familias enteras excluidas: `ui` (API interna de la UI), `atp`, `proxyagentapi`, `marketplace` y la mayor parte de `incidents` y `casbapi`.
+Aunque la operación sea GET: contenido de archivos, correos, chat o calendario; forense, pcap, capturas, artefactos y malware; diccionarios y archivos descargables; certificados, tokens, JWT, OTP y claves; imágenes de VPE; instaladores; ubicación exacta, IPs, hostnames y filas por usuario; historial de chat del agente; entitlements comerciales (`marketplace`) salvo decisión de licenciamiento. Familias enteras excluidas: `ui` (API interna de la UI) y `balkan` (sus notificaciones), `atp`, `proxyagentapi`, `marketplace` y la mayor parte de `incidents` y `casbapi`.
 
 ## Posibles líneas de trabajo
 
@@ -161,8 +230,8 @@ Agrupaciones de candidatos para que otra sesión las convierta en tareas `NSK-*`
 
 - **`200` útiles:** `users/counts`, `nsbrowser/licensesettings`, `nsbrowser/licenses`, `nsbrowser/policies`, `steering/ipsec/{pops,tunnels}`, `steering/gre/{pops,tunnels}`, `dem/alert/{rules,receivers}`, `POST dem/alerts/getalerts`, `reporting/er/reports` (53), `spm/stats/disconnectedinstances`, `rbac/roles/me`, `ips/{status,allowlist,alertonlymode}`, `forwardproxy/auth/globalsettings`, `enrollment/{secure-enrollment,tenantnotifications}`, `casbapi/accessreviews` (0), `epdlp/constraints` (0), ADEM `getinfo`, `getapplications`, `getlocations`, `getsummary`, `getentities`, `device/getaggregatedscores`, `metrics/getexpscore`, `device/getrca`, y UBA `incidents/users/getanomalies`.
 - **UCI:** `POST ubadatasvc/user/uci` con `{user, fromTime, toTime}` (no `username`, como envía el SDK) devuelve `confidences[{start, confidenceScore}]`; `POST incidents/uba/getuci` con `{users[], fromTime, toTime}` devuelve `usersUci[]` en lote. Segundos y milisegundos dan densidades distintas (359 vs 22 puntos en 30 días).
-- **`403` (falta scope):** `auth/tokens`, `enrollment/tokenset`, `dem/query/definitions`, `dem/apps`, `dem/appprobes`, `aig/*`, `airt/*`, `casb/appinstances`, `analysis/npa/jobs`, `services/dlp/profiles`, `policy/internetaccess/*`, `profiles/networks`, `ips/threathuntingconfig`, `events/logstreaming/list`, `steering/expressconnect/sites`. `events/metrics/transactionevents` da `401`.
-- **`404` (sin licencia o ruta inexistente en el tenant):** `spm/{apps,policy/rules,saas_posture_score,inventory}`, `devices/tags`, `steering/devices`, `steering/globalconfig/clientconfiguration`, `users/getgroups` por GET (es POST).
+- **`403` en esa fecha:** `auth/tokens`, `enrollment/tokenset`, `dem/query/definitions`, `dem/apps`, `dem/appprobes`, `aig/*`, `airt/*`, `casb/appinstances`, `analysis/npa/jobs`, `services/dlp/profiles`, `policy/internetaccess/*`, `profiles/networks`, `ips/threathuntingconfig`, `events/logstreaming/list`, `steering/expressconnect/sites`. `events/metrics/transactionevents` da `401`. Histórico: el estado vigente está en «Rutas bloqueadas» (`dem/apps`, `dem/appprobes` y `enrollment/tokenset` ya no dan `403`).
+- **`404` (ruta inexistente en el tenant: no figura en el Swagger, ver «Rutas bloqueadas»):** `spm/{apps,policy/rules,saas_posture_score,inventory}`, `devices/tags`, `steering/devices`, `steering/globalconfig/clientconfiguration`, `users/getgroups` por GET (es POST).
 - **`400` por parámetros:** `incidents/users/scenarios`, `aisecurity/usage`, `adem/{userlist,poplist,deviceoslist}`, `adem/tenant/getusage`, `adem/users/metrics/getexpscores`, `events/datasearch/incident`, `events/data/audit` e `infrastructure`; esquemas por capturar.
 
 ## Contratos verificados de Netskope
@@ -179,10 +248,28 @@ Probe `scripts/probe_netskope_experience.py` (sólo lectura; informa forma y cla
 - **ADEM, por usuario:** `getinfo` (puntaje, `lastKnownLocation`, `organizationUnit`, `userGroup`), `getlocations` (ciudad, región, país, lat/long), `device/getdetails` (**`publicIp`, `privateIp`, `gateway`, `pop`, `geo`, `clientStatus`**, CPU, memoria), `device/getrca` (`rootCause` y `scoreSummary` con cpu, disco, memoria, red, Wi-Fi), `getaggregatedscores`, `getexpscore` (serie). Cada llamada ~0,5 s.
 - **UEBA:** `incidents/users/getanomalies` acepta varios usuarios, `timeframe` máximo 30 días y devuelve hasta 1000 filas (25 usuarios con UCI bajo: 4922 en 30 días; mediana 9,5 por usuario, máximo 743) con escenario, subescenario, regla, actividad, severidad, `score`, aplicación, método de acceso e IPs. Catálogo `GET incidents/users/scenarios?lastxdays=` (requiere ese parámetro): `Compromised credential`, `Compromised device`, `Insider threat`. En la muestra dominó `Insider threat` › `DLP violation`. `ubadatasvc/user/uci` da la serie de UCI (277 puntos en 30 días) y `incidents/watchlists` las listas con usuarios.
 - **Decisión (2026-10-10, `NSK-EXP-ONPREM-001`):** el sync de equipos guarda sólo categorías en los atributos del dispositivo (`onprem_status`, `onprem_method`, `client_config`, `steering_config`); **no** guarda IPs públicas ni privadas, `match_ip`, POP ni código postal. `GET /api/cmdb/netskope/experience/presence` cuenta equipos activos con señal en 7 días por estado, `client_config` y empresa; el detalle usa los filtros `onprem_status` y `client_config` de `GET /api/cmdb/netskope/devices`. Un equipo sin el dato (sincronizado antes) cuenta como "Sin dato", nunca como remoto. Mostrar `match_ip` queda fuera hasta confirmar con el responsable del tenant que es la lista de egreso corporativa.
+- **Presencia semanal (2026-10-19, `NSK-EXP-PRESENCE-001`, migración `108`):** la ubicación de una persona en «Usuarios para revisar» y «Rendimiento en oficina» ya no es la foto de la última sincronización (escondía a los híbridos: en 7 días, 929 equipos reportaron desde la oficina y desde fuera, frente a 239 sólo desde la oficina). Cada sync guarda en `netskope_device_presence_days` un registro por equipo, **día UTC de su último evento** y estado `on-prem`/`off-prem` (sin IPs ni ubicación; retención 90 días; la migración hizo el backfill desde los snapshots). La persona es «En oficina» si algún equipo suyo reportó desde la oficina al menos un día de los últimos 7 (hoy y los 6 anteriores) y la API devuelve `office_days`; «Remoto» si sólo reportó desde fuera. Un equipo apagado repite su evento viejo y no suma días. Con datos del 2026-10-19, las personas en oficina entre las 100 de ADEM pasaron de 8 a 23 y la lectura tarda 0,2 s. **Límite pendiente:** el puntaje sigue siendo el promedio ADEM de 24 h sin separar oficina de remoto, y los 100 peores del tenant están en banda «Bueno»; medir la experiencia sólo dentro de la oficina es `NSK-EXP-OFFICE-001` (ver «Experiencia digital en la oficina»).
 - **Decisión (2026-10-11, `NSK-FLEET-001`):** la vista Equipos lee `GET /api/cmdb/netskope/devices/fleet-groups?group_by=company|os|client_config|device_make`, una sola lectura agrupada sobre la población por defecto del inventario (equipos activos con evento en 7 días): equipos, con evento en 24 h, cliente al día (sobre versiones reconocidas), SO en el mínimo (sobre SO con mínimo configurado) y en oficina (sobre los que Netskope clasificó). Sin línea base, la columna no se evalúa; nunca es cero. Cada celda equivale a la lista de `GET /api/cmdb/netskope/devices` con los mismos filtros (test de integración). `experience/presence`, `devices/freshness`, `devices/client-compliance` y `devices/fleet` quedan publicados pero la interfaz ya no los usa.
 
 ### Postura Netskope (`NSK-POSTURE-001`)
 No consulta Netskope: `GET /api/cmdb/netskope/posture` evalúa al leer chequeos sobre el inventario ya sincronizado (eventos de desinstalación/deshabilitación, sin señal > 30 días sin diagnóstico, hostname duplicado y, sólo con `netskope:uba_read`, UCI Poor/Moderate). Cada chequeo es la misma consulta que `GET /api/cmdb/netskope/devices` con sus filtros sobre todo el inventario activo; sin permiso queda pendiente, nunca cero. Los chequeos de releases golden y de mínimos de SO están diferidos hasta definir esa política (`NSK-POLICY-001`): no se evalúan ni se muestran. No persiste hallazgos ni estados.
+
+### Release golden desde la documentación pública (`NSK-GOLDEN-001`)
+Única fuente HTTP que no es la API del tenant; aprobada por el dueño el 2026-10-16. `NETSKOPE_GOLDEN_RELEASE_URL=https://docs.netskope.com/en/netskope-client-golden-release-updates` (único valor aceptado; sin ese valor la tarea no se programa). Un `GET` anónimo y de sólo lectura, sin redirecciones, con timeout de 20 s y cuerpo de hasta 2 MB. Se lee `Current Golden Release: N` y el rango `Golden Release Updates Between X and N.y.z` cuyo extremo superior es esa versión; la salida es el par `["N.y.z", "X"]`. Si falta alguna de las dos, el número está fuera de 50–999 o el rango no es creciente, la corrida falla y se conserva la sugerencia anterior: nunca se adivina una versión. Verificado en vivo el 2026-10-16: `141.0.0` y `138.0.0`.
+
+El resultado se guarda en `netskope_golden_suggestion` (migración `106`, una sola fila) y se lee con `GET /api/netskope/baselines/client-golden-releases/suggestion` (`netskope:read`). **Es sólo una sugerencia:** no toca `netskope_baselines` ni el cumplimiento; el editor de la línea base la ofrece con «Usar sugerida» y un admin la guarda con el `PUT` auditado de siempre. Tarea `netskope_golden_release`, una vez por día (`SyncPolicy` de 1440 min).
+
+### Experiencia digital en la oficina (`NSK-EXP-OFFICE-001`, 2026-10-19)
+
+**Pregunta:** ¿quién tuvo mala experiencia digital estando en la oficina en los últimos 7 días, y cómo evoluciona por semana? El puntaje ADEM de `getentities` no sirve: es el promedio de 24 h de los 100 peores del tenant, con oficina y remoto mezclados.
+
+**Probe `NSK-EXP-OFFICE-001/v1`** (`scripts/probe_netskope_office_windows.py`, sólo lectura, sin correos ni IDs): `POST adem/users/getinfo {user, starttime, endtime}` puntúa **exactamente la ventana pedida**: la primera mitad del tramo en oficina dio otro puntaje en 6 de 10 personas, una ventana nocturna sin actividad devolvió `null` en 9 de 10, la repetición fue idéntica en 10 de 10 y respondió para días de hace 7 días. Mediana 0,26 s por llamada.
+
+**Tramos.** Migración `109`: cada día de presencia (`netskope_device_presence_days`) guarda el primer y el último evento del equipo en ese día y estado; el sync los amplía con `LEAST`/`GREATEST`. El tramo en oficina de una persona en un día UTC va del primer al último evento `on-prem` de sus equipos (unidos por usuario igual al correo); el remoto, igual con `off-prem`. Un tramo de menos de 15 minutos no se mide. Sólo se miden personas que fueron a la oficina en una semana alrededor del día, así el tramo remoto sirve para compararlas consigo mismas.
+
+**Tarea `netskope_office_experience`** (opt-in `NETSKOPE_OFFICE_EXPERIENCE_PATH=/api/v2/adem/users/getinfo`; otro valor se rechaza): cada 3 h mide hasta dos días UTC completos pendientes de los últimos 7 (el primero que corre rellena la semana). Por persona y día guarda en `netskope_office_experience_days` minutos y puntaje en oficina y en remoto (sólo eso: sin IP, POP, ubicación ni equipo); retención 180 días. El día se reemplaza y se marca medido (`netskope_office_experience_measured`) en una transacción. Una llamada fallida es «Sin dato»; si fallan más del 10 % (y más de 2), la corrida falla y el día queda pendiente. Con datos reales del miércoles 2026-10-14: 542 personas con tramo en oficina (mediana ~9 h) y ~1.180 consultas; en una muestra de 60, las 60 en banda «Bueno».
+
+**Lectura** `GET /api/cmdb/netskope/experience/office?weeks=2..26` (`netskope:uba_read`, auditada con conteos): ventana de los 7 días completos hasta ayer; por persona, puntaje en oficina promediado por minutos, banda de Netskope (malo 0–30, regular 31–70, bueno 71–100), puntaje remoto y `worse_in_office` (15 puntos o más por debajo del remoto); resumen con denominador (`measured`) y días medidos; serie semanal lunes a domingo UTC donde una semana sin días medidos es `null`, nunca cero. La respuesta suma `office_avg`/`remote_avg` (remoto sólo de quienes también tienen puntaje en oficina) por ventana y por semana, `weekdays` (por día de la semana sobre los días medidos de la serie; un día nunca medido es `null`) y `companies` (hasta 12 empresas y el resto contado aparte). `GET /api/cmdb/netskope/experience/office/person?email=` (mismo permiso, auditada sin el correo) devuelve los últimos 7 días completos de una persona: `place` sale de la presencia del sync (`office`, `remote` o `no_signal` si ningún equipo reportó un evento clasificado) y `measured=false` marca un día todavía no medido, así «Pendiente» nunca se confunde con «Sin señal» o «Remoto». Se ve en la vista «Experiencia en oficina» del menú (separada de Usuarios desde el 2026-10-19: es una pregunta sobre el servicio, no sobre una persona) y en la ficha de cada persona («Últimos 7 días»); mientras no haya días medidos la vista conserva la de 24 h rotulada como provisoria.
 
 ### UCI de usuarios (`NSK-UBA-002`)
 `NETSKOPE_UCI_PATH=/api/v2/incidents/users/getactiveuci` (único valor aceptado). `POST {ratingRank: Poor|Moderate}` → `results[{user, startTime (ms), uciScore}]` + `totalCount`; cada calificación debe llegar completa (`len(results) == totalCount`) o la corrida falla; `Good`/`All` se truncan en 1.000 filas y no se piden. El historial de una semana sale de `POST incidents/uba/getuci {users[], fromTime, toTime}` en lotes de 250 (sólo para leer el puntaje anterior; la serie no se guarda). Escala 0–1000. Tabla `netskope_user_uci`, reemplazo completo, permiso `netskope:uba_read`.
@@ -195,7 +282,7 @@ El cliente (`netskope/sse/integrations/netskope.py`) envía `Netskope-API-Token`
 
 ### Permisos y accesibilidad del tenant
 
-Matriz del 2026-09-24 (token read-only), actualizada el 2026-10-01 (11:56–11:58 UTC, credencial de Custodia, sólo GET, 17 rutas de desbloqueo y 15 de DEM):
+Matriz del 2026-09-24 (token read-only), actualizada el 2026-10-01 (11:56–11:58 UTC, credencial de Custodia, sólo GET, 17 rutas de desbloqueo y 15 de DEM). Es histórica: el estado vigente de los `403`/`401` está en «Rutas bloqueadas»; desde entonces `dem/apps` y `dem/appprobes` pasaron a `200` (2026-10-19).
 
 | Resultado | Rutas |
 |---|---|
@@ -230,7 +317,7 @@ Opt-in con `NETSKOPE_GROUPS_PATH=/api/v2/users/getgroups` (otro valor es inerte 
 
 ### UEBA por usuario y cola del operador (`NSK-EXP-UEBA-001`, fases 3 y 4)
 - `GET /api/cmdb/netskope/users/{object_id}/anomalies` (`netskope:uba_read`, lectura en vivo, nada persistido): `incidents/users/getanomalies` con `{users:[correo], timeframe:30, limit:1000}`; devuelve conteos por severidad (normalizada: `High`/`high`, `low`/`Low`… → minúscula; otro valor es «Sin dato»), por escenario y subescenario, las reglas más frecuentes y las 10 más graves y recientes con `severity`, `scenario`, `sub_scenario`, `rule`, `activity`, `app`, `score` y `time`. **Nunca** salen IP de origen o destino, `alertId`/`eventId`/`anomalyId`, `anomalyData.featureValue` ni `additionalProperties`. Si `totalCount` supera las filas devueltas, `truncated`. Probe 2026-10-10: 30 días y 1000 filas es el tope; el usuario más cargado de la muestra tenía 781.
-- `GET /api/cmdb/netskope/experience/attention` (`netskope:uba_read`): cola de hasta 50 usuarios que une el UCI bajo/moderado guardado con los 100 de peor puntaje de `adem/users/getentities` (24 h; Netskope ignora `offset` y no pasa de 100, así que **no** es la distribución del tenant). Orden: primero los que figuran en ambas fuentes, luego Poor, Moderate y solo ADEM. El puntaje de una fuente que no listó al usuario es `null` («Sin dato»), nunca 0. Si ADEM falla devuelve solo UCI con `adem_available=false`.
+- `GET /api/cmdb/netskope/experience/attention` (`netskope:uba_read`): cola de hasta 50 usuarios que une el UCI bajo/moderado guardado con los 100 de peor puntaje de `adem/users/getentities` (24 h; Netskope ignora `offset` y no pasa de 100, así que **no** es la distribución del tenant). Orden: primero los que figuran en ambas fuentes, luego Poor, Moderate y solo ADEM. El puntaje de una fuente que no listó al usuario es `null` («Sin dato»), nunca 0. Si ADEM falla devuelve solo UCI con `adem_available=false`. **Presencia en oficina (2026-10-16):** cada fila trae `presence` (`office` si algún equipo activo con señal en 7 días figura `on-prem` en Netskope; `remote` si sólo `off-prem`; `unknown` sin equipo o sin dato, nunca remoto). El equipo se une a la persona sólo cuando su `username` es exactamente el correo (sin similitud). `summary` cuenta, sobre las personas con puntaje ADEM listado (antes del tope de 50), cuántas están en oficina, remotas o sin dato; es un conteo sobre esa lista acotada, no una tasa del tenant.
 
 ### Alertas agregadas (`NSK-ALR-001`) y políticas observadas (`NSK-POL-001/002`)
 
@@ -330,3 +417,7 @@ Lectura de forma, tipos y conteos (GET, sin valores personales). Antes respondí
 **Implementación (`NSK-RBAC-001`, 2026-10-14).** Capa opcional del sync de inventario: `NETSKOPE_RBAC_PATH=/api/v2/rbac/roles` aprueba la familia completa (detalle de rol, administradores por SCIM y mapa de páginas); otro valor se rechaza. Una lectura incompleta, inconsistente o inválida conserva lo almacenado y marca la corrida como parcial: el cliente exige que las filas de roles igualen `count`, que los administradores igualen `totalResults` y rechaza listas vacías. Se guardan como tipos distintos de la fuente `netskope` (migración `100`): `netskope_role` (nombre, tipo, `userCount` informado, última edición y los grupos de API con nivel distinto de `none`), `netskope_admin` (correo, estado, tipo de cuenta, último acceso, bloqueo y MFA) y `netskope_api_group` (grupo y las páginas de la consola que abre, del mapa `pagemapping`); el enlace administrador → rol es la arista `has_role` por `role.value`. 22 de los grupos de API que traen los roles no figuran en `pagemapping` (por ejemplo `aisecurity_*`): se muestran con «Sin página asociada». Rutas: `GET /api/cmdb/netskope/admins`, `/admin-roles` y `/admin-roles/{id}`, con el permiso estricto `netskope:admin_inventory_read` (no lo otorgan `netskope:read` ni `access:manage`; lo tienen `netskope_admin` y el administrador de plataforma) y lecturas auditadas con conteos y nombres de filtro, sin valores. Vista: «Administradores» en el menú de Netskope (`/netskope/admins`).
 
 **Ids negativos (2026-10-14).** Los 16 roles predefinidos del tenant tienen `roleId` negativo (de -17 a -1) y los administradores que los tienen lo referencian igual en `role.value`; los 16 roles personalizados usan ids positivos. El cliente, las rutas (`/admin-roles/{id}` y el filtro `role`) y los tests aceptan cualquier entero. Una primera versión rechazaba los negativos y la capa fallaba en cada sync (aviso «Con avisos» en el inventario).
+
+**Actualización (2026-10-16):** la cola «Para revisar» vuelve a ser sólo UCI (más ubicación); el cruce oficina × rendimiento vive en la pestaña «Rendimiento en oficina» de Usuarios. `attention` devuelve además `performance_rows` (todas las personas con puntaje ADEM, peor primero, máx. 100) y el `summary` con bandas de Netskope (malo 0–30, regular 31–70, bueno 71–100). Quien Netskope no lista no tiene puntaje: se muestra «Sin dato», nunca 0 ni «bueno».
+
+**Actualización (2026-10-19):** `rows` queda sólo con UCI bajo o moderado (Poor antes que Moderate, menor puntaje primero; un puntaje ADEM bajo por sí solo ya no entra, y la cola deja de mostrar motivo y ubicación). La vista «Usuarios» pasa a llamarse «Riesgo» y todo el rendimiento ADEM se concentra en la vista «Rendimiento» (`/netskope/office`): pestañas «Oficina, por semana» (`NSK-EXP-OFFICE-001`) y «Ahora, últimas 24 h» (`performance_rows`). El mismo día se reemplazó esa segunda pestaña por «Evolución diaria» (`NSK-EXP-OFFICE-002`, `GET /api/cmdb/netskope/experience/office/timeline?days=7..180&company=&email=` o con `start`/`end` (fechas UTC, acotadas a 180 días completos; rango vacío = 422), `netskope:uba_read`, auditada sin valores): promedio diario por persona de `netskope_office_experience_days`, sin consultar Netskope ni migración. `performance_rows` sigue en la respuesta de `attention` pero ninguna pantalla la usa.

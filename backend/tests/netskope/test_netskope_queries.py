@@ -192,7 +192,7 @@ class NetskopeQueryTests(unittest.TestCase):
         with patch("app.netskope.sse.repositories.netskope_inventory.fetch_all", new=fetch_all):
             facets = asyncio.run(get_netskope_device_facets(object()))
 
-        self.assertEqual(set(facets), {"os", "client_version", "classification_status", "user_status", "company", "last_seen_event", "device_make", "device_model"})
+        self.assertEqual(set(facets), {"os", "client_version", "classification_status", "user_status", "company", "last_seen_event", "device_make", "device_model", "onprem_status", "uci_rating"})
         for call in fetch_all.await_args_list:
             query, params = call.args[1], call.args[2]
             self.assertIn("object_type = 'device'", query)

@@ -2,7 +2,7 @@ import { api } from '../../../cross/lib/api';
 import type { NetskopeRetiredActivity, NetskopeExperienceDevices, NetskopeExperienceDetail, NetskopeExperienceScore, NetskopeExperienceWindow } from '../types/netskope';
 import { EMPTY_NETSKOPE_DEVICE_QUERY, netskopeDevicesQuery, netskopeUsersQuery } from './netskope-device-filters';
 import { netskopeDlpQueryString } from './netskope-dlp';
-import type { NetskopeAaChart, NetskopeAaChartSummary, NetskopeAdminRoleDetail, NetskopeAdminRolesResponse, NetskopeAdminsQuery, NetskopeAdminsResponse, NetskopeAaSeverity, NetskopeAlertAggregates, NetskopeBaselines, NetskopeClientEvents, NetskopeDashboardPreferences, NetskopeDeviceChanges, NetskopeDeviceFacets, NetskopeDeviceQuery, NetskopeDeviceReviewSummary, NetskopeDlpAlerts, NetskopeDlpQuery, NetskopeDlpStatus, NetskopeDlpPolicies, NetskopeDuplicates, NetskopeFleetGroupBy, NetskopeFleetGroups, NetskopeListResponse, NetskopePostureResponse, NetskopeSelectedMetrics, NetskopeAnomalies, NetskopeAttention, NetskopeUciCompaniesResponse, NetskopeUciResponse, NetskopeUsersFilters, NetskopeWidgetFilters } from '../types/netskope';
+import type { NetskopeAaChart, NetskopeAaChartSummary, NetskopeAdminRoleDetail, NetskopeAdminRolesResponse, NetskopeAdminsQuery, NetskopeAdminsResponse, NetskopeAaSeverity, NetskopeAlertAggregates, NetskopeBaselines, NetskopeGoldenSuggestion, NetskopeClientEvents, NetskopeDashboardPreferences, NetskopeDeviceChanges, NetskopeDeviceFacets, NetskopeDeviceQuery, NetskopeDeviceReviewSummary, NetskopeDlpAlerts, NetskopeDlpQuery, NetskopeDlpStatus, NetskopeDlpPolicies, NetskopeDuplicates, NetskopeFleet, NetskopeFleetGroupBy, NetskopeFleetGroups, NetskopeListResponse, NetskopePostureResponse, NetskopeSelectedMetrics, NetskopeAnomalies, NetskopeAttention, NetskopeOfficeExperience, NetskopeOfficePerson7d, NetskopeOfficeTimeline, NetskopeUciCompaniesResponse, NetskopeUciResponse, NetskopeUsersFilters, NetskopeWidgetFilters } from '../types/netskope';
 
 export function fetchNetskopeExperienceDevices(userId: number, hours: 2 | 24 | 48, signal?: AbortSignal) {
   return api<NetskopeExperienceDevices>(`/cmdb/netskope/users/${userId}/experience/devices?hours=${hours}`, { signal });
@@ -85,8 +85,28 @@ export function fetchNetskopeUserAnomalies(userId: number, signal?: AbortSignal)
   return api<NetskopeAnomalies>(`/cmdb/netskope/users/${userId}/anomalies`, { signal });
 }
 
-export function fetchNetskopeAttention(signal?: AbortSignal): Promise<NetskopeAttention> {
-  return api<NetskopeAttention>('/cmdb/netskope/experience/attention', { signal });
+export function fetchNetskopeAttention(signal?: AbortSignal, company = ''): Promise<NetskopeAttention> {
+  return api<NetskopeAttention>(`/cmdb/netskope/experience/attention${company ? `?company=${encodeURIComponent(company)}` : ''}`, { signal });
+}
+
+/* NSK-EXP-OFFICE-001: the last 7 measured days in the office and the weekly evolution. */
+export function fetchNetskopeOfficeExperience(signal?: AbortSignal, weeks = 8): Promise<NetskopeOfficeExperience> {
+  return api<NetskopeOfficeExperience>(`/cmdb/netskope/experience/office?weeks=${weeks}`, { signal });
+}
+
+/* NSK-EXP-OFFICE-001: where a person worked each of the last 7 complete days and, once measured, their scores. */
+export function fetchNetskopeOfficePerson(email: string, signal?: AbortSignal): Promise<NetskopeOfficePerson7d> {
+  return api<NetskopeOfficePerson7d>(`/cmdb/netskope/experience/office/person?email=${encodeURIComponent(email)}`, { signal });
+}
+
+/* NSK-EXP-OFFICE-002: the daily average for everyone or one company, with one person's own line when given. */
+export function fetchNetskopeOfficeTimeline(filters: { days: number; company: string; email: string; start?: string; end?: string }, signal?: AbortSignal): Promise<NetskopeOfficeTimeline> {
+  const params = new URLSearchParams({ days: String(filters.days) });
+  if (filters.start) params.set('start', filters.start);
+  if (filters.end) params.set('end', filters.end);
+  if (filters.company) params.set('company', filters.company);
+  if (filters.email) params.set('email', filters.email);
+  return api<NetskopeOfficeTimeline>(`/cmdb/netskope/experience/office/timeline?${params}`, { signal });
 }
 
 /* NSK-POSTURE-001: one read carries every check with its bounded sample. */
@@ -108,12 +128,20 @@ export function saveNetskopeDashboardPreferences(
   });
 }
 
+export function fetchNetskopeFleet(signal?: AbortSignal): Promise<NetskopeFleet> {
+  return api<NetskopeFleet>('/cmdb/netskope/devices/fleet', { signal });
+}
+
 export function fetchNetskopeFleetGroups(groupBy: NetskopeFleetGroupBy, signal?: AbortSignal): Promise<NetskopeFleetGroups> {
   return api<NetskopeFleetGroups>(`/cmdb/netskope/devices/fleet-groups?group_by=${encodeURIComponent(groupBy)}`, { signal });
 }
 
 export function fetchNetskopeBaselines(): Promise<NetskopeBaselines> {
   return api<NetskopeBaselines>('/netskope/baselines');
+}
+
+export function fetchNetskopeGoldenSuggestion(): Promise<NetskopeGoldenSuggestion> {
+  return api<NetskopeGoldenSuggestion>('/netskope/baselines/client-golden-releases/suggestion');
 }
 
 export function saveNetskopeGoldenReleases(releases: string[], note: string) {

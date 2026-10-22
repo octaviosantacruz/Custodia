@@ -29,6 +29,19 @@ class NetskopeBaselinesHttpTests(unittest.IsolatedAsyncioTestCase):
             response = await self.client.get("/api/netskope/baselines")
         self.assertEqual(response.status_code, 200)
 
+    async def test_the_documented_golden_suggestion_is_readable_but_never_applied(self):
+        self.session.set_permissions(["inventory:read"])
+        self.assertEqual((await self.client.get("/api/netskope/baselines/client-golden-releases/suggestion")).status_code, 403)
+        self.session.set_permissions(["inventory:read", "netskope:read"])
+        suggestion = {"releases": ["141.0.0", "138.0.0"], "source_url": "https://docs.netskope.com/x", "fetched_at": "2026-10-16T00:00:00Z"}
+        save = AsyncMock()
+        with patch("app.netskope.sse.api.routes.netskope_baselines.get_golden_suggestion", new=AsyncMock(return_value=suggestion)), \
+             patch("app.netskope.sse.api.routes.netskope_baselines.save_netskope_baseline", new=save):
+            response = await self.client.get("/api/netskope/baselines/client-golden-releases/suggestion")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["releases"], ["141.0.0", "138.0.0"])
+        save.assert_not_awaited()
+
     async def test_writing_needs_netskope_admin_and_stores_releases_newest_first(self):
         payload = {"releases": ["135.0.0", " 141.0.0 ", "138.1.0"], "note": "  Golden según doc 2026-09  "}
         self.session.set_permissions(["inventory:read", "netskope:read"])

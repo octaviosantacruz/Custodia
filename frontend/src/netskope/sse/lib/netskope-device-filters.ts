@@ -2,7 +2,7 @@ import type { NetskopeDeviceFilters, NetskopeDeviceQuery, NetskopeUsersFilters }
 
 export const NETSKOPE_PAGE_SIZE = 50;
 
-export const EMPTY_NETSKOPE_DEVICE_FILTERS: NetskopeDeviceFilters = { os: '', client_version: '', classification_status: '', user_status: '', company: '', last_seen_event: '', device_make: '', device_model: '', hostname: '', username: '', observed_user_status: '', observed_user: '', onprem_status: '', client_config: '' };
+export const EMPTY_NETSKOPE_DEVICE_FILTERS: NetskopeDeviceFilters = { os: '', client_version: '', classification_status: '', user_status: '', company: '', last_seen_event: '', device_make: '', device_model: '', hostname: '', username: '', observed_user_status: '', observed_user: '', onprem_status: '', client_config: '', uci_rating: '' };
 
 export const EMPTY_NETSKOPE_USERS_FILTERS: NetskopeUsersFilters = { deviceCount: '', recentDeviceAge: '', activityDays: 0, accountStatus: '' };
 

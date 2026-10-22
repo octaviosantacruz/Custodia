@@ -56,6 +56,8 @@ class RunWithDatabaseSecretTests(unittest.TestCase):
         self.assertIn("sólo en memoria", with_file)
         self.assertIn(".secrets/database_password sigue desactualizado", with_file)
         self.assertIn("scripts/refresh_database_password.sh", with_file)
+        self.assertIn("custodia-database-password.timer", with_file)
+        self.assertIn("no requieren actualizarlo", with_file)
         self.assertNotIn("refresh_database_password", RUNNER.recovered_notice(""))
 
 

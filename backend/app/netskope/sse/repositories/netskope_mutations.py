@@ -8,6 +8,11 @@ from uuid import UUID
 from psycopg.types.json import Jsonb
 from psycopg_pool import AsyncConnectionPool
 
+from app.netskope.sse.repositories.netskope_shared import valid_event_epoch
+
+# NSK-EXP-PRESENCE-001: office/remote event days kept for weekly views and their trend.
+PRESENCE_RETENTION_DAYS = 90
+
 
 async def record_device_snapshots(
     pool: AsyncConnectionPool,
@@ -31,6 +36,32 @@ async def record_device_snapshots(
                     """,
                     params,
                 )
+            # NSK-EXP-PRESENCE-001: the run's office/remote event days, in the same transaction; the span
+            # (first and last event of the day) widens as later runs see newer events (NSK-EXP-OFFICE-001).
+            await conn.execute(
+                f"""
+                INSERT INTO public.netskope_device_presence_days
+                    (device_id, event_day, onprem_status, first_event_at, last_event_at)
+                SELECT device_id, (to_timestamp(event_epoch) AT TIME ZONE 'UTC')::date, onprem_status,
+                       to_timestamp(min(event_epoch)), to_timestamp(max(event_epoch))
+                FROM (
+                    SELECT device_id, attributes->>'onprem_status' AS onprem_status,
+                           {valid_event_epoch('captured_at')} AS event_epoch
+                    FROM public.netskope_device_snapshots
+                    WHERE source_run_id = %s AND attributes->>'onprem_status' IN ('on-prem', 'off-prem')
+                ) AS classified
+                WHERE event_epoch IS NOT NULL
+                GROUP BY 1, 2, 3
+                ON CONFLICT (device_id, event_day, onprem_status) DO UPDATE
+                    SET first_event_at = LEAST(netskope_device_presence_days.first_event_at, EXCLUDED.first_event_at),
+                        last_event_at = GREATEST(netskope_device_presence_days.last_event_at, EXCLUDED.last_event_at)
+                """,
+                (run_id,),
+            )
+            await conn.execute(
+                "DELETE FROM public.netskope_device_presence_days WHERE event_day < (now() AT TIME ZONE 'UTC')::date - %s",
+                (PRESENCE_RETENTION_DAYS,),
+            )
 
 
 async def record_alert_aggregates(

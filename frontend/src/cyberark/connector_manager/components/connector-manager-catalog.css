@@ -1,0 +1,8 @@
+.connector-manager-heading { align-items: start; border-bottom: 1px solid var(--border-soft); display: flex; gap: 16px; justify-content: space-between; padding: 16px; }
+.connector-manager-heading h2 { color: var(--text-primary); font-size: 15px; margin: 0 0 6px; }
+.connector-manager-heading p { align-items: center; color: var(--text-secondary); display: flex; flex-wrap: wrap; font-size: 11px; gap: 5px; margin: 0; }
+.connector-manager-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 10px; }
+.connector-manager-table thead th { max-width: 150px; white-space: normal; }
+.connector-manager-table tbody th { background: transparent; color: var(--text-primary); font-size: 12px; font-weight: 600; letter-spacing: normal; min-width: 180px; text-align: left; text-transform: none; }
+.connector-manager-description { max-width: 280px; overflow-wrap: anywhere; }
+.connector-manager-table time { white-space: nowrap; }

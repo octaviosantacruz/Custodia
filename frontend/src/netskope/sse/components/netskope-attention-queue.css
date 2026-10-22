@@ -11,6 +11,4 @@
 .nsk-attention .compact-table-wrap { max-height: 360px; overflow-y: auto; }
 
 .nsk-attention-explanation { color: var(--text-secondary); font-size: 11px; margin: 0; }
-.nsk-attention-scales { display: flex; gap: 24px; }
-.nsk-attention-scales p { color: var(--text-secondary); font-size: 12px; margin: 0; }
-.nsk-attention-reasons { display: grid; gap: 3px; font-size: 12px; }
+.nsk-attention-company { align-items: center; display: inline-flex; gap: 6px; margin-left: auto; }

@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import type { NetskopeDeviceFacets, NetskopeDeviceFilterKey, NetskopeDeviceQuery } from '../types/netskope';
 import { formatNumber } from '../../../cross/lib/format';
 import { NETSKOPE_CHANGE_LABELS, NETSKOPE_CLIENT_COMPLIANCE_LABELS, NETSKOPE_EVENT_AGE_OPTIONS, NETSKOPE_OS_COMPLIANCE_LABELS, netskopeFilterChips, netskopeFilterGroupCounts } from '../lib/netskope-filter-chips';
+import { fleetGroupKeyLabel } from '../lib/netskope-fleet-groups';
 import { CompactSelect } from '../../../cross/components/compact-select';
 
 const DEVICE_FILTERS: Array<{ key: NetskopeDeviceFilterKey; allLabel: string; ariaLabel: string }> = [
@@ -11,6 +12,8 @@ const DEVICE_FILTERS: Array<{ key: NetskopeDeviceFilterKey; allLabel: string; ar
   { key: 'classification_status', allLabel: 'Todas las clasificaciones', ariaLabel: 'Filtrar por clasificación' },
   { key: 'os', allLabel: 'Todos los SO', ariaLabel: 'Filtrar por sistema operativo' },
   { key: 'client_version', allLabel: 'Todas las versiones', ariaLabel: 'Filtrar por versión de cliente' },
+  { key: 'onprem_status', allLabel: 'Dónde trabaja: todos', ariaLabel: 'Filtrar por dónde trabaja' },
+  { key: 'uci_rating', allLabel: 'Cualquier confianza (UCI)', ariaLabel: 'Filtrar por índice de confianza (UCI)' },
   { key: 'last_seen_event', allLabel: 'Cualquier último evento', ariaLabel: 'Filtrar por último evento del cliente' },
 ];
 
@@ -26,8 +29,9 @@ type Props = {
 
 function deviceFilterOptions(key: NetskopeDeviceFilterKey, allLabel: string, facets: NetskopeDeviceFacets | null, selected: string) {
   const buckets = facets?.[key] || [];
-  const options = [{ value: '', label: allLabel }, ...buckets.map((bucket) => ({ value: bucket.key, label: `${bucket.key} · ${formatNumber(bucket.count)}` }))];
-  if (selected && !buckets.some((bucket) => bucket.key === selected)) options.push({ value: selected, label: selected });
+  const shown = (value: string) => key === 'uci_rating' ? fleetGroupKeyLabel('uci_rating', value) : key === 'onprem_status' ? fleetGroupKeyLabel('onprem_status', value) : value;
+  const options = [{ value: '', label: allLabel }, ...buckets.map((bucket) => ({ value: bucket.key, label: `${shown(bucket.key)} · ${formatNumber(bucket.count)}` }))];
+  if (selected && !buckets.some((bucket) => bucket.key === selected)) options.push({ value: selected, label: shown(selected) });
   return options;
 }
 
@@ -35,6 +39,7 @@ export function NetskopeDeviceFilters({ query, facets, filtered, onQueryChange, 
   const groups = netskopeFilterGroupCounts(query);
   const chips = netskopeFilterChips(query, { evidenceState: evidenceLabels, change: NETSKOPE_CHANGE_LABELS, clientCompliance: NETSKOPE_CLIENT_COMPLIANCE_LABELS, osCompliance: NETSKOPE_OS_COMPLIANCE_LABELS });
   const [identityOpen, setIdentityOpen] = useState(() => groups.identity > 0);
+  const [placeOpen, setPlaceOpen] = useState(() => groups.place > 0);
   const [activityOpen, setActivityOpen] = useState(() => groups.activity > 0);
 
   const removeChip = (chip: (typeof chips)[number]) => {
@@ -48,6 +53,15 @@ export function NetskopeDeviceFilters({ query, facets, filtered, onQueryChange, 
         <summary><span>Identidad y equipo</span><span className="netskope-filter-group-count">({groups.identity})</span></summary>
         <div className="netskope-filter-group-controls">
           {(['user_status', 'company', 'classification_status', 'os', 'client_version'] as const).map((key) => {
+            const filter = DEVICE_FILTERS.find((item) => item.key === key)!;
+            return <CompactSelect key={key} className="netskope-attribute-filter" ariaLabel={filter.ariaLabel} value={query.filters[key]} onChange={(next) => onDeviceFilterChange(key, next)} options={deviceFilterOptions(key, filter.allLabel, facets, query.filters[key])} />;
+          })}
+        </div>
+      </details>
+      <details className="netskope-filter-group" open={placeOpen} onToggle={(event) => setPlaceOpen(event.currentTarget.open)}>
+        <summary><span>Ubicación y confianza</span><span className="netskope-filter-group-count">({groups.place})</span></summary>
+        <div className="netskope-filter-group-controls">
+          {(['onprem_status', 'uci_rating'] as const).map((key) => {
             const filter = DEVICE_FILTERS.find((item) => item.key === key)!;
             return <CompactSelect key={key} className="netskope-attribute-filter" ariaLabel={filter.ariaLabel} value={query.filters[key]} onChange={(next) => onDeviceFilterChange(key, next)} options={deviceFilterOptions(key, filter.allLabel, facets, query.filters[key])} />;
           })}

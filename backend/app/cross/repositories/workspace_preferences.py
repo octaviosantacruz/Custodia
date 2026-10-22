@@ -5,10 +5,10 @@ from app.db import fetch_one
 from app.cross.repositories.audit import record_audit
 
 DEFAULT_VISIBLE = ["safes"]
-MAX_VISIBLE_PER_DOMAIN = 6
-# PAM and Admin each keep their own quick-access quota. This aggregate cap
-# protects the stored payload while allowing six entries in both active tools.
-MAX_VISIBLE = MAX_VISIBLE_PER_DOMAIN * 2
+# UX-NAV-001: the UI offers three quick-access slots per active platform and
+# lets the person spread them freely; this cap only protects the stored payload
+# and leaves room for more platforms.
+MAX_VISIBLE = 12
 MAX_RECENT = 8
 
 

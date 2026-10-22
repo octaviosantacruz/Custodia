@@ -21,10 +21,9 @@ for (const { route: destination, resources } of cases) {
     await page.goto(destination);
     await Promise.all(responses);
     await expect(page.locator('.state-block-loading')).toHaveCount(0);
-    // Opening the loaded navigation also flushes initial shell effects; PUTs
+    // The rendered section bar also flushes initial shell effects; PUTs
     // that record recents are independent of these shared read requests.
-    await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-    await expect(page.getByRole('region', { name: 'Workspaces' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: /^Secciones de (CyberArk|Netskope)$/ })).toBeVisible();
     expect(Object.fromEntries(counts)).toEqual(Object.fromEntries(paths.map((path) => [path, 1])));
   });
 }

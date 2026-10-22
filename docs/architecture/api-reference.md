@@ -16,7 +16,7 @@ acepta sesión, token de escritura (`X-Access-Token`) o token Bearer de lectura.
 cada rol: [Catálogo de roles y permisos](access-catalog.md) (generado desde las migraciones).
 Contratos, límites y ejemplos de cada integración: [Contratos de integración](integration-contracts.md).
 
-210 operaciones.
+216 operaciones.
 
 | Método | Ruta | Acceso | Etiqueta |
 |---|---|---|---|
@@ -113,6 +113,9 @@ Contratos, límites y ejemplos de cada integración: [Contratos de integración]
 | GET | `/api/cmdb/netskope/dlp/policies` | dependencia propia `require_dlp_read` | Alertas DLP Netskope |
 | GET | `/api/cmdb/netskope/dlp/status` | dependencia propia `require_dlp_read` | Alertas DLP Netskope |
 | GET | `/api/cmdb/netskope/experience/attention` | dependencia propia `require_uba_read` | UCI Netskope |
+| GET | `/api/cmdb/netskope/experience/office` | dependencia propia `require_uba_read` | UCI Netskope |
+| GET | `/api/cmdb/netskope/experience/office/person` | dependencia propia `require_uba_read` | UCI Netskope |
+| GET | `/api/cmdb/netskope/experience/office/timeline` | dependencia propia `require_uba_read` | UCI Netskope |
 | GET | `/api/cmdb/netskope/experience/pops` | `inventory:read`; `access:manage` o `netskope:read` (lectura) | Inventario Netskope |
 | GET | `/api/cmdb/netskope/experience/presence` | `inventory:read`; `access:manage` o `netskope:read` (lectura) | Inventario Netskope |
 | GET | `/api/cmdb/netskope/groups` | `inventory:read`; `access:manage` o `netskope:read` (lectura) | Inventario Netskope |
@@ -164,6 +167,8 @@ Contratos, límites y ejemplos de cada integración: [Contratos de integración]
 | GET | `/api/connection-inventory/uninventoried` | `coverage:read` (lectura) | Inventario de conexiones |
 | PATCH | `/api/connection-inventory/{inventory_id}` | `coverage:manage` (escritura) | Inventario de conexiones |
 | GET | `/api/connection-inventory/{inventory_id}/history` | `coverage:read` (lectura) | Inventario de conexiones |
+| GET | `/api/connector-manager/networks` | `access:manage` o `pam:catalogs_read` (lectura) | CyberArk Connector Manager |
+| GET | `/api/connector-manager/pools` | `access:manage` o `pam:catalogs_read` (lectura) | CyberArk Connector Manager |
 | GET | `/api/cyberark-risk/findings` | `pam:risk_read` (lectura) | CyberArk Risk Management |
 | GET | `/api/cyberark-risk/findings/all` | `pam:risk_read` (lectura) | CyberArk Risk Management |
 | GET | `/api/cyberark-risk/overview` | `pam:risk_read` (lectura) | CyberArk Risk Management |
@@ -206,6 +211,7 @@ Contratos, límites y ejemplos de cada integración: [Contratos de integración]
 | GET | `/api/lifecycle/retired` | `inventory:read` | Safes |
 | GET | `/api/netskope/baselines` | `access:manage` o `netskope:read` (lectura) | Postura Netskope |
 | PUT | `/api/netskope/baselines/client-golden-releases` | `netskope:admin` (escritura) | Postura Netskope |
+| GET | `/api/netskope/baselines/client-golden-releases/suggestion` | `access:manage` o `netskope:read` (lectura) | Postura Netskope |
 | PUT | `/api/netskope/baselines/os-minimum-versions` | `netskope:admin` (escritura) | Postura Netskope |
 | GET | `/api/operational-errors` | `access:manage` o `audit:read` (lectura) | Actividad |
 | GET | `/api/operational-logs` | `access:manage` o `audit:read` (lectura) | Actividad |
@@ -237,7 +243,7 @@ Contratos, límites y ejemplos de cada integración: [Contratos de integración]
 |---|---|
 | `access:directory_read` | 4 |
 | `access:local_users_manage` | 8 |
-| `access:manage` | 84 |
+| `access:manage` | 87 |
 | `access:oidc_mappings_read` | 4 |
 | `access:permissions_manage` | 4 |
 | `access:role_assignments_manage` | 11 |
@@ -254,8 +260,8 @@ Contratos, límites y ejemplos de cada integración: [Contratos de integración]
 | `inventory:export` | 3 |
 | `inventory:read` | 89 |
 | `netskope:admin` | 2 |
-| `netskope:read` | 43 |
-| `pam:catalogs_read` | 15 |
+| `netskope:read` | 44 |
+| `pam:catalogs_read` | 17 |
 | `pam:risk_read` | 3 |
 | `safes:manage` | 7 |
 | `safes:read` | 4 |

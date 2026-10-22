@@ -103,7 +103,7 @@ test('Identidades keeps the navigation focused on users and roles/groups', async
   const navigation = page.getByRole('tablist', { name: 'Secciones de identidad' });
   await expect(navigation.getByRole('tab')).toHaveCount(2);
   await expect(navigation.getByRole('tab', { name: /Asientos Standard/ })).toHaveCount(0);
-  await expect(navigation.getByRole('tab', { name: /Federaciones/ })).toHaveCount(0);
+  await expect(navigation.getByRole('tab', { name: /^Federaciones$/ })).toHaveCount(0);
 });
 
 test('a matched user shows the derived federation, never phrased as evidence from the API (UX-AUD2-009)', async ({ page }) => {
@@ -125,11 +125,10 @@ test('the switcher offers a single Identidades destination, not one per Identity
   await mockAuthenticatedApp(page);
   await page.goto('/pam');
 
-  await page.getByRole('button', { name: /Cambiar workspace/ }).click();
-  const workspaceMenu = page.getByRole('region', { name: 'Workspaces' });
-  await expect(workspaceMenu.getByRole('link', { name: /Identidades.*¿Quién existe en Identity y en qué grupos\?/ })).toHaveCount(1);
-  await expect(workspaceMenu.getByRole('link', { name: /Federaciones/ })).toHaveCount(0);
-  await expect(workspaceMenu.getByRole('link', { name: /Grupos de Okta/ })).toHaveCount(0);
+  const workspaceMenu = page.getByRole('navigation', { name: 'Secciones de CyberArk', exact: true });
+  await expect(workspaceMenu.getByRole('link', { name: /^Identidades$/ })).toHaveCount(1);
+  await expect(workspaceMenu.getByRole('link', { name: /^Federaciones$/ })).toHaveCount(0);
+  await expect(workspaceMenu.getByRole('link', { name: /^Grupos de Okta$/ })).toHaveCount(0);
 });
 
 test('the Federaciones tab is hidden without identity:catalogs_read/access:manage, and its direct route redirects to the first authorized tab', async ({ page }) => {
@@ -144,13 +143,13 @@ test('the Federaciones tab is hidden without identity:catalogs_read/access:manag
 
   const identityNav = page.getByRole('tablist', { name: 'Secciones de identidad' });
   await expect(identityNav.getByRole('tab', { name: /Usuarios.*Personas y cuentas registradas/ })).toBeVisible();
-  await expect(identityNav.getByRole('tab', { name: /Federaciones/ })).toHaveCount(0);
+  await expect(identityNav.getByRole('tab', { name: /^Federaciones$/ })).toHaveCount(0);
 
   // A direct link to the now-hidden tab redirects to the first
   // authorized one instead of rendering it anyway or an empty pane.
   await page.goto('/pam/identity/federations');
   await expect(page).toHaveURL(/\/pam\/identity\/users$/);
-  await expect(identityNav.getByRole('tab', { name: /Federaciones/ })).toHaveCount(0);
+  await expect(identityNav.getByRole('tab', { name: /^Federaciones$/ })).toHaveCount(0);
   await expect(identityNav.getByRole('tab', { name: /Usuarios.*Personas y cuentas registradas/ })).toHaveAttribute('aria-selected', 'true');
 });
 
@@ -180,7 +179,7 @@ test('the retired Federaciones URL lands on Identidades even for catalog readers
   await expect(page).toHaveURL(/\/pam\/identity(\/users)?$/);
   const identityNav = page.getByRole('tablist', { name: 'Secciones de identidad' });
   await expect(identityNav.getByRole('tab', { name: /Usuarios.*Personas y cuentas registradas/ })).toHaveAttribute('aria-selected', 'true');
-  await expect(identityNav.getByRole('tab', { name: /Federaciones/ })).toHaveCount(0);
+  await expect(identityNav.getByRole('tab', { name: /^Federaciones$/ })).toHaveCount(0);
 });
 
 

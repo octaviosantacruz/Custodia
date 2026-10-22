@@ -158,17 +158,20 @@ class PermissionHttpMatrixTests(unittest.IsolatedAsyncioTestCase):
         with patch("app.cross.services.user_management.list_people", new=AsyncMock(side_effect=directory)), \
              patch("app.cross.repositories.oidc_groups.fetch_all", new=AsyncMock(return_value=[{
                  "actor_id": "okta-observed", "observed_groups": ["team-readers"], "groups_observed_at": "2026-10-11T12:00:00Z",
+                 "role_group_sources": {"reader": ["team-readers"]},
              }])) as observations:
             self.session.set_permissions(["access:directory_read"])
             hidden = await self.client.get("/api/auth/people")
             self.assertEqual(hidden.status_code, 200)
             self.assertIsNone(hidden.json()["rows"][0]["identities"][0].get("observed_groups"))
+            self.assertIsNone(hidden.json()["rows"][0]["identities"][0].get("role_group_sources"))
             observations.assert_not_awaited()
             self.session.set_permissions(["access:directory_read", "access:oidc_mappings_read"])
             visible = await self.client.get("/api/auth/people")
         self.assertEqual(visible.status_code, 200)
         observed = visible.json()["rows"][0]["identities"][0]
         self.assertEqual(observed.get("observed_groups"), ["team-readers"])
+        self.assertEqual(observed.get("role_group_sources"), {"reader": ["team-readers"]})
         self.assertEqual(observed.get("groups_observed_at"), "2026-10-11T12:00:00Z")
 
     async def test_observed_oidc_members_require_directory_and_mapping_permissions(self):
@@ -438,6 +441,38 @@ class PermissionHttpMatrixTests(unittest.IsolatedAsyncioTestCase):
         ):
             granted = await self.client.post("/api/safes/bulk-assignment", json=payload)
         self.assertEqual(granted.status_code, 200)
+
+    async def test_connector_manager_catalogs_require_technical_catalog_access_and_sanitize_failures(self):
+        from app.cyberark.connector_manager.integrations.connector_manager import ConnectorManagerError, ConnectorManagerNotConfigured
+
+        target = "app.cyberark.connector_manager.api.routes.catalogs"
+        remote = AsyncMock()
+        remote.__aenter__.return_value = remote
+        with patch(f"{target}.ConnectorManagerSettings.from_environment") as settings, patch(f"{target}.ConnectorManagerClient", return_value=remote), patch(f"{target}.get_catalog", new=AsyncMock()) as read:
+            for catalog in ("pools", "networks"):
+                for permission in ([], ["inventory:read"], ["sia:catalogs_read"], ["netskope:read"]):
+                    self.session.set_permissions(permission)
+                    self.assertEqual((await self.client.get(f"/api/connector-manager/{catalog}")).status_code, 403)
+                read.assert_not_awaited()
+                for permission in (["pam:catalogs_read"], ["access:manage"]):
+                    self.session.set_permissions(permission)
+                    read.return_value = {"source_system": "cyberark_connector_manager", "queried_at": "2026-10-19T12:00:00Z", "catalog": catalog, "rows": [], "total": 0}
+                    response = await self.client.get(f"/api/connector-manager/{catalog}")
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.json()["source_system"], "cyberark_connector_manager")
+                    self.assertEqual(read.await_args.args[1], catalog)
+                read.reset_mock()
+            read.side_effect = ConnectorManagerError("private-token and remote payload")
+            response = await self.client.get("/api/connector-manager/pools")
+            self.assertEqual(response.status_code, 502)
+            self.assertNotIn("private-token", response.text)
+            read.reset_mock()
+            settings.side_effect = ConnectorManagerNotConfigured("private-token")
+            response = await self.client.get("/api/connector-manager/networks")
+            self.assertEqual(response.status_code, 503)
+            self.assertNotIn("private-token", response.text)
+            read.assert_not_awaited()
+            self.assertEqual((await self.client.post("/api/connector-manager/pools")).status_code, 405)
 
     async def test_cyberark_risk_requires_its_narrow_read_permission(self):
         self.session.set_permissions(["inventory:read", "access:manage"])

@@ -19,6 +19,7 @@ backend/app/                         frontend/src/
     sia/                                sia/
     access/                             access/
     risk_management/                    risk_management/
+    connector_manager/                  connector_manager/
     shared/                             shared/
   netskope/                           netskope/
     sse/                                sse/
@@ -30,6 +31,12 @@ equipos, postura de endpoints, DEM, agregados de alertas y DLP son funciones
 de Netskope. No se crean herramientas nuevas para cada feature. No hay
 otros proveedores en alcance ni fuentes habilitadas por el simple hecho de
 existir una carpeta.
+
+Connector Manager posee sus catálogos read-only de pools y redes en
+`cyberark/connector_manager/`. Registra sólo rutas en vivo; no añade una fuente
+de ingesta. `cyberark/shared/components/connectors-workspace.tsx` compone su
+tabla con los inventarios PSM/SIA existentes, sin imports entre propietarios
+ni relaciones inferidas entre datos.
 
 ## Capas dentro de una herramienta
 
@@ -158,8 +165,8 @@ de seguridad/startup permanecen en la raíz.
 
 Cada herramienta declara su contrato y `register()` en `source.py`. El contrato
 compartido `source_contract.py` no importa herramientas. `sources.py` invoca
-los seis registros estáticos y sigue siendo el único registro: Risk Management
-expone solamente sus rutas, sin crear una fuente de sincronización no aprobada.
+los registros estáticos y sigue siendo el único registro: Risk Management y
+Connector Manager exponen solamente sus rutas, sin crear una fuente de sincronización no aprobada.
 
 `main.py` compone los routers transversales con los registrados; las fachadas
 CMDB e ingesta iteran sus respectivos routers. Las rutas manuales de cada
@@ -187,7 +194,7 @@ paquetes importables y el discovery de unittest recorre la jerarquía.
 Un test individual se ejecuta con `python -m unittest
 tests.cyberark.pam.test_cyberark` desde `backend/`.
 
-Los tests frontend siguen la misma propiedad: `frontend/tests/{cyberark/{pam,identity_administration,sia,risk_management},netskope/sse,cross}/` para los unitarios (`*.unit.test.ts`) y `tests/e2e/` con esa jerarquía y las fixtures comunes en `tests/e2e/support/fixtures.ts`. SSE, DLP y DEM no se separan en herramientas distintas; los puentes Identity–PAM y Personas quedan en `cross/`.
+Los tests frontend siguen la misma propiedad: `frontend/tests/{cyberark/{pam,identity_administration,sia,risk_management,connector_manager},netskope/sse,cross}/` para los unitarios (`*.unit.test.ts`) y `tests/e2e/` con esa jerarquía y las fixtures comunes en `tests/e2e/support/fixtures.ts`. SSE, DLP y DEM no se separan en herramientas distintas; los puentes Identity–PAM y Personas quedan en `cross/`.
 
 ```bash
 npm --prefix frontend run test:unit -- --test-name-pattern="sync"   # opciones del runner de Node

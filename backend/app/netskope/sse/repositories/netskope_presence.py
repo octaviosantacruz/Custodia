@@ -35,6 +35,39 @@ def _groups(rows: list[dict[str, Any]], limit: int | None = None) -> tuple[list[
     return ordered[:limit], sum(entry["total"] for entry in ordered[limit:])
 
 
+PRESENCE_DAYS = 7
+
+
+async def get_users_presence(pool: AsyncConnectionPool, emails: list[str]) -> dict[str, dict[str, int]]:
+    """Per normalized email: days of the last PRESENCE_DAYS (today and the 6 before, UTC dates) on which
+    one of the person's devices reported from the office or from outside (NSK-EXP-PRESENCE-001).
+
+    Read from the per-day presence the sync records, not the latest device state, so a hybrid person who
+    was in the office on Monday still counts as such on Thursday. The device is tied to the person only by
+    its reported username being exactly that email (lower/trim); no similarity. A person with no matching
+    device or no classified event in the window is simply absent ("Sin dato", never remote).
+    """
+    if not emails:
+        return {}
+    rows = await fetch_all(
+        pool,
+        """SELECT lower(btrim(o.attributes->>'username')) AS email,
+                  count(DISTINCT p.event_day) FILTER (WHERE p.onprem_status = 'on-prem')::int AS office_days,
+                  count(DISTINCT p.event_day) FILTER (WHERE p.onprem_status = 'off-prem')::int AS remote_days
+           FROM public.cyberark_inventory_objects o
+           JOIN public.netskope_device_presence_days p
+             ON p.device_id = o.source_id AND p.event_day > (now() AT TIME ZONE 'UTC')::date - %s
+           WHERE o.source_system = %s AND o.object_type = 'device' AND o.lifecycle_status = 'active'
+             AND lower(btrim(o.attributes->>'username')) = ANY(%s)
+           GROUP BY 1""",
+        (PRESENCE_DAYS, SOURCE_SYSTEM, emails),
+    )
+    return {
+        row["email"]: {"office_days": row["office_days"], "remote_days": row["remote_days"]}
+        for row in rows if row["office_days"] or row["remote_days"]
+    }
+
+
 async def get_netskope_presence(pool: AsyncConnectionPool) -> dict[str, Any]:
     statuses = await fetch_all(pool, f"SELECT {_STATUS} AS key, count(*)::int AS count {_DEVICES} GROUP BY 1 ORDER BY count(*) DESC, key", (SOURCE_SYSTEM,))
     methods = await fetch_all(pool, f"SELECT {_METHOD} AS key, count(*)::int AS count {_DEVICES} GROUP BY 1 ORDER BY count(*) DESC, key", (SOURCE_SYSTEM,))

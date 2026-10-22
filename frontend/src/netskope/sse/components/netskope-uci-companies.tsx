@@ -10,10 +10,10 @@ import { ApiError } from '../../../cross/lib/api';
 import { fetchNetskopeUciCompanies } from '../lib/netskope-api';
 import { UCI_EXPLANATION, UCI_SCALE, uciRiskChange, uciRiskChangeLabel, uciRiskLabel, uciRiskShare } from '../lib/netskope-uci';
 
-type Props = { refreshKey: number; enabled: boolean; onUnauthorized: () => void };
+type Props = { refreshKey: number; enabled: boolean; onUnauthorized: () => void; onReview: (company: string) => void };
 
 /** Which companies have the largest share of users with a Poor or Moderate UCI. */
-export function NetskopeUciCompanies({ refreshKey, enabled, onUnauthorized }: Props) {
+export function NetskopeUciCompanies({ refreshKey, enabled, onUnauthorized, onReview }: Props) {
   const panel = useQuery({ queryKey: ['netskope', 'uci', 'companies', refreshKey], enabled,
     queryFn: ({ signal }) => fetchNetskopeUciCompanies(signal), retry: false, staleTime: 60_000, refetchOnWindowFocus: false });
   useEffect(() => { if (panel.error instanceof ApiError && panel.error.status === 401) onUnauthorized(); }, [panel.error, onUnauthorized]);
@@ -37,7 +37,11 @@ export function NetskopeUciCompanies({ refreshKey, enabled, onUnauthorized }: Pr
         <td>{formatNumber(company.users)}</td>
         <td>{formatNumber(company.poor)}</td>
         <td>{formatNumber(company.moderate)}</td>
-        <td><BarCell label={`${formatNumber(company.poor + company.moderate)} de ${formatNumber(company.users)} · ${uciRiskLabel(company)}`} share={uciRiskShare(company)} /></td>
+        <td>{company.poor + company.moderate > 0
+          ? <button type="button" className="netskope-uci-review" aria-label={`Revisar a las ${formatNumber(company.poor + company.moderate)} personas de ${company.company}`} onClick={() => onReview(company.company)}>
+            <BarCell label={`${formatNumber(company.poor + company.moderate)} de ${formatNumber(company.users)} · ${uciRiskLabel(company)}`} share={uciRiskShare(company)} />
+          </button>
+          : <BarCell label={`0 de ${formatNumber(company.users)} · ${uciRiskLabel(company)}`} share={uciRiskShare(company)} />}</td>
         <td className={change === null ? 'netskope-uci-empty' : undefined}>{change === null || change === 0 ? uciRiskChangeLabel(change) : `${change > 0 ? 'Aumenta' : 'Disminuye'} ${uciRiskChangeLabel(change)}`}</td>
       </tr>;
       })}</tbody>

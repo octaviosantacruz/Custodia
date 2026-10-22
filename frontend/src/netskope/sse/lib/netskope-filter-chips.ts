@@ -1,5 +1,6 @@
 import { STALE_EXPLANATION_LABELS, NETSKOPE_REVIEW_ATTENTION_LABELS, NETSKOPE_REVIEW_STATUS_LABELS, reviewDiagnosisLabel } from './netskope-device-review.ts';
 import { presenceStatusLabel } from './netskope-presence.ts';
+import { uciRatingLabel } from './netskope-fleet-groups.ts';
 import type { NetskopeDeviceFilterKey, NetskopeDeviceQuery, NetskopeEventAge } from '../types/netskope';
 
 export const NETSKOPE_EVENT_AGE_OPTIONS: Array<{ value: NetskopeEventAge; label: string }> = [
@@ -39,6 +40,7 @@ const DEVICE_FILTER_CHIP_LABELS: Record<NetskopeDeviceFilterKey, string> = {
   observed_user: 'Usuario resuelto',
   onprem_status: 'Ubicación',
   client_config: 'Client config',
+  uci_rating: 'Confianza (UCI)',
 };
 const INVENTORY_FILTER_CHIP_KEYS: NetskopeDeviceFilterKey[] = ['os', 'client_version', 'classification_status', 'user_status', 'company', 'last_seen_event'];
 
@@ -78,6 +80,7 @@ export function netskopeFilterChips(query: NetskopeDeviceQuery, labels: Netskope
   if (query.filters.username) chips.push({ id: 'username', label: `Usuario: ${query.filters.username}`, clear: { filter: 'username' } });
   if (query.filters.observed_user_status) chips.push({ id: 'observed-user-status', label: `Usuario observado: ${OBSERVED_USER_STATUS_LABELS[query.filters.observed_user_status] ?? query.filters.observed_user_status}`, clear: { filter: 'observed_user_status' } });
   if (query.filters.onprem_status) chips.push({ id: 'onprem-status', label: `Ubicación: ${presenceStatusLabel(query.filters.onprem_status)}`, clear: { filter: 'onprem_status' } });
+  if (query.filters.uci_rating) chips.push({ id: 'uci-rating', label: `Confianza (UCI): ${uciRatingLabel(query.filters.uci_rating)}`, clear: { filter: 'uci_rating' } });
   if (query.filters.client_config) chips.push({ id: 'client-config', label: `Client config: ${query.filters.client_config}`, clear: { filter: 'client_config' } });
   if (query.filters.observed_user) chips.push({ id: 'observed-user', label: `Usuario resuelto: ${query.filters.observed_user}`, clear: { filter: 'observed_user' } });
   if (query.coverageRisk) chips.push({ id: 'coverage-risk', label: 'Último evento: desinstalación o deshabilitación', clear: { coverageRisk: '' } });
@@ -93,6 +96,7 @@ export function netskopeFilterGroupCounts(query: NetskopeDeviceQuery) {
   return {
     identity: identityKeys.filter((key) => query.filters[key]).length,
     activity: Number(Boolean(query.eventAge)) + Number(Boolean(query.filters.last_seen_event)),
+    place: Number(Boolean(query.filters.onprem_status)) + Number(Boolean(query.filters.uci_rating)),
     diagnosis: Number(Boolean(query.reviewDiagnosis)) + Number(Boolean(query.reviewStatus)) + Number(Boolean(query.reviewAttention)) + Number(Boolean(query.reviewSuggestion)),
   };
 }
