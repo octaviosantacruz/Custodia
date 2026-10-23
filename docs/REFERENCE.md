@@ -42,11 +42,8 @@ sanear la historia para distribución. `PROD-DIST-001` cubre esa revisión.
 
 ## Por qué se hizo en otro worktree
 
-Las unidades locales `custodia-api-dev.service` y
-`custodia-panel-dev.service` apuntan a `/home/saint/projects/Custodia`.
-Limpiar ese directorio podía activar recargas o romper esos servicios.
-Por eso el producto vive en `/home/saint/projects/Custodia-product`, rama
-`product/go-reset`, desde el mismo commit. No se copiaron configuraciones
+Nota 23/10: la v1 salió de este host; el producto es el único checkout en
+`/home/saint/projects/Custodia` (`main`). Contexto histórico del 22/10: no se copiaron configuraciones
 locales ni se cambiaron unidades, puertos, bases o servicios.
 
 Se descartó traducir toda la aplicación: conservaría el acoplamiento laboral

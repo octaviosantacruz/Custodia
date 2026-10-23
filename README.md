@@ -81,11 +81,10 @@ La rama `product/go-reset` parte de `f6a7acc`: primero retiró el árbol heredad
 luego recuperó su frontend en `company-demo/` (commit `71c68de`) y el 22/10
 lo retiró en favor de la interfaz nueva de `web/`.
 No recupera el backend ni su configuración de despliegue. El checkout
-`/home/saint/projects/Custodia` conserva la aplicación anterior en
-`maintenance/v1`, fijada a `f6a7acc`, y es el que usan los servicios locales.
-El checkout del producto es `/home/saint/projects/Custodia-product`; `main`
-integra allí las ramas del producto. No actualizar el checkout v1 a `main`:
-el producto no incluye el runtime que necesitan sus unidades.
-No se modificaron sus unidades ni sus bases.
+`/home/saint/projects/Custodia` es el único checkout del producto (`main`).
+Desde el 23/10 la v1 laboral ya no vive en este host: sigue en la rama
+`maintenance/v1` (`f6a7acc`) de `origin` y en su propio entorno. Las unidades
+`custodia-*-dev` se retiraron de este servidor.
+Las bases de datos no se tocaron.
 La historia Git sigue disponible como referencia; no es material listo para
 publicar. La procedencia y distribución se revisan en `PROD-DIST-001`.
