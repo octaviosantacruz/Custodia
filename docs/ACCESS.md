@@ -31,6 +31,40 @@ Pendiente de este contrato: vincular emisor/sujeto a usuarios de
 autorización con permisos por conexión (`PROD-AUTH-001`), caché de replay
 compartida si hay más de una instancia, y auditoría con ID de correlación.
 
+### Recorrido local con Ozal real
+
+`npm run test:ozal` ejecuta ambos binarios reales y el frontend en modo API,
+con PostgreSQL descartable y dos perfiles independientes de Chromium. Crea
+passkeys virtuales mediante WebAuthn: un lector abre Personas en español e
+inglés; otro usuario entra a Ozal pero Custodia le deniega la lectura. Verifica
+las respuestas de Personas y cobertura, rechazo de acceso directo, headers
+falsos y replay, ausencia de cookies de Ozal en el upstream, reinicio del edge,
+logout y nuevo ingreso con la passkey existente. No simula la API ni firma
+aserciones desde el harness: las firma el proceso de Ozal.
+
+Desde la raíz del repositorio, con las dependencias de `web/` y Chromium de
+Playwright instalados, preparar los artefactos y referencias:
+
+```bash
+# OZAL_BIN debe apuntar a un binario compilado del checkout de Ozal a probar.
+export OZAL_BIN=/absolute/path/to/ozal
+export CUSTODIA_BIN=/tmp/custodia-acceptance
+export CUSTODIA_WEB_DIR=/tmp/custodia-acceptance-web
+(cd server && go build -o "$CUSTODIA_BIN" ./cmd/custodia)
+npm --prefix web run build -- --outDir "$CUSTODIA_WEB_DIR"
+eval "$(scripts/test-db.sh)"
+trap 'scripts/test-db.sh stop' EXIT
+npm run test:ozal
+```
+
+La prueba crea configuración y claves temporales propias, usa puertos libres
+en loopback y limpia los procesos y archivos al terminar. No usa configuración
+ni bases de servicios activos. La base debe ser la de `scripts/test-db.sh`;
+no pasar una base del host. El transporte local es HTTP bajo `.localhost`,
+un contexto seguro para WebAuthn en Chromium. Esta prueba **no** acredita TLS
+público, un túnel Cloudflare ni autenticadores físicos. La aceptación publicada
+con dos usuarios sigue pendiente.
+
 ## Tres contextos explícitos
 
 | Contexto | Autenticación propuesta | Qué conserva Custodia |
