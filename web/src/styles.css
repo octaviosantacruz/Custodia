@@ -195,8 +195,8 @@ th,
 }
 
 .button.primary {
-  background: var(--accent);
-  color: #081018;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 .button.primary:hover:not(:disabled) {

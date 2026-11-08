@@ -45,10 +45,10 @@
 .person-radial-center { align-items: center; display: grid; gap: 4px; justify-items: center; max-width: 240px; text-align: center; }
 .person-radial-avatar {
   align-items: center;
-  background: var(--accent);
+  background: var(--accent-fill);
   border-radius: 50%;
-  box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 14%, transparent), 0 0 34px color-mix(in srgb, var(--accent) 28%, transparent);
-  color: #08110d;
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-fill) 14%, transparent), 0 0 34px color-mix(in srgb, var(--accent-fill) 28%, transparent);
+  color: var(--on-accent);
   display: inline-flex;
   height: 96px;
   justify-content: center;

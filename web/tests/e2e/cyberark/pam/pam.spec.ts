@@ -20,7 +20,7 @@ test('CyberArk node in the home visibility wheel highlights and opens PAM', asyn
   const cyberArkNode = page.locator('.home-visibility-node-cyberark');
   await cyberArkNode.hover();
   await expect(page.locator('.home-visibility')).toHaveAttribute('data-active-domain', 'cyberark');
-  await expect(page.locator('.home-visibility-line-cyberark')).toHaveCSS('background-color', 'rgb(53, 196, 119)');
+  await expect(page.locator('.home-visibility-line-cyberark')).toHaveCSS('background-color', 'rgb(199, 246, 85)');
   await cyberArkNode.click();
   await expect(page).toHaveURL(/\/pam$/);
 });

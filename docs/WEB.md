@@ -29,6 +29,14 @@ propia del 22/10 se retiró y queda en Git (`617f460`).
   pruebas e2e, así que la demo y las pruebas no pueden divergir. Nada sale del
   navegador; el build real no incluye ese código.
 
+La demo cuenta la historia de Acme Corp: `web/src/demo/acme-api.ts` responde
+desde `web/src/demo/model/company.json` las rutas de Personas, Safes, cuentas,
+métricas de CyberArk e inventario de Netskope, y delega el resto en la API
+simulada. Personas, equipos, Safes y contadores salen del mismo escenario que
+cita el sitio (Alice: brecha; Bob: parcial; Eve: desconocido). Las fechas se
+corren para que la captura parezca siempre reciente. Las pruebas e2e siguen
+usando sólo `mock-api.ts`.
+
 La demo entra con una sesión de lectura («Demo»). Una ruta que la API
 simulada no conoce responde «No disponible en la demo».
 
@@ -41,8 +49,12 @@ empleador de origen; ver `AGENTS.md`.
 ## Marca
 
 La marca son dos registros que se cruzan (`web/public/mark.svg`, lima sobre
-grafito); el favicon y el logo de la cabecera son el mismo dibujo. El resto
-del sistema visual es el de DS Hub (`web/src/styles/foundation.css`).
+grafito); el favicon y el logo de la cabecera son el mismo dibujo. La app
+conserva la estructura de DS Hub (rueda, círculos, accesos), pero usa la paleta
+y las tipografías del sitio (`site/src/design/tokens.css`): tinta fría, lima
+sólo para marca, acción, foco y selección, y los colores de veredicto para los
+estados. Los tokens viven en `web/src/styles/foundation.css`; el texto sobre
+lima usa `--accent-fill` y `--on-accent` en ambos temas.
 
 ## Verificación
 

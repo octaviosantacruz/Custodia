@@ -154,7 +154,7 @@ test('hovering CyberArk syncs the left action and visibility wheel states', asyn
 
   await expect(cyberArkAction).toHaveAttribute('title', 'Abrir el tablero, inventario y accesos de CyberArk');
   await expect(page.locator('.home-visibility')).toHaveAttribute('data-active-domain', 'cyberark');
-  await expect(page.locator('.home-visibility-node-cyberark')).toHaveCSS('border-color', 'rgb(53, 196, 119)');
+  await expect(page.locator('.home-visibility-node-cyberark')).toHaveCSS('border-color', 'rgb(199, 246, 85)');
   await expect(cyberArkAction).toHaveClass(/is-active/);
   await expect(page.locator('.home-visibility-satellite, .home-visibility-line-identity, .home-visibility-line-sia')).toHaveCount(0);
 
@@ -177,9 +177,9 @@ test('Netskope is reachable from home and the visibility wheel follows the card'
   await expect(page.locator('.home-visibility')).toHaveAttribute('data-active-domain', 'netskope');
   await expect(netskopeAction).toHaveClass(/is-active/);
   await expect(netskopeNode).toHaveClass(/is-active/);
-  await expect(netskopeNode).toHaveCSS('border-color', 'rgb(53, 196, 119)');
+  await expect(netskopeNode).toHaveCSS('border-color', 'rgb(199, 246, 85)');
   await expect(netskopeEdge).toHaveClass(/is-active/);
-  await expect(netskopeEdge).toHaveCSS('background-color', 'rgb(53, 196, 119)');
+  await expect(netskopeEdge).toHaveCSS('background-color', 'rgb(199, 246, 85)');
 
   await expect(page.getByRole('button', { name: 'Abrir Netskope' })).toBeVisible();
   await netskopeNode.click();

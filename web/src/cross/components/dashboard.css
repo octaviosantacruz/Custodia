@@ -25,7 +25,7 @@
 .bar-track span {
   color: var(--accent-strong);
 }
-.bar-track span { background: var(--accent); }
+.bar-track span { background: var(--chart-1); }
 .bar-track,
 .bar-track span {
   border-radius: var(--radius-sm);

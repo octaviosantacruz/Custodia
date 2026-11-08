@@ -18,7 +18,7 @@ export function advancedChartPalette(styles: TokenReader): AdvancedChartPalette 
     text: token('--text-secondary', '#9ca3af'),
     textStrong: token('--text-primary', '#f2f4f5'),
     border: token('--border-soft', '#27302b'),
-    accent: token('--accent', '#35c477'),
+    accent: token('--chart-2', '#56d298'),
     secondary: token('--chart-1', '#5ba2ff'),
     surface: token('--bg-surface', '#1d2125'),
     low: token('--bg-muted', '#161719'),
