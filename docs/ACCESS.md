@@ -1,30 +1,49 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-22
+revisado: 2026-11-08
 ---
 
-# Acceso: Switchboard, OIDC y pruebas
+# Acceso: Ozal, OIDC y pruebas
 
-**Recomendación pendiente de aceptación técnica:** usar Switchboard como
-entrada para la instalación del dueño; ofrecer OIDC genérico para una
-instalación independiente. No portar el acoplamiento a Okta, grupos laborales
-ni el modo híbrido de la versión anterior. Ninguno de los modos siguientes
-está implementado en el producto Go.
+**Estado (08/11):** el modo detrás de Ozal (antes Switchboard) está
+implementado en `server/` con la aserción firmada descrita abajo; OIDC genérico
+sigue pendiente para una instalación independiente. No portar el acoplamiento
+a Okta, grupos laborales ni el modo híbrido de la versión anterior.
+
+## Lo implementado: aserción de Ozal
+
+Ozal firma, para cada petición autorizada de la ruta de Custodia
+(`identity_assertion: {"audience": "custodia"}`), un JWS EdDSA en
+`X-Ozal-Assertion` con `iss` (origen del login de Ozal), `aud`, `sub`,
+`email`, `groups`, `iat`, `exp` (60 s) y `jti`; borra cualquier copia que
+mande el cliente. Custodia (`server/internal/identity`):
+
+- acepta sólo pares en loopback **y** una aserción válida; sin ella, 401;
+- verifica la firma con claves fijadas en `ozal.public_keys` (identificadas
+  por `kid`, nunca obtenidas de una URL del token), `iss`, `aud`, vigencia
+  con tolerancia acotada (`max_skew_seconds` ≤ 30) y vida máxima de 60 s;
+- rechaza un `jti` repetido; la caché es en memoria, acotada, y si se llena
+  rechaza (falla cerrada);
+- autoriza la lectura por grupos o correos de `readers` (403 si no).
+
+Pendiente de este contrato: vincular emisor/sujeto a usuarios de
+autorización con permisos por conexión (`PROD-AUTH-001`), caché de replay
+compartida si hay más de una instancia, y auditoría con ID de correlación.
 
 ## Tres contextos explícitos
 
 | Contexto | Autenticación propuesta | Qué conserva Custodia |
 |---|---|---|
 | Demo pública | Sin login, sólo datos sintéticos y estado local del ejemplo. | Ningún acceso a cuentas, inventario o backend privado. |
-| Instalación detrás de Switchboard | Modo `switchboard`, identidad verificable por petición. | Usuarios locales de autorización, permisos, alcances por conexión y auditoría. |
+| Instalación detrás de Ozal | Aserción firmada por petición (implementada). | Usuarios locales de autorización, permisos, alcances por conexión y auditoría. |
 | Instalación independiente | Modo `oidc`, Custodia como cliente de un proveedor compatible. | Sus propias sesiones revocables, permisos y auditoría. |
 
 El modo se selecciona al configurar la instalación; no se mezclan mecanismos
 ni se activa login local cuando falla el gateway o el proveedor. Elegir
-Switchboard no requiere que Custodia implemente OIDC para ese recorrido.
+Ozal no requiere que Custodia implemente OIDC para ese recorrido.
 
-## Switchboard: situación comprobada y contrato por construir
+## Antecedente: por qué los headers no alcanzaban
 
 En el checkout revisado de Switchboard, las rutas protegidas del proceso
 integrado autentican y autorizan antes del túnel. La identidad viaja por

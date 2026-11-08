@@ -14,7 +14,7 @@ export const registration = {
       description: t('Buscá una persona y revisá sus identidades, accesos y vínculos disponibles.'),
       introHelp: { label: t('Vínculos por persona'), paragraphs: [t(t('La persona queda en el centro y cada herramienta en su órbita: la línea indica cómo se conecta, por correo exacto 1 a 1 o referencia por nombre. Elegí una herramienta para ver su detalle y abrir su cadena o su inventario.')), t(t('Una persona ausente en una fuente queda sin registro. La vista conserva la evidencia de cliente Netskope disponible, sin inventar cobertura ni relaciones.'))] },
       catalog: true, switcher: true, gate: 'manage',
-      alternatePermissions: ['pam:catalogs_read', 'identity:catalogs_read', 'netskope:read'],
+      alternatePermissions: ['pam:catalogs_read', 'identity:catalogs_read', 'netskope:read', 'people:read'],
       order: 10,
       runtime: 'cyberark',
       routingDomain: 'pam',

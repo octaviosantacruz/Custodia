@@ -18,7 +18,7 @@ import { useSafeTableConfig } from '../pam/hooks/use-safe-table-config';
 import { nextActionOptions } from '../../cross/lib/format';
 import { hasWorkspaceAccess, type WorkspaceView } from '../../cross/lib/workspaces';
 import { firstAuthorizedSiaResourceWorkspace } from '../../cross/lib/workspaces';
-import { domainOf } from '../../cross/lib/domains';
+import { domainAccessible, domainOf } from '../../cross/lib/domains';
 import { navigateFromWidget, selectSearchResult } from '../pam/lib/widget-navigation';
 import type { ConnectionCoverageFilter } from '../../cross/types/connection';
 import type { SearchResult } from '../../cross/lib/search-api';
@@ -101,7 +101,7 @@ export function CyberarkRouter({
   const { summary, catalogs, analytics, accountPlatformCoverage, accountManagementSummary, accountManagementSummaryLoading, accountManagementSummaryError, safes, safeTotal, safeClassificationCounts, loadError, loading, setSafes, loadDashboard } = useDashboard({
     authChecked, authStatus, search, includeAccounts, workflowFilter, classificationFilter, accountTypeFilter,
     inventoryScopeFilter, qualityFilter, scopeHintFilter, healthFilter, nextActionFilter, businessUnitFilter, responsibleFilter, page,
-    loadFiltered: workspaceView === 'safes', enabled: domainOf(workspaceView) === 'pam', refreshKey, includeInternal, onUnauthorized, onError,
+    loadFiltered: workspaceView === 'safes', enabled: domainOf(workspaceView) === 'pam' && domainAccessible('pam', authStatus?.permissions ?? []), refreshKey, includeInternal, onUnauthorized, onError,
   });
   const { detail, setDetail, form, setForm, saving, savingSafeNumber, savedSafeNumber, selectSafe, exportSafes, exportAccounts, quickUpdate, saveAssignment, bulkSaveAssignment, saveMetadata } = useSafeActions({
     catalogs, search, includeAccounts, workflowFilter, classificationFilter, accountTypeFilter, inventoryScopeFilter,

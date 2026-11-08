@@ -1,0 +1,55 @@
+{
+  "query": "",
+  "people": [
+    {
+      "email": "bob.chen@acme.example",
+      "name": "Bob Chen",
+      "sources": [
+        "pam",
+        "identity",
+        "netskope"
+      ]
+    },
+    {
+      "email": "carol.diaz@acme.example",
+      "name": "Carol Diaz",
+      "sources": [
+        "identity",
+        "netskope"
+      ]
+    },
+    {
+      "email": "alice.morgan@acme.example",
+      "name": "Alice Morgan",
+      "sources": [
+        "pam",
+        "identity",
+        "netskope"
+      ]
+    },
+    {
+      "email": "dave.kim@acme.example",
+      "name": "Dave Kim",
+      "sources": [
+        "identity",
+        "netskope"
+      ]
+    },
+    {
+      "email": "eve.taylor@acme.example",
+      "name": "Eve Taylor",
+      "sources": [
+        "identity",
+        "netskope"
+      ]
+    },
+    {
+      "email": "frank.lopez@acme.example",
+      "name": "Frank Lopez",
+      "sources": [
+        "identity",
+        "netskope"
+      ]
+    }
+  ]
+}

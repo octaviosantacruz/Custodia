@@ -1,15 +1,15 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-22
+revisado: 2026-11-08
 ---
 
 # Arquitectura del producto Go
 
-**Estado:** diseño objetivo. Go como backend y producto extensible están
-decididos por el dueño; la selección técnica siguiente es una recomendación
-para implementar y verificar por lotes. No hay servidor Go de Custodia en
-este checkout todavía.
+**Estado (08/11):** primer recorrido implementado en `server/`: Personas y
+cobertura (CONN-001) leídas de PostgreSQL, detrás de Ozal. El resto de este
+documento sigue siendo el diseño objetivo; lo que ya existe está en
+[Lo implementado](#lo-implementado).
 
 **Corrección del dueño, 22/10:** la UI original y la lógica Python existente
 definen la experiencia y los contratos que deben preservarse. Las carpetas y
@@ -148,3 +148,28 @@ concurrencia; UI contra fixtures y API real de prueba. Incluir dos conexiones
 del mismo tipo con IDs externos iguales. Verificar instalación vacía,
 upgrade y restore descartable antes del piloto externo. Una demo estática
 no sustituye esas pruebas.
+
+## Lo implementado
+
+Módulo `server/` (Go 1.25 como mínimo). Dependencias fijadas: `pgx/v5` 5.12.0,
+`goose/v3` 3.29.0 y `go-jose/v4` 4.1.9.
+
+| Paquete | Rol |
+|---|---|
+| `cmd/custodia` | Composición: `serve`, `migrate up`, `seed demo`, `version`. `serve` se niega a arrancar con migraciones pendientes. |
+| `internal/people` | Núcleo puro: personas desde Identity, vínculos por correo exacto y único, CONN-001 con su evidencia. |
+| `internal/inventory` | Conexiones, corridas y observaciones; `Assemble` arma el snapshot; `AcmeSeed` carga la empresa ficticia. |
+| `internal/identity` | Verifica la aserción de Ozal (firma con clave fijada, emisor, audiencia, vigencia ≤ 60 s, `jti` único) y exige par en loopback. |
+| `internal/store/postgres` | Adaptador `pgx`; migraciones `goose` embebidas en `migrations/`. |
+| `internal/httpapi` | Las rutas de Personas, `auth/status`, preferencias en memoria y el frontend compilado; lo demás responde 501. |
+
+Identidad natural en la base: `(conexión, colección, id externo)`, con
+`attrs` `jsonb` versionado. Personas y vínculos se calculan al leer; todavía no
+se persisten. La paridad con la demo se prueba contra respuestas exportadas de
+`web/src/demo/acme-api.ts` (`server/testdata/golden`, `server/scripts/export-golden.mjs`).
+Las pruebas de PostgreSQL usan una base descartable en Docker (`scripts/test-db.sh`).
+
+Límites de esta etapa: sin conectores ni sincronización (`PROD-CONN-001`), sin
+roles (los lectores salen de `readers` en la configuración), preferencias de
+vista en memoria, una conexión por fuente y caché de replay en memoria de una
+sola instancia.

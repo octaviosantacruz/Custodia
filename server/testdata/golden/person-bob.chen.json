@@ -1,0 +1,53 @@
+{
+  "email": "bob.chen@acme.example",
+  "name": "Bob Chen",
+  "tools": {
+    "pam": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 301,
+        "display_name": "Bob Chen",
+        "source_id": "acme-pam-1",
+        "user_type": "EPVUser"
+      },
+      "totals": {
+        "roles": 1,
+        "safes": 1,
+        "accounts": 2,
+        "platforms": 2,
+        "psms": 0
+      }
+    },
+    "identity": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 101,
+        "display_name": "Bob Chen",
+        "source_id": "acme-identity-101",
+        "active": true
+      },
+      "role_count": 1
+    },
+    "netskope": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 201,
+        "display_name": "Bob Chen",
+        "source_id": "acme-netskope-1"
+      },
+      "device_count": 1,
+      "stale_device_count": 1,
+      "company": "Acme Corp",
+      "client_versions": [
+        "110.0.1",
+        "109.0.0"
+      ],
+      "operating_systems": [
+        "Windows"
+      ]
+    }
+  }
+}

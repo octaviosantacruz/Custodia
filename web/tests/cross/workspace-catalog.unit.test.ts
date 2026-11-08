@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { CATALOG_BY_ID, CATALOG_ENTRIES, type WorkspaceCatalogEntry, type WorkspaceView } from '../../src/cross/lib/workspace-catalog.ts';
 import { hasWorkspaceAccess, workspaceFromPath, workspacePath } from '../../src/cross/lib/workspaces.ts';
 import { WORKSPACE_DESCRIPTIONS } from '../../src/cross/lib/workspace-registry.ts';
-import { areaOf, domainHasSectionNav, domainOf, domainWorkspaces, domains, QUICK_ACCESS_PER_PLATFORM, quickAccessLimit } from '../../src/cross/lib/domains.ts';
+import { areaOf, domainAccessible, domainHasSectionNav, domainOf, domainWorkspaces, domains, QUICK_ACCESS_PER_PLATFORM, quickAccessLimit } from '../../src/cross/lib/domains.ts';
 
 const ENTRIES: readonly WorkspaceCatalogEntry[] = CATALOG_ENTRIES;
 
@@ -51,7 +51,8 @@ test('Conexiones groups Personas under its own neutral tool while keeping its PA
   assert.doesNotMatch(domains.find((domain) => domain.id === 'admin')!.blurb, /riesgo/i);
   assert.equal(CATALOG_BY_ID.person.path, '/chains/person');
   assert.equal(CATALOG_BY_ID.person.gate, 'manage');
-  assert.deepEqual(CATALOG_BY_ID.person.alternatePermissions, ['pam:catalogs_read', 'identity:catalogs_read', 'netskope:read']);
+  // people:read is the Go server's reader grant: People without any tool's catalogs.
+  assert.deepEqual(CATALOG_BY_ID.person.alternatePermissions, ['pam:catalogs_read', 'identity:catalogs_read', 'netskope:read', 'people:read']);
   assert.equal(CATALOG_BY_ID.assets.id, 'assets');
   assert.equal(CATALOG_BY_ID.assets.path, '/pam/assets');
   assert.deepEqual(CATALOG_BY_ID.assets.legacyPaths, ['/pam/ip-inventory', '/pam/access-assets']);
@@ -120,4 +121,17 @@ test('UX-NAV-001 the quick-access total grows by three per active platform, and 
   assert.equal(domainHasSectionNav('dlp'), true);
   assert.equal(domainHasSectionNav('cross'), false);
   assert.equal(domainHasSectionNav('admin'), false);
+});
+
+test('a session that only holds People (the Go server reader) opens People and nothing else', () => {
+  const reader = ['domain:cross', 'people:read'];
+  assert.equal(hasWorkspaceAccess('person', reader), true);
+  assert.equal(domainAccessible('cross', reader), true);
+  for (const view of ['general', 'netskope'] as const) {
+    assert.equal(domainAccessible(domainOf(view), reader) && hasWorkspaceAccess(view, reader), false, view);
+  }
+  // The demo grants no domain:* at all: every active tool stays open.
+  const demo = ['inventory:read', 'safes:read', 'netskope:read', 'pam:catalogs_read'];
+  assert.equal(domainAccessible(domainOf('general'), demo) && hasWorkspaceAccess('general', demo), true);
+  assert.equal(domainAccessible(domainOf('netskope'), demo) && hasWorkspaceAccess('netskope', demo), true);
 });

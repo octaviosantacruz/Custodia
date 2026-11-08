@@ -29,7 +29,8 @@ aceptación deja de bloquear Go. La referencia contractual está en Python.
   su backlog laboral. Demo vigente: `web/` con `npm run build:demo`,
   publicada como proyecto de Pages aparte; ver docs/WEB.md. La UI propia del
   22/10 se retiró (consultar `617f460`). `demo/` conserva el experimento reducido.
-  Sin backend Go ni autenticación real.
+  `server/` es el backend Go (08/11): hoy sólo Personas y cobertura, detrás de
+  la aserción firmada de Ozal; ver docs/ARCHITECTURE.md («Lo implementado»).
 - Backend objetivo Go; PostgreSQL autoridad; React/TypeScript para interfaz.
   Versiones y dependencias se fijan al implementar. No hay librería compartida
   ni importación aprobada con SIGEA.
@@ -54,6 +55,11 @@ aceptación deja de bloquear Go. La referencia contractual está en Python.
   cierres con evidencia; distinguir diseño, código, prueba y despliegue.
 - `npm run verify` valida la documentación y el modelo del ejemplo;
   `npm run verify:demo` compila la demo y recorre el guion en un navegador.
+  `npm run verify:server` verifica `server/` (gofmt, vet, `go test -race`);
+  sus pruebas de PostgreSQL corren sólo contra la base descartable de
+  `scripts/test-db.sh` (`CUSTODIA_TEST_DATABASE_URL`), nunca contra bases del host.
+  `server/testdata/golden` se regenera con `node server/scripts/export-golden.mjs`
+  cuando cambia la demo, y entonces el núcleo Go debe seguir igual a ella.
   `npm run verify:web` verifica la interfaz de `web/` (tipos, lint, estilos,
   unitarias y e2e); `verify:demo` sigue reservado al experimento de `demo/`.
   Al implementar Go, añadir su gate y ejecutarlo. No reportar suites de la

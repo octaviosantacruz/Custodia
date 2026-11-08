@@ -2,6 +2,7 @@ import { ArrowRight, Waypoints } from 'lucide-react';
 import { useId, useState, type CSSProperties, type ReactElement } from 'react';
 import type { AuthStatus } from '../types/auth';
 import { hasWorkspaceAccess, type WorkspaceView } from '../lib/workspaces';
+import { domainAccessible, domainOf } from '../lib/domains';
 import { HOME_WHEEL_CENTER, radialOrbitLayout, wheelPercent, wheelRay, type RadialWheelNode, type WheelPoint } from '../lib/home-wheel';
 import './home-workspace.css';
 import { t } from '../i18n/index.ts';
@@ -72,6 +73,9 @@ type HomeTool = {
   title: string;
   logo: () => ReactElement;
   view?: WorkspaceView;
+  /* Set when this session cannot open the tool (its server does not serve
+     it, or the role lacks the permission): shown, but not as a link. */
+  unavailable?: boolean;
 };
 
 export const HOME_SECTIONS: readonly { id: HomeSection; label: string }[] = [
@@ -89,9 +93,19 @@ export const HOME_TOOLS: readonly HomeTool[] = [
   { id: 'bigid', section: 'platform', label: t('BigID DSPM'), detail: t('Descubrimiento y postura de seguridad de datos'), title: t('BigID DSPM · Próximamente'), logo: BigIdLogo },
 ];
 
-export function homeToolsForSection(section: HomeSection): readonly HomeTool[] {
-  return HOME_TOOLS.filter((tool) => tool.section === section);
+export function homeToolsForSection(section: HomeSection, permissions?: readonly string[]): readonly HomeTool[] {
+  return HOME_TOOLS.filter((tool) => tool.section === section).map((tool) =>
+    permissions && tool.view && !canOpen(tool.view, [...permissions]) ? { ...tool, view: undefined, unavailable: true } : tool);
 }
+
+/* A tool opens only when its domain is visible to the session and its view's
+   own gate passes: an open view inside a domain the role cannot see is still
+   closed (a server that serves only People grants no other domain). */
+function canOpen(view: WorkspaceView, permissions: string[]): boolean {
+  return domainAccessible(domainOf(view), permissions) && hasWorkspaceAccess(view, permissions);
+}
+
+const toolStatus = (tool: HomeTool) => tool.unavailable ? t('No disponible') : t('Próximamente');
 
 /* HOME-WHEEL-002 experimental variant: tools occupy the middle of a flat,
    two-circle radial crown. Destructuring is intentionally independent from
@@ -126,13 +140,13 @@ function HomeWheelSpoke({ id, from, to, active }: { id: string; from: WheelPoint
 function HomeWheelLabel({ tool, active }: { tool: HomeTool; active: boolean }) {
   return <span className={`home-visibility-label home-visibility-label-${tool.id}${active ? ' is-active' : ''}`} aria-hidden="true">
     <strong>{tool.label}</strong>
-    <small>{tool.view ? tool.detail : t('Próximamente')}</small>
+    <small>{tool.view ? tool.detail : toolStatus(tool)}</small>
     {tool.view ? <span className="home-visibility-label-action">{t('Abrir')} <ArrowRight size={12} /></span> : null}
   </span>;
 }
 
-export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPeople = false, onNavigate, onFocusChange }: { monochrome?: boolean; focus?: HomeFocus; showPeople?: boolean; onNavigate?: (view: WorkspaceView) => void; onFocusChange?: (focus: HomeFocus) => void }) {
-  const platformTools = homeToolsForSection('platform');
+export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPeople = false, permissions, onNavigate, onFocusChange }: { monochrome?: boolean; focus?: HomeFocus; showPeople?: boolean; permissions?: readonly string[]; onNavigate?: (view: WorkspaceView) => void; onFocusChange?: (focus: HomeFocus) => void }) {
+  const platformTools = homeToolsForSection('platform', permissions);
   const peopleTool = HOME_TOOLS.find((tool) => tool.id === 'people');
   const peopleView = peopleTool?.view;
   return <aside className={'home-visibility' + (monochrome ? ' home-visibility-monochrome' : '')} data-active-domain={focus || undefined} data-tools={platformTools.length} aria-label={t('Fuentes de visibilidad de Custodia')}>
@@ -221,7 +235,7 @@ export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
       return <div key={tool.id} className={`home-domain-button home-domain-button-${tool.id} home-domain-button-disabled`} aria-disabled="true" {...hover(tool.id)}>
         <span className="home-domain-icon"><Logo /></span>
         <span><strong>{tool.label}</strong><small>{tool.detail}</small></span>
-        <small className="home-domain-status">{t('Próximamente')}</small>
+        <small className="home-domain-status">{toolStatus(tool)}</small>
       </div>;
     }
     return <button key={tool.id} className={`home-domain-button home-domain-button-${tool.id}` + (active ? ' is-active' : '')} type="button" title={tool.title} onClick={() => onNavigate(view)} {...hover(tool.id)}>
@@ -244,10 +258,10 @@ export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
         </section>}
         <section className="home-actions-group" data-section="platforms" aria-labelledby="home-section-platforms">
           <h2 className="home-actions-section" id="home-section-platforms">{HOME_SECTIONS[1].label}</h2>
-          {homeToolsForSection('platform').map((tool) => <div key={tool.id} className={`home-domain-entry home-domain-entry-${tool.id}`}>{renderTool(tool)}</div>)}
+          {homeToolsForSection('platform', authStatus.permissions ?? []).map((tool) => <div key={tool.id} className={`home-domain-entry home-domain-entry-${tool.id}`}>{renderTool(tool)}</div>)}
         </section>
       </div>
     </section>
-    <HomeVisibilityGraphic focus={focus} showPeople={canOpenPeople} onNavigate={onNavigate} onFocusChange={setFocus} />
+    <HomeVisibilityGraphic focus={focus} showPeople={canOpenPeople} permissions={authStatus.permissions ?? []} onNavigate={onNavigate} onFocusChange={setFocus} />
   </main>;
 }

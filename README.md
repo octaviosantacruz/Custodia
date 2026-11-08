@@ -94,7 +94,7 @@ not.
 | Stage | What | State |
 |---|---|---|
 | Demo | People crossed across CyberArk and Netskope, verdicts with evidence and each tool's inventory, in English and Spanish. Runs fully in the browser. | Done |
-| Backend | Go and PostgreSQL; the existing rules move over with their regression tests. | In progress |
+| Backend | Go and PostgreSQL. First path done: People and coverage (CONN-001) from the database, behind Ozal, with the same answers as the demo. Real connectors and roles are next. | In progress |
 | Self-hosted | Real CyberArk and Netskope adapters, sign-in through OIDC, a reproducible install. | Next |
 | More sources | Data, endpoint, vulnerability and firewall tools. | Later |
 
@@ -119,13 +119,36 @@ Switch language from the user menu or with `?lang=en` / `?lang=es`.
 | Path | What |
 |---|---|
 | `web/` | The app: React, Vite and TypeScript. Builds against a real API or as a static demo with a simulated API ([WEB.md](docs/WEB.md)). |
+| `server/` | The Go backend with PostgreSQL. Today it serves People and coverage ([Architecture](docs/ARCHITECTURE.md)). |
 | `site/` | The product site (`npm run build:site`). |
 | `docs/` | Product, architecture, connectors, design and decisions (in Spanish). |
 | `demo/` | An earlier, reduced experiment; not the current demo. |
 
+## Server (in development)
+
+`server/` serves the frontend and People from PostgreSQL. It has no login of its
+own: it runs behind [Ozal](https://github.com/ozal-project/ozal), which signs an
+identity assertion for each request that Custodia verifies with Ozal's public
+key. Without one it answers 401, even on loopback.
+
+```bash
+cd web && npm ci && npm run build && cd ..           # frontend in real mode
+cd server && go build -o custodia ./cmd/custodia
+cp config.example.json custodia.json                 # issuer, Ozal's key, readers
+export CUSTODIA_DATABASE_URL='postgres://…'
+./custodia migrate up -config custodia.json
+./custodia seed demo -config custodia.json -fixture ../web/src/demo/model/company.json
+./custodia serve -config custodia.json                # 127.0.0.1:8090
+```
+
+In Ozal, Custodia's route sets `identity_assertion: {"audience": "custodia"}` and
+`health_path: "/healthz"`; `sudo -u ozal ozal assertion public-key` prints the key for
+`ozal.public_keys`.
+
 ## Development
 
 ```bash
+npm run verify:server   # gofmt, vet and server tests (with a DB: eval "$(scripts/test-db.sh)")
 npm run verify:web      # types, lint, styles, unit tests, demo build and e2e for web/
 npm run build:site      # product site
 npm run verify          # docs + company and experiment models
