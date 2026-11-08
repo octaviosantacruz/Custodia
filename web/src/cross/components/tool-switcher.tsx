@@ -21,8 +21,8 @@ type ToolMeta = { label: string; detail: string } & ({ icon: LucideIcon; logo?: 
 const TOOL_META: Record<Domain, ToolMeta> = {
   cross: { label: 'Conexiones', detail: 'Alcance de cada persona en las herramientas', icon: Waypoints },
   admin: { label: 'Administración', detail: 'Usuarios, permisos y actividad', icon: SlidersHorizontal },
-  pam: { label: domainMeta('pam').product.label, detail: domainMeta('pam').product.description, logo: { dark: '/cyberark-logo-mint.png', selectedDark: '/cyberark-logo-white.png', light: '/cyberark-logo-dark.png' } },
-  dlp: { label: domainMeta('dlp').product.label, detail: domainMeta('dlp').product.description, logo: { dark: '/netskope-full-mint.png', selectedDark: '/netskope-full-white.png', light: '/netskope-full-black.png' } },
+  pam: { label: domainMeta('pam').product.label, detail: domainMeta('pam').product.description, logo: { dark: '/cyberark-logo-lime.png', selectedDark: '/cyberark-logo-white.png', light: '/cyberark-logo-dark.png' } },
+  dlp: { label: domainMeta('dlp').product.label, detail: domainMeta('dlp').product.description, logo: { dark: '/netskope-full-lime.png', selectedDark: '/netskope-full-white.png', light: '/netskope-full-black.png' } },
   dspm: { label: 'BigID DSPM', detail: 'Descubrimiento y postura de seguridad de datos', logo: { dark: '/bigid-full-white.png', light: '/bigid-full-black.png' } },
 };
 

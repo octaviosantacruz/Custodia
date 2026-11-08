@@ -279,7 +279,7 @@ test('refresh from a Netskope workspace enqueues only Netskope without a PAM pre
   await page.getByRole('button', { name: 'Abrir menú de usuario' }).click();
   await page.getByRole('button', { name: /Actualizar (datos|Netskope)/ }).click();
   await expect.poll(() => requests).toContain('/api/ingestion/netskope/runs');
-  await expect(page.locator('.sync-toast-source-mark .sync-toast-logo-dark')).toHaveAttribute('src', '/netskope-full-mint.png');
+  await expect(page.locator('.sync-toast-source-mark .sync-toast-logo-dark')).toHaveAttribute('src', '/netskope-full-lime.png');
   expect(requests).not.toContain('/api/ingestion/preview');
   expect(requests).not.toContain('/api/ingestion/all/runs');
   await expect(page.locator('.sync-toast')).toContainText('Netskope actualizado');
@@ -388,7 +388,7 @@ for (const theme of ['dark', 'light'] as const) {
     completeRuns = true;
     await expect(toast).toContainText('Sincronización completada');
     await expect(toast).toContainText('CyberArk actualizado.');
-    await expect(toast.locator('.sync-toast-icon img')).toHaveAttribute('src', '/cyberark-logo-mint.png');
+    await expect(toast.locator('.sync-toast-icon img')).toHaveAttribute('src', '/cyberark-logo-lime.png');
     const successAxe = await new AxeBuilder({ page }).include('.sync-toast').analyze();
     expect(successAxe.violations.map(({ id }) => id), `${theme} successful sync toast axe`).toEqual([]);
   });

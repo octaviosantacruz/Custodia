@@ -83,7 +83,7 @@ test('COV-002: exporting downloads the destinations CSV', async ({ page }) => {
   // The notice carries the tool's logo, not the generic check, because it was raised from a CyberArk workspace.
   const notice = page.locator('.app-toast-notice');
   await expect(notice).toContainText('CyberArk · ACTUALIZACIÓN');
-  await expect(notice.locator('.app-toast-source-image')).toHaveAttribute('src', '/cyberark-logo-mint.png');
+  await expect(notice.locator('.app-toast-source-image')).toHaveAttribute('src', '/cyberark-logo-lime.png');
 });
 
 test('COV-ABM: add, edit, retire and bulk-edit destinations, each through its own endpoint', async ({ page }) => {

@@ -7,5 +7,5 @@ export const registration = {
   workspaces: [],
   domains: [],
   categories: [],
-  sync: { source: 'access', meta: { label: 'Access space', fallback: 'A' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: 'CyberArk', image: '/cyberark-logo-mint.png', fallback: 'C' }, componentLabel: 'Access space', quietAutomaticSuccess: true },
+  sync: { source: 'access', meta: { label: 'Access space', fallback: 'A' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: 'CyberArk', image: '/cyberark-logo-lime.png', fallback: 'C' }, componentLabel: 'Access space', quietAutomaticSuccess: true },
 } as const satisfies FrontendRegistration;

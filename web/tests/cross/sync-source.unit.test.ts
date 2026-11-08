@@ -8,7 +8,7 @@ test('operational notices resolve the Netskope and CyberArk logos by product', (
   const cyberark = syncSourceFromNotice('Tu vista de CyberArk quedó actualizada');
 
   assert.equal(syncSourceMeta(netskope).image, '/netskope-full-white.png');
-  assert.equal(syncSourceMeta(cyberark).image, '/cyberark-logo-mint.png');
+  assert.equal(syncSourceMeta(cyberark).image, '/cyberark-logo-lime.png');
 });
 
 test('generic notices keep the Custodia fallback instead of assigning a product', () => {
@@ -34,7 +34,7 @@ test('tool labels group CyberArk features while preserving unknown source names'
 
 test('tool metadata uses product logos and feature sources produce one chip per tool', () => {
   assert.deepEqual(syncToolMeta('cyberark'), {
-    label: 'CyberArk', image: '/cyberark-logo-mint.png', fallback: 'C',
+    label: 'CyberArk', image: '/cyberark-logo-lime.png', fallback: 'C',
   });
   assert.deepEqual(syncToolMeta('netskope'), {
     label: 'Netskope', image: '/netskope-full-white.png', fallback: 'N',
