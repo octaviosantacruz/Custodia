@@ -2,6 +2,7 @@ import { accounts, coverageSummary, devices, people, safes, type CoverageStatus 
 import { insights, personView, PLANNED, VERDICT_LABEL } from '../model/view.ts';
 import { Seal, Verdict, VerdictGlyph } from '../ui/identity.tsx';
 import { Link, useApp } from '../ui/router.tsx';
+import { SourceOrbit } from '../ui/orbit.tsx';
 import { Shell } from '../ui/shell.tsx';
 
 const VERDICTS: CoverageStatus[] = ['covered', 'partial', 'gap', 'unknown'];
@@ -15,6 +16,19 @@ export function Overview() {
   return (
     <Shell title="Resumen" lede="Qué dicen las fuentes de Acme Corp y qué se concluye al cruzarlas.">
       <div className="overview">
+        <section className="orbit-hero" aria-labelledby="orbit-title">
+          <div>
+            <h2 id="orbit-title">Fuentes y cruces</h2>
+            <p className="muted">Cada fuente dice lo suyo; Custodia concluye al cruzarlas. Pasá el cursor por una fuente o por el centro para ver qué se une.</p>
+            <ul>
+              <li><Seal source="pam" label="product" /> <span>Identidad y privilegios</span></li>
+              <li><Seal source="sse" label="product" /> <span>Red y navegación</span></li>
+              <li><span className="muted">Los círculos punteados son fuentes planificadas, sin datos todavía.</span></li>
+            </ul>
+          </div>
+          <SourceOrbit />
+        </section>
+
         <section className="card coverage" aria-labelledby="coverage-title">
           <header className="card-head">
             <div>

@@ -68,6 +68,7 @@ test('the demo opens behind its own sign-in and never calls a server', async ({ 
 test('a gap and an ambiguous identity stay distinct cases with their evidence', async ({ page }) => {
   await enter(page);
   await page.getByRole('link', { name: 'Personas', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Personas' })).toBeVisible();
   await page.getByRole('link', { name: 'Alice Morgan', exact: true }).click();
   const verdict = page.getByRole('complementary', { name: /Brecha/ });
   await expect(verdict).toContainText('ningún dispositivo reciente observado');

@@ -1,6 +1,7 @@
 import { people } from '../model/company.ts';
 import { ago, personView, sourceRun, SOURCE_ORDER, SOURCES, type SourceKey } from '../model/view.ts';
 import { Seal, Verdict } from '../ui/identity.tsx';
+import { PersonOrbit } from '../ui/orbit.tsx';
 import { Link, useApp } from '../ui/router.tsx';
 import { Shell } from '../ui/shell.tsx';
 
@@ -97,6 +98,8 @@ export function Person({ id }: { id: number }) {
             <h2 id="trama-title">Trama</h2>
             <p className="muted">Cómo se une esta persona en cada fuente.</p>
           </header>
+          <PersonOrbit initials={person.name.split(' ').map(w => w[0]).join('')} name={person.name}
+            spots={groups(view).map(g => ({ key: g.source, join: g.join, title: SOURCES[g.source].product, detail: g.joinLabel }))} />
           <Trama view={view} />
           <ul className="trama-legend">
             <li><svg width="28" height="8" aria-hidden="true"><path d="M0 4h28" className="legend-solid" /></svg> unión por correo exacto</li>

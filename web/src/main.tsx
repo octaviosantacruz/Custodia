@@ -6,6 +6,7 @@ import './design/tokens.css';
 import './design/base.css';
 import './design/components.css';
 import './design/pages.css';
+import './design/orbit.css';
 import { App } from './App.tsx';
 import { AppProvider } from './ui/router.tsx';
 
