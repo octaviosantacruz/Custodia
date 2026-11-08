@@ -1,0 +1,33 @@
+/* NSK-EXP-OFFICE-002: daily timeline. Lines reuse the office/remote palette of netskope-office-experience.css;
+   the person's line is thicker and the group lines step back behind it. */
+.nsk-timeline-controls { align-items: center; display: flex; flex-wrap: wrap; gap: 10px 14px; }
+.nsk-timeline-search { position: relative; width: 260px; }
+.nsk-timeline-search .search-box { width: 100%; }
+.nsk-timeline-results { background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); display: grid; left: 0; padding: 4px; position: absolute; right: 0; top: calc(100% + 4px); z-index: 10; }
+.nsk-timeline-results button { background: transparent; border: 0; border-radius: calc(var(--radius-md) - 2px); color: var(--text-primary); cursor: pointer; display: grid; font: inherit; font-size: 12px; gap: 1px; padding: 6px 8px; text-align: left; }
+.nsk-timeline-results button:hover, .nsk-timeline-results button:focus-visible { background: var(--bg-subtle); outline: none; }
+.nsk-timeline-results small { color: var(--text-secondary); font-size: 11px; }
+.nsk-timeline-results p { color: var(--text-secondary); font-size: 12px; margin: 6px 8px; }
+.nsk-timeline-chip { align-items: center; background: var(--bg-subtle); border: 1px solid var(--border-strong); border-radius: 999px; color: var(--text-primary); display: inline-flex; font-size: 12px; gap: 6px; padding: 4px 6px 4px 12px; }
+.nsk-timeline-chip button { background: transparent; border: 0; border-radius: 50%; color: var(--text-secondary); cursor: pointer; display: inline-flex; padding: 2px; }
+.nsk-timeline-chip button:hover, .nsk-timeline-chip button:focus-visible { color: var(--text-primary); outline: none; box-shadow: var(--focus-ring); }
+.nsk-timeline-person-note { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.nsk-timeline-plot { max-width: none; }
+.nsk-timeline-people { color: var(--text-secondary); font-size: 11px; }
+.nsk-office-series.is-muted polyline { opacity: 0.45; stroke-width: 1.5; }
+.nsk-office-series.is-muted circle { opacity: 0.45; }
+.nsk-office-series.is-person polyline { stroke-width: 3; }
+.nsk-office-series circle.is-few { fill: var(--bg-panel); stroke-width: 2; }
+.nsk-office-series.is-office circle.is-few { stroke: var(--office-line); }
+.nsk-office-series.is-remote circle.is-few { stroke: var(--remote-line); }
+.nsk-office-line-swatch.is-person { height: 4px; }
+.nsk-office-line-swatch.is-muted { opacity: 0.45; }
+.nsk-timeline-summary { align-items: center; color: var(--text-secondary); display: flex; flex-wrap: wrap; font-size: 12px; gap: 6px 20px; margin: 0; }
+.nsk-timeline-summary span { align-items: center; display: inline-flex; gap: 6px; }
+.nsk-timeline-summary strong { color: var(--text-primary); font-size: 18px; font-variant-numeric: tabular-nums; }
+.nsk-timeline-summary-period { color: var(--text-primary); font-weight: 600; }
+/* Days chosen on the chart: a quiet band behind the lines and a bold date. */
+.nsk-timeline-day { cursor: pointer; touch-action: none; }
+.nsk-timeline-plot svg { user-select: none; }
+.nsk-timeline-selected { fill: var(--accent-strong); opacity: 0.12; }
+.nsk-office-tick.is-selected { fill: var(--text-primary); font-weight: 600; }

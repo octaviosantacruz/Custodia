@@ -3,10 +3,11 @@
 Inventario de herramientas de seguridad con procedencia, cambios explicables
 y decisiones humanas que una sincronización no sobrescribe.
 
-La demo vigente está en `web/`: **Acme Corp**, una empresa ficticia
-con personas, áreas, equipos y accesos relacionados, sobre una interfaz e
-identidad visual nuevas ([WEB.md](docs/WEB.md)). La interfaz heredada de
-`company-demo/` se retiró el 22/10 ([escenario](docs/COMPANY-DEMO.md)).
+Custodia es DS Hub renombrado y abierto, con licencia [Apache 2.0](LICENSE).
+`web/` es su frontend: inicio con la rueda de fuentes, Personas, CyberArk,
+Netskope y Ayuda. Se puede compilar contra la API real o como demo estática
+que corre en el navegador con una API simulada y datos ficticios
+([WEB.md](docs/WEB.md)). `site/` es el sitio de producto.
 **Todavía no incluye backend Go ni autenticación real**. El orden elegido es Portfolio, instalación autohospedada y,
 después de validar uso, evaluar SaaS.
 
@@ -14,22 +15,19 @@ después de validar uso, evaluar SaaS.
 
 1. Leer la [revisión del producto existente](docs/EXISTING-PRODUCT.md): los
    recorridos y contratos Python son referencia para la interfaz nueva.
-2. Recorrer [Acme Corp](docs/WEB.md) y seguir el
-   [tracker](docs/TO_IMPLEMENT.md): ampliar esa experiencia con datos
-   sintéticos y portar sus contratos a Go por recorridos.
+2. Recorrer la [demo](docs/WEB.md) y seguir el
+   [tracker](docs/TO_IMPLEMENT.md): portar los contratos a Go por recorridos.
 
 ```bash
 cd web
 npm ci
-npm run build
-npm run preview
+npm run preview:demo   # demo estática, sin backend
 # http://127.0.0.1:4184
 ```
 
-Dirección aclarada por el dueño el 22/10: inventario de herramientas de
-ciberseguridad, cruces e inferencias, priorizando la experiencia ya construida.
-La demo reducida de `demo/` se conserva como experimento; no es el diseño
-objetivo ni la referencia de paridad. Su aceptación no bloquea Go.
+El sitio de producto se construye con `npm run build:site` (o
+`cd site && npm ci && npm run dev`). La demo reducida de `demo/` se conserva
+como experimento anterior; no es la demo vigente.
 
 ## Documentación
 
@@ -39,7 +37,7 @@ objetivo ni la referencia de paridad. Su aceptación no bloquea Go.
 | Empresa ficticia, sitio y demo vigentes | [WEB.md](docs/WEB.md) · escenario original en [COMPANY-DEMO.md](docs/COMPANY-DEMO.md) |
 | Go y PostgreSQL | [Arquitectura](docs/ARCHITECTURE.md) |
 | Configurar y sincronizar herramientas | [Conectores](docs/CONNECTORS.md) |
-| Switchboard, OIDC y QA | [Acceso](docs/ACCESS.md) |
+| Switchboard (hoy Ozal), OIDC y QA | [Acceso](docs/ACCESS.md) |
 | Interfaz y recorrido de ejemplo | [Diseño](docs/DESIGN.md) |
 | Criterios para avanzar | [Validación](docs/VALIDATION.md) |
 | De dónde viene lo que lleva la demo | [Procedencia](docs/PROVENANCE.md) |
@@ -51,29 +49,15 @@ objetivo ni la referencia de paridad. Su aceptación no bloquea Go.
 ## Verificación disponible
 
 ```bash
-npm run verify          # documentos + modelos de empresa y experimento (instalar web antes)
-npm run verify:web      # build, modelo y Chromium de la interfaz nueva
-npm run verify:demo     # sólo experimento reducido anterior, en demo/
-npm run package:demo    # sólo paquete del experimento anterior, sin publicar
+npm run verify:web      # tipos, lint, estilos, unitarias, build de la demo y e2e de web/
+npm run build:site      # sitio de producto
+npm run verify          # documentos + modelos de empresa y experimento
+npm run verify:demo     # sólo el experimento reducido anterior, en demo/
 ```
 
-`verify` requiere Node.js 24 o superior (ejecuta TypeScript directamente);
-comprueba documentación, enlaces, separación de IDs y los modelos de la
-empresa y del [experimento](fixtures/lab/scenario.json). `verify:demo` instala las dependencias
-fijadas de `demo/`, compila sin `.env` y recorre los siete pasos del guion con
-Playwright, incluyendo teclado, foco, ES/EN, pantalla angosta, accesibilidad
-WCAG A/AA con axe, los estados de ejemplo y que no haya peticiones fuera
-del origen. Playwright
-necesita su Chromium (`npx playwright install chromium`) y las librerías del
-sistema (`npx playwright install-deps chromium`, con sudo).
-
-El experimento reducido permanece en `http://127.0.0.1:4180` cuando se ejecuta
-desde `demo/`; no es la demo vigente ni la UI objetivo.
-
-Revisión técnica 22/10: aviso parcial, filtro de conexiones, foco y guion
-móvil corregidos; 16 pruebas de navegador, incluyendo cada estado con axe
-en ambos idiomas. Las capturas son del laboratorio sintético. La aceptación
-final del dueño y la distribución siguen pendientes; Go no está implementado.
+`verify` requiere Node.js 24 o superior. Las pruebas de navegador usan
+Playwright con Chromium (`npx playwright install chromium`; las librerías del
+sistema con `npx playwright install-deps chromium`, con sudo).
 
 ## Relación con la versión anterior
 

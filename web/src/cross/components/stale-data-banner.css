@@ -1,0 +1,6 @@
+.stale-data-banner { align-items: flex-start; background: color-mix(in srgb, var(--warning) 12%, var(--bg-surface)); border: 1px solid var(--warning); border-radius: 8px; color: var(--text-primary); display: flex; font-size: 12px; gap: 10px; margin: 0 0 12px; padding: 10px 14px; }
+.stale-data-banner > svg { color: var(--warning); flex: none; margin-top: 2px; }
+.stale-data-banner > div { flex: 1; }
+.stale-data-banner ul { color: var(--text-secondary); margin: 4px 0 0; padding-left: 16px; }
+.stale-data-banner-link { background: none; border: 0; color: var(--accent-strong); cursor: pointer; font: inherit; text-decoration: underline; }
+.stale-data-banner-link:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }

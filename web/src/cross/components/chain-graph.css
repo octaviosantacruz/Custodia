@@ -1,0 +1,34 @@
+.chain-graph-panel { background: var(--bg-subtle); border: 1px solid var(--border-soft); padding: 16px; }
+.chain-graph-heading { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; }
+.chain-graph-heading h3 { color: var(--text-primary); font-size: 15px; margin: 3px 0 4px; }
+.chain-graph-heading > div > p:not(.eyebrow) { color: var(--text-secondary); font-size: 11px; margin: 0; }
+.chain-graph-status { border: 1px solid; flex: 0 0 auto; font-size: 10px; font-weight: 800; padding: 5px 8px; }
+.chain-graph-status.is-ready { background: var(--status-resolved-bg); border-color: var(--status-resolved-border); color: var(--status-resolved-text); }
+.chain-graph-status.is-pending { background: var(--status-pending-bg); border-color: var(--status-pending-border); color: var(--status-pending-text); }
+.chain-graph-track { align-items: stretch; display: flex; gap: 8px; margin-top: 16px; overflow-x: auto; padding-bottom: 3px; }
+.chain-graph-step { align-items: center; display: flex; flex: 1 0 142px; gap: 8px; min-width: 0; }
+.chain-graph-node { background: var(--bg-panel); border: 1px solid var(--border); min-height: 112px; padding: 11px; width: 100%; }
+.chain-graph-node.is-action { color: inherit; cursor: pointer; font: inherit; text-align: left; }
+.chain-graph-node.is-action:hover { background: var(--bg-hover); border-color: var(--accent); }
+.chain-graph-node.is-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chain-graph-node.is-ready { border-top: 2px solid var(--accent); }
+.chain-graph-node.is-pending { border-top: 2px solid var(--status-pending-text); }
+.chain-graph-node.is-empty { border-top: 2px solid var(--border-strong); }
+.chain-graph-panel.is-compact .chain-graph-node { min-height: 78px; padding: 9px 10px; }
+.chain-graph-panel.is-compact .chain-graph-node > strong { font-size: 20px; margin-top: 7px; }
+.chain-graph-panel.is-compact .chain-graph-track { margin-top: 12px; }
+.chain-graph-node-top { align-items: center; color: var(--text-secondary); display: flex; font-size: 10px; font-weight: 800; gap: 5px; justify-content: space-between; letter-spacing: .06em; text-transform: uppercase; }
+.chain-graph-node-top svg { color: var(--status-pending-text); flex: 0 0 auto; }
+.chain-graph-node > strong { color: var(--text-primary); display: block; font-size: 23px; line-height: 1; margin: 9px 0 5px; }
+.chain-graph-node > small { color: var(--text-secondary); display: block; font-size: 10px; line-height: 1.25; }
+.chain-graph-node > em { color: var(--accent-strong); display: block; font-size: 9px; font-style: normal; font-weight: 800; margin-top: 9px; text-transform: uppercase; }
+.chain-graph-items { display: flex; flex-direction: column; gap: 2px; margin-top: 9px; }
+.chain-graph-items span { color: var(--text-secondary); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chain-graph-arrow { color: var(--accent-strong); flex: 0 0 auto; }
+@media (max-width: 700px) {
+  .chain-graph-heading { flex-direction: column; gap: 9px; }
+  .chain-graph-status { align-self: flex-start; }
+  .chain-graph-track { align-items: stretch; flex-direction: column; overflow-x: visible; }
+  .chain-graph-step { flex-direction: column; }
+  .chain-graph-arrow { transform: rotate(90deg); }
+}

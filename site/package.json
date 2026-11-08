@@ -1,0 +1,19 @@
+{
+  "name": "custodia-site",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run site && vite",
+    "build": "npm run site && vite build",
+    "preview": "vite preview",
+    "site": "node scripts/build-site.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/instrument-sans": "5.3.0",
+    "@fontsource-variable/jetbrains-mono": "5.3.0"
+  },
+  "devDependencies": {
+    "vite": "8.2.1"
+  }
+}

@@ -1,0 +1,10 @@
+.metric-reading { border-top: 1px solid var(--border-soft); color: var(--text-secondary); padding: 10px 15px; text-align: left; }
+.metric-reading-code { color: var(--text-muted); font-size: 10px; }
+.metric-reading-summary, .metric-reading-details dl { display: grid; gap: 5px; margin: 5px 0; }
+.metric-reading-summary div { display: flex; gap: 6px; align-items: baseline; }
+.metric-reading dt { color: var(--text-muted); font-size: 10px; flex: 0 0 auto; }
+.metric-reading dd { font-size: 11px; line-height: 1.4; margin: 0; overflow-wrap: anywhere; }
+.metric-reading-unknowns { font-size: 11px; line-height: 1.4; margin: 8px 0; }
+.metric-reading-details summary { color: var(--text-primary); cursor: pointer; font-size: 11px; font-weight: 650; width: fit-content; }
+.metric-reading-details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.metric-reading-details dl { border-left: 2px solid var(--accent); padding-left: 10px; margin-top: 10px; }

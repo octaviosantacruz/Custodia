@@ -1,0 +1,60 @@
+import { Boxes, Database, PlugZap } from 'lucide-react';
+import type { FrontendRegistration } from '../../source-contract.ts';
+
+/** Static declarations; runtime components stay behind a literal lazy import. */
+export const registration = {
+  id: 'cyberark/sia',
+  toolLabel: 'CyberArk',
+  workspaces: [
+    {
+      id: 'sia', path: '/pam/sia', legacyPaths: ['/sia'], domain: 'pam',
+      label: 'SIA', detail: '¿Qué cubre SIA: políticas, máquinas, bases?', icon: PlugZap,
+      description: "Revisá políticas, destinatarios y vínculos de acceso SIA.",
+      introHelp: { label: "Políticas de acceso SIA", paragraphs: ["Políticas de acceso SIA. Los vínculos por correo exacto se muestran separados de las referencias por nombre."] },
+      catalog: true, switcher: true, gate: 'open',
+      order: 9,
+      runtime: 'cyberark',
+      category: { id: 'identity_sia', order: 1 },
+      refreshSources: ['sia'],
+      command: { tool: 'sia', platform: 'cyberark', aliases: ['sia', 'politicas', 'policies', 'acceso', 'recursos'], priority: 13 },
+    },
+    {
+      id: 'siaConnectors', path: '/pam/connectors', domain: 'pam',
+      label: 'Conectores', detail: 'Inventarios de PSM, SIA y Connector Manager', icon: PlugZap,
+      description: 'Consultá por separado los conectores PSM de Privilege Cloud y los conectores de Secure Infrastructure Access.',
+      catalog: false, switcher: false, gate: 'manage', alternatePermission: 'sia:catalogs_read',
+      order: 26,
+      runtime: 'cyberark',
+      command: { tool: 'sia', platform: 'cyberark', aliases: ['conectores sia', 'conectores'], priority: 37 },
+    },
+    {
+      id: 'siaResources', path: '/pam/sia/resources', legacyPaths: ['/pam/sia/target-sets'], domain: 'pam',
+      label: 'Máquinas virtuales SIA', detail: 'Infraestructura registrada en SIA', icon: Boxes,
+      description: "Consultá las máquinas virtuales registradas en SIA.",
+      introHelp: { label: "Inventario de máquinas virtuales SIA", paragraphs: ["Inventario de sólo lectura de Secure Infrastructure Access. No muestra direcciones IP, FQDN ni nombres de red."] },
+      catalog: true, switcher: false, gate: 'manage', alternatePermission: 'sia:catalogs_read',
+      order: 27,
+      runtime: 'cyberark',
+      category: { id: 'identity_sia', order: 2 },
+      recentWorkspace: 'sia',
+      refreshSources: ['sia'],
+      command: { tool: 'sia', platform: 'cyberark', aliases: ['recursos', 'vm', 'infraestructura'], priority: 35 },
+    },
+    {
+      id: 'siaDatabaseAccounts', path: '/pam/sia/database-accounts', domain: 'pam',
+      label: 'Cuentas de base de datos SIA', detail: 'Strong Accounts y plataformas asociadas', icon: Database,
+      description: "Consultá cuentas de base de datos y sus plataformas SIA.",
+      introHelp: { label: "Inventario de cuentas de base de datos SIA", paragraphs: ["Inventario de Strong Accounts administradas por Secure Infrastructure Access. Se muestran plataforma, base de datos, puerto y fechas operativas; nunca nombres de usuario ni credenciales."] },
+      catalog: true, switcher: false, gate: 'manage', alternatePermission: 'sia:catalogs_read',
+      order: 28,
+      runtime: 'cyberark',
+      category: { id: 'identity_sia', order: 3 },
+      recentWorkspace: 'sia',
+      refreshSources: ['sia'],
+      command: { tool: 'sia', platform: 'cyberark', aliases: ['cuentas bd', 'strong accounts', 'base de datos'], priority: 36 },
+    },
+  ],
+  domains: [],
+  categories: [],
+  sync: { source: 'sia', meta: { label: 'SIA', fallback: 'S' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: 'CyberArk', image: '/cyberark-logo-mint.png', fallback: 'C' }, componentLabel: 'SIA', quietAutomaticSuccess: true },
+} as const satisfies FrontendRegistration;

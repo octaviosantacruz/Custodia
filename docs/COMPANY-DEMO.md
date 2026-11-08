@@ -28,7 +28,7 @@ las 13:00. Los correos usan `faro.example`; las direcciones de destinos son
 `192.0.2.0/24`. No se usan inventarios, identidades, dominios, grupos ni
 credenciales de una empresa real.
 
-[company.json](../web/src/model/company.json) es la única fuente de estos
+[company.json](../web/src/demo/model/company.json) es la única fuente de estos
 datos. Los endpoints sintéticos derivan de ella búsquedas, fichas, relaciones,
 equipos y cuentas: no mantienen cifras decorativas independientes.
 

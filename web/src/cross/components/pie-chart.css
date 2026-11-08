@@ -1,0 +1,26 @@
+.pie-chart { align-items: center; position: relative; display: flex; gap: 16px; padding: 16px 20px 20px; }
+.pie-chart-empty { padding: 18px 24px 22px; }
+.pie-chart svg { flex: 0 0 auto; }
+.pie-chart-total { fill: var(--text-primary); font-size: 20px; font-weight: 700; }
+.pie-chart-total-label { fill: var(--text-secondary); font-size: 9px; text-transform: uppercase; letter-spacing: .04em; }
+.pie-chart-legend { display: flex; flex: 1; flex-direction: column; gap: 8px; list-style: none; margin: 0; min-width: 0; padding: 0; }
+.pie-chart-legend li { align-items: center; display: flex; flex-wrap: wrap; font-size: 12px; gap: 8px; }
+.pie-chart-legend li.expanded .pie-chart-legend-label { overflow: visible; text-overflow: clip; white-space: normal; }
+.pie-chart-swatch { border-radius: 3px; flex: 0 0 10px; height: 10px; width: 10px; }
+.pie-chart-legend-label { background: transparent; border: 0; color: var(--text-secondary); cursor: pointer; flex: 1; font: inherit; min-width: 0; overflow: hidden; padding: 0; text-align: left; text-overflow: ellipsis; text-transform: capitalize; white-space: nowrap; }
+.pie-chart-legend-label:hover, .pie-chart-legend-label:focus-visible { color: var(--text-primary); text-decoration: underline; }
+.pie-chart-legend strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.pie-chart-legend-pct { color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+.company-chart-card .pie-chart { align-items: flex-start; }
+@media (max-width: 480px) { .pie-chart { flex-direction: column; } }
+.dashboard-edit-content .personal-chart-card .pie-chart { min-height: 105px; }
+.pie-chart-legend-wrap { display: flex; flex: 1; flex-direction: column; gap: 8px; min-width: 0; }
+.pie-chart-legend li.active .pie-chart-legend-label { color: var(--text-primary); }
+.pie-chart-slice { cursor: default; transition: opacity .12s; }
+.pie-chart-more { align-self: flex-start; background: transparent; border: 0; color: var(--accent-strong); cursor: pointer; font: inherit; font-size: 12px; padding: 0; }
+.pie-chart-more:hover, .pie-chart-more:focus-visible { text-decoration: underline; }
+.pie-chart-tooltip { background: var(--bg-elevated); border: 1px solid var(--border-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-modal); color: var(--text-secondary); font-size: 12px; padding: 6px 10px; pointer-events: none; position: absolute; white-space: nowrap; z-index: 5; }
+.pie-chart-tooltip strong { color: var(--text-primary); }
+.pie-chart-dialog { max-width: 640px; }
+.pie-chart-dialog .pie-chart { align-items: flex-start; padding: 16px 0 0; }
+.pie-chart-dialog .pie-chart-legend { max-height: 60vh; overflow-y: auto; padding-right: 4px; }

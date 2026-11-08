@@ -6,7 +6,8 @@
     "test:model": "node --test demo/src/model/*.test.ts",
     "verify:demo": "cd demo && npm ci && npm run build && npm run test:e2e",
     "package:demo": "npm --prefix demo run build && node scripts/package-demo.mjs",
-    "test:web": "npm --prefix web test",
-    "verify:web": "npm --prefix web test && npm --prefix web run build && npm --prefix web run test:e2e"
+    "test:web": "npm --prefix web run test:unit",
+    "verify:web": "npm --prefix web run typecheck && npm --prefix web run lint && npm --prefix web run verify:styles && npm --prefix web run test:unit && npm --prefix web run build:demo && npm --prefix web run test:e2e",
+    "build:site": "npm --prefix site run build"
   }
 }

@@ -1,0 +1,19 @@
+/* Retired Safes list: read-only inventory panel shown from the Safes
+   workspace selector. Dense desktop layout, tokens only so both themes work. */
+.retired-safes-panel { display: grid; gap: 12px; min-width: 0; padding: 16px 0 18px; }
+.retired-safes-heading { border-bottom: 1px solid var(--border-soft); padding: 0 20px 12px; }
+.retired-safes-kicker { align-items: center; color: var(--accent-strong); display: inline-flex; font-size: 9px; font-weight: 800; gap: 6px; letter-spacing: .14em; }
+.retired-safes-table-wrap { border-top: 1px solid var(--border-soft); }
+.retired-safes-table { font-size: 11px; }
+/* The shared compact-table sizes the first cell for an icon/checkbox; this
+   list has no selection column, so let the name column breathe. */
+.compact-table.retired-safes-table th:first-child,
+.compact-table.retired-safes-table td:first-child { width: 55%; }
+.compact-table.retired-safes-table tbody tr { cursor: default; }
+.compact-table.retired-safes-table th { font-size: 10px; letter-spacing: .04em; text-transform: uppercase; }
+.retired-safes-identity { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.retired-safes-identity strong { color: var(--text-primary); overflow-wrap: anywhere; }
+.retired-safes-identity small { color: var(--text-secondary); font-size: 10px; overflow-wrap: anywhere; }
+.retired-safes-panel > .state-block { margin: 0 20px; padding: 20px; }
+.retired-safes-cap-note { color: var(--text-secondary); font-size: 11px; margin: 0 20px; }
+.retired-safes-panel .load-more-footer { padding-left: 20px; padding-right: 20px; }

@@ -1,0 +1,119 @@
+.auth-logo .ds-hub-mark { height: 36px; width: 36px; }
+.custodia-mark-surface { fill: #0d0f13; }
+.custodia-mark-shared { fill: #c9f04a; }
+.custodia-mark-record { fill: none; stroke: #c9f04a; stroke-width: 2.4; }
+
+.home-workspace { align-items: center; display: grid; gap: clamp(48px, 9vw, 150px); grid-template-columns: minmax(0, 560px) minmax(280px, 440px); justify-content: center; min-height: calc(100dvh - 68px); padding: 48px 24px; }
+.home-content { max-width: 560px; width: 100%; }
+.home-content h1 { font-size: clamp(34px, 5vw, 58px); letter-spacing: -.05em; margin: 12px 0 8px; }
+.home-copy { color: var(--text-secondary); font-size: 17px; margin: 0 0 32px; }
+.home-actions { border-top: 1px solid var(--border-soft); max-width: 480px; }
+.home-actions-group + .home-actions-group { margin-top: 4px; }
+.home-actions-section { color: var(--text-muted); font-size: 10px; font-weight: 750; letter-spacing: .14em; margin: 0; padding: 16px 0 2px; text-transform: uppercase; }
+.home-domain-icon .ds-hub-mark { height: 22px; width: 22px; }
+.home-domain-entry { display: block; }
+.home-domain-button { align-items: center; background: transparent; border: 0; border-bottom: 1px solid var(--border-soft); color: var(--text-primary); display: flex; gap: 14px; min-height: 82px; padding: 14px 12px 14px 0; position: relative; text-align: left; width: 100%; }
+.home-domain-button:not(.home-domain-button-disabled)::before { background: var(--accent); content: ""; height: 100%; left: -12px; position: absolute; transform: scaleY(0); transform-origin: center; transition: transform .25s cubic-bezier(.16, 1, .3, 1); width: 3px; }
+.home-domain-button:hover { color: var(--accent-strong); }
+.home-domain-button:not(.home-domain-button-disabled):hover { background: var(--bg-hover); }
+.home-domain-button:not(.home-domain-button-disabled):hover::before { transform: scaleY(1); }
+.home-domain-button:not(.home-domain-button-disabled).is-active { background: var(--bg-hover); color: var(--accent-strong); }
+.home-domain-button:not(.home-domain-button-disabled).is-active::before { transform: scaleY(1); }
+.home-domain-button-disabled { color: var(--text-muted); cursor: default; }
+.home-domain-button-disabled .home-domain-icon { color: var(--text-muted); }
+.home-domain-status { color: var(--text-muted) !important; flex: 0 0 auto !important; font-size: 10px !important; }
+.home-domain-button > span:nth-child(2) { display: flex; flex: 1; flex-direction: column; gap: 4px; }
+.home-domain-button strong { font-size: 14px; }
+.home-domain-button small { color: var(--text-secondary); font-size: 11px; }
+.home-domain-icon { align-items: center; background: var(--bg-subtle); color: var(--accent-strong); display: flex; height: 40px; justify-content: center; width: 40px; }
+.home-domain-button:not(.home-domain-button-disabled).is-active .home-domain-icon { background: color-mix(in srgb, var(--accent) 15%, var(--bg-subtle)); }
+.home-domain-logo { align-items: center; display: flex; height: 28px; justify-content: center; width: 28px; }
+.home-domain-logo img { height: 24px; object-fit: contain; width: 24px; }
+.home-domain-logo-white { display: block; }
+.home-domain-logo-dark { display: none; }
+:root[data-theme='light'] .home-domain-logo-white { display: none; }
+:root[data-theme='light'] .home-domain-logo-dark { display: block; }
+@media (max-width: 700px) { .home-workspace { align-items: flex-start; padding: 64px 18px; } }
+
+.home-visibility { aspect-ratio: 1; isolation: isolate; max-width: 440px; perspective: 800px; position: relative; width: 100%; }
+/* HOME-WHEEL-002 experimental variant: two concentric 2D circles form a
+   radial selector. The inner boundary contains Personas and the outer one
+   contains the uniformly distributed tool crown. */
+.home-visibility::before { background: radial-gradient(circle, color-mix(in srgb, var(--accent) 9%, transparent) 0 26%, transparent 68%); content: ""; inset: 2%; pointer-events: none; position: absolute; z-index: 0; }
+.home-visibility-ring { border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--border-soft)); border-radius: 50%; box-shadow: 0 0 28px color-mix(in srgb, var(--accent) 7%, transparent), inset 0 0 38px color-mix(in srgb, var(--accent) 6%, transparent); height: 96%; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 96%; z-index: 1; }
+.home-visibility-orbit { background: color-mix(in srgb, var(--bg-app) 90%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 62%, var(--border-strong)); border-radius: 50%; box-shadow: 0 0 26px color-mix(in srgb, var(--accent) 11%, transparent); height: 54%; left: 50%; pointer-events: none; position: absolute; top: 50%; transform: translate(-50%, -50%); width: 54%; z-index: 1; }
+.home-visibility-core { align-items: center; background: var(--accent); border: 0; border-radius: 50%; color: #08110d; display: flex; flex-direction: column; gap: 4px; height: 94px; justify-content: center; left: 50%; padding: 0; position: absolute; top: 50%; transform: translate(-50%, -50%); transition: box-shadow var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out); width: 94px; z-index: 6; }
+.home-visibility-core .ds-hub-mark { height: 30px; width: 30px; }
+.home-visibility-core span { font-size: 11px; font-weight: 750; letter-spacing: .02em; }
+.home-visibility-core > span:last-child { color: #08110d; }
+.home-visibility-node { align-items: center; background: var(--bg-subtle); border: 1px solid color-mix(in srgb, var(--border-strong) 82%, var(--accent)); border-radius: 50%; box-shadow: 0 8px 20px color-mix(in srgb, #000 22%, transparent); color: var(--text-primary); display: flex; font: inherit; height: var(--home-node-size, 84px); justify-content: center; padding: 0; position: absolute; transform: translate(-50%, -50%); transition: background-color var(--motion-base) var(--motion-ease-out), border-color var(--motion-base) var(--motion-ease-out), box-shadow var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out); width: var(--home-node-size, 84px); z-index: 4; }
+button.home-visibility-node { cursor: pointer; }
+.home-visibility-node .home-domain-logo { height: 48px; width: 48px; }
+.home-visibility-node .home-domain-logo img { height: 44px; object-fit: contain; width: 44px; }
+.home-visibility-line { background: var(--accent); clip-path: inset(-8px 100% -8px 0); height: 2px; left: 0; margin-top: -1px; opacity: 0; position: absolute; top: 0; transform-origin: 0 0; transition: clip-path .35s var(--motion-ease-out), opacity .35s var(--motion-ease-out); z-index: 2; }
+/* The edge only exists while lit: it is drawn from the centre out, slowly enough to read as a connection
+   forming, and retracts faster so moving between nodes never leaves a trail. */
+.home-visibility-line.is-active { box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 45%, transparent), 0 0 22px color-mix(in srgb, var(--accent) 22%, transparent); clip-path: inset(-8px 0 -8px 0); opacity: 1; transition: clip-path .8s cubic-bezier(.22, .72, .18, 1), opacity .3s var(--motion-ease-out); }
+.home-visibility-node.is-active, button.home-visibility-node:hover { background: color-mix(in srgb, var(--accent) 14%, var(--bg-subtle)); border-color: var(--accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 13%, transparent), 0 10px 26px color-mix(in srgb, var(--accent) 25%, transparent); transform: translate(-50%, calc(-50% - 4px)) scale(1.07); }
+.home-visibility-label { align-items: flex-start; backdrop-filter: blur(12px); background: color-mix(in srgb, var(--bg-elevated) 90%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border-soft)); border-radius: 8px; box-shadow: 0 12px 30px color-mix(in srgb, #000 28%, transparent); display: flex; flex-direction: column; gap: 3px; left: 50%; min-width: 174px; opacity: 0; padding: 9px 11px; pointer-events: none; position: absolute; text-align: left; top: calc(100% + 12px); transform: translate(-50%, 7px) scale(.96); transition: opacity var(--motion-fast) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out), visibility 0s linear var(--motion-base); visibility: hidden; white-space: normal; z-index: 12; }
+.home-visibility-label::before { background: var(--accent); content: ""; height: 100%; left: 0; opacity: .75; position: absolute; top: 0; width: 2px; }
+.home-visibility-label strong { color: var(--text-primary); font-size: 12px; line-height: 1.2; }
+.home-visibility-label small { color: var(--text-secondary); font-size: 10px; line-height: 1.35; }
+.home-visibility-label-action { align-items: center; color: var(--accent-strong); display: inline-flex; font-size: 10px; font-weight: 700; gap: 4px; margin-top: 2px; }
+.home-visibility-label-people { bottom: calc(50% + 59px); left: 50%; min-width: 0; top: auto; width: 176px; transform: translate(-50%, 7px) scale(.96); }
+.home-visibility-label-people.is-active { transform: translate(-50%, 0) scale(1); }
+.home-visibility-label.is-active { opacity: 1; transform: translate(-50%, 0) scale(1); transition-delay: 35ms, 35ms, 0s; visibility: visible; }
+/* The lower BigID node opens tangentially to the right: the narrow gap above
+   it belongs to Personas and is deliberately kept clear. */
+.home-visibility-node-bigid .home-visibility-label { left: calc(100% + 12px); top: 50%; transform: translate(7px, -50%) scale(.96); }
+.home-visibility-node-bigid .home-visibility-label.is-active { transform: translate(0, -50%) scale(1); }
+button.home-visibility-node:focus-visible { box-shadow: 0 0 0 4px var(--bg-app), 0 0 0 6px var(--accent-strong); outline: 0; }
+.home-visibility-core-people { cursor: pointer; }
+.home-visibility-core-icon { align-items: center; background: #08110d; border-radius: 8px; color: var(--accent-strong); display: inline-flex; height: 38px; justify-content: center; width: 38px; }
+.home-visibility-core-people:hover, .home-visibility-core-people.is-active { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 14%, transparent), 0 0 28px color-mix(in srgb, var(--accent) 28%, transparent); transform: translate(-50%, -50%) scale(1.08); }
+.home-visibility-core-people:focus-visible { box-shadow: 0 0 0 4px var(--bg-app), 0 0 0 6px var(--accent-strong); outline: 0; }
+@media (max-width: 900px) { .home-workspace { gap: 40px; grid-template-columns: minmax(0, 560px) minmax(220px, 280px); } .home-visibility { max-width: 280px; } .home-visibility { --home-node-size: 58px; } .home-visibility-node .home-domain-logo { height: 38px; width: 38px; } .home-visibility-node .home-domain-logo img { height: 32px; width: 32px; } .home-visibility-core { height: 74px; width: 74px; } .home-visibility-core svg { height: 19px; width: 19px; } }
+@media (max-width: 700px) { .home-workspace { display: flex; flex-direction: column; } .home-visibility { max-width: 260px; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-visibility-ring { animation: home-wheel-circle-arrive var(--motion-panel) var(--motion-ease-out) backwards; }
+  .home-visibility-orbit { animation: home-wheel-circle-arrive var(--motion-panel) var(--motion-ease-out) 40ms backwards; }
+  .home-visibility-core { animation: home-wheel-node-arrive var(--motion-base) var(--motion-ease-out) 60ms backwards; }
+  .home-visibility-node { animation: home-wheel-node-arrive var(--motion-base) var(--motion-ease-out) calc(80ms + var(--home-node-order, 0) * 20ms) backwards; }
+  .home-reveal { animation: home-arrive .6s cubic-bezier(.16, 1, .3, 1) both; }
+  .home-content > .eyebrow.home-reveal { animation-delay: 150ms; }
+  .home-title-reveal { animation: home-title-arrive .8s cubic-bezier(.16, 1, .3, 1) 220ms both; }
+  .home-greeting-text { animation: home-greeting-reveal 1.4s cubic-bezier(.22, .72, .18, 1) 260ms both; }
+  .home-greeting-accent { animation: home-greeting-accent-arrive .72s var(--motion-ease-out) 1.36s both; }
+  .home-copy.home-reveal { animation-delay: 290ms; }
+  .home-actions.home-reveal { animation-delay: 360ms; }
+  .home-domain-button { transition: background-color .2s ease, color .2s ease, transform .2s ease; }
+  .home-domain-button:not(.home-domain-button-disabled):hover { transform: translateX(4px); }
+  .home-domain-button:not(.home-domain-button-disabled):hover .home-domain-icon { background: color-mix(in srgb, var(--accent) 15%, var(--bg-subtle)); }
+  .home-domain-button:not(.home-domain-button-disabled):hover > svg { transform: translateX(4px); }
+  .home-domain-button > svg { transition: transform .25s cubic-bezier(.16, 1, .3, 1); }
+}
+@keyframes home-wheel-circle-arrive { from { opacity: 0; transform: translate(-50%, -50%) scale(.94); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes home-wheel-node-arrive { from { opacity: 0; transform: translate(-50%, -50%) scale(.82); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes home-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes home-title-arrive { from { opacity: 0; transform: translateX(-34px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes home-greeting-reveal { from { clip-path: inset(0 100% 0 0); opacity: 0; transform: translateY(7px); } to { clip-path: inset(0); opacity: 1; transform: translateY(0); } }
+@keyframes home-greeting-accent-arrive { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .home-greeting-text,
+  .home-greeting-accent { animation: none; }
+  .home-visibility-node,
+  .home-visibility-core,
+  .home-visibility-ring,
+  .home-visibility-orbit { animation: none; transition: none; }
+  .home-visibility-line { transition: none; }
+  .home-visibility-label { transition: none; }
+  button.home-visibility-node:hover, .home-visibility-node.is-active,
+  .home-visibility-core-people:hover, .home-visibility-core-people.is-active { transform: translate(-50%, -50%); }
+  button.home-visibility-node:hover, .home-visibility-node.is-active { transform: translate(-50%, -50%); }
+}
+
+.home-greeting-wordmark { border-bottom: 1px solid color-mix(in srgb, var(--accent-strong) 34%, transparent); color: var(--accent-strong); display: inline-block; font-family: 'Caveat Variable', cursive; font-size: .92em; font-variation-settings: 'wght' 560; font-weight: 560; letter-spacing: -.035em; line-height: .82; margin-right: .13em; padding: 0 .07em .12em .02em; position: relative; vertical-align: -.03em; }
+.home-greeting-text { display: block; }
+.home-greeting-accent { background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent-strong) 20%, transparent)); border-radius: 999px; bottom: 0; height: 3px; left: .04em; position: absolute; right: .02em; transform-origin: left center; }
+.home-greeting-name { color: var(--text-primary); }

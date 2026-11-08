@@ -1,18 +1,10 @@
-# Leído por Switchboard Pages (PAGES-003). Switchboard conserva la última
-# coincidencia de una cabecera, así que ninguna aparece en dos reglas que
-# puedan aplicar a la misma ruta.
-
 /*
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  X-Content-Type-Options: nosniff
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
 
-# El HTML se revalida en cada visita, así un deploy se ve enseguida.
-/
-  Cache-Control: public, max-age=0, must-revalidate
-/en/
-  Cache-Control: public, max-age=0, must-revalidate
-/demo/
+/index.html
   Cache-Control: public, max-age=0, must-revalidate
 
 /assets/*

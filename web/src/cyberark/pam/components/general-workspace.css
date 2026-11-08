@@ -1,0 +1,7 @@
+.personal-metric-button[data-status="pending"] .dashboard-goal small { color: var(--warning); }
+.dashboard-goal strong { align-items: baseline; display: flex; gap: 4px; }
+.dashboard-goal strong small { color: var(--text-muted); font-size: 13px; font-weight: 600; }
+.dashboard-goal-meta { color: var(--accent-strong); font-size: 10px; font-weight: 700; margin-top: 6px; }
+.dashboard-goal-track { background: var(--border-soft); display: block; height: 3px; margin: 8px 0 2px; overflow: hidden; width: 100%; }
+.dashboard-goal-track span { background: var(--accent); display: block; height: 100%; }
+

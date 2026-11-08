@@ -3,12 +3,22 @@
 Leer primero README.md, docs/TO_IMPLEMENT.md y el documento del área afectada.
 El contexto compartido está en `/home/saint/projects/AGENTS.md`.
 
-## Dirección corregida por el dueño — 22/10
+## Dirección corregida por el dueño — 08/11
 
-La interfaz es nueva y propia (`web/`, docs/WEB.md, aprobada por el dueño
-el 22/10); no derivar de la UI de DSHub. Los flujos y reglas de
-`/home/saint/projects/Custodia` siguen siendo referencia de contratos:
-leer docs/EXISTING-PRODUCT.md.
+Custodia es DS Hub renombrado y publicado como código abierto (Apache 2.0).
+`web/` es el frontend de DS Hub con la marca de Custodia: misma estructura,
+estilo y registro de herramientas. Se construye en dos modos: contra la API
+real (`npm run build`) o como demo estática con la API simulada de
+`src/demo/mock-api.ts` (`npm run build:demo`), la misma que usan las pruebas
+e2e. `site/` es el sitio de producto (inglés y español) y enlaza a la demo.
+Esto reemplaza la decisión del 22/10 de no derivar de la UI de DS Hub.
+
+Nunca copiar datos del empleador de origen: dominios, nombres de empresas o
+grupos, hosts, remotos ni credenciales. La demo y las pruebas usan sólo
+nombres ficticios (`acme.example`, Globex, Initech).
+
+Los flujos y reglas de `/home/saint/projects/Custodia` siguen siendo
+referencia de contratos: leer docs/EXISTING-PRODUCT.md.
 Custodia inventaría herramientas de ciberseguridad (Netskope, CyberArk,
 CrowdStrike y otras) y permite cruces e inferencias explicables. La demo
 reducida es un experimento; no define producto, paridad ni UI objetivo y su
@@ -16,9 +26,9 @@ aceptación deja de bloquear Go. La referencia contractual está en Python.
 
 - Producto personal: demo Portfolio primero, autohospedado Go después y SaaS
   sólo tras validar uso. No traducir toda la aplicación anterior ni copiar
-  su backlog laboral. Demo vigente: empresa ficticia Acme Corp en
-  `web/`, interfaz e identidad nuevas sin código de DSHub; ver docs/WEB.md.
-  La UI recuperada de `company-demo/` se retiró (consultar `71c68de`). `demo/` conserva el experimento reducido.
+  su backlog laboral. Demo vigente: `web/` con `npm run build:demo`,
+  publicada como proyecto de Pages aparte; ver docs/WEB.md. La UI propia del
+  22/10 se retiró (consultar `617f460`). `demo/` conserva el experimento reducido.
   Sin backend Go ni autenticación real.
 - Backend objetivo Go; PostgreSQL autoridad; React/TypeScript para interfaz.
   Versiones y dependencias se fijan al implementar. No hay librería compartida
@@ -44,8 +54,8 @@ aceptación deja de bloquear Go. La referencia contractual está en Python.
   cierres con evidencia; distinguir diseño, código, prueba y despliegue.
 - `npm run verify` valida la documentación y el modelo del ejemplo;
   `npm run verify:demo` compila la demo y recorre el guion en un navegador.
-  `npm run verify:web` verifica la interfaz de `web/`; `verify:demo`
-  sigue reservado al experimento de `demo/`.
+  `npm run verify:web` verifica la interfaz de `web/` (tipos, lint, estilos,
+  unitarias y e2e); `verify:demo` sigue reservado al experimento de `demo/`.
   Al implementar Go, añadir su gate y ejecutarlo. No reportar suites de la
   versión anterior como prueba del producto nuevo.
 - Las dependencias de `demo/` van con versión exacta. Cambiar el modelo

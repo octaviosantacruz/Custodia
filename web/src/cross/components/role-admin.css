@@ -1,0 +1,50 @@
+.role-admin { overflow: visible; }
+.role-admin:focus { outline: none; }
+.role-map-header { align-items: center; display: flex; gap: 16px; justify-content: space-between; padding: 18px 20px 14px; }
+.role-map-header h2 { font-size: 19px; margin: 0 0 5px; }
+.role-map-header p { color: var(--text-secondary); font-size: 12px; margin: 0; }
+.role-map-toolbar { align-items: center; border-top: 1px solid var(--border-soft); display: flex; gap: 10px; padding: 12px 20px; }
+.role-map-toolbar .search-box { flex: 1; max-width: 460px; }
+.role-map-toolbar .search-box input { min-width: 0; }
+.role-result-count { color: var(--text-secondary); font-size: 11px; margin-left: auto; }
+.role-map-scroll { overflow: auto; }
+.role-map { border-collapse: collapse; font-size: 12px; width: 100%; }
+.role-map th, .role-map td { border-bottom: 1px solid var(--border-soft); padding: 7px 14px; text-align: left; vertical-align: middle; }
+.role-map thead th { background: var(--bg-muted); border-top: 1px solid var(--border-soft); color: var(--text-secondary); font-size: 10px; font-weight: 650; letter-spacing: .025em; white-space: nowrap; }
+.role-map thead th:first-child { padding-left: 20px; width: 26%; }
+.role-map th small { display: block; font-weight: 400; margin-top: 3px; }
+.role-map tbody th { background: none; letter-spacing: normal; text-transform: none; }
+.role-map tbody tr { cursor: default; }
+.role-map tbody tr:hover { background: var(--bg-hover); }
+.role-name-button { align-items: center; background: none; border: 0; color: var(--text-primary); cursor: pointer; display: flex; gap: 9px; min-height: 34px; padding: 0 0 0 6px; text-align: left; }
+.role-name-button > svg { color: var(--text-secondary); flex-shrink: 0; }
+.role-name-button strong { font-size: 12px; font-weight: 650; }
+.role-name-button small { color: var(--text-secondary); font-size: 10px; }
+.role-area-access { background: var(--accent-subtle, var(--bg-muted)); border: 1px solid var(--border-soft); border-radius: 5px; color: var(--text-primary); cursor: pointer; display: grid; font: inherit; gap: 3px; min-width: 110px; padding: 6px 9px; text-align: left; }
+.role-area-access small { color: var(--text-secondary); font-size: 10px; }
+.role-area-access:hover { border-color: var(--accent); }
+.role-no-access { color: var(--text-secondary); padding-left: 10px; }
+.role-map .button { font-size: 11px; min-height: 30px; padding: 5px 9px; white-space: nowrap; }
+.role-map-legend { color: var(--text-secondary); font-size: 11px; line-height: 1.6; margin: 0; padding: 12px 20px; }
+.role-name-button:focus-visible, .role-area-access:focus-visible { border-radius: 4px; box-shadow: var(--focus-ring); outline: none; }
+.role-permission-catalog { border-top: 1px solid var(--border-soft); padding: 14px 20px; }
+.role-permission-catalog summary { color: var(--text-secondary); cursor: pointer; font-size: 11px; }
+.role-permission-catalog p { color: var(--text-secondary); font-size: 12px; }
+.permission-create-form { background: var(--bg-muted); border: 1px solid var(--border); border-radius: 6px; display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 12px; padding: 14px; }
+.permission-create-form label { color: var(--text-secondary); display: grid; font-size: 11px; gap: 6px; }
+.permission-create-form input { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 5px; color: var(--text-primary); font: inherit; min-height: 32px; padding: 6px 8px; }
+.permission-create-form input:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.permission-description { grid-column: 1 / -1; }
+.permission-create-form > div { display: flex; gap: 8px; grid-column: 1 / -1; justify-content: flex-end; }
+
+.role-compartments { display: grid; gap: 12px; padding: 4px 20px 0; }
+.role-tool-compartment { border: 1px solid var(--border-soft); border-radius: 7px; overflow: hidden; }
+.role-tool-compartment > summary { align-items: center; background: var(--bg-muted); cursor: pointer; display: flex; gap: 10px; list-style: none; min-height: 48px; padding: 8px 14px; }
+.role-tool-compartment > summary::-webkit-details-marker { display: none; }
+.role-tool-compartment > summary > span:not(.access-tool-mark) { align-items: baseline; display: flex; flex: 1; gap: 10px; }
+.role-tool-compartment > summary strong { font-size: 13px; }
+.role-tool-compartment > summary small { color: var(--text-secondary); font-size: 11px; }
+.role-tool-compartment:not([open]) > summary > svg { transform: rotate(-90deg); }
+.role-tool-compartment > summary:focus-visible { box-shadow: inset var(--focus-ring); outline: none; }
+.role-name-button .access-tool-mark { height: 20px; width: 30px; }
+.role-name-button .access-tool-mark.is-compact img { width: 17px; }

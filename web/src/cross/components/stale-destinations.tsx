@@ -1,0 +1,45 @@
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { fetchStaleDestinations } from '../lib/connection-inventory-api';
+import { workLabel, workTone } from '../lib/connection-work';
+import { dateTimeHint, formatDate, formatNumber } from '../lib/format';
+import { CompactSelect } from './compact-select';
+import { StatusBadge } from './semantic';
+import { StateBlock } from './state-block';
+
+const DAY_OPTIONS = [7, 14, 30, 60].map((days) => ({ value: String(days), label: `${days} días` }));
+
+export function StaleDestinations({ refreshKey }: { refreshKey: number }) {
+  const [days, setDays] = useState(14);
+  const query = useQuery({ queryKey: ['cross', 'stale-destinations', days, refreshKey], queryFn: ({ signal }) => fetchStaleDestinations(days, signal) });
+  const data = query.data;
+
+  return <section className="list-panel database-surface progress-panel">
+    <div className="progress-trend-head">
+      <div>
+        <h2>Sin movimiento</h2>
+        <p className="muted">Destinos pendientes, en curso o bloqueados cuyo estado de trabajo no cambió en el plazo elegido. Si nunca se tocó, cuenta desde que entró al inventario.</p>
+      </div>
+      <CompactSelect ariaLabel="Plazo sin movimiento" value={String(days)} onChange={(value) => setDays(Number(value))} options={DAY_OPTIONS} />
+    </div>
+    {query.isLoading && <StateBlock variant="loading" title="Buscando destinos sin movimiento…" />}
+    {query.error && <StateBlock variant="error" title="No se pudieron buscar los destinos sin movimiento" hint={query.error instanceof Error ? query.error.message : undefined} action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>Reintentar</button>} />}
+    {data && data.total === 0 && <p className="muted progress-empty" role="status">Ningún destino lleva más de {days} días sin movimiento.</p>}
+    {data && data.total > 0 && <>
+      <p className="muted progress-since" role="status">{formatNumber(data.total)} {data.total === 1 ? 'destino lleva' : 'destinos llevan'} más de {days} días sin movimiento{data.total > data.rows.length ? `; se muestran los ${formatNumber(data.rows.length)} más antiguos` : ''}.</p>
+      <div className="compact-table-wrap"><table className="compact-table progress-table">
+        <caption className="sr-only">Destinos sin movimiento</caption>
+        <thead><tr><th>Destino</th><th>Ambiente</th><th>Estado</th><th>Responsable</th><th>Sin cambios</th></tr></thead>
+        <tbody>
+          {data.rows.map((row) => <tr key={row.inventory_id}>
+            <td><strong>{row.instance_name}</strong><span className="table-subvalue">{row.private_ip}{row.port ? `:${row.port}` : ''}</span></td>
+            <td>{row.environment || 'Sin ambiente'}</td>
+            <td><StatusBadge tone={workTone(row.work_status)}>{workLabel(row.work_status)}</StatusBadge></td>
+            <td>{row.responsible}</td>
+            <td><strong>{formatNumber(row.idle_days)} días</strong><span className="table-subvalue"><time dateTime={row.idle_since} title={dateTimeHint(row.idle_since)}>{row.last_change ? `Último cambio ${formatDate(row.idle_since)}` : `En el inventario desde ${formatDate(row.idle_since)}`}</time></span></td>
+          </tr>)}
+        </tbody>
+      </table></div>
+    </>}
+  </section>;
+}

@@ -1,0 +1,12 @@
+.role-members-backdrop { background: rgb(0 0 0 / .45); display: flex; inset: 0; justify-content: flex-end; position: fixed; z-index: 60; }
+.role-members-panel { background: var(--bg-panel, var(--bg)); border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; height: 100%; overflow-y: auto; padding: 18px 20px; width: min(420px, 100%); }
+.role-members-panel:focus { outline: none; }
+.role-members-panel header { align-items: center; display: flex; justify-content: space-between; gap: 12px; }
+.role-members-panel h3 { font-size: 15px; margin: 0; }
+.role-members-add { display: grid; gap: 4px; }
+.role-members-add input { background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm, 6px); color: var(--text-primary); font: inherit; font-size: 12px; min-height: 32px; padding: 5px 10px; }
+.role-members-add input:focus-visible { border-color: var(--accent); box-shadow: var(--focus-ring); outline: 0; }
+.role-members-add ul, .role-members-list { display: grid; list-style: none; margin: 0; padding: 0; }
+.role-members-add li, .role-members-list li { align-items: center; border-bottom: 1px solid var(--border-soft); color: var(--text-primary); display: flex; font-size: 12px; gap: 8px; justify-content: space-between; min-height: 36px; padding: 4px 0; }
+.role-members-add small, .role-members-list small { color: var(--text-secondary); display: block; font-size: 11px; }
+.role-members-empty { color: var(--text-secondary); font-size: 12px; margin: 0; }

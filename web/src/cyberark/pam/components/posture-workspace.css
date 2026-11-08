@@ -1,0 +1,94 @@
+.posture-surface { overflow: hidden; }
+.posture-toolbar .database-caption { white-space: normal; }
+.posture-source-context { display: grid; gap: 5px; padding: 10px 18px; border-bottom: 1px solid var(--border-soft); color: var(--text-secondary); font-size: 11px; }
+.posture-role-note { color: var(--text-muted); font-size: 10px; }
+.posture-facts .posture-role-note { display: block; margin-top: 4px; }
+.posture-source-context strong, .posture-source-label, .posture-filter-scope { color: var(--text-primary); font-size: 11px; }
+.posture-source-pagination { display: flex; align-items: center; gap: 16px; padding-left: 18px; border-top: 1px solid var(--border); }
+.posture-source-pagination > strong { color: var(--text-primary); font-size: 12px; }
+.posture-source-pagination .pagination { flex: 1; border-top: 0; }
+.posture-catalog-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 18px; color: var(--text-secondary); font-size: 12px; border-top: 1px solid var(--border-soft); }
+.posture-unified-table { table-layout: fixed; width: 100%; min-width: 960px; }
+/* Six columns after UX-AUD2-019 consolidates provenance into the finding. */
+.posture-table.posture-unified-table th:nth-child(1), .posture-table.posture-unified-table td:nth-child(1) { width: 26%; }
+.posture-unified-table th:nth-child(2) { width: 20%; }
+.posture-unified-table th:nth-child(3) { width: 18%; }
+.posture-unified-table th:nth-child(4) { width: 8%; }
+.posture-unified-table th:nth-child(5) { width: 9%; }
+.posture-unified-table th:nth-child(6) { width: 19%; }
+.posture-unified-table td, .posture-unified-table th, .posture-unified-table .posture-row-link { white-space: normal; overflow-wrap: anywhere; }
+.posture-unified-table .posture-row-link small { font-weight: 400; }
+.posture-filter-row { align-items: end; border-bottom: 1px solid var(--border-soft); display: flex; flex-wrap: wrap; gap: 12px; padding: 14px 18px; }
+.posture-filter-row label, .posture-field { color: var(--text-secondary); display: flex; flex-direction: column; font-size: 11px; font-weight: 700; gap: 6px; }
+.posture-filter-row select, .posture-field select, .posture-field input, .posture-field textarea { background: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-primary); font: inherit; min-height: 34px; padding: 7px 9px; }
+.posture-filter-row select { min-width: 160px; }
+.posture-field textarea { resize: vertical; }
+
+.cyberark-risk-section { margin-top: 12px; }
+.cyberark-risk-pagination { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px; }
+.cyberark-risk-pagination > div { display: flex; gap: 6px; }
+.posture-catalog-detail { margin-top: 6px; max-width: 420px; font-size: 12px; }
+.posture-catalog-detail summary { color: var(--text-secondary); cursor: pointer; }
+.posture-catalog-detail p { color: var(--text-secondary); line-height: 1.5; white-space: normal; }
+.posture-catalog-detail small { color: var(--text-muted); overflow-wrap: anywhere; }
+.cyberark-risk-section tbody td { vertical-align: top; }
+.cyberark-risk-section tbody td > small { display: block; margin-top: 4px; color: var(--text-muted); font-size: 10px; }
+.cyberark-risk-remediations { display: grid; gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
+.cyberark-risk-remediations li { padding: 12px; border: 1px solid var(--border); border-radius: 8px; }
+.cyberark-risk-remediations p { margin: 6px 0 0; color: var(--text-secondary); line-height: 1.45; }
+.posture-table { min-width: 920px; }
+.posture-table th:first-child, .posture-table td:first-child { width: 24%; }
+.cyberark-risk-section .compact-table th:first-child, .cyberark-risk-section .compact-table td:first-child { width: 28%; }
+.posture-row-link:focus-visible, .posture-catalog-detail summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.posture-row { cursor: pointer; }
+.posture-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.posture-row td { vertical-align: middle; }
+.posture-row td small, .posture-row-link small { color: var(--text-muted); display: block; font-size: 10px; margin-top: 4px; }
+.posture-row-link { background: transparent; border: 0; color: var(--text-primary); cursor: pointer; display: block; font: inherit; font-weight: 700; padding: 0; text-align: left; }
+.posture-row-link:hover { color: var(--accent-strong); }
+.posture-finding-drawer { max-width: 560px; }
+.posture-badge-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+.posture-explanation { color: var(--text-secondary); font-size: 12px; line-height: 1.5; margin: 0 0 18px; }
+.posture-guidance { display: grid; gap: 1px; margin-bottom: 18px; overflow: hidden; border: 1px solid var(--border-soft); }
+.posture-guidance > div { background: var(--bg-subtle); padding: 12px 14px; }
+.posture-guidance span { color: var(--text-muted); display: block; font-size: 10px; font-weight: 750; letter-spacing: .05em; margin-bottom: 4px; text-transform: uppercase; }
+.posture-guidance p { color: var(--text-primary); font-size: 12px; line-height: 1.5; margin: 0; }
+.posture-guidance .posture-guidance-action { border-left: 2px solid var(--accent); }
+.posture-review-action { color: var(--text-secondary); font-size: 11px; line-height: 1.4; }
+.posture-evidence > summary { color: var(--text-primary); cursor: pointer; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.posture-facts, .posture-evidence-list { display: grid; gap: 11px; margin: 0; }
+.posture-facts div, .posture-evidence-list div { border-bottom: 1px solid var(--border-soft); display: flex; gap: 14px; justify-content: space-between; padding-bottom: 9px; }
+.posture-facts dt, .posture-evidence-list dt { color: var(--text-muted); font-size: 10px; font-weight: 700; text-transform: capitalize; }
+.posture-facts dd, .posture-evidence-list dd { color: var(--text-primary); font-size: 11px; margin: 0; max-width: 65%; text-align: right; overflow-wrap: anywhere; }
+.posture-context-button { margin-top: 16px; }
+.posture-action-section h3 { color: var(--text-primary); font-size: 14px; margin: 0 0 4px; }
+.posture-action-section { display: grid; gap: 12px; }
+.posture-action-section .button { justify-self: start; }
+@media (max-width: 700px) { .posture-filter-row { align-items: stretch; flex-direction: column; } .posture-filter-row select { width: 100%; } .posture-facts div, .posture-evidence-list div { align-items: flex-start; flex-direction: column; gap: 4px; } .posture-facts dd, .posture-evidence-list dd { max-width: 100%; text-align: left; } }
+
+/* UX-AUD2-023: the complete detection timestamp is one atomic table value. */
+.posture-unified-table td:nth-child(6) { white-space: nowrap; }
+
+/* Toolbar: view switch on the left, refresh actions on the right. */
+.posture-toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 10px 16px; justify-content: space-between; margin-bottom: 14px; }
+.posture-section-switch { background: var(--bg-panel); border: 1px solid var(--border-soft); border-radius: var(--radius-md); display: inline-flex; gap: 2px; padding: 3px; }
+.posture-section-switch .button { border-color: transparent; }
+.posture-section-switch [aria-pressed="true"] { background: var(--bg-muted); border-color: var(--border-strong); color: var(--accent-strong); }
+
+/* Tipos de riesgo: same reading order as the Netskope observed-policies view. */
+.cyberark-risk-section { display: grid; gap: 14px; padding: 20px 24px 24px; }
+.cyberark-risk-types-heading { align-items: start; display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+.cyberark-risk-types-heading .section-title { align-items: center; display: flex; gap: 8px; }
+.cyberark-risk-types-heading h2 { font-size: 15px; margin: 0; }
+.cyberark-risk-source-note { color: var(--text-secondary); display: flex; flex-wrap: wrap; font-size: 11px; gap: 4px 10px; }
+.cyberark-risk-source-note strong { color: var(--text-primary); font-weight: 700; }
+.cyberark-risk-types-toolbar { align-items: center; display: flex; flex-wrap: wrap; gap: 12px; }
+.cyberark-risk-types-search { flex: 1; min-width: 260px; }
+.cyberark-risk-types-sort { align-items: center; display: inline-flex; gap: 8px; }
+.cyberark-risk-types-label { color: var(--text-secondary); font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.cyberark-risk-type-name { align-items: center; display: inline-flex; gap: 6px; }
+.cyberark-risk-section .compact-table-wrap { border: 1px solid var(--border-soft); border-radius: var(--radius-md); }
+.cyberark-risk-section .summary-stat:last-child dd { font-size: 15px; line-height: 1.3; }
+.posture-risk-view { align-self: flex-end; margin-left: auto; order: 2; background: var(--bg-panel); border: 1px solid var(--border-soft); border-radius: var(--radius-md); display: inline-flex; gap: 2px; padding: 3px; }
+.posture-risk-view .button { border-color: transparent; }
+.posture-risk-view [aria-pressed="true"] { background: var(--bg-muted); border-color: var(--border-strong); color: var(--accent-strong); }

@@ -2,5 +2,7 @@ node_modules
 dist
 test-results
 playwright-report
-/index.html
-/es/
+.wrangler
+.env
+.env.*
+!.env.example

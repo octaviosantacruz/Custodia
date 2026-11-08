@@ -1,98 +1,51 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-22
+revisado: 2026-11-08
 ---
 
-# Custodia web: interfaz e identidad nuevas
+# Custodia web: el frontend de DS Hub, abierto
 
-Rama `product/custodia-ui`, carpeta `web/`. Empresa ficticia: **Acme Corp**
-(antes Faro Digital; renombrada el 22/10 a pedido del dueño, con personas
-genéricas: Alice, Bob, Carol, Dave, Eve, Frank). Pedido del dueño el 22/10: romper
-con la interfaz heredada de DSHub y crear una identidad visual propia, con un
-sistema de color explícito, incluido el login.
+Custodia es DS Hub renombrado y publicado como código abierto (Apache 2.0).
+Desde el 08/11 la web se construye sobre el frontend de DS Hub; la interfaz
+propia del 22/10 se retiró y queda en Git (`617f460`).
 
-## Qué es nuevo y qué se conserva
+## Qué hay en el repo
 
-- **Nuevo desde cero:** shell, navegación, login, pantallas, componentes,
-  CSS, tipografías, marca y sistema de color. No importa código de
-  `company-demo/src`. Dependencias de ejecución: React y dos tipografías.
-- **Se conserva:** el modelo de Faro Digital (`web/src/model/company.ts` y
-  `company.json`, copiados de `company-demo/lab/`) con la regla CONN-001 v1.
-  `view.ts` agrega la lectura por fuente, el escenario de captura y los
-  hallazgos cruzados.
-- `company-demo/` se retiró de la rama el 22/10 a pedido del dueño; la UI
-  anterior se consulta en Git (`71c68de`).
-
-## Estructura y publicación
-
-Un build estático con tres páginas: `/` sitio de producto en inglés (por
-defecto), `/es/` en español y `/demo/` la app. Las dos páginas del sitio se
-generan desde `site/template.html` y `site/strings.mjs` con
-`scripts/build-site.mjs` (corre en `npm run build`/`dev`; los HTML generados
-no se versionan). El sitio anima la historia de un hallazgo (recolectar →
-unir → regla → conclusión), el logo y los bloques al entrar en pantalla; sin
-JavaScript o con «reducir movimiento» se ve el estado final. La demo enruta en el hash
-(`/demo/#/personas/3`) porque el servidor de sitios no reescribe rutas
-profundas. `public/_headers` fija una CSP sin orígenes externos. Se publica
-con Switchboard en `custodia.octaviosantacruz.com` mediante
-`server-ops/deploy/hetzner-public/publish-site.py custodia-site`, sólo desde
-fuentes commiteadas.
-
-## Pantallas
-
-Dos planos separados en la navegación:
-
-- **Cruces** (lo que Custodia concluye): Resumen (cobertura, inventario con
-  procedencia, hallazgos de fuentes y cruces, puntos ciegos), Personas y la ficha de
-  persona con su trama y el veredicto con evidencia.
-- **Herramientas** (lo que cada una dice, sin veredictos): CyberArk ·
-  Identidades, Roles, Safes, Cuentas, Plataformas; Netskope · Usuarios,
-  Equipos, Versiones de cliente. Cada tabla muestra la corrida, busca en
-  cualquier atributo, despliega los atributos crudos de la fuente y separa
-  la columna «Vínculo», que es la unión propuesta por Custodia y su motivo.
-
-Además: Entrar, Fuentes (conectadas y planificadas) y Sistema visual.
-
-## Sistema visual
-
-Fuentes conectadas: **CyberArk** y **Netskope**. Identity Administration es
-el módulo de identidad de CyberArk, no una fuente aparte (corrección del
-dueño, 22/10). El resto de herramientas del plan queda sin adaptador.
-
-El color tiene tres trabajos y cada familia hace sólo el suyo:
-
-| Familia | Uso | Valores |
+| Carpeta | Qué es | Cómo se publica |
 |---|---|---|
-| Marca (lima) | logo, acción principal, foco, selección | `--brand` |
-| Procedencia | qué fuente lo dice, con sello de dos letras | `--src-pam` (CyberArk: módulos Identity y PAM), `--src-sse` (Netskope) y reservados `--src-edr`, `--src-vuln`, `--src-firewall` |
-| Veredicto | qué concluye una regla, con forma propia | `--v-covered` (círculo), `--v-partial` (medio), `--v-gap` (rombo), `--v-unknown` (anillo punteado) |
+| `web/` | La app: shell, inicio con la rueda de fuentes, Personas, CyberArk, Netskope, Ayuda. React + Vite + TypeScript | Proyecto de Pages `custodia-demo` |
+| `site/` | Sitio de producto en inglés (`/`) y español (`/es/`), generado desde `site/site/` | Proyecto de Pages `custodia` |
+| `demo/` | Experimento reducido anterior | No se publica |
 
-Todo lo demás es la escala neutra `--ink-*`. El trazo comunica la unión:
-continuo = correo exacto, discontinuo = ambiguo, punteado = ausencia. Lo
-observado («sin señal») se escribe en tinta; sólo una regla pinta un
-veredicto. Los logos de CyberArk, Netskope y BigID (blancos, recuperados de
-`71c68de`) vuelven a pedido del dueño: sólo junto al nombre de la
-herramienta, nunca como portadores de color; el sitio declara que son marcas
-de sus dueños. Tipografías: Instrument Sans (interfaz) y
-JetBrains Mono (datos), ambas OFL-1.1. Los tokens viven en
-`web/src/design/tokens.css` y la página «Sistema visual» los documenta.
+## Dos modos de la app
 
-El login ofrece «Entrar a la demo» y un acceso con passkey/SSO
-deshabilitado: Switchboard u OIDC genérico están diseñados, no implementados.
+- **Real:** `npm run build`. La app habla con `/api` a través de
+  `web/src/cross/lib/api.ts`; en desarrollo, Vite reenvía `/api` a
+  `127.0.0.1:8000`.
+- **Demo:** `npm run build:demo` (define `VITE_DEMO=1`). Antes del primer
+  render, `web/src/demo/install.ts` intercepta `fetch` y responde `/api`
+  con `web/src/demo/mock-api.ts`. Es la misma API simulada que usan las
+  pruebas e2e, así que la demo y las pruebas no pueden divergir. Nada sale del
+  navegador; el build real no incluye ese código.
+
+La demo entra con una sesión de lectura («Demo»). Una ruta que la API
+simulada no conoce responde «No disponible en la demo».
+
+## Datos
+
+Todo nombre de la demo y las pruebas es ficticio: `acme.example`, Globex,
+Initech. No se copian dominios, empresas, grupos, hosts ni remotos del
+empleador de origen; ver `AGENTS.md`.
+
+## Marca
+
+La marca son dos registros que se cruzan (`web/public/mark.svg`, lima sobre
+grafito); el favicon y el logo de la cabecera son el mismo dibujo. El resto
+del sistema visual es el de DS Hub (`web/src/styles/foundation.css`).
 
 ## Verificación
 
-`npm run verify:web`: typecheck, build, 6 pruebas del modelo y 11 e2e en
-Chromium (sitio estático y bilingüe sin JavaScript ni pedidos externos,
-acceso, hallazgos, brecha frente a identidad ambigua, capturas desactualizada
-y parcial, tablas por herramienta con atributos y vínculo, filtros, axe WCAG
-A/AA en el sitio y quince pantallas de la demo, búsqueda por columnas visibles,
-fechas coherentes al cambiar de captura y 390 px sin desplazamiento
-lateral). Puertos locales efímeros: 4184 (dev/preview) y
-4185 (e2e), igual que las demos anteriores, sin entrada en `ports.json`.
-
-Cada hallazgo atribuye sólo las fuentes que usa: la colisión de identidades
-se observa en CyberArk; la brecha y la cobertura parcial cruzan CyberArk y
-Netskope. El sitio y el login no declaran una licencia de código abierto;
-esa decisión sigue pendiente en PROD-DIST-001.
+`npm run verify:web` desde la raíz: tipos, lint, estilos, pruebas unitarias,
+build de la demo y e2e con Chromium. El sitio se construye con
+`npm run build:site`.

@@ -1,0 +1,12 @@
+.access-areas { display: grid; gap: 12px; margin: 0; }
+.access-areas dt { color: var(--text-primary); font-size: 12px; font-weight: 650; margin-bottom: 2px; }
+.access-areas dd { color: var(--text-secondary); font-size: 12px; line-height: 1.6; margin: 0; }
+.access-areas em { color: var(--text-primary); font-style: normal; margin-right: 4px; }
+.access-none { color: var(--text-secondary); font-size: 12px; margin: 0; }
+.access-changes { display: grid; gap: 4px; margin-top: 12px; }
+.access-changes p { color: var(--text-secondary); font-size: 12px; margin: 0; }
+.access-changes strong { color: var(--text-primary); margin-right: 6px; }
+.access-codes { margin-top: 12px; }
+.access-codes summary { color: var(--text-secondary); cursor: pointer; font-size: 11px; width: fit-content; }
+.access-codes summary:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+.access-codes p { color: var(--text-secondary); font-family: var(--font-mono, monospace); font-size: 11px; margin: 6px 0 0; overflow-wrap: anywhere; }
