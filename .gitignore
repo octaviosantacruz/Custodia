@@ -16,3 +16,7 @@ test-results/
 artifacts/
 *.log
 .DS_Store
+
+# Copia local del DSHub original (datos del empleador): nunca subir
+DSHub-feat-netskope-dev/
+*.zip
