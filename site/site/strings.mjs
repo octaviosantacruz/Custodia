@@ -102,6 +102,7 @@ export const pages = {
     st4t: 'Later', st4h: 'Data, endpoint, vulnerabilities, firewalls', st4p: 'BigID, CrowdStrike, Cortex XDR, Tenable. Each new source arrives with its contract and its rules.',
     trademarks: 'CyberArk, Netskope and BigID logos and names are trademarks of their owners and identify the products Custodia reads from. Custodia is not affiliated with them.',
     footDemo: 'Live demo',
+    footSource: 'Source on GitHub · Apache 2.0',
     footNote: 'custodia · prototype · 2026',
   },
   es: {
@@ -205,6 +206,7 @@ export const pages = {
     st4t: 'Después', st4h: 'Datos, endpoint, vulnerabilidades, firewalls', st4p: 'BigID, CrowdStrike, Cortex XDR, Tenable. Cada fuente nueva entra con su contrato y sus reglas.',
     trademarks: 'Los logos y nombres de CyberArk, Netskope y BigID son marcas de sus dueños e identifican los productos de los que lee Custodia. Custodia no está afiliado a ellos.',
     footDemo: 'Demo en vivo',
+    footSource: 'Código en GitHub · Apache 2.0',
     footNote: 'custodia · prototipo · 2026',
   },
 };
