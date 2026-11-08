@@ -55,7 +55,7 @@ a.button { text-decoration: none; }
 .can-animate .hero-copy > :nth-child(5) { animation-delay: .32s; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
 
-/* ---------- La historia animada (12 s por vuelta) ---------- */
+/* ---------- La historia animada: una sola pasada (9 s) que termina en el veredicto ---------- */
 .story { background: var(--ink-100); border: 1px solid var(--ink-300); border-radius: var(--r-lg); margin: 0; padding: var(--s-4) var(--s-4) var(--s-3); }
 .story-svg { display: block; height: auto; width: 100%; }
 .story-svg text { fill: var(--ink-900); font-family: var(--font-ui); font-size: 13px; font-weight: 600; }
@@ -88,10 +88,15 @@ a.button { text-decoration: none; }
 
 .can-animate .story :is(.st-r1, .st-r2, .st-r3, .st-r4, .st-person, .st-join, .st-label, .st-rule, .st-scan, .st-verdict, .st-finding),
 .can-animate .story .story-steps :is(li, li span) {
-  animation-duration: 12s; animation-iteration-count: infinite; animation-play-state: paused; animation-timing-function: var(--ease);
+  animation-duration: 9s; animation-fill-mode: both; animation-iteration-count: 1; animation-play-state: paused; animation-timing-function: var(--ease);
 }
-.can-animate .story.is-in :is(.st-r1, .st-r2, .st-r3, .st-r4, .st-person, .st-join, .st-label, .st-rule, .st-scan, .st-verdict, .st-finding),
-.can-animate .story.is-in .story-steps :is(li, li span) { animation-play-state: running; }
+/* Arranca la primera vez que se ve y queda quieta en el último cuadro. */
+.can-animate .story.is-seen :is(.st-r1, .st-r2, .st-r3, .st-r4, .st-person, .st-join, .st-label, .st-rule, .st-scan, .st-verdict, .st-finding),
+.can-animate .story.is-seen .story-steps :is(li, li span) { animation-play-state: running; }
+.story { position: relative; }
+.story-replay { background: var(--ink-150); border: 1px solid var(--ink-300); border-radius: var(--r-pill); color: var(--ink-700); cursor: pointer; font: 600 var(--t-xs) var(--font-ui); opacity: 0; padding: 4px 10px; position: absolute; right: var(--s-3); top: var(--s-3); transition: opacity .3s var(--ease), color .2s, border-color .2s; }
+.story-replay:hover, .story-replay:focus-visible { border-color: var(--brand); color: var(--ink-900); }
+.story.is-done .story-replay, .story-replay:focus-visible { opacity: 1; }
 .can-animate .story .st-r1 { animation-name: st-r1; }
 .can-animate .story .st-r2 { animation-name: st-r2; }
 .can-animate .story .st-r3 { animation-name: st-r3; }
@@ -114,27 +119,27 @@ a.button { text-decoration: none; }
 .can-animate .story .sp3 span { animation-name: st-num3; }
 .can-animate .story .sp4 span { animation-name: st-num4; }
 
-@keyframes st-r1 { 0%, 4% { opacity: 0; transform: translateX(-10px); } 8%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-r2 { 0%, 7% { opacity: 0; transform: translateX(-10px); } 11%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-r3 { 0%, 10% { opacity: 0; transform: translateX(-10px); } 14%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-r4 { 0%, 13% { opacity: 0; transform: translateX(-10px); } 17%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-pop { 0%, 23% { opacity: 0; transform: scale(.6); } 28%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-draw { 0%, 28% { stroke-dashoffset: 1; opacity: 1; } 38%, 93% { stroke-dashoffset: 0; opacity: 1; } 98%, 100% { stroke-dashoffset: 0; opacity: 0; } }
-@keyframes st-draw-late { 0%, 36% { stroke-dashoffset: 1; opacity: 1; } 44%, 93% { stroke-dashoffset: 0; opacity: 1; } 98%, 100% { stroke-dashoffset: 0; opacity: 0; } }
-@keyframes st-fade-late { 0%, 38% { opacity: 0; } 45%, 93% { opacity: 1; } 98%, 100% { opacity: 0; } }
-@keyframes st-label { 0%, 35% { opacity: 0; } 40%, 93% { opacity: 1; } 98%, 100% { opacity: 0; } }
-@keyframes st-rule { 0%, 48% { opacity: 0; transform: translateY(6px); } 52%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-scan { 0%, 52% { transform: scaleX(0); } 66%, 93% { transform: scaleX(1); } 98%, 100% { transform: scaleX(1); opacity: 0; } }
-@keyframes st-verdict { 0%, 68% { opacity: 0; transform: scale(.5); } 72% { opacity: 1; transform: scale(1.12); } 75%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
-@keyframes st-finding { 0%, 73% { opacity: 0; transform: translateY(6px); } 78%, 93% { opacity: 1; transform: none; } 98%, 100% { opacity: 0; } }
+@keyframes st-r1 { 0%, 4% { opacity: 0; transform: translateX(-10px); } 8%, 100% { opacity: 1; transform: none; } }
+@keyframes st-r2 { 0%, 7% { opacity: 0; transform: translateX(-10px); } 11%, 100% { opacity: 1; transform: none; } }
+@keyframes st-r3 { 0%, 10% { opacity: 0; transform: translateX(-10px); } 14%, 100% { opacity: 1; transform: none; } }
+@keyframes st-r4 { 0%, 13% { opacity: 0; transform: translateX(-10px); } 17%, 100% { opacity: 1; transform: none; } }
+@keyframes st-pop { 0%, 23% { opacity: 0; transform: scale(.6); } 28%, 100% { opacity: 1; transform: none; } }
+@keyframes st-draw { 0%, 28% { stroke-dashoffset: 1; opacity: 1; } 38%, 100% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes st-draw-late { 0%, 36% { stroke-dashoffset: 1; opacity: 1; } 44%, 100% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes st-fade-late { 0%, 38% { opacity: 0; } 45%, 100% { opacity: 1; } }
+@keyframes st-label { 0%, 35% { opacity: 0; } 40%, 100% { opacity: 1; } }
+@keyframes st-rule { 0%, 48% { opacity: 0; transform: translateY(6px); } 52%, 100% { opacity: 1; transform: none; } }
+@keyframes st-scan { 0%, 52% { opacity: 1; transform: scaleX(0); } 66% { opacity: 1; transform: scaleX(1); } 76%, 100% { opacity: 0; transform: scaleX(1); } }
+@keyframes st-verdict { 0%, 68% { opacity: 0; transform: scale(.5); } 72% { opacity: 1; transform: scale(1.12); } 75%, 100% { opacity: 1; transform: none; } }
+@keyframes st-finding { 0%, 73% { opacity: 0; transform: translateY(6px); } 78%, 100% { opacity: 1; transform: none; } }
 @keyframes st-sp1 { 0%, 2%, 27%, 100% { color: var(--ink-600); } 4%, 25% { color: var(--ink-900); } }
 @keyframes st-sp2 { 0%, 26%, 49%, 100% { color: var(--ink-600); } 28%, 47% { color: var(--ink-900); } }
 @keyframes st-sp3 { 0%, 48%, 69%, 100% { color: var(--ink-600); } 50%, 67% { color: var(--ink-900); } }
-@keyframes st-sp4 { 0%, 68%, 95%, 100% { color: var(--ink-600); } 70%, 93% { color: var(--ink-900); } }
+@keyframes st-sp4 { 0%, 68% { color: var(--ink-600); } 70%, 100% { color: var(--ink-900); } }
 @keyframes st-num1 { 0%, 2%, 27%, 100% { background: transparent; border-color: var(--ink-400); color: inherit; } 4%, 25% { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); } }
 @keyframes st-num2 { 0%, 26%, 49%, 100% { background: transparent; border-color: var(--ink-400); color: inherit; } 28%, 47% { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); } }
 @keyframes st-num3 { 0%, 48%, 69%, 100% { background: transparent; border-color: var(--ink-400); color: inherit; } 50%, 67% { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); } }
-@keyframes st-num4 { 0%, 68%, 95%, 100% { background: transparent; border-color: var(--ink-400); color: inherit; } 70%, 93% { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); } }
+@keyframes st-num4 { 0%, 68% { background: transparent; border-color: var(--ink-400); color: inherit; } 70%, 100% { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); } }
 
 /* ---------- Revelado al hacer scroll ---------- */
 .can-animate .reveal { opacity: 0; transform: translateY(16px); transition: opacity .7s var(--ease), transform .7s var(--ease), border-color .25s var(--ease); }
@@ -187,40 +192,66 @@ a.button { text-decoration: none; }
 .go { color: var(--ink-700); font-size: var(--t-sm); font-weight: 600; transition: color .2s, transform .2s var(--ease); }
 .question:hover .go { color: var(--brand); transform: translateX(3px); }
 
-/* ---------- Mini animaciones de los pasos (6 s) ---------- */
-.mini { align-content: start; background: var(--ink-50); border: 1px solid var(--ink-300); border-radius: var(--r-md); display: grid; gap: 6px; height: 132px; overflow: hidden; padding: var(--s-3); }
+/* ---------- Mini animaciones de los pasos ----------
+   Avanzan con el scroll (animation-timeline: view()) y quedan quietas en su
+   estado final; sin soporte, corren una sola vez al aparecer. Sin bucles. */
+.mini { align-content: start; background: var(--ink-50); border: 1px solid var(--ink-300); border-radius: var(--r-md); display: grid; gap: 6px; height: 132px; overflow: hidden; padding: var(--s-3); view-timeline: --mini block; }
 .mc-row { background: var(--ink-150); border-left: 2px solid var(--src-pam); border-radius: 4px; color: var(--ink-700); font-family: var(--font-data); font-size: 11px; padding: 3px 8px; }
-.mini-join { align-content: center; gap: var(--s-3); }
-.mj-pair { align-items: center; display: flex; gap: 8px; position: relative; }
-.mj-chip { border: 1px solid var(--tone); border-radius: 4px; color: var(--tone); font-family: var(--font-data); font-size: 11px; padding: 2px 7px; }
-.mj-pair.is-ambiguous .mj-chip { border-style: dashed; }
-.mj-q { color: var(--v-unknown); font-family: var(--font-data); font-weight: 700; }
-.mj-tag { color: var(--ink-600); font-family: var(--font-data); font-size: 10px; margin-left: auto; }
+.mini-join { align-content: center; gap: 10px; }
+.mj-case { align-items: center; display: grid; gap: 4px 6px; grid-template-columns: auto 26px auto; justify-content: start; }
+.mj-stack { display: grid; gap: 4px; }
+.mj-chip { border: 1px solid var(--tone); border-radius: 4px; color: var(--tone); font-family: var(--font-data); font-size: 10.5px; padding: 1px 6px; white-space: nowrap; }
+.mj-chip em { color: var(--ink-600); font-style: normal; }
+.is-ambiguous .mj-chip { border-style: dashed; }
+.mj-link { height: 12px; overflow: visible; width: 26px; }
+.is-ambiguous .mj-link { height: 28px; }
+.mj-link path { fill: none; stroke: var(--src-sse); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.is-ambiguous .mj-link path { stroke: var(--v-unknown); stroke-dasharray: 3 3; }
+.mj-tag { color: var(--tone); font-family: var(--font-data); font-size: 10px; grid-column: 1 / -1; }
 .mini-conclude { align-content: center; gap: var(--s-3); justify-items: start; }
 .mr-rule { align-items: center; color: var(--ink-700); display: flex; font-size: 11px; gap: 8px; width: 100%; }
 .mr-bar { background: var(--ink-200); border-radius: 3px; flex: 1; height: 6px; overflow: hidden; }
-.mr-bar span { background: var(--ink-700); display: block; height: 100%; width: 100%; }
+.mr-bar span { background: var(--ink-700); display: block; height: 100%; transform-origin: left center; width: 100%; }
 
-.can-animate .mini :is(.mc-row, .mj-chip, .mj-tag, .mj-q, .mr-bar span, .mr-verdict) {
-  animation-duration: 6s; animation-iteration-count: infinite; animation-play-state: paused; animation-timing-function: var(--ease);
+.can-animate .mini :is(.mc-row, .mj-a, .mj-a2, .mj-b, .mj-link path, .mj-tag, .mr-bar span, .mr-verdict) {
+  animation-duration: 2.4s; animation-fill-mode: both; animation-play-state: paused; animation-timing-function: var(--ease);
 }
-.can-animate .reveal.is-in .mini :is(.mc-row, .mj-chip, .mj-tag, .mj-q, .mr-bar span, .mr-verdict) { animation-play-state: running; }
+.can-animate .reveal.is-seen .mini :is(.mc-row, .mj-a, .mj-a2, .mj-b, .mj-link path, .mj-tag, .mr-bar span, .mr-verdict) { animation-play-state: running; }
 .can-animate .mc1 { animation-name: mc1; }
 .can-animate .mc2 { animation-name: mc2; }
 .can-animate .mc3 { animation-name: mc3; }
-@keyframes mc1 { 0%, 8% { opacity: 0; transform: translateX(-12px); } 14%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
-@keyframes mc2 { 0%, 22% { opacity: 0; transform: translateX(-12px); } 28%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
-@keyframes mc3 { 0%, 36% { opacity: 0; transform: translateX(-12px); } 42%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
-.can-animate .is-exact .mj-left { animation-name: mj-left; }
-.can-animate .is-exact .mj-right { animation-name: mj-right; }
-.can-animate .is-exact .mj-tag, .can-animate .mr-verdict { animation-name: mj-tag; }
-.can-animate .mj-q { animation-name: mj-q; }
-@keyframes mj-left { 0%, 15% { transform: translateX(-10px); } 40%, 88% { transform: translateX(4px); } 100% { transform: translateX(-10px); } }
-@keyframes mj-right { 0%, 15% { transform: translateX(18px); } 40%, 88% { transform: translateX(-4px); } 100% { transform: translateX(18px); } }
-@keyframes mj-tag { 0%, 42% { opacity: 0; transform: scale(.8); } 50%, 88% { opacity: 1; transform: none; } 96%, 100% { opacity: 0; } }
-@keyframes mj-q { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-.can-animate .mr-bar span { animation-name: mr-bar; transform-origin: left center; }
-@keyframes mr-bar { 0%, 8% { transform: scaleX(0); } 45%, 88% { transform: scaleX(1); } 100% { opacity: 0; transform: scaleX(1); } }
+.can-animate .mj-a, .can-animate .mj-a2 { animation-name: mj-in-left; }
+.can-animate .mj-b { animation-name: mj-in-right; }
+.can-animate .mj-link path { animation-name: mj-draw; stroke-dashoffset: 0; }
+.can-animate .is-ambiguous .mj-link path { animation-name: mj-fade; }
+.can-animate .mj-tag, .can-animate .mr-verdict { animation-name: mj-tag; }
+.can-animate .mr-bar span { animation-name: mr-bar; }
+/* Escalonado: Alice se une primero; Eve después, y no se une. */
+.can-animate .is-ambiguous :is(.mj-a, .mj-a2, .mj-b, .mj-link path, .mj-tag) { animation-delay: .6s; }
+.can-animate .mj-a2 { animation-delay: .75s !important; }
+@keyframes mc1 { 0%, 5% { opacity: 0; transform: translateX(-12px); } 30%, 100% { opacity: 1; transform: none; } }
+@keyframes mc2 { 0%, 25% { opacity: 0; transform: translateX(-12px); } 55%, 100% { opacity: 1; transform: none; } }
+@keyframes mc3 { 0%, 45% { opacity: 0; transform: translateX(-12px); } 75%, 100% { opacity: 1; transform: none; } }
+@keyframes mj-in-left { 0% { opacity: 0; transform: translateX(-10px); } 35%, 100% { opacity: 1; transform: none; } }
+@keyframes mj-in-right { 0% { opacity: 0; transform: translateX(10px); } 35%, 100% { opacity: 1; transform: none; } }
+@keyframes mj-draw { 0%, 35% { opacity: 1; stroke-dasharray: 1; stroke-dashoffset: 1; } 65%, 100% { opacity: 1; stroke-dasharray: 1; stroke-dashoffset: 0; } }
+@keyframes mj-fade { 0%, 35% { opacity: 0; } 65%, 100% { opacity: 1; } }
+@keyframes mj-tag { 0%, 60% { opacity: 0; transform: translateY(4px); } 85%, 100% { opacity: 1; transform: none; } }
+@keyframes mr-bar { 0%, 5% { transform: scaleX(0); } 60%, 100% { transform: scaleX(1); } }
+
+@supports (animation-timeline: view()) {
+  /* Con scroll: la mini avanza mientras su tarjeta entra en pantalla. */
+  .can-animate .mini :is(.mc-row, .mj-a, .mj-a2, .mj-b, .mj-link path, .mj-tag, .mr-bar span, .mr-verdict) {
+    animation-delay: 0s !important; animation-duration: auto; animation-play-state: running; animation-timeline: --mini; animation-timing-function: linear;
+  }
+  .can-animate .mini .mc-row, .can-animate .is-exact > * , .can-animate .is-exact .mj-link path, .can-animate .mr-bar span { animation-range: entry 30% cover 40%; }
+  .can-animate .is-ambiguous :is(.mj-a, .mj-a2, .mj-b, .mj-link path, .mj-tag), .can-animate .mr-verdict { animation-range: cover 30% cover 52%; }
+
+  /* Progreso de lectura bajo la cabecera. */
+  .can-animate .scroll-progress { animation: progress linear both; animation-timeline: scroll(root block); display: block; }
+}
+.scroll-progress { background: var(--brand); bottom: -1px; display: none; height: 2px; left: 0; position: absolute; right: 0; transform: scaleX(0); transform-origin: left center; }
+@keyframes progress { to { transform: scaleX(1); } }
 
 /* ---------- Capturas ---------- */
 .shots { display: grid; gap: var(--s-5) var(--s-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--s-6); }

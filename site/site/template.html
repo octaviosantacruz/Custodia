@@ -30,6 +30,7 @@
     <a class="skip-link" href="#content">{{skip}}</a>
     <div class="site">
       <header class="site-head">
+        <span class="scroll-progress" aria-hidden="true"></span>
         <a href="{{path}}" class="wordmark" aria-label="{{homeLabel}}">
           <svg class="mark is-intro" width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
             <defs><clipPath id="mark-clip"><rect x="2.5" y="2.5" width="18" height="18" rx="5" /></clipPath></defs>
@@ -120,6 +121,7 @@
               <li class="sp3"><span>3</span>{{step3}}</li>
               <li class="sp4"><span>4</span>{{step4}}</li>
             </ol>
+            <button class="story-replay" type="button" hidden>{{replay}}</button>
             <figcaption id="story-caption" class="sr-only">{{storyAlt}}</figcaption>
           </figure>
         </section>
@@ -182,16 +184,20 @@
             </article>
             <article class="tile step-tile reveal">
               <div class="mini mini-join" aria-hidden="true">
-                <div class="mj-pair is-exact">
-                  <span class="mj-chip mj-left" data-src="pam">alice.morgan</span>
-                  <span class="mj-chip mj-right" data-src="sse">alice.morgan</span>
-                  <span class="mj-tag">{{m_join}}</span>
+                <div class="mj-case is-exact">
+                  <span class="mj-chip mj-a" data-src="pam">alice.morgan@</span>
+                  <svg class="mj-link" viewBox="0 0 40 12" preserveAspectRatio="none"><path pathLength="1" d="M0 6h40" /></svg>
+                  <span class="mj-chip mj-b" data-src="sse">alice.morgan@</span>
+                  <span class="mj-tag" data-verdict="covered">{{m_join}}</span>
                 </div>
-                <div class="mj-pair is-ambiguous">
-                  <span class="mj-chip" data-src="pam">eve.taylor</span>
-                  <span class="mj-q">?</span>
-                  <span class="mj-chip" data-src="pam">eve.taylor</span>
-                  <span class="mj-tag">{{m_amb}}</span>
+                <div class="mj-case is-ambiguous">
+                  <span class="mj-stack">
+                    <span class="mj-chip mj-a" data-src="pam">eve.taylor@ <em>#105</em></span>
+                    <span class="mj-chip mj-a2" data-src="pam">eve.taylor@ <em>#106</em></span>
+                  </span>
+                  <svg class="mj-link" viewBox="0 0 40 28" preserveAspectRatio="none"><path d="M0 6C20 6 20 14 40 14" /><path d="M0 22C20 22 20 14 40 14" /></svg>
+                  <span class="mj-chip mj-b" data-src="sse">eve.taylor@</span>
+                  <span class="mj-tag" data-verdict="unknown">{{m_amb}}</span>
                 </div>
               </div>
               <span class="step">02</span>
