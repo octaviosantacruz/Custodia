@@ -1,20 +1,30 @@
-# Custodia
+<p align="center">
+  <img src="site/public/mark.svg" width="72" alt="Logo de Custodia">
+</p>
 
-[English](README.md) · **Español**
+<h1 align="center">Custodia</h1>
 
-**Lo que tus herramientas de seguridad saben, juntas.**
+<p align="center">
+  <strong>Lo que tus herramientas de seguridad saben, juntas.</strong><br>
+  Custodia une con reglas explícitas los registros de las herramientas de seguridad que ya usás y muestra lo que ninguna ve sola. Cada conclusión lleva su regla, su fuente y su captura.
+</p>
 
-Custodia lee las herramientas de seguridad que ya usás, une sus registros con
-reglas explícitas y muestra lo que ninguna ve sola: quién tiene acceso
-privilegiado sin un equipo sano, qué identidades chocan y dónde la cobertura
-es, sencillamente, desconocida. Cada conclusión lleva su regla, su fuente y su
-captura, para que puedas comprobarla antes de actuar.
+<p align="center">
+  <a href="https://custodia-demo.pages.dev/?lang=es">Demo en vivo</a> ·
+  <a href="https://custodia.octaviosantacruz.com/es/">Sitio</a> ·
+  <a href="#cómo-funciona">Cómo funciona</a> ·
+  <a href="#estado-y-hoja-de-ruta">Hoja de ruta</a> ·
+  <a href="docs/PRODUCT.md">Producto</a> ·
+  <a href="LICENSE">Apache 2.0</a>
+</p>
 
-[**Demo en vivo**](https://custodia-demo.pages.dev/?lang=es) ·
-[Sitio del producto](https://custodia.octaviosantacruz.com/es/) ·
-[Apache 2.0](LICENSE) · Estado: prototipo open source
+<p align="center"><a href="README.md">English</a> · <strong>Español</strong></p>
+
+> **Prototipo:** la interfaz está completa y corre como demo con datos ficticios. El backend Go y los adaptadores reales están en curso.
 
 ![Custodia: una persona cruzada entre CyberArk y Netskope, con el veredicto y su evidencia](site/public/shots/es/person.png)
+
+*La demo con una empresa ficticia: cómo se une una persona en cada herramienta y el veredicto con su evidencia.*
 
 ## El problema
 

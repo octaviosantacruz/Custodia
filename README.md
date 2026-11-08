@@ -1,20 +1,30 @@
-# Custodia
+<p align="center">
+  <img src="site/public/mark.svg" width="72" alt="Custodia logo">
+</p>
 
-**English** · [Español](README.es.md)
+<h1 align="center">Custodia</h1>
 
-**What your security tools know, together.**
+<p align="center">
+  <strong>What your security tools know, together.</strong><br>
+  Custodia joins the records of the security tools you already run with explicit rules, and shows what none of them sees alone. Every conclusion carries its rule, its source and its capture.
+</p>
 
-Custodia reads the security tools you already run, joins their records with
-explicit rules and shows what none of them sees alone: who has privileged
-access without a healthy device, which identities collide, where coverage is
-simply unknown. Every conclusion carries its rule, its source and its capture,
-so you can check it before you act.
+<p align="center">
+  <a href="https://custodia-demo.pages.dev/?lang=en">Live demo</a> ·
+  <a href="https://custodia.octaviosantacruz.com">Website</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#status-and-roadmap">Roadmap</a> ·
+  <a href="docs/PRODUCT.md">Product</a> ·
+  <a href="LICENSE">Apache 2.0</a>
+</p>
 
-[**Live demo**](https://custodia-demo.pages.dev/?lang=en) ·
-[Product site](https://custodia.octaviosantacruz.com) ·
-[Apache 2.0](LICENSE) · Status: open source prototype
+<p align="center"><strong>English</strong> · <a href="README.es.md">Español</a></p>
+
+> **Prototype:** the interface is complete and runs as a demo with fictional data. The Go backend and real adapters are in progress.
 
 ![Custodia: one person crossed across CyberArk and Netskope, with the verdict and its evidence](site/public/shots/en/person.png)
+
+*The demo running on a fictional company: how one person is joined in each tool, and the verdict with its evidence.*
 
 ## The problem
 
