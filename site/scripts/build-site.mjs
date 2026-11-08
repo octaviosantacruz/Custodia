@@ -13,7 +13,10 @@ const template = await readFile(join(root, 'site/template.html'), 'utf8');
 // Las capturas no llevan hash en el nombre: la versión en la URL cambia con su
 // contenido, así una captura nueva no queda escondida detrás de la caché.
 const shots = createHash('sha256');
-for (const name of ['summary', 'person', 'tools']) shots.update(await readFile(join(root, `public/shots/${name}.png`)));
+for (const name of ['summary', 'person', 'tools']) {
+  // Cada captura va en PNG y WebP (el WebP pesa ~5 veces menos); los dos entran en la versión.
+  for (const ext of ['png', 'webp']) shots.update(await readFile(join(root, `public/shots/${name}.${ext}`)));
+}
 const shotVersion = shots.digest('hex').slice(0, 10);
 
 for (const [lang, strings] of Object.entries(pages)) {

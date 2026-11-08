@@ -6,7 +6,20 @@
     <meta name="color-scheme" content="dark" />
     <title>{{title}}</title>
     <meta name="description" content="{{description}}" />
+    <meta name="theme-color" content="#06070a" />
     <link rel="icon" href="/mark.svg" type="image/svg+xml" />
+    <link rel="canonical" href="https://custodia.octaviosantacruz.com{{path}}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Custodia" />
+    <meta property="og:locale" content="{{ogLocale}}" />
+    <meta property="og:url" content="https://custodia.octaviosantacruz.com{{path}}" />
+    <meta property="og:title" content="{{title}}" />
+    <meta property="og:description" content="{{description}}" />
+    <meta property="og:image" content="https://custodia.octaviosantacruz.com/shots/summary.png?v={{shotVersion}}" />
+    <meta property="og:image:width" content="1440" />
+    <meta property="og:image:height" content="900" />
+    <meta property="og:image:alt" content="{{ogImageAlt}}" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="alternate" hreflang="en" href="https://custodia.octaviosantacruz.com/" />
     <link rel="alternate" hreflang="es" href="https://custodia.octaviosantacruz.com/es/" />
     <link rel="alternate" hreflang="x-default" href="https://custodia.octaviosantacruz.com/" />
@@ -201,9 +214,9 @@
           <p class="section-kicker">{{insideKicker}}</p>
           <h2 id="inside-title">{{insideTitle}}</h2>
           <div class="shots">
-            <figure class="shot reveal"><a href="{{demo}}/"><img src="/shots/summary.png?v={{shotVersion}}" alt="{{shotAlt1}}" width="1440" height="900" loading="lazy" /></a><figcaption>{{shot1}}</figcaption></figure>
-            <figure class="shot reveal"><a href="{{demo}}/chains/person"><img src="/shots/person.png?v={{shotVersion}}" alt="{{shotAlt2}}" width="1440" height="900" loading="lazy" /></a><figcaption>{{shot2}}</figcaption></figure>
-            <figure class="shot reveal"><a href="{{demo}}/pam/safes"><img src="/shots/tools.png?v={{shotVersion}}" alt="{{shotAlt3}}" width="1440" height="900" loading="lazy" /></a><figcaption>{{shot3}}</figcaption></figure>
+            <figure class="shot is-feature reveal"><a href="{{demo}}/chains/person"><picture><source srcset="/shots/person.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/person.png?v={{shotVersion}}" alt="{{shotAlt2}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot2}}</figcaption></figure>
+            <figure class="shot reveal"><a href="{{demo}}/"><picture><source srcset="/shots/summary.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/summary.png?v={{shotVersion}}" alt="{{shotAlt1}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot1}}</figcaption></figure>
+            <figure class="shot reveal"><a href="{{demo}}/pam/safes"><picture><source srcset="/shots/tools.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/tools.png?v={{shotVersion}}" alt="{{shotAlt3}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot3}}</figcaption></figure>
           </div>
           <p class="hint">{{shotsNote}}</p>
         </section>

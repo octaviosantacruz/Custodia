@@ -223,7 +223,9 @@ a.button { text-decoration: none; }
 @keyframes mr-bar { 0%, 8% { transform: scaleX(0); } 45%, 88% { transform: scaleX(1); } 100% { opacity: 0; transform: scaleX(1); } }
 
 /* ---------- Capturas ---------- */
-.shots { display: grid; gap: var(--s-4); grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: var(--s-6); }
+.shots { display: grid; gap: var(--s-5) var(--s-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--s-6); }
+.shot.is-feature { grid-column: 1 / -1; }
+.shot.is-feature figcaption { font-size: var(--t-md); max-width: 62ch; }
 .shot { margin: 0; }
 .shot a { border: 1px solid var(--ink-300); border-radius: var(--r-lg); display: block; overflow: hidden; }
 .shot img { display: block; height: auto; transition: transform .5s var(--ease); width: 100%; }
