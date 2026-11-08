@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { NetskopeOfficeWeek } from '../types/netskope';
 import { formatNumber } from '../../../cross/lib/format';
 import { weekRange } from '../lib/netskope-office';
+import { t } from '../../../cross/i18n/index.ts';
 
 const WIDTH = 640;
 const HEIGHT = 170;
@@ -12,8 +13,8 @@ const RIGHT = 70;
 const PLOT_W = WIDTH - LEFT - RIGHT;
 const PLOT_H = HEIGHT - TOP - BOTTOM;
 const SERIES = [
-  { key: 'office_avg', label: 'En la oficina', className: 'is-office' },
-  { key: 'remote_avg', label: 'En remoto (mismas personas)', className: 'is-remote' },
+  { key: 'office_avg', label: t('En la oficina'), className: 'is-office' },
+  { key: 'remote_avg', label: t('En remoto (mismas personas)'), className: 'is-remote' },
 ] as const;
 
 type Point = { x: number; y: number; value: number };
@@ -42,24 +43,24 @@ export function NetskopeOfficeAverages({ series }: { series: NetskopeOfficeWeek[
   const activeWeek = active === null ? null : series[active];
   return <figure className="nsk-office-trend nsk-office-averages">
     <figcaption>
-      <span className="nsk-office-trend-legend" aria-label="Leyenda">
+      <span className="nsk-office-trend-legend" aria-label={t('Leyenda')}>
         {SERIES.map((item) => <span key={item.key}><i className={`nsk-office-line-swatch ${item.className}`} aria-hidden />{item.label}</span>)}
       </span>
-      <button type="button" className="button subtle" aria-pressed={table} onClick={() => setTable((value) => !value)}>{table ? 'Ver gráfico' : 'Ver como tabla'}</button>
+      <button type="button" className="button subtle" aria-pressed={table} onClick={() => setTable((value) => !value)}>{table ? t('Ver gráfico') : t('Ver como tabla')}</button>
     </figcaption>
-    {!values.length ? <p className="nsk-attention-explanation">Todavía no hay semanas con puntaje medido.</p>
+    {!values.length ? <p className="nsk-attention-explanation">{t('Todavía no hay semanas con puntaje medido.')}</p>
       : table ? <div className="compact-table-wrap"><table className="compact-table">
-        <caption className="sr-only">Puntaje promedio semanal en la oficina y en remoto</caption>
-        <thead><tr><th scope="col">Semana</th><th scope="col">En la oficina</th><th scope="col">En remoto</th><th scope="col">Días medidos</th></tr></thead>
+        <caption className="sr-only">{t('Puntaje promedio semanal en la oficina y en remoto')}</caption>
+        <thead><tr><th scope="col">{t('Semana')}</th><th scope="col">{t('En la oficina')}</th><th scope="col">{t('En remoto')}</th><th scope="col">{t('Días medidos')}</th></tr></thead>
         <tbody>{series.map((week) => <tr key={week.week_start}>
           <th scope="row">{weekRange(week.week_start)}</th>
-          <td>{week.office_avg === null ? <span className="nsk-attention-empty">Sin medición</span> : formatNumber(week.office_avg)}</td>
-          <td>{week.remote_avg === null ? <span className="nsk-attention-empty">Sin dato</span> : formatNumber(week.remote_avg)}</td>
+          <td>{week.office_avg === null ? <span className="nsk-attention-empty">{t('Sin medición')}</span> : formatNumber(week.office_avg)}</td>
+          <td>{week.remote_avg === null ? <span className="nsk-attention-empty">{t('Sin dato')}</span> : formatNumber(week.remote_avg)}</td>
           <td>{week.days_measured} de 7</td>
         </tr>)}</tbody>
       </table></div>
       : <div className="nsk-office-trend-plot" onMouseLeave={() => setActive(null)}>
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Puntaje promedio semanal en la oficina y en remoto">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={t('Puntaje promedio semanal en la oficina y en remoto')}>
           {[low, Math.round((low + 100) / 2), 100].map((tick) => <g key={tick}>
             <line className="nsk-office-grid" x1={LEFT} x2={LEFT + PLOT_W} y1={y(tick)} y2={y(tick)} />
             <text className="nsk-office-tick" x={LEFT - 6} y={y(tick) + 4} textAnchor="end">{tick}</text>
@@ -91,7 +92,7 @@ export function NetskopeOfficeAverages({ series }: { series: NetskopeOfficeWeek[
         </svg>
         {activeWeek ? <div className={`nsk-office-tooltip${(active ?? 0) >= series.length / 2 ? ' is-left' : ''}`} role="tooltip" style={{ left: `${(x(active ?? 0) / WIDTH) * 100}%` }}>
           <strong>Semana del {weekRange(activeWeek.week_start)}</strong>
-          {activeWeek.office_avg === null ? <span>Sin medición</span> : <>
+          {activeWeek.office_avg === null ? <span>{t('Sin medición')}</span> : <>
             <span><i className="nsk-office-line-swatch is-office" aria-hidden />En la oficina {formatNumber(activeWeek.office_avg)}</span>
             <span><i className="nsk-office-line-swatch is-remote" aria-hidden />En remoto {activeWeek.remote_avg === null ? 'sin dato' : formatNumber(activeWeek.remote_avg)}</span>
           </>}

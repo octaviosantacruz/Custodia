@@ -1,4 +1,5 @@
 import fixture from './company.json' with { type: 'json' };
+import { t } from '../../cross/i18n/index.ts';
 
 export const company = fixture.company;
 export type Person = { id: number; name: string; email: string; area: string; site: string; identityIds: number[]; netskopeId: number; pamId: number | null; safeIds: number[]; case: string };
@@ -33,12 +34,12 @@ export function coverage(person: Person, mode: SourceMode = 'complete') {
   const status: CoverageStatus = mode !== 'complete' || !unique ? 'unknown'
     : recent === 0 ? 'gap' : recent < total ? 'partial' : 'covered';
   const explanation = status === 'unknown'
-    ? !unique ? 'Hay dos identidades activas con el mismo correo. No se elige una automáticamente.'
-      : mode === 'partial' ? 'La captura Netskope es parcial. No permite afirmar ausencia ni cobertura vigente.'
-        : 'La captura Netskope tiene 73 horas. Supera el umbral de 24 horas; no se evalúa cobertura.'
-    : status === 'gap' ? 'Identidad y usuario Netskope únicos, captura completa y vigente, pero ningún dispositivo reciente observado.'
-      : status === 'partial' ? 'Hay un dispositivo reciente y otro sin señal en 7 días. No confirma abandono ni falta de EDR.'
-        : 'Todos los dispositivos vinculados por usuario exacto tienen señal en los últimos 7 días. Sólo demuestra evidencia del cliente Netskope.';
+    ? !unique ? t('Hay dos identidades activas con el mismo correo. No se elige una automáticamente.')
+      : mode === 'partial' ? t('La captura Netskope es parcial. No permite afirmar ausencia ni cobertura vigente.')
+        : t('La captura Netskope tiene 73 horas. Supera el umbral de 24 horas; no se evalúa cobertura.')
+    : status === 'gap' ? t('Identidad y usuario Netskope únicos, captura completa y vigente, pero ningún dispositivo reciente observado.')
+      : status === 'partial' ? t('Hay un dispositivo reciente y otro sin señal en 7 días. No confirma abandono ni falta de EDR.')
+        : t('Todos los dispositivos vinculados por usuario exacto tienen señal en los últimos 7 días. Sólo demuestra evidencia del cliente Netskope.');
   return {
     metric_code: 'CONN-001', metric_version: '1', email: person.email, status,
     identity_records: person.identityIds.length, netskope_users: 1,
@@ -56,8 +57,8 @@ export function coverageSummary(mode: SourceMode = 'complete') {
     counts.coverage_percent = counts.covered / counts.denominator * 100;
     counts.device_coverage_percent = counts.devices_recent / counts.devices_total * 100;
   }
-  return { metric_code: 'CONN-001', metric_version: '1', label: 'Cliente Netskope activo y observado recientemente',
-    population: 'Personas activas de Acme Corp (Identity Administration)', person_freshness_hours: 24, device_freshness_days: 7,
+  return { metric_code: 'CONN-001', metric_version: '1', label: t('Cliente Netskope activo y observado recientemente'),
+    population: t('Personas activas de Acme Corp (Identity Administration)'), person_freshness_hours: 24, device_freshness_days: 7,
     counts, sources: coverage(people[0], mode).sources };
 }
 

@@ -1,6 +1,7 @@
 import { formatNumber } from './format.ts';
 import type { WorkspaceView } from './workspaces';
 import type { PersonSource, PersonToolSummary } from './chains-api';
+import { t } from '../i18n/index.ts';
 
 export type PersonToolTone = 'success' | 'warning' | 'neutral' | 'info';
 
@@ -45,7 +46,7 @@ function identityCopy(tool: PersonToolSummary): string {
 
 function netskopeCopy(tool: PersonToolSummary): string {
   const recent = tool.device_count ?? 0;
-  const parts = [`${formatNumber(recent)} ${recent === 1 ? 'dispositivo reciente' : 'dispositivos recientes'}`];
+  const parts = [`${formatNumber(recent)} ${recent === 1 ? t('dispositivo reciente') : t('dispositivos recientes')}`];
   if (tool.stale_device_count) parts.push(`${formatNumber(tool.stale_device_count)} sin actividad en 7 días`);
   if (tool.company) parts.push(tool.company);
   const versions = tool.client_versions ?? [];
@@ -64,8 +65,8 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
     const safes = tool.role_access.safes;
     return {
       tone: safes > 0 ? 'info' : 'neutral',
-      statusLabel: 'Acceso por rol · nombre exacto',
-      summary: `${formatNumber(tool.role_access.matched_roles)} ${tool.role_access.matched_roles === 1 ? 'rol vinculado' : 'roles vinculados'} · ${formatNumber(safes)} ${safes === 1 ? 'Safe' : 'Safes'}`,
+      statusLabel: t('Acceso por rol · nombre exacto'),
+      summary: `${formatNumber(tool.role_access.matched_roles)} ${tool.role_access.matched_roles === 1 ? t('rol vinculado') : t('roles vinculados')} · ${formatNumber(safes)} ${safes === 1 ? t('Safe') : t('Safes')}`,
       why: ROLE_BASIS,
       openable: false,
     };
@@ -74,7 +75,7 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
     return {
       tone: 'info',
       statusLabel: 'Acceso por SIA · nombre exacto',
-      summary: `${formatNumber(siaPolicies)} ${siaPolicies === 1 ? 'política de SIA' : 'políticas de SIA'}`,
+      summary: `${formatNumber(siaPolicies)} ${siaPolicies === 1 ? t('política de SIA') : t('políticas de SIA')}`,
       why: SIA_ONLY_BASIS,
       openable: false,
     };
@@ -86,7 +87,7 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
     return {
       tone: 'warning',
       statusLabel: 'Vínculo ambiguo',
-      summary: 'Varios registros activos comparten el correo exacto; no se dibuja ningún vínculo.',
+      summary: t('Varios registros activos comparten el correo exacto; no se dibuja ningún vínculo.'),
       why: AMBIGUOUS_BASIS,
       openable: false,
     };
@@ -95,7 +96,7 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
     return {
       tone: 'info',
       statusLabel: 'Referencia por nombre',
-      summary: `${formatNumber(tool.policy_count ?? 0)} políticas de SIA nombran a la persona por usuario o por rol de Identity.`,
+      summary: t('{n} políticas de SIA nombran a la persona por usuario o por rol de Identity.', { n: formatNumber(tool.policy_count ?? 0) }),
       why: SIA_BASIS,
       openable: false,
     };
@@ -103,7 +104,7 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
   const suspended = source === 'pam' && tool.user?.suspended;
   return {
     tone: 'success',
-    statusLabel: suspended ? 'Vinculado · suspendido' : 'Vinculado por correo',
+    statusLabel: suspended ? t('Vinculado · suspendido') : t('Vinculado por correo'),
     summary: source === 'pam' ? pamCopy(tool) : source === 'identity' ? identityCopy(tool) : netskopeCopy(tool),
     why: EMAIL_BASIS,
     // Identity and PAM are one node in Relaciones: the PAM tool opens it.

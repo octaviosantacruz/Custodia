@@ -12,6 +12,7 @@ import { groupSyncRunsByToolCycle, syncStatusLabel, syncToolLabel } from '../lib
 import { buildSyncTimeline } from '../lib/sync-timeline';
 import { SyncRunsTimeline } from './sync-runs-timeline';
 import './sync-runs-view.css';
+import { t } from '../i18n/index.ts';
 
 function statusTone(status: string): 'success' | 'warning' | 'danger' | 'info' {
   if (status === 'completed') return 'success';
@@ -36,13 +37,13 @@ function runDescription(group: ReturnType<typeof groupSyncRunsByToolCycle<Ingest
     const failed = group.affectedComponents.filter((component) => component.status === 'failed').length;
     const partial = group.affectedComponents.length - failed;
     return [
-      failed ? `${formatNumber(failed)} ${failed === 1 ? 'componente fallido' : 'componentes fallidos'}` : '',
+      failed ? `${formatNumber(failed)} ${failed === 1 ? t('componente fallido') : t('componentes fallidos')}` : '',
       partial ? `${formatNumber(partial)} ${partial === 1 ? 'parcial' : 'parciales'}` : '',
     ].filter(Boolean).join(' · ');
   }
   if (group.status === 'completed') {
     const completed = group.components.filter((component) => component.status === 'completed').length;
-    return `${formatNumber(completed)} ${completed === 1 ? 'componente completado' : 'componentes completados'}`;
+    return `${formatNumber(completed)} ${completed === 1 ? t('componente completado') : t('componentes completados')}`;
   }
   const activeMessage = group.runs.find((run) => run.status === 'running' && run.status_message)?.status_message;
   if (activeMessage) return activeMessage;
@@ -55,9 +56,9 @@ function stageDuration(ms: number): string {
 }
 
 const STAGE_STATUS: Record<SyncStage['status'], { label: string; tone: 'success' | 'warning' | 'danger' | 'neutral' }> = {
-  completed: { label: 'Completada', tone: 'success' },
-  failed: { label: 'Fallida', tone: 'danger' },
-  skipped: { label: 'Omitida', tone: 'neutral' },
+  completed: { label: t('Completada'), tone: 'success' },
+  failed: { label: t('Fallida'), tone: 'danger' },
+  skipped: { label: t('Omitida'), tone: 'neutral' },
 };
 
 /** Per-layer outcome of one run. An optional layer that failed does not fail
@@ -82,17 +83,17 @@ function RunStages({ runId, label, status, source }: { runId: string; label: str
     <table className="sync-run-component-table sync-run-stage-table" aria-label={`Capas de ${label}`}>
       <colgroup><col /><col /><col /><col /><col /><col /></colgroup>
       <thead><tr>
-        <th scope="col">Capa</th><th scope="col">Tipo</th><th scope="col">Estado</th><th scope="col" className="sync-run-objects">Filas</th><th scope="col">Detalle</th><th scope="col">Historial reciente</th>
+        <th scope="col">{t('Capa')}</th><th scope="col">{t('Tipo')}</th><th scope="col">{t('Estado')}</th><th scope="col" className="sync-run-objects">{t('Filas')}</th><th scope="col">{t('Detalle')}</th><th scope="col">{t('Historial reciente')}</th>
       </tr></thead>
       <tbody>{stages.map((stage) => {
         const view = STAGE_STATUS[stage.status];
         return <tr key={stage.stage}>
           <th scope="row">{stage.stage.replaceAll('_', ' ')}</th>
-          <td>{stage.required ? 'Obligatoria' : 'Opcional'}</td>
+          <td>{stage.required ? t('Obligatoria') : t('Opcional')}</td>
           <td><StatusBadge tone={view.tone}>{view.label}</StatusBadge></td>
           <td className="sync-run-objects">{stage.item_count === null ? '—' : formatNumber(stage.item_count)}</td>
           <td className="sync-run-stage">{stage.status === 'failed'
-            ? <>{stage.error_kind}<small>{stage.required ? 'La corrida se detuvo sin escribir.' : 'No se retiró lo que esta capa gobierna.'}</small></>
+            ? <>{stage.error_kind}<small>{stage.required ? t('La corrida se detuvo sin escribir.') : t('No se retiró lo que esta capa gobierna.')}</small></>
             : stage.status === 'skipped' ? stage.detail || 'No aplica'
               : stageDuration(stage.duration_ms)}</td>
           <td className="sync-run-stage">{history[stage.stage] ? <>{history[stage.stage].runs} {history[stage.stage].runs === 1 ? 'corrida' : 'corridas'} · mediana {stageDuration(history[stage.stage].medianDurationMs)}{history[stage.stage].lastItemCount === null ? '' : ` · ${formatNumber(history[stage.stage].lastItemCount as number)} filas`}{history[stage.stage].failedRuns ? <small>{history[stage.stage].failedRuns} con fallo</small> : null}</> : '—'}</td>
@@ -105,12 +106,12 @@ function RunStages({ runId, label, status, source }: { runId: string; label: str
 function RunComponentDetails({ group }: { group: ReturnType<typeof groupSyncRunsByToolCycle<IngestionRun>>[number] }) {
   const [open, setOpen] = useState(false);
   return <details className="sync-run-components" onToggle={(event) => setOpen(event.currentTarget.open)}>
-    <summary>Detalle por componente</summary>
+    <summary>{t('Detalle por componente')}</summary>
     <div className="sync-run-table-wrap">
       <table className="sync-run-component-table" aria-label={`Componentes de ${syncToolLabel(group.tool)}`}>
         <colgroup><col /><col /><col /><col /><col /></colgroup>
         <thead><tr>
-          <th scope="col">Componente</th><th scope="col">Estado</th><th scope="col" className="sync-run-objects">Objetos</th><th scope="col">Etapa</th><th scope="col">Última actualización</th>
+          <th scope="col">{t('Componente')}</th><th scope="col">{t('Estado')}</th><th scope="col" className="sync-run-objects">{t('Objetos')}</th><th scope="col">{t('Etapa')}</th><th scope="col">{t('Última actualización')}</th>
         </tr></thead>
         <tbody>{group.components.map((component) => {
           const run = component.runs.find((candidate) => candidate.status === component.status) ?? component.runs[0];
@@ -123,7 +124,7 @@ function RunComponentDetails({ group }: { group: ReturnType<typeof groupSyncRuns
             <th scope="row">{component.label}</th>
             <td><StatusBadge tone={statusTone(component.status)}>{syncStatusLabel(component.status)}</StatusBadge></td>
             <td className="sync-run-objects">{formatNumber(component.objects)}</td>
-            <td className="sync-run-stage">{stage}{run.error_count ? <small>{formatNumber(run.error_count)} {run.error_count === 1 ? 'error registrado' : 'errores registrados'}</small> : null}</td>
+            <td className="sync-run-stage">{stage}{run.error_count ? <small>{formatNumber(run.error_count)} {run.error_count === 1 ? t('error registrado') : t('errores registrados')}</small> : null}</td>
             <td className={stale ? 'sync-run-update is-stale' : 'sync-run-update'}>
               {component.status === 'running'
                 ? <span>{run.heartbeat_at ? `Última señal ${relativeTime(run.heartbeat_at).toLowerCase()}` : 'Sin señal del worker'}</span>
@@ -166,18 +167,18 @@ export function SyncRunsView({ onUnauthorized }: { onUnauthorized?: () => void }
   }, [hasActiveRuns, reloadKey]);
 
   return <section className="activity-panel sync-runs-panel">
-    <div className="activity-meta"><span><Activity size={14} /> Estado operativo de la cola</span><strong>{formatNumber(groups.length)} ciclos recientes</strong></div>
-    <p className="operational-errors-note">Cada ciclo agrupa las corridas de una plataforma. Abrí el detalle para ver el estado y la etapa de cada componente.</p>
+    <div className="activity-meta"><span><Activity size={14} /> {t('Estado operativo de la cola')}</span><strong>{formatNumber(groups.length)} ciclos recientes</strong></div>
+    <p className="operational-errors-note">{t('Cada ciclo agrupa las corridas de una plataforma. Abrí el detalle para ver el estado y la etapa de cada componente.')}</p>
     {!loading && !error ? <SyncRunsTimeline rows={buildSyncTimeline(groups)} /> : null}
     <div className="sync-runs-list">
-      {loading ? <StateBlock variant="loading" title="Cargando sincronizaciones…" />
-        : error ? <StateBlock variant="error" title="No se pudieron cargar las sincronizaciones" hint={error} action={<button type="button" className="button subtle" onClick={() => { setLoading(true); setReloadKey((value) => value + 1); }}>Reintentar</button>} />
+      {loading ? <StateBlock variant="loading" title={t('Cargando sincronizaciones…')} />
+        : error ? <StateBlock variant="error" title={t('No se pudieron cargar las sincronizaciones')} hint={error} action={<button type="button" className="button subtle" onClick={() => { setLoading(true); setReloadKey((value) => value + 1); }}>{t('Reintentar')}</button>} />
           : groups.length ? groups.map((group) => <article className={`sync-run-item is-${group.status}`} key={group.runs[0].run_id}>
               <div className="sync-run-status" aria-hidden="true">{group.status === 'running' ? <LoaderCircle size={18} className="spin" /> : group.status === 'completed' ? <CheckCircle2 size={18} /> : group.status === 'failed' || group.status === 'partial' ? <CircleAlert size={18} /> : <Clock3 size={18} />}</div>
               <div className="sync-run-main">
                 <div className="sync-run-heading"><strong>{syncToolLabel(group.tool)}</strong><StatusBadge tone={statusTone(group.status)}>{syncStatusLabel(group.status)}</StatusBadge>{[...new Set(group.affectedComponents.map((component) => component.status))].filter((status) => status !== group.status).map((status) => <StatusBadge key={status} tone={statusTone(status)}>{syncStatusLabel(status)}</StatusBadge>)}</div>
                 <span>{runDescription(group)}</span>
-                <small>{group.automatic ? 'Automática' : 'Manual'} · <DateTime value={group.latest_at} /> · {formatNumber(group.runs.length)} {group.runs.length === 1 ? 'corrida' : 'corridas'}</small>
+                <small>{group.automatic ? t('Automática') : t('Manual')} · <DateTime value={group.latest_at} /> · {formatNumber(group.runs.length)} {group.runs.length === 1 ? 'corrida' : 'corridas'}</small>
               </div>
               <div className="sync-run-heartbeat">
                 <strong>{heartbeatLabel(group)}</strong>
@@ -185,7 +186,7 @@ export function SyncRunsView({ onUnauthorized }: { onUnauthorized?: () => void }
               </div>
               <RunComponentDetails group={group} />
             </article>)
-            : <StateBlock variant="empty" title="Sin sincronizaciones registradas" />}
+            : <StateBlock variant="empty" title={t('Sin sincronizaciones registradas')} />}
     </div>
   </section>;
 }

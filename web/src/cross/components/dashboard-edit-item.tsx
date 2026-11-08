@@ -6,6 +6,7 @@ import { DASHBOARD_SIZE_LABELS, type DashboardWidgetSize } from '../lib/dashboar
 import type { ChartMode } from '../lib/chart-mode';
 import { ChartModeSwitch } from './chart-mode-switch';
 import './dashboard-edit-item.css';
+import { t } from '../i18n/index.ts';
 
 const SIZE_OPTIONS: DashboardWidgetSize[] = ['sm', 'md', 'lg'];
 const SETTINGS_OPEN_EVENT = 'dashboard-settings-open';
@@ -19,9 +20,9 @@ export function DashboardEditToolbar({ label, hint, dirty, saving, onCancel, onS
   onSave: () => void;
 }) {
   return <div className="dashboard-edit-bar" role="toolbar" aria-label={label}>
-    <span>{dirty ? 'Cambios sin guardar' : 'Sin cambios'}{hint ? ` · ${hint}` : ''}</span>
-    <button type="button" className="button subtle" onClick={onCancel} disabled={saving}>Cancelar</button>
-    <button type="button" className="button primary" onClick={onSave} disabled={saving || !dirty}>{saving ? 'Guardando…' : 'Guardar vista'}</button>
+    <span>{dirty ? t('Cambios sin guardar') : t('Sin cambios')}{hint ? ` · ${hint}` : ''}</span>
+    <button type="button" className="button subtle" onClick={onCancel} disabled={saving}>{t('Cancelar')}</button>
+    <button type="button" className="button primary" onClick={onSave} disabled={saving || !dirty}>{saving ? t('Guardando…') : t('Guardar vista')}</button>
   </div>;
 }
 
@@ -56,19 +57,19 @@ function DashboardSettingsPanel({ id, title, size, showSize, saving, mode, onMod
   return <div ref={panelRef} className="dashboard-settings-panel" style={top === null ? undefined : { top }} role="dialog" aria-modal="false" aria-label={`Configurar ${title}`}
     onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); onClose(); } }}>
     <div className="dashboard-settings-head">
-      <div><small>Configurar</small><h3>{title}</h3></div>
-      <button ref={closeRef} type="button" className="icon-button" aria-label="Cerrar configuración" onClick={onClose}><X size={16} /></button>
+      <div><small>{t('Configurar')}</small><h3>{title}</h3></div>
+      <button ref={closeRef} type="button" className="icon-button" aria-label={t('Cerrar configuración')} onClick={onClose}><X size={16} /></button>
     </div>
     <div className="dashboard-settings-body">
-      {mode && onMode ? <section><h4>Presentación</h4><ChartModeSwitch value={mode} onChange={onMode} label={`Presentación de ${title}`} disabled={saving} /></section> : null}
-      {showSize && size ? <section><h4>Tamaño</h4>
+      {mode && onMode ? <section><h4>{t('Presentación')}</h4><ChartModeSwitch value={mode} onChange={onMode} label={`Presentación de ${title}`} disabled={saving} /></section> : null}
+      {showSize && size ? <section><h4>{t('Tamaño')}</h4>
         <div className="dashboard-widget-size" role="group" aria-label={`Tamaño de ${title}`}>
           {SIZE_OPTIONS.map((option) => <button key={option} type="button" className={`dashboard-size-chip ${size === option ? 'selected' : ''}`.trim()} aria-pressed={size === option} disabled={saving} onClick={() => onSize(id, option)}><strong>{DASHBOARD_SIZE_LABELS[option]}</strong></button>)}
         </div>
       </section> : null}
       {children}
     </div>
-    <div className="dashboard-settings-foot"><button type="button" className="button primary" onClick={onClose}>Listo</button></div>
+    <div className="dashboard-settings-foot"><button type="button" className="button primary" onClick={onClose}>{t('Listo')}</button></div>
   </div>;
 }
 
@@ -132,14 +133,14 @@ export function DashboardEditItem({ id, title, index, count, size, saving, showS
     <div className="dashboard-edit-controls">
       <span className="dashboard-edit-handle" aria-hidden="true"><GripVertical size={14} /></span>
       <strong className="dashboard-edit-title">{title}</strong>
-      <button ref={configureRef} type="button" className="button subtle dashboard-edit-configure" aria-label={`Configurar ${title}`} aria-haspopup="dialog" aria-expanded={configuring} disabled={saving} onClick={() => (configuring ? closeSettings() : openSettings())}><SlidersHorizontal size={13} aria-hidden="true" /> Configurar</button>
+      <button ref={configureRef} type="button" className="button subtle dashboard-edit-configure" aria-label={`Configurar ${title}`} aria-haspopup="dialog" aria-expanded={configuring} disabled={saving} onClick={() => (configuring ? closeSettings() : openSettings())}><SlidersHorizontal size={13} aria-hidden="true" /> {t('Configurar')}</button>
       <div className="dashboard-edit-menu" ref={menu.ref}>
         <button type="button" className="icon-button" aria-label={`Más acciones de ${title}`} aria-haspopup="menu" aria-expanded={menu.open} aria-controls={menu.open ? menuId : undefined} disabled={saving} onClick={() => menu.setOpen((current) => !current)}><EllipsisVertical size={15} aria-hidden="true" /></button>
         {menu.open ? <div className="dashboard-edit-menu-list" id={menuId} role="menu" aria-label={`Acciones de ${title}`}>
-          {onDuplicate ? <button type="button" role="menuitem" aria-label={`Duplicar ${title}`} onClick={choose(() => onDuplicate(id))}><Copy size={14} aria-hidden="true" /> Duplicar</button> : null}
-          <button type="button" role="menuitem" aria-label={`Mover ${title} arriba`} disabled={index === 0} onClick={choose(() => onMove(id, -1))}><ChevronUp size={14} aria-hidden="true" /> Mover arriba</button>
-          <button type="button" role="menuitem" aria-label={`Mover ${title} abajo`} disabled={index === count - 1} onClick={choose(() => onMove(id, 1))}><ChevronDown size={14} aria-hidden="true" /> Mover abajo</button>
-          <button type="button" role="menuitem" className="danger" aria-label={`Quitar ${title}`} onClick={choose(() => onRemove(id))}><Trash2 size={14} aria-hidden="true" /> Quitar</button>
+          {onDuplicate ? <button type="button" role="menuitem" aria-label={`Duplicar ${title}`} onClick={choose(() => onDuplicate(id))}><Copy size={14} aria-hidden="true" /> {t('Duplicar')}</button> : null}
+          <button type="button" role="menuitem" aria-label={`Mover ${title} arriba`} disabled={index === 0} onClick={choose(() => onMove(id, -1))}><ChevronUp size={14} aria-hidden="true" /> {t('Mover arriba')}</button>
+          <button type="button" role="menuitem" aria-label={`Mover ${title} abajo`} disabled={index === count - 1} onClick={choose(() => onMove(id, 1))}><ChevronDown size={14} aria-hidden="true" /> {t('Mover abajo')}</button>
+          <button type="button" role="menuitem" className="danger" aria-label={`Quitar ${title}`} onClick={choose(() => onRemove(id))}><Trash2 size={14} aria-hidden="true" /> {t('Quitar')}</button>
         </div> : null}
       </div>
     </div>

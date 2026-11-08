@@ -9,6 +9,7 @@ import { StateBlock } from '../../../cross/components/state-block';
 import type { PamComponentRow } from '../types/pam';
 import { usePamRefreshKey } from '../../shared/refresh-context';
 import './pam-technical-catalog.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 type PamSystemHealthProps = {
   authChecked: boolean;
@@ -47,23 +48,23 @@ export function PamSystemHealthWorkspace({ authChecked, authenticated, onUnautho
     return () => controller.abort();
   }, [authChecked, authenticated, onError, onUnauthorized, refreshKey]);
 
-  return <section className="list-panel database-surface pam-platforms-panel" aria-label="Salud de componentes PAM">
+  return <section className="list-panel database-surface pam-platforms-panel" aria-label={t('Salud de componentes PAM')}>
     <div className="pam-platforms-heading">
-      <div><div className="pam-health-title"><h3>Salud de componentes</h3><HelpHint label="Salud de componentes PAM"><p>Conteos agregados por tipo de componente (Portal, CPM, PSM/SSH); no atribuye IP, usuario técnico ni capacidad de host.</p></HelpHint></div><p>Conectividad y versión de Portal, CPM y PSM/SSH observadas por CyberArk. Sin métricas de host ni secretos.</p></div>
+      <div><div className="pam-health-title"><h3>{t('Salud de componentes')}</h3><HelpHint label={t('Salud de componentes PAM')}><p>Conteos agregados por tipo de componente (Portal, CPM, PSM/SSH); no atribuye IP, usuario técnico ni capacidad de host.</p></HelpHint></div><p>{t('Conectividad y versión de Portal, CPM y PSM/SSH observadas por CyberArk. Sin métricas de host ni secretos.')}</p></div>
       <span className="database-toolbar-count">{formatNumber(rows.length)} {rows.length === 1 ? "componente" : "componentes"}</span>
     </div>
     <div className="pam-health-list">
-      {loading ? <StateBlock variant="loading" title="Cargando salud de componentes…" />
-        : error ? <StateBlock variant="error" title="No se pudo cargar la salud de componentes" hint={error} />
+      {loading ? <StateBlock variant="loading" title={t('Cargando salud de componentes…')} />
+        : error ? <StateBlock variant="error" title={t('No se pudo cargar la salud de componentes')} hint={error} />
           : rows.length ? rows.map((component) => {
             const allConnected = component.total_count > 0 && component.connected_count === component.total_count;
             return <article className={`pam-health-item${allConnected ? ' is-healthy' : ' is-attention'}`} key={component.object_id}>
               <div className="pam-health-component"><Activity size={16} aria-hidden /><div><strong>{COMPONENT_LABELS[component.display_name] || component.display_name}</strong><span>{component.description || 'Sin descripción'}</span></div></div>
-              <div className="pam-health-fact"><span>Conectividad</span>{allConnected ? <strong className="status-pill status-active"><CheckCircle2 size={12} aria-hidden /> {formatNumber(component.connected_count)} de {formatNumber(component.total_count)} conectados</strong> : <strong className="status-pill status-warning"><XCircle size={12} aria-hidden /> {formatNumber(component.connected_count)} de {formatNumber(component.total_count)} conectados</strong>}</div>
-              <div className="pam-health-fact"><span>Versiones</span><strong>{versionListLabel(component.instance_versions)}</strong></div>
-              <div className="pam-health-fact"><span>Última observación</span><strong><DateTime value={epochSecondsToIso(component.latest_logon_at)} missing="Sin observación registrada" /></strong></div>
+              <div className="pam-health-fact"><span>{t('Conectividad')}</span>{allConnected ? <strong className="status-pill status-active"><CheckCircle2 size={12} aria-hidden /> {formatNumber(component.connected_count)} de {formatNumber(component.total_count)} conectados</strong> : <strong className="status-pill status-warning"><XCircle size={12} aria-hidden /> {formatNumber(component.connected_count)} de {formatNumber(component.total_count)} conectados</strong>}</div>
+              <div className="pam-health-fact"><span>{t('Versiones')}</span><strong>{versionListLabel(component.instance_versions)}</strong></div>
+              <div className="pam-health-fact"><span>{t('Última observación')}</span><strong><DateTime value={epochSecondsToIso(component.latest_logon_at)} missing="Sin observación registrada" /></strong></div>
             </article>;
-          }) : <StateBlock variant="empty" title="Todavía no hay componentes PAM sincronizados" />}
+          }) : <StateBlock variant="empty" title={t('Todavía no hay componentes PAM sincronizados')} />}
     </div>
   </section>;
 }

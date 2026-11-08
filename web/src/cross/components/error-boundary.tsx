@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import './error-boundary.css';
+import { t } from '../i18n/index.ts';
 
 type Props = { children: ReactNode };
 type State = { hasError: boolean };
@@ -20,9 +21,9 @@ export class ErrorBoundary extends Component<Props, State> {
     return <main className="app-error-state">
       <div role="alert">
         <p className="eyebrow">CUSTODIA</p>
-        <h1>Ocurrió un error inesperado</h1>
-        <p>La vista no pudo cargarse. Podés reintentar sin perder los datos guardados.</p>
-        <button className="button primary" type="button" onClick={() => window.location.reload()}>Reintentar</button>
+        <h1>{t('Ocurrió un error inesperado')}</h1>
+        <p>{t('La vista no pudo cargarse. Podés reintentar sin perder los datos guardados.')}</p>
+        <button className="button primary" type="button" onClick={() => window.location.reload()}>{t('Reintentar')}</button>
       </div>
     </main>;
   }

@@ -6,11 +6,12 @@ import { grantUserRole, listPeople, revokeUserRole, roleAssignments, type User }
 import { StateBlock } from './state-block';
 import { TablePagination } from './table-pagination';
 import './role-members.css';
+import { t } from '../i18n/index.ts';
 
 type Props = { roleCode: string; roleName: string; count: number; canAssign: boolean; canGrant?: boolean; currentActorId?: string; onChanged: () => void; onNotice: (message: string) => void; onError: (message: string) => void };
 
 const PAGE_SIZE = 20;
-const accountLabel = (user: User) => user.auth_source === 'oidc' ? 'Okta' : user.is_active ? 'Local' : 'Local desactivado';
+const accountLabel = (user: User) => user.auth_source === 'oidc' ? 'Okta' : user.is_active ? t('Local') : t('Local desactivado');
 
 /** ACCESS-UI-001: "Miembros (N)" opens a side panel listing who has the role; Custodia assignments are added and removed there. */
 export function RoleMembers(props: Props) {
@@ -66,23 +67,23 @@ function MembersPanel({ roleCode, roleName, canAssign, canGrant = canAssign, cur
 
   return <div className="role-members-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <div ref={panelRef} className="role-members-panel" role="dialog" aria-modal="true" aria-labelledby="role-members-title" tabIndex={-1}>
-      <header><h3 id="role-members-title">Miembros de {roleName}</h3><button type="button" className="icon-button" aria-label="Cerrar miembros" onClick={onClose}><X size={16} /></button></header>
+      <header><h3 id="role-members-title">Miembros de {roleName}</h3><button type="button" className="icon-button" aria-label={t('Cerrar miembros')} onClick={onClose}><X size={16} /></button></header>
       {canGrant && <div className="role-members-add">
         <label className="sr-only" htmlFor="role-member-search">Agregar miembro a {roleName}</label>
-        <input id="role-member-search" type="search" placeholder="Agregar por nombre o correo" value={query} disabled={busy} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
-        {candidates.length > 0 && <ul aria-label="Personas para agregar">{candidates.map((user) => <li key={user.actor_id}>
+        <input id="role-member-search" type="search" placeholder={t('Agregar por nombre o correo')} value={query} disabled={busy} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
+        {candidates.length > 0 && <ul aria-label={t('Personas para agregar')}>{candidates.map((user) => <li key={user.actor_id}>
           <span>{user.display_name} <small>{user.email} · {accountLabel(user)}</small></span>
           <button type="button" className="icon-button" disabled={busy} aria-label={`Agregar ${user.display_name} (${accountLabel(user)})`} onClick={() => void change(user, 'grant')}><Plus size={14} /></button>
         </li>)}</ul>}
       </div>}
-      {error ? <StateBlock compact variant="error" title="No se pudieron cargar los miembros" hint={error} action={<button className="button subtle" type="button" onClick={() => setAttempt((value) => value + 1)}>Reintentar</button>} />
-        : !rows ? <StateBlock compact variant="loading" title="Cargando miembros" />
-          : !rows.length ? <p className="role-members-empty">Nadie tiene este rol.</p>
+      {error ? <StateBlock compact variant="error" title={t('No se pudieron cargar los miembros')} hint={error} action={<button className="button subtle" type="button" onClick={() => setAttempt((value) => value + 1)}>{t('Reintentar')}</button>} />
+        : !rows ? <StateBlock compact variant="loading" title={t('Cargando miembros')} />
+          : !rows.length ? <p className="role-members-empty">{t('Nadie tiene este rol.')}</p>
             : <ul className="role-members-list" aria-label={`Miembros de ${roleName}`}>{rows.map((user) => {
               const source = roleAssignments(user).find((assignment) => assignment.role_code === roleCode)?.source;
               const removable = canAssign && source === 'manual' && user.actor_id !== currentActorId;
               return <li key={user.actor_id}>
-                <span>{user.display_name} <small>{user.email || 'Sin correo'} · {accountLabel(user)}{source === 'oidc' ? ' · por Okta' : ''}</small></span>
+                <span>{user.display_name} <small>{user.email || 'Sin correo'} · {accountLabel(user)}{source === 'oidc' ? t(' · por Okta') : ''}</small></span>
                 {removable ? <button type="button" className="icon-button" disabled={busy} aria-label={`Quitar ${roleName} a ${user.display_name}`} onClick={() => void change(user, 'revoke')}><X size={14} /></button> : null}
               </li>;
             })}</ul>}

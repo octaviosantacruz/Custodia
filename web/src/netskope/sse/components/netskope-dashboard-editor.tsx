@@ -9,6 +9,7 @@ import { netskopeChartHasMode, netskopeChartMode, netskopeDefaultChartMode, nets
 import { groupNetskopeWidgetDefinitions, netskopeWidgetPickerDetails, topBuckets as topAaBuckets } from '../lib/netskope-dashboard-picker';
 import type { NetskopeAlertWindow, NetskopeDeviceFacets, NetskopeMetricBucket, NetskopeSelectedMetrics as NetskopeMetrics, NetskopeWidgetFilterKey, NetskopeWidgetFilters, NetskopeWidgetInstance, NetskopeWidgetSize } from '../types/netskope';
 import '../../../cross/components/dashboard-widget.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 const FILTER_ALL_LABELS: Record<NetskopeWidgetFilterKey, string> = {
   os: 'Todos los SO',
@@ -71,7 +72,7 @@ export function NetskopeEditableItem({ instance, index, count, saving, facets, s
     onAnnounce={onAnnounce}
     mode={netskopeChartHasMode(instance.id) ? netskopeChartMode(instance) : undefined}
     onMode={(mode) => onStyle(instance.id, mode)}
-    settings={definition?.filterKeys.length ? <section><h4>Filtros</h4><div className="netskope-widget-filters">
+    settings={definition?.filterKeys.length ? <section><h4>{t('Filtros')}</h4><div className="netskope-widget-filters">
       {definition.filterKeys.map((key) => <label key={key}><span>{FILTER_LABELS[key]}</span><CompactSelect className="netskope-widget-filter" ariaLabel={FILTER_ARIA_LABELS[key]} value={filters[key] ?? ''} onChange={(value) => onFilters(instance.id, { ...filters, [key]: value })} options={filterOptions(key, facets, filters[key] ?? '')} /></label>)}
     </div></section> : undefined}
   >{children}</DashboardEditItem>;
@@ -125,7 +126,7 @@ export function NetskopeAddWidget({ kind, definitions, addedIds, disabled, limit
         previewKind,
         previewLabel: details.previewLabel,
         previewBuckets: details.previewBuckets ?? topAaBuckets(aaPreviews?.[option.id]),
-        visualization: previewKind === 'number' ? 'Indicador' : previewKind === 'donut' ? 'Dona' : 'Barras',
+        visualization: previewKind === 'number' ? 'Indicador' : previewKind === 'donut' ? t('Dona') : t('Barras'),
         added: addedIds.includes(option.id),
         recommended: NETSKOPE_RECOMMENDED_IDS.has(option.id),
         unavailable: details.unavailable,
@@ -134,9 +135,9 @@ export function NetskopeAddWidget({ kind, definitions, addedIds, disabled, limit
   }));
   return <DashboardWidgetPicker
     kind={kind}
-    eyebrow={kind === 'data' ? 'DATOS CLAVE' : 'INVENTARIO Y POSTURA'}
-    heading={kind === 'data' ? 'Elegí un dato para tu tablero' : 'Elegí un gráfico para tu tablero'}
-    helper={kind === 'data' ? 'Indicadores rápidos para saber qué está pasando ahora.' : 'Comparaciones visuales para encontrar patrones y desvíos.'}
+    eyebrow={kind === 'data' ? t('DATOS CLAVE') : t('INVENTARIO Y POSTURA')}
+    heading={kind === 'data' ? t('Elegí un dato para tu tablero') : t('Elegí un gráfico para tu tablero')}
+    helper={kind === 'data' ? t('Indicadores rápidos para saber qué está pasando ahora.') : t('Comparaciones visuales para encontrar patrones y desvíos.')}
     groups={groups}
     disabled={disabled}
     limitReached={limitReached}

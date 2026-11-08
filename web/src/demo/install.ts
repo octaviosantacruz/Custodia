@@ -6,8 +6,9 @@
  */
 import { createMockApi } from './mock-api.ts';
 import { withAcmeData } from './acme-api.ts';
+import { t } from '../cross/i18n/index.ts';
 
-export const DEMO_USER = { actor_id: 'demo', name: 'Demo', email: 'demo@acme.example', roles: ['reader'], role_names: ['Lector'] };
+export const DEMO_USER = { actor_id: 'demo', name: 'Demo', email: 'demo@acme.example', roles: ['reader'], role_names: [t('Lector')] };
 
 export function installDemoApi() {
   const handle = withAcmeData(createMockApi({

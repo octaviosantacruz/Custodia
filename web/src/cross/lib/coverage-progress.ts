@@ -1,9 +1,10 @@
 import type { CoverageBlock, CoveragePoint } from '../types/connection';
 import type { StackedSegment } from './stacked-bar';
+import { localeTag } from '../i18n/index.ts';
 
 /** "X de N": the share is never shown without its denominator. */
 export function xOfN(count: number, total: number): string {
-  return `${count.toLocaleString('es-AR')} de ${total.toLocaleString('es-AR')}`;
+  return `${count.toLocaleString(localeTag())} de ${total.toLocaleString(localeTag())}`;
 }
 
 /** The readings of one capability as the parts of N, from the best to the worst. */

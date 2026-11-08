@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreHorizontal } from 'lucide-react';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type OverflowAction = {
   id: string;
@@ -152,7 +153,7 @@ export function OverflowActions({ actions, className = '', ariaLabel, minVisible
       aria-label={`Más acciones: ${ariaLabel}`}
       aria-haspopup="menu"
       aria-expanded={open}
-      title="Más acciones"
+      title={t('Más acciones')}
       onClick={() => setOpen((current) => !current)}
       onKeyDown={(event) => {
         if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {

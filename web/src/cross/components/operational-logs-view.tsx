@@ -8,13 +8,14 @@ import { CompactSelect } from './compact-select';
 import { TablePagination } from './table-pagination';
 import { HelpHint } from './help-hint';
 import { PageVolumeHistogram } from './page-volume-histogram';
+import { t } from '../i18n/index.ts';
 
 const SOURCE_LABELS: Record<string, string> = {
   cyberark: 'CyberArk', identity_administration: 'Identity', sia: 'SIA', access: 'Access', netskope: 'Netskope', ingestion: 'Ingesta',
 };
 
 function sourceLabel(source: string): string { return SOURCE_LABELS[source] || source; }
-function levelLabel(level: OperationalLogEntry['level']): string { return level === 'error' ? 'Error' : level === 'warning' ? 'Advertencia' : 'Info'; }
+function levelLabel(level: OperationalLogEntry['level']): string { return level === 'error' ? 'Error' : level === 'warning' ? t('Advertencia') : t('Info'); }
 
 export function OperationalLogsView({ onUnauthorized }: { onUnauthorized?: () => void }) {
   const [rows, setRows] = useState<OperationalLogEntry[]>([]);
@@ -45,12 +46,12 @@ export function OperationalLogsView({ onUnauthorized }: { onUnauthorized?: () =>
 
   const icon = (entry: OperationalLogEntry) => entry.level === 'error' ? <XCircle size={15} /> : entry.level === 'warning' ? <TriangleAlert size={15} /> : <Info size={15} />;
   return <section className="activity-panel operational-logs-panel">
-    <div className="activity-toolbar operational-logs-toolbar"><label className="search-box"><Search size={16} aria-hidden="true" /><input type="search" aria-label="Buscar logs operativos" value={q} onChange={(event) => startQuery(() => { setQ(event.target.value); setPage(0); })} placeholder="Fuente, evento o mensaje" /></label><CompactSelect ariaLabel="Filtrar por nivel" value={level} onChange={(value) => startQuery(() => { setLevel(value); setPage(0); })} options={[{ value: '', label: 'Todos los niveles' }, { value: 'info', label: 'Info' }, { value: 'warning', label: 'Advertencias' }, { value: 'error', label: 'Errores' }]} /><CompactSelect ariaLabel="Filtrar por fuente" value={source} onChange={(value) => startQuery(() => { setSource(value); setPage(0); })} options={[{ value: '', label: 'Todas las fuentes' }, { value: 'cyberark', label: 'CyberArk' }, { value: 'netskope', label: 'Netskope' }, { value: 'identity_administration', label: 'Identity' }, { value: 'sia', label: 'SIA' }, { value: 'access', label: 'Access' }]} /></div>
-      <div className="activity-meta"><span><Info size={14} /> Logs operativos · eventos de workers y sync</span><strong>{formatNumber(total)} eventos</strong><HelpHint label="Alcance y privacidad de los logs"><p>Vista segura para diagnóstico. No presenta el archivo crudo, tokens, headers ni payloads. El histograma resume sólo las filas de esta página y estos filtros.</p></HelpHint></div>
-      <PageVolumeHistogram timestamps={rows.map((row) => row.occurred_at)} state={error ? 'error' : loading || !requestReady ? 'loading' : 'ready'} title="Volumen de esta página" help="Agrupa por día UTC los logs de la página cargada, con los filtros actuales. No infiere el volumen total de la ventana." />
-    <div className="activity-table-wrap"><table className="activity-table"><thead><tr><th>Fecha</th><th>Nivel</th><th>Fuente</th><th>Evento</th><th>Detalle</th></tr></thead><tbody>
-      {loading ? <tr><td colSpan={5}><StateBlock variant="loading" title="Cargando logs operativos…" /></td></tr>
-        : error ? <tr><td colSpan={5}><StateBlock variant="error" title="No se pudieron cargar los logs" hint={error} action={<button type="button" className="button subtle" onClick={() => setReloadKey((value) => value + 1)}>Reintentar</button>} /></td></tr>
+    <div className="activity-toolbar operational-logs-toolbar"><label className="search-box"><Search size={16} aria-hidden="true" /><input type="search" aria-label={t('Buscar logs operativos')} value={q} onChange={(event) => startQuery(() => { setQ(event.target.value); setPage(0); })} placeholder={t('Fuente, evento o mensaje')} /></label><CompactSelect ariaLabel={t('Filtrar por nivel')} value={level} onChange={(value) => startQuery(() => { setLevel(value); setPage(0); })} options={[{ value: '', label: t('Todos los niveles') }, { value: 'info', label: t('Info') }, { value: 'warning', label: t('Advertencias') }, { value: 'error', label: t('Errores') }]} /><CompactSelect ariaLabel={t('Filtrar por fuente')} value={source} onChange={(value) => startQuery(() => { setSource(value); setPage(0); })} options={[{ value: '', label: t('Todas las fuentes') }, { value: 'cyberark', label: t('CyberArk') }, { value: 'netskope', label: t('Netskope') }, { value: 'identity_administration', label: t('Identity') }, { value: 'sia', label: 'SIA' }, { value: 'access', label: t('Access') }]} /></div>
+      <div className="activity-meta"><span><Info size={14} /> {t('Logs operativos · eventos de workers y sync')}</span><strong>{formatNumber(total)} eventos</strong><HelpHint label={t('Alcance y privacidad de los logs')}><p>{t('Vista segura para diagnóstico. No presenta el archivo crudo, tokens, headers ni payloads. El histograma resume sólo las filas de esta página y estos filtros.')}</p></HelpHint></div>
+      <PageVolumeHistogram timestamps={rows.map((row) => row.occurred_at)} state={error ? 'error' : loading || !requestReady ? 'loading' : 'ready'} title={t('Volumen de esta página')} help="Agrupa por día UTC los logs de la página cargada, con los filtros actuales. No infiere el volumen total de la ventana." />
+    <div className="activity-table-wrap"><table className="activity-table"><thead><tr><th>{t('Fecha')}</th><th>{t('Nivel')}</th><th>{t('Fuente')}</th><th>{t('Evento')}</th><th>{t('Detalle')}</th></tr></thead><tbody>
+      {loading ? <tr><td colSpan={5}><StateBlock variant="loading" title={t('Cargando logs operativos…')} /></td></tr>
+        : error ? <tr><td colSpan={5}><StateBlock variant="error" title={t('No se pudieron cargar los logs')} hint={error} action={<button type="button" className="button subtle" onClick={() => setReloadKey((value) => value + 1)}>{t('Reintentar')}</button>} /></td></tr>
           : rows.length ? rows.map((row) => <tr key={row.log_id}>
               <td><span className="cell-stack"><time className="cell-lead" dateTime={row.occurred_at} title={dateTimeHint(row.occurred_at)}>{formatDate(row.occurred_at)}</time></span></td>
               <td><span className={`operational-log-level ${row.level}`}>{icon(row)} {levelLabel(row.level)}</span></td>
@@ -58,7 +59,7 @@ export function OperationalLogsView({ onUnauthorized }: { onUnauthorized?: () =>
               <td><code>{row.event}</code></td>
               <td><span className="cell-stack"><span className="cell-lead">{row.message}</span><span className="cell-sub">{row.run_id || 'Evento general'}</span></span></td>
             </tr>)
-            : <tr><td colSpan={5}><StateBlock variant={q || level || source ? 'no-results' : 'empty'} title={q || level || source ? 'Sin logs para estos filtros' : 'No hay logs operativos registrados'} /></td></tr>}
+            : <tr><td colSpan={5}><StateBlock variant={q || level || source ? 'no-results' : 'empty'} title={q || level || source ? t('Sin logs para estos filtros') : t('No hay logs operativos registrados')} /></td></tr>}
     </tbody></table></div>
      <TablePagination page={page} pageSize={pageSize} total={total} onPageChange={(nextPage) => {
        if (nextPage === page) return;

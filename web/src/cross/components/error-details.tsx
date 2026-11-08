@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertCircle, X } from 'lucide-react';
 import { type ErrorDetails } from '../lib/error-details';
 import { useDialogFocusTrap } from '../hooks/use-dialog-focus-trap';
+import { t } from '../i18n/index.ts';
 
 function suggestedAction({ status }: ErrorDetails): string {
   if (!status) return 'Revisá la conexión y volvé a intentar.';
@@ -25,18 +26,18 @@ export function ErrorDetailsButton({ details, label = 'Ver detalle técnico' }: 
       <section ref={dialogRef} className="confirm-dialog error-details-dialog" role="dialog" aria-modal="true" aria-labelledby="error-details-title" tabIndex={-1}>
         <div className="confirm-dialog-header">
           <div className="confirm-dialog-icon"><AlertCircle size={18} /></div>
-          <button className="icon-button" type="button" aria-label="Cerrar" title="Cerrar" onClick={() => setOpen(false)}><X size={16} /></button>
+          <button className="icon-button" type="button" aria-label={t('Cerrar')} title={t('Cerrar')} onClick={() => setOpen(false)}><X size={16} /></button>
         </div>
-        <h2 id="error-details-title">Detalle del error</h2>
+        <h2 id="error-details-title">{t('Detalle del error')}</h2>
         <dl className="error-details-list">
-          <div><dt>Tipo</dt><dd>{details.status ? `HTTP ${details.status}` : 'Error de red o del cliente'}</dd></div>
-          <div><dt>Endpoint</dt><dd>{details.path || 'No disponible'}</dd></div>
-          <div><dt>Referencia</dt><dd>{details.requestId || 'No disponible'}</dd></div>
-          <div><dt>Mensaje</dt><dd>{details.message}</dd></div>
-          <div><dt>Acción sugerida</dt><dd>{suggestedAction(details)}</dd></div>
+          <div><dt>{t('Tipo')}</dt><dd>{details.status ? `HTTP ${details.status}` : 'Error de red o del cliente'}</dd></div>
+          <div><dt>{t('Endpoint')}</dt><dd>{details.path || 'No disponible'}</dd></div>
+          <div><dt>{t('Referencia')}</dt><dd>{details.requestId || 'No disponible'}</dd></div>
+          <div><dt>{t('Mensaje')}</dt><dd>{details.message}</dd></div>
+          <div><dt>{t('Acción sugerida')}</dt><dd>{suggestedAction(details)}</dd></div>
         </dl>
         <div className="confirm-dialog-actions">
-          <button className="button primary" type="button" onClick={() => setOpen(false)}>Cerrar</button>
+          <button className="button primary" type="button" onClick={() => setOpen(false)}>{t('Cerrar')}</button>
         </div>
       </section>
     </div> : null}

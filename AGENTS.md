@@ -1,6 +1,6 @@
 # Custodia — instrucciones del producto
 
-Leer primero README.md, docs/TO_IMPLEMENT.md y el documento del área afectada.
+Leer primero README.es.md (o README.md, en inglés), docs/TO_IMPLEMENT.md y el documento del área afectada.
 El contexto compartido está en `/home/saint/projects/AGENTS.md`.
 
 ## Dirección corregida por el dueño — 08/11

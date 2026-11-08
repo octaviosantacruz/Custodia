@@ -44,6 +44,7 @@ import type { IngestionRun } from './cross/types/ingestion';
 
 import type { WorkspaceView } from './cross/lib/workspaces';
 import './App.css';
+import { t } from './cross/i18n/index.ts';
 
 // Stable fallback: a fresh `[]` each render would recreate `hasAccess` and re-run its effects.
 const NO_PERMISSIONS: string[] = [];
@@ -177,7 +178,7 @@ export function App() {
     if (!authChecked || !isAuthenticated || hasAccess(workspaceView)) return;
     if (domainOf(workspaceView) === 'dlp') {
       const fallback = firstAccessibleDomainWorkspace('dlp', actorPermissions);
-      setNotice('No tenés acceso a esta vista. Te llevamos a una sección de Netskope disponible para tu perfil.');
+      setNotice(t('No tenés acceso a esta vista. Te llevamos a una sección de Netskope disponible para tu perfil.'));
       navigateWorkspace(fallback ?? 'general', { replace: true });
       return;
     }
@@ -258,7 +259,7 @@ export function App() {
     },
     {
       id: 'action-catalogs', kind: 'action', platform: 'cyberark',
-      label: 'Administrar catálogos', detail: 'Unidades y responsables operativos',
+      label: t('Administrar catálogos'), detail: t('Unidades y responsables operativos'),
       aliases: ['catalogos', 'unidades', 'responsables'], priority: 41,
       permission: 'catalogs:manage',
       run: () => { selectWorkspace('safes'); setCatalogOpenRequest((current) => current + 1); },

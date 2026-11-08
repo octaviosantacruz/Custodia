@@ -5,16 +5,17 @@ import { formatNumber } from '../../../cross/lib/format';
 import { NETSKOPE_CHANGE_LABELS, NETSKOPE_CLIENT_COMPLIANCE_LABELS, NETSKOPE_EVENT_AGE_OPTIONS, NETSKOPE_OS_COMPLIANCE_LABELS, netskopeFilterChips, netskopeFilterGroupCounts } from '../lib/netskope-filter-chips';
 import { fleetGroupKeyLabel } from '../lib/netskope-fleet-groups';
 import { CompactSelect } from '../../../cross/components/compact-select';
+import { t } from '../../../cross/i18n/index.ts';
 
 const DEVICE_FILTERS: Array<{ key: NetskopeDeviceFilterKey; allLabel: string; ariaLabel: string }> = [
-  { key: 'user_status', allLabel: 'Todos los estados de usuario', ariaLabel: 'Filtrar por estado de usuario' },
-  { key: 'company', allLabel: 'Todas las empresas', ariaLabel: 'Filtrar por empresa' },
-  { key: 'classification_status', allLabel: 'Todas las clasificaciones', ariaLabel: 'Filtrar por clasificación' },
-  { key: 'os', allLabel: 'Todos los SO', ariaLabel: 'Filtrar por sistema operativo' },
-  { key: 'client_version', allLabel: 'Todas las versiones', ariaLabel: 'Filtrar por versión de cliente' },
-  { key: 'onprem_status', allLabel: 'Dónde trabaja: todos', ariaLabel: 'Filtrar por dónde trabaja' },
-  { key: 'uci_rating', allLabel: 'Cualquier confianza (UCI)', ariaLabel: 'Filtrar por índice de confianza (UCI)' },
-  { key: 'last_seen_event', allLabel: 'Cualquier último evento', ariaLabel: 'Filtrar por último evento del cliente' },
+  { key: 'user_status', allLabel: 'Todos los estados de usuario', ariaLabel: t('Filtrar por estado de usuario') },
+  { key: 'company', allLabel: 'Todas las empresas', ariaLabel: t('Filtrar por empresa') },
+  { key: 'classification_status', allLabel: 'Todas las clasificaciones', ariaLabel: t('Filtrar por clasificación') },
+  { key: 'os', allLabel: 'Todos los SO', ariaLabel: t('Filtrar por sistema operativo') },
+  { key: 'client_version', allLabel: 'Todas las versiones', ariaLabel: t('Filtrar por versión de cliente') },
+  { key: 'onprem_status', allLabel: 'Dónde trabaja: todos', ariaLabel: t('Filtrar por dónde trabaja') },
+  { key: 'uci_rating', allLabel: 'Cualquier confianza (UCI)', ariaLabel: t('Filtrar por índice de confianza (UCI)') },
+  { key: 'last_seen_event', allLabel: 'Cualquier último evento', ariaLabel: t('Filtrar por último evento del cliente') },
 ];
 
 type Props = {
@@ -47,10 +48,10 @@ export function NetskopeDeviceFilters({ query, facets, filtered, onQueryChange, 
     else onQueryChange(chip.clear);
   };
 
-  return <div className="netskope-filter-row netskope-device-filter-row" role="group" aria-label="Filtros de dispositivos">
+  return <div className="netskope-filter-row netskope-device-filter-row" role="group" aria-label={t('Filtros de dispositivos')}>
     <div className="netskope-filter-groups">
       <details className="netskope-filter-group" open={identityOpen} onToggle={(event) => setIdentityOpen(event.currentTarget.open)}>
-        <summary><span>Identidad y equipo</span><span className="netskope-filter-group-count">({groups.identity})</span></summary>
+        <summary><span>{t('Identidad y equipo')}</span><span className="netskope-filter-group-count">({groups.identity})</span></summary>
         <div className="netskope-filter-group-controls">
           {(['user_status', 'company', 'classification_status', 'os', 'client_version'] as const).map((key) => {
             const filter = DEVICE_FILTERS.find((item) => item.key === key)!;
@@ -59,7 +60,7 @@ export function NetskopeDeviceFilters({ query, facets, filtered, onQueryChange, 
         </div>
       </details>
       <details className="netskope-filter-group" open={placeOpen} onToggle={(event) => setPlaceOpen(event.currentTarget.open)}>
-        <summary><span>Ubicación y confianza</span><span className="netskope-filter-group-count">({groups.place})</span></summary>
+        <summary><span>{t('Ubicación y confianza')}</span><span className="netskope-filter-group-count">({groups.place})</span></summary>
         <div className="netskope-filter-group-controls">
           {(['onprem_status', 'uci_rating'] as const).map((key) => {
             const filter = DEVICE_FILTERS.find((item) => item.key === key)!;
@@ -68,17 +69,17 @@ export function NetskopeDeviceFilters({ query, facets, filtered, onQueryChange, 
         </div>
       </details>
       <details className="netskope-filter-group" open={activityOpen} onToggle={(event) => setActivityOpen(event.currentTarget.open)}>
-        <summary><span>Actividad observada</span><span className="netskope-filter-group-count">({groups.activity})</span></summary>
+        <summary><span>{t('Actividad observada')}</span><span className="netskope-filter-group-count">({groups.activity})</span></summary>
         <div className="netskope-filter-group-controls">
-          <CompactSelect className="netskope-attribute-filter" ariaLabel="Filtrar por antigüedad del último evento" value={query.eventAge} onChange={(next) => onQueryChange({ eventAge: next as NetskopeDeviceQuery['eventAge'] })} options={NETSKOPE_EVENT_AGE_OPTIONS} />
-          <CompactSelect className="netskope-attribute-filter" ariaLabel="Filtrar por último evento del cliente" value={query.filters.last_seen_event} onChange={(next) => onDeviceFilterChange('last_seen_event', next)} options={deviceFilterOptions('last_seen_event', 'Cualquier último evento', facets, query.filters.last_seen_event)} />
+          <CompactSelect className="netskope-attribute-filter" ariaLabel={t('Filtrar por antigüedad del último evento')} value={query.eventAge} onChange={(next) => onQueryChange({ eventAge: next as NetskopeDeviceQuery['eventAge'] })} options={NETSKOPE_EVENT_AGE_OPTIONS} />
+          <CompactSelect className="netskope-attribute-filter" ariaLabel={t('Filtrar por último evento del cliente')} value={query.filters.last_seen_event} onChange={(next) => onDeviceFilterChange('last_seen_event', next)} options={deviceFilterOptions('last_seen_event', 'Cualquier último evento', facets, query.filters.last_seen_event)} />
         </div>
       </details>
     </div>
     {filtered ? <div className="netskope-filter-active">
       <span className="netskope-filter-count">Filtros activos ({chips.length})</span>
       {chips.map((chip) => <span key={chip.id} className="netskope-filter-chip">{chip.label}<button type="button" aria-label={`Quitar filtro ${chip.label}`} onClick={() => removeChip(chip)}><X size={12} aria-hidden="true" /></button></span>)}
-      {filtered ? <button type="button" className="button subtle netskope-clear-filters" onClick={onClearFilters}><X size={13} aria-hidden="true" /> Limpiar todos</button> : null}
+      {filtered ? <button type="button" className="button subtle netskope-clear-filters" onClick={onClearFilters}><X size={13} aria-hidden="true" /> {t('Limpiar todos')}</button> : null}
     </div> : null}
   </div>;
 }

@@ -12,6 +12,7 @@
  */
 import { accounts, company, coverage, coverageSummary, devices, people, personDevices, personSummary, safes, sourceEvidence, type Person } from './model/company.ts';
 import type { MockRequest, MockResponse } from './mock-api.ts';
+import { t } from '../cross/i18n/index.ts';
 
 type Handler = (request: MockRequest) => Promise<MockResponse>;
 type Json = unknown;
@@ -35,6 +36,8 @@ export function shiftDates(value: Json, offset: number): Json {
 }
 
 const areaIds = new Map(company.areas.map((area, index) => [area, index + 1]));
+/** Las áreas del modelo están en español; salen traducidas al idioma de la demo. */
+const areaName = (area: string) => t(area);
 const areaCode = (area: string) => area.slice(0, 3).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 const personById = new Map(people.map((person) => [person.id, person]));
 const counts = (items: string[]) => [...items.reduce((map, key) => map.set(key, (map.get(key) ?? 0) + 1), new Map<string, number>())]
@@ -57,7 +60,7 @@ function safeRow(safe: (typeof safes)[number]) {
     member_count: members.length, account_count: safeAccounts(safe.id).length,
     cpm_configured: true, olac_enabled: true, retention_configured: true, manage_safe_principal_count: 1,
     account_type_counts: {}, internal_name: null,
-    business_unit_id: areaIds.get(safe.area) ?? null, business_unit_name: safe.area,
+    business_unit_id: areaIds.get(safe.area) ?? null, business_unit_name: areaName(safe.area),
     responsible_id: responsible?.id ?? null, responsible_name: responsible?.name ?? null,
     classification_status: safe.quality === 'clean' ? 'assigned' : 'pending',
     inventory_scope: safe.scope, data_quality_status: safe.quality, scope_hint: null,
@@ -68,11 +71,11 @@ function safeRow(safe: (typeof safes)[number]) {
 function safeDetail(safe: (typeof safes)[number]) {
   return {
     safe: {
-      ...safeRow(safe), creator_name: 'Administrador', description: null, managing_cpm: 'PasswordManager',
+      ...safeRow(safe), creator_name: t('Administrador'), description: null, managing_cpm: 'PasswordManager',
       number_of_versions_retention: 5, number_of_days_retention: null, auto_purge_enabled: false,
       creation_time: '2026-01-12T10:00:00Z', last_modification_time: company.capturedAt, notes: safe.note,
       assigned_at: safe.quality === 'clean' ? '2026-10-20T15:00:00Z' : null,
-      assigned_by: safe.quality === 'clean' ? 'Equipo de seguridad' : null,
+      assigned_by: safe.quality === 'clean' ? t('Equipo de seguridad') : null,
     },
     members: people.filter((person) => person.safeIds.includes(safe.id)).map((person) => ({
       member_id: `acme-member-${person.id}`, member_name: person.email, member_type: 'User',
@@ -116,7 +119,7 @@ function deviceRow(device: (typeof devices)[number]) {
     first_seen_at: '2026-03-02T09:00:00Z', last_seen_at: device.lastSignalAt,
     device_evidence: {
       ...sourceState, state: recent ? 'recent' : age <= REVIEW_DAYS ? 'not_recent' : 'review',
-      reason: recent ? 'Señal del cliente en los últimos 7 días.' : `Sin señal hace ${Math.round(age)} días. No confirma abandono.`,
+      reason: recent ? t('Señal del cliente en los últimos 7 días.') : t('Sin señal hace {n} días. No confirma abandono.', { n: Math.round(age) }),
       last_signal_at: device.lastSignalAt, age_days: Math.floor(age), recent_days: RECENT_DAYS, review_days: REVIEW_DAYS,
       source_freshness_hours: 24, client_version: device.clientVersion, os: device.os, os_version: device.osVersion,
       last_seen_event: recent ? 'connect' : 'disconnect',
@@ -127,7 +130,7 @@ function deviceRow(device: (typeof devices)[number]) {
 function userRow(person: Person) {
   return {
     object_id: person.netskopeId, display_name: person.name, source_id: `acme-netskope-${person.id}`,
-    attributes: { email: person.email, department: person.area, location: person.site },
+    attributes: { email: person.email, department: areaName(person.area), location: t(person.site) },
     first_seen_at: '2026-03-02T09:00:00Z', last_seen_at: company.capturedAt,
   };
 }
@@ -154,17 +157,17 @@ function dashboardWidgets() {
   const pending = rows.filter((row) => row.classification_status === 'pending').length;
   const pamUsers = people.filter((person) => person.pamId).length;
   const byArea = (measure: 'safes' | 'accounts') => company.areas.map((area) => ({
-    key: area, filter_value: String(areaIds.get(area)),
+    key: areaName(area), filter_value: String(areaIds.get(area)),
     count: measure === 'safes' ? safes.filter((safe) => safe.area === area).length
       : accounts.filter((account) => safes.find((safe) => safe.id === account.safeId)?.area === area).length,
   })).filter((bucket) => bucket.count > 0);
   return [
-    widget({ widget_id: 'without-accounts', title: 'Safes sin cuentas', kind: 'count', measure: 'safes', filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: 'no_accounts' }, value: withoutAccounts }),
-    widget({ widget_id: 'pending-classification', title: 'Pendientes de clasificar', kind: 'count', measure: 'safes', filters: { workflow_status: '', classification_status: 'pending', inventory_scope: '', data_quality_status: '', health_filter: '' }, value: pending }),
-    widget({ widget_id: 'pam-users', title: 'Usuarios PAM', kind: 'count', measure: 'pam_users', value: pamUsers }),
-    widget({ widget_id: 'safes-by-company', title: 'Safes por área', kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'business_unit' }, position: 0, buckets: byArea('safes') }),
-    widget({ widget_id: 'accounts-by-company', title: 'Cuentas por área', kind: 'chart', measure: 'accounts', chart: { style: 'bars', group_by: 'business_unit' }, position: 1, buckets: byArea('accounts') }),
-    widget({ widget_id: 'safes-by-status', title: 'Safes por estado', kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'workflow_status' }, position: 2, buckets: counts(safes.map((safe) => safe.workflow)).map((bucket) => ({ ...bucket, filter_value: bucket.key })) }),
+    widget({ widget_id: 'without-accounts', title: t('Safes sin cuentas'), kind: 'count', measure: 'safes', filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: 'no_accounts' }, value: withoutAccounts }),
+    widget({ widget_id: 'pending-classification', title: t('Pendientes de clasificar'), kind: 'count', measure: 'safes', filters: { workflow_status: '', classification_status: 'pending', inventory_scope: '', data_quality_status: '', health_filter: '' }, value: pending }),
+    widget({ widget_id: 'pam-users', title: t('Usuarios PAM'), kind: 'count', measure: 'pam_users', value: pamUsers }),
+    widget({ widget_id: 'safes-by-company', title: t('Safes por área'), kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'business_unit' }, position: 0, buckets: byArea('safes') }),
+    widget({ widget_id: 'accounts-by-company', title: t('Cuentas por área'), kind: 'chart', measure: 'accounts', chart: { style: 'bars', group_by: 'business_unit' }, position: 1, buckets: byArea('accounts') }),
+    widget({ widget_id: 'safes-by-status', title: t('Safes por estado'), kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'workflow_status' }, position: 2, buckets: counts(safes.map((safe) => safe.workflow)).map((bucket) => ({ ...bucket, filter_value: bucket.key })) }),
   ];
 }
 
@@ -207,9 +210,9 @@ function freshness() {
     thresholds: { recent_hours: 24, week_days: 7, stale_days: 30 }, total: devices.length,
     review_candidates: devices.filter((device) => deviceAge(device) > RECENT_DAYS).length, source_evidence: sourceState,
     buckets: [
-      bucket('lt_24h', 'Menos de 24 h', (age) => age < 1), bucket('d1_7', '1 a 7 días', (age) => age >= 1 && age <= 7),
-      bucket('d7_30', '7 a 30 días', (age) => age > 7 && age <= 30), bucket('gt_30d', 'Más de 30 días', (age) => age > 30),
-      bucket('unknown', 'Sin dato', () => false),
+      bucket('lt_24h', t('Menos de 24 h'), (age) => age < 1), bucket('d1_7', t('1 a 7 días'), (age) => age >= 1 && age <= 7),
+      bucket('d7_30', t('7 a 30 días'), (age) => age > 7 && age <= 30), bucket('gt_30d', t('Más de 30 días'), (age) => age > 30),
+      bucket('unknown', t('Sin dato'), () => false),
     ],
   };
 }
@@ -248,16 +251,16 @@ export function acmeResponse(url: URL, method: string): Json | null {
   if (path === '/api/dashboard/preferences') return { widgets: dashboardWidgets(), is_default: true };
   if (path === '/api/catalogs') {
     return {
-      business_units: company.areas.map((area) => ({ business_unit_id: areaIds.get(area), unit_code: areaCode(area), unit_name: area, is_active: true })),
+      business_units: company.areas.map((area) => ({ business_unit_id: areaIds.get(area), unit_code: areaCode(area), unit_name: areaName(area), is_active: true })),
       responsibles: people.map((person) => ({ responsible_id: person.id, display_name: person.name, email: person.email, is_active: true })),
       account_types: [],
     };
   }
   if (path === '/api/analytics') {
     return {
-      workflow_status: counts(safes.map((safe) => safe.workflow)), next_actions: [{ key: 'Sin definir', count: safes.length }], account_types: [],
-      business_units: counts(safes.map((safe) => safe.area)).map((bucket) => ({ ...bucket, label: bucket.key })),
-      responsibles: counts(safes.map((safe) => personById.get(safe.responsibleId)?.name ?? 'Sin responsable')).map((bucket) => ({ ...bucket, label: bucket.key })),
+      workflow_status: counts(safes.map((safe) => safe.workflow)), next_actions: [{ key: t('Sin definir'), count: safes.length }], account_types: [],
+      business_units: counts(safes.map((safe) => areaName(safe.area))).map((bucket) => ({ ...bucket, label: bucket.key })),
+      responsibles: counts(safes.map((safe) => personById.get(safe.responsibleId)?.name ?? t('Sin responsable'))).map((bucket) => ({ ...bucket, label: bucket.key })),
     };
   }
   if (path === '/api/safes') {

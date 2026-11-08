@@ -1,3 +1,4 @@
+import { t } from '../../../cross/i18n/index.ts';
 const MAKE_ALIASES: Readonly<Record<string, readonly string[]>> = {
   'hewlett packard': ['hp'],
   'hewlett-packard': ['hp'],
@@ -23,8 +24,8 @@ export function deviceMakeModelLabel(make: string | null | undefined, model: str
 
 /** How Custodia reads the client's last signal; the colour dot in the inventory carries the same state. */
 export const DEVICE_EVIDENCE_LABELS: Record<'recent' | 'not_recent' | 'review' | 'unknown', string> = {
-  recent: 'Señal reciente',
-  not_recent: 'Sin señal reciente',
-  review: 'Candidato a revisión',
-  unknown: 'Sin evidencia vigente',
+  recent: t('Señal reciente'),
+  not_recent: t('Sin señal reciente'),
+  review: t('Candidato a revisión'),
+  unknown: t('Sin evidencia vigente'),
 };

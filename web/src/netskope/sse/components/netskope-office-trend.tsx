@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { NetskopeOfficeWeek } from '../types/netskope';
 import { formatNumber } from '../../../cross/lib/format';
 import { weekRange } from '../lib/netskope-office';
+import { t } from '../../../cross/i18n/index.ts';
 
 const WIDTH = 640;
 const HEIGHT = 190;
@@ -32,25 +33,25 @@ export function NetskopeOfficeTrend({ series }: { series: NetskopeOfficeWeek[] }
   const activeWeek = active === null ? null : series[active];
   return <figure className="nsk-office-trend">
     <figcaption>
-      <span className="nsk-office-trend-legend" aria-label="Leyenda">
-        <span><i className="nsk-office-swatch is-poor" aria-hidden />Malo</span>
-        <span><i className="nsk-office-swatch is-fair" aria-hidden />Regular</span>
+      <span className="nsk-office-trend-legend" aria-label={t('Leyenda')}>
+        <span><i className="nsk-office-swatch is-poor" aria-hidden />{t('Malo')}</span>
+        <span><i className="nsk-office-swatch is-fair" aria-hidden />{t('Regular')}</span>
       </span>
-      <button type="button" className="button subtle" aria-pressed={table} onClick={() => setTable((value) => !value)}>{table ? 'Ver gráfico' : 'Ver como tabla'}</button>
+      <button type="button" className="button subtle" aria-pressed={table} onClick={() => setTable((value) => !value)}>{table ? t('Ver gráfico') : t('Ver como tabla')}</button>
     </figcaption>
     {table ? <div className="compact-table-wrap"><table className="compact-table">
-      <caption className="sr-only">Evolución semanal del rendimiento en la oficina</caption>
-      <thead><tr><th scope="col">Semana</th><th scope="col">Malo</th><th scope="col">Regular</th><th scope="col">Personas medidas</th><th scope="col">Peor en oficina</th><th scope="col">Días medidos</th></tr></thead>
+      <caption className="sr-only">{t('Evolución semanal del rendimiento en la oficina')}</caption>
+      <thead><tr><th scope="col">{t('Semana')}</th><th scope="col">{t('Malo')}</th><th scope="col">{t('Regular')}</th><th scope="col">{t('Personas medidas')}</th><th scope="col">{t('Peor en oficina')}</th><th scope="col">{t('Días medidos')}</th></tr></thead>
       <tbody>{series.map((week) => <tr key={week.week_start}>
         <th scope="row">{weekRange(week.week_start)}</th>
         {week.measured === null
-          ? <td colSpan={4} className="nsk-attention-empty">Sin medición</td>
+          ? <td colSpan={4} className="nsk-attention-empty">{t('Sin medición')}</td>
           : <><td>{formatNumber(week.poor ?? 0)}</td><td>{formatNumber(week.fair ?? 0)}</td><td>{formatNumber(week.measured)}</td><td>{formatNumber(week.worse_in_office ?? 0)}</td></>}
         <td>{week.days_measured} de 7</td>
       </tr>)}</tbody>
     </table></div>
       : <div className="nsk-office-trend-plot" onMouseLeave={() => setActive(null)}>
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Evolución semanal: personas con rendimiento malo o regular en la oficina">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={t('Evolución semanal: personas con rendimiento malo o regular en la oficina')}>
           <line className="nsk-office-axis" x1={0} x2={WIDTH} y1={TOP + PLOT} y2={TOP + PLOT} />
           {series.map((week, index) => {
             const center = step * index + step / 2;
@@ -78,7 +79,7 @@ export function NetskopeOfficeTrend({ series }: { series: NetskopeOfficeWeek[] }
         </svg>
         {activeWeek ? <div className={`nsk-office-tooltip${(active ?? 0) >= series.length / 2 ? ' is-left' : ''}`} role="tooltip" style={{ left: `${((step * (active ?? 0) + step / 2) / WIDTH) * 100}%` }}>
           <strong>Semana del {weekRange(activeWeek.week_start)}</strong>
-          {activeWeek.measured === null ? <span>Sin medición</span> : <>
+          {activeWeek.measured === null ? <span>{t('Sin medición')}</span> : <>
             <span><i className="nsk-office-swatch is-poor" aria-hidden />Malo {formatNumber(activeWeek.poor ?? 0)}</span>
             <span><i className="nsk-office-swatch is-fair" aria-hidden />Regular {formatNumber(activeWeek.fair ?? 0)}</span>
             <span>De {formatNumber(activeWeek.measured)} personas medidas en la oficina</span>

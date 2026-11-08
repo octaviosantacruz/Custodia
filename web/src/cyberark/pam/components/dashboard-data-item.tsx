@@ -4,6 +4,7 @@ import { usePopover } from '../../../cross/hooks/use-popover';
 import { dashboardValueLabel, dashboardWidgetDetail, dashboardWidgetExplanation, type DashboardWidget } from '../lib/dashboard-metrics';
 import { dateTimeHint, formatNumber } from '../../../cross/lib/format';
 import './dashboard-data-item.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 type DashboardDataItemProps = {
   widget: DashboardWidget;
@@ -35,7 +36,7 @@ export function DashboardDataItem({ widget, onNavigate }: DashboardDataItemProps
   const valueLabel = isKr1 && !calculable ? 'No calculable' : dashboardValueLabel(widget);
   const tooltipId = `dashboard-data-help-${widget.widget_id}`;
   const hasDrilldown = widget.measure !== 'cyberark_compliance';
-  const drilldownLabel = widget.measure === 'kr1_safe_bu_coverage' ? 'Abrir Safes sin unidad de negocio' : widget.measure === 'safe_account_coverage' ? 'Abrir Safes sin cuentas' : 'Abrir resultados';
+  const drilldownLabel = widget.measure === 'kr1_safe_bu_coverage' ? 'Abrir Safes sin unidad de negocio' : widget.measure === 'safe_account_coverage' ? t('Abrir Safes sin cuentas') : t('Abrir resultados');
   const { Icon, tone } = dashboardDataPresentation(widget);
   const title = <span className="dashboard-data-title"><Icon size={14} aria-hidden="true" />{widget.title}</span>;
   return <article className={`dashboard-data-item tone-${tone}`} data-status={widget.data_status ?? 'available'} ref={ref}>
@@ -46,17 +47,17 @@ export function DashboardDataItem({ widget, onNavigate }: DashboardDataItemProps
     {open && <section className="dashboard-data-tooltip" id={tooltipId} role="tooltip">
       <strong>{widget.title}</strong>
       {isKr1 ? <div className="pam-data-reading">
-        <span>KR1 · completitud de inventario</span>
+        <span>{t('KR1 · completitud de inventario')}</span>
         <dl>
-          <div><dt>Qué mide</dt><dd>Safes con al menos una cuenta activa</dd></div>
-          <div><dt>Población</dt><dd>{typeof widget.total_count === 'number' ? `${typeof widget.covered_count === 'number' ? formatNumber(widget.covered_count) : 'Numerador no informado'} de ${formatNumber(widget.total_count)} Safes activos del alcance seleccionado` : 'Población no informada'}</dd></div>
-          <div><dt>Período / captura</dt><dd><DateTime value={widget.measured_at} missing="Fecha de captura no informada" /></dd></div>
-          <div><dt>Fórmula</dt><dd>Safes activos con al menos una cuenta activa / total de Safes activos del alcance seleccionado × 100</dd></div>
-          <div><dt>Fuente</dt><dd>{explanation.source}</dd></div>
-          <div><dt>Qué no permite concluir</dt><dd>{explanation.includes}</dd></div>
+          <div><dt>{t('Qué mide')}</dt><dd>{t('Safes con al menos una cuenta activa')}</dd></div>
+          <div><dt>{t('Población')}</dt><dd>{typeof widget.total_count === 'number' ? `${typeof widget.covered_count === 'number' ? formatNumber(widget.covered_count) : 'Numerador no informado'} de ${formatNumber(widget.total_count)} Safes activos del alcance seleccionado` : 'Población no informada'}</dd></div>
+          <div><dt>{t('Período / captura')}</dt><dd><DateTime value={widget.measured_at} missing="Fecha de captura no informada" /></dd></div>
+          <div><dt>{t('Fórmula')}</dt><dd>{t('Safes activos con al menos una cuenta activa / total de Safes activos del alcance seleccionado × 100')}</dd></div>
+          <div><dt>{t('Fuente')}</dt><dd>{explanation.source}</dd></div>
+          <div><dt>{t('Qué no permite concluir')}</dt><dd>{explanation.includes}</dd></div>
         </dl>
-        <p>{widget.data_status === 'pending' ? 'Dato pendiente de actualizar. ' : ''}{!calculable ? 'No calculable: falta población o evidencia del numerador. ' : ''}Desconocidos: conteo no informado por esta métrica.</p>
-      </div> : <><p><b>Qué incluye:</b> {explanation.includes}</p><p><b>Fuente:</b> {explanation.source}</p><p><b>Para investigar:</b> {explanation.next}</p></>}
+        <p>{widget.data_status === 'pending' ? t('Dato pendiente de actualizar. ') : ''}{!calculable ? t('No calculable: falta población o evidencia del numerador. ') : ''}Desconocidos: conteo no informado por esta métrica.</p>
+      </div> : <><p><b>{t('Qué incluye:')}</b> {explanation.includes}</p><p><b>{t('Fuente:')}</b> {explanation.source}</p><p><b>{t('Para investigar:')}</b> {explanation.next}</p></>}
     </section>}
   </article>;
 }

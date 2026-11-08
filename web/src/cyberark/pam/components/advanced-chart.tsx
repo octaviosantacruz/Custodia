@@ -7,6 +7,7 @@ import { advancedChartTable } from '../lib/advanced-chart-rows';
 import { advancedChartPalette, advancedChartTooltip } from '../lib/advanced-chart-palette';
 import './advanced-chart.css';
 import type { DashboardChartData, DashboardChartStyle } from '../lib/dashboard-metrics';
+import { t } from '../../../cross/i18n/index.ts';
 
 function subscribeTheme(notify: () => void) {
   const observer = new MutationObserver(notify);
@@ -87,18 +88,18 @@ export function AdvancedChart({ title, style, data, onSelect }: Props) {
     return () => { disposed = true; cleanup(); };
   }, [data, hasData, onSelect, style, theme]);
 
-  if (!hasData) return <p className="advanced-chart-empty">Sin datos suficientes para esta visualización.</p>;
+  if (!hasData) return <p className="advanced-chart-empty">{t('Sin datos suficientes para esta visualización.')}</p>;
   const table = advancedChartTable(style, data, (value) => workflowLabel(value as Parameters<typeof workflowLabel>[0]));
   return <div className="advanced-chart-frame">
     <div ref={chartRef} className="advanced-chart" role="img" aria-label={description} />
     <details className="advanced-chart-data">
-      <summary>Ver datos</summary>
+      <summary>{t('Ver datos')}</summary>
       <div className="compact-table-wrap"><table className="compact-table">
         <caption className="sr-only">{title}</caption>
-        <thead><tr>{table.columns.map((column) => <th key={column} scope="col">{column}</th>)}{onSelect ? <th scope="col"><span className="sr-only">Abrir</span></th> : null}</tr></thead>
+        <thead><tr>{table.columns.map((column) => <th key={column} scope="col">{column}</th>)}{onSelect ? <th scope="col"><span className="sr-only">{t('Abrir')}</span></th> : null}</tr></thead>
         <tbody>{table.rows.map((row, index) => <tr key={index}>
           {row.cells.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}
-          {onSelect ? <td>{row.filterValue ? <button type="button" className="button subtle" aria-label={`Abrir ${row.cells[0]}`} onClick={() => onSelect(row.filterValue as string)}>Abrir</button> : null}</td> : null}
+          {onSelect ? <td>{row.filterValue ? <button type="button" className="button subtle" aria-label={`Abrir ${row.cells[0]}`} onClick={() => onSelect(row.filterValue as string)}>{t('Abrir')}</button> : null}</td> : null}
         </tr>)}</tbody>
       </table></div>
     </details>

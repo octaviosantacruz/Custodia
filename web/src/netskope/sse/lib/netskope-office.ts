@@ -1,7 +1,8 @@
+import { localeTag } from '../../../cross/i18n/index.ts';
 /* NSK-EXP-OFFICE-001 helpers shared by the office experience charts and tables. */
 
-const DAY = new Intl.DateTimeFormat('es-AR', { day: 'numeric', timeZone: 'UTC' });
-const DAY_MONTH = new Intl.DateTimeFormat('es-AR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const DAY = new Intl.DateTimeFormat(localeTag(), { day: 'numeric', timeZone: 'UTC' });
+const DAY_MONTH = new Intl.DateTimeFormat(localeTag(), { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const utc = (iso: string) => new Date(`${iso}T00:00:00Z`);
 
 /** A Monday-to-Sunday UTC week as a range: "12–18 oct", or "28 sept–4 oct" across months. */
@@ -14,4 +15,4 @@ export function weekRange(weekStart: string): string {
 }
 
 export const dayLabel = (iso: string) => DAY_MONTH.format(utc(iso));
-export const weekdayShort = (iso: string) => new Intl.DateTimeFormat('es-AR', { weekday: 'short', timeZone: 'UTC' }).format(utc(iso));
+export const weekdayShort = (iso: string) => new Intl.DateTimeFormat(localeTag(), { weekday: 'short', timeZone: 'UTC' }).format(utc(iso));

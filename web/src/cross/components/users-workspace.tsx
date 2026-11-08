@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ClipboardCheck, ShieldCheck, UsersRound } from 'lucide-react';
 import { handleTablistKeyDown } from '../lib/tablist-keyboard';
 import './user-admin.css';
+import { t } from '../i18n/index.ts';
 
 type UsersWorkspaceProps = {
   authMode?: 'local' | 'oidc' | 'hybrid';
@@ -27,10 +28,10 @@ export function UsersWorkspace(props: UsersWorkspaceProps) {
     if (view === 'roles' && !canSeeRoles && canSeeUsers) setView('users');
   }, [canSeeRoles, canSeeUsers, view]);
   return <div className="access-workspace">
-    <nav className="access-tabs" aria-label="Administración de acceso" role="tablist" onKeyDown={handleTablistKeyDown}>
-      {canSeeUsers && <button id="access-tab-users" aria-controls="access-tabpanel" className={view === 'users' ? 'active' : ''} type="button" role="tab" aria-selected={view === 'users'} tabIndex={view === 'users' ? 0 : -1} onClick={() => setView('users')}><UsersRound size={16} /><span><strong>Usuarios de Custodia</strong><small>Identidades locales y Okta</small></span></button>}
-      {canSeeUsers && <button id="access-tab-review" aria-controls="access-tabpanel" className={view === 'review' ? 'active' : ''} type="button" role="tab" aria-selected={view === 'review'} tabIndex={view === 'review' ? 0 : -1} onClick={() => setView('review')}><ClipboardCheck size={16} /><span><strong>Revisión de accesos</strong><small>Quién tiene qué y desde cuándo</small></span></button>}
-      {canSeeRoles && <button id="access-tab-roles" aria-controls="access-tabpanel" className={view === 'roles' ? 'active' : ''} type="button" role="tab" aria-selected={view === 'roles'} tabIndex={view === 'roles' ? 0 : -1} onClick={() => setView('roles')}><ShieldCheck size={16} /><span><strong>Roles y permisos</strong><small>Alcance efectivo por producto</small></span></button>}
+    <nav className="access-tabs" aria-label={t('Administración de acceso')} role="tablist" onKeyDown={handleTablistKeyDown}>
+      {canSeeUsers && <button id="access-tab-users" aria-controls="access-tabpanel" className={view === 'users' ? 'active' : ''} type="button" role="tab" aria-selected={view === 'users'} tabIndex={view === 'users' ? 0 : -1} onClick={() => setView('users')}><UsersRound size={16} /><span><strong>{t('Usuarios de Custodia')}</strong><small>{t('Identidades locales y Okta')}</small></span></button>}
+      {canSeeUsers && <button id="access-tab-review" aria-controls="access-tabpanel" className={view === 'review' ? 'active' : ''} type="button" role="tab" aria-selected={view === 'review'} tabIndex={view === 'review' ? 0 : -1} onClick={() => setView('review')}><ClipboardCheck size={16} /><span><strong>{t('Revisión de accesos')}</strong><small>{t('Quién tiene qué y desde cuándo')}</small></span></button>}
+      {canSeeRoles && <button id="access-tab-roles" aria-controls="access-tabpanel" className={view === 'roles' ? 'active' : ''} type="button" role="tab" aria-selected={view === 'roles'} tabIndex={view === 'roles' ? 0 : -1} onClick={() => setView('roles')}><ShieldCheck size={16} /><span><strong>{t('Roles y permisos')}</strong><small>{t('Alcance efectivo por producto')}</small></span></button>}
     </nav>
     <div role="tabpanel" id="access-tabpanel" aria-labelledby={`access-tab-${view}`}>
       {view === 'users' && canSeeUsers ? <UserAdmin {...props} /> : view === 'review' && canSeeUsers ? <AccessReview /> : view === 'roles' && canSeeRoles ? <RoleAdmin permissions={props.permissions} currentActorId={props.currentActorId} onNotice={props.onNotice} onError={props.onError} /> : null}

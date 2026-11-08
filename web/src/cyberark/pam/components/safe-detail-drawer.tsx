@@ -11,6 +11,7 @@ import { SafeAccountList, SafeMemberList, SafeSummary } from './safe-detail-sect
 import { OverflowActions } from './overflow-actions';
 import { useDialogFocusTrap } from '../../../cross/hooks/use-dialog-focus-trap';
 import './safe-detail-drawer.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 type SafeDetailDrawerProps = {
   detail: { safe: SafeDetail; members: Member[] };
@@ -120,62 +121,62 @@ export function SafeDetailDrawer({
   }, [activeTab, detail.safe.safe_number, detail.safe.account_count, detail.members.length, audit.length]);
 
   return <div ref={dialogRef} className="drawer-layer" role="dialog" aria-modal="true" aria-labelledby="safe-drawer-title" tabIndex={-1}>
-    <button className="drawer-backdrop" type="button" aria-label="Cerrar detalle del Safe" onClick={onClose} />
+    <button className="drawer-backdrop" type="button" aria-label={t('Cerrar detalle del Safe')} onClick={onClose} />
     <aside className="detail-drawer">
-      <div className="detail-title"><div className="detail-icon"><Shield size={18} /></div><div className="detail-heading"><p className="eyebrow">SAFE #{detail.safe.safe_number}</p><h2 id="safe-drawer-title">{detail.safe.safe_name}</h2><p>{detail.safe.safe_url_id} · {formatNumber(detail.safe.account_count)} cuentas · {formatNumber(detail.members.length)} miembros</p></div><button ref={closeRef} className="icon-button drawer-close" type="button" title="Cerrar detalle" aria-label="Cerrar" onClick={onClose}><X size={16} /></button></div>
-      <nav className="detail-tabs" aria-label="Secciones del detalle" ref={tabsRef}>{([['summary', 'Resumen'], ['accounts', `Cuentas ${detail.safe.account_count ? `(${formatNumber(detail.safe.account_count)})` : ''}`], ['members', `Miembros ${detail.members.length ? `(${formatNumber(detail.members.length)})` : ''}`], ['classify', 'Clasificar'], ['history', `Historial ${audit.length ? `(${formatNumber(audit.length)})` : ''}`]] as const).map(([key, label]) => <button key={key} className={activeTab === key ? 'active' : ''} type="button" title={`Mostrar ${label.toLowerCase()} del Safe`} onClick={() => setActiveTab(key)}>{label}</button>)}</nav>
+      <div className="detail-title"><div className="detail-icon"><Shield size={18} /></div><div className="detail-heading"><p className="eyebrow">SAFE #{detail.safe.safe_number}</p><h2 id="safe-drawer-title">{detail.safe.safe_name}</h2><p>{detail.safe.safe_url_id} · {formatNumber(detail.safe.account_count)} cuentas · {formatNumber(detail.members.length)} miembros</p></div><button ref={closeRef} className="icon-button drawer-close" type="button" title={t('Cerrar detalle')} aria-label={t('Cerrar')} onClick={onClose}><X size={16} /></button></div>
+      <nav className="detail-tabs" aria-label={t('Secciones del detalle')} ref={tabsRef}>{([['summary', 'Resumen'], ['accounts', `Cuentas ${detail.safe.account_count ? `(${formatNumber(detail.safe.account_count)})` : ''}`], ['members', `Miembros ${detail.members.length ? `(${formatNumber(detail.members.length)})` : ''}`], ['classify', 'Clasificar'], ['history', `Historial ${audit.length ? `(${formatNumber(audit.length)})` : ''}`]] as const).map(([key, label]) => <button key={key} className={activeTab === key ? 'active' : ''} type="button" title={`Mostrar ${label.toLowerCase()} del Safe`} onClick={() => setActiveTab(key)}>{label}</button>)}</nav>
 
       {activeTab === 'summary' && <SafeSummary safe={detail.safe} />}
 
       {activeTab === 'summary' && <section className="detail-section safe-cross-links">
-        <div className="detail-section-heading"><div><h3>Saltos a otros módulos</h3><p className="detail-summary-copy">Saltos rápidos para investigar esta Safe en otros módulos.</p></div></div>
+        <div className="detail-section-heading"><div><h3>{t('Saltos a otros módulos')}</h3><p className="detail-summary-copy">{t('Saltos rápidos para investigar esta Safe en otros módulos.')}</p></div></div>
         <div className="safe-cross-link-grid">
-          <button type="button" className="identity-conn-link" onClick={() => onNavigate('sia', detail.safe.safe_name)}><span className="identity-conn-text"><strong>Buscar en SIA</strong><small>Coincidencias por nombre de Safe</small></span></button>
-          {detail.members[0] && <button type="button" className="identity-conn-link" onClick={() => onNavigate(detail.members[0].member_type.toLowerCase() === 'group' ? 'identityGroups' : 'identityUsers', detail.members[0].member_name)}><span className="identity-conn-text"><strong>Buscar miembro en Identidades</strong><small>{detail.members[0].member_name} · coincidencia por nombre</small></span></button>}
+          <button type="button" className="identity-conn-link" onClick={() => onNavigate('sia', detail.safe.safe_name)}><span className="identity-conn-text"><strong>{t('Buscar en SIA')}</strong><small>{t('Coincidencias por nombre de Safe')}</small></span></button>
+          {detail.members[0] && <button type="button" className="identity-conn-link" onClick={() => onNavigate(detail.members[0].member_type.toLowerCase() === 'group' ? 'identityGroups' : 'identityUsers', detail.members[0].member_name)}><span className="identity-conn-text"><strong>{t('Buscar miembro en Identidades')}</strong><small>{detail.members[0].member_name} · coincidencia por nombre</small></span></button>}
         </div>
       </section>}
 
       {activeTab === 'classify' && <section className="detail-section detail-edit-section">
         <div className="detail-section-heading">
           <div>
-            <h3>Seguimiento del Safe</h3>
-            <p className="detail-summary-copy">Definí el estado, la próxima acción y quién lo sigue.</p>
+            <h3>{t('Seguimiento del Safe')}</h3>
+            <p className="detail-summary-copy">{t('Definí el estado, la próxima acción y quién lo sigue.')}</p>
           </div>
         </div>
         <div className="form-grid">
-          <Field label="Estado operativo"><CompactSelect ariaLabel="Estado operativo" value={form.workflow_status} options={workflowStatusesFor(form.workflow_status).map((status) => ({ value: status, label: workflowLabel(status) }))} onChange={(value) => updateForm({ workflow_status: value as MetadataForm['workflow_status'] })} /></Field>
-          <Field label="Acción siguiente"><CompactSelect className={`action-select ${actionTone(selectedAction)}`} value={selectedAction === 'Sin definir' ? '' : selectedAction} ariaLabel="Acción siguiente" options={detailActions.map((action) => ({ value: action, label: action || 'Sin definir' }))} onChange={(value) => updateForm({ next_action: value || '' })} /></Field>
-          <Field label="Unidad de negocio"><CompactSelect className={`drawer-assignment-select unit-select${form.business_unit_id ? '' : ' is-unassigned'}`} value={form.business_unit_id ? String(form.business_unit_id) : ''} ariaLabel="Unidad de negocio" onAdd={onAddBusinessUnit} addLabel="Agregar unidad" options={[{ value: '', label: 'Sin asignar' }, ...catalogs.business_units.filter((unit) => unit.is_active !== false).map((unit) => ({ value: String(unit.business_unit_id), label: businessUnitLabel(unit) }))]} onChange={(value) => updateForm({ business_unit_id: value ? Number(value) : '' })} /></Field>
-          <Field label="Responsable"><CompactSelect className="drawer-assignment-select responsible-select" value={form.responsible_id ? String(form.responsible_id) : ''} ariaLabel="Responsable" onAdd={onAddResponsible} addLabel="Agregar responsable" options={[{ value: '', label: 'Sin asignar' }, ...catalogs.responsibles.filter((person) => person.is_active !== false).map((person) => ({ value: String(person.responsible_id), label: person.display_name }))]} onChange={(value) => updateForm({ responsible_id: value ? Number(value) : '' })} /></Field>
-          <Field label="Notas" full><textarea value={form.notes} onChange={(event) => updateForm({ notes: event.target.value })} placeholder="Observaciones de clasificación" /></Field>
+          <Field label={t('Estado operativo')}><CompactSelect ariaLabel={t('Estado operativo')} value={form.workflow_status} options={workflowStatusesFor(form.workflow_status).map((status) => ({ value: status, label: workflowLabel(status) }))} onChange={(value) => updateForm({ workflow_status: value as MetadataForm['workflow_status'] })} /></Field>
+          <Field label={t('Acción siguiente')}><CompactSelect className={`action-select ${actionTone(selectedAction)}`} value={selectedAction === 'Sin definir' ? '' : selectedAction} ariaLabel={t('Acción siguiente')} options={detailActions.map((action) => ({ value: action, label: action || 'Sin definir' }))} onChange={(value) => updateForm({ next_action: value || '' })} /></Field>
+          <Field label={t('Unidad de negocio')}><CompactSelect className={`drawer-assignment-select unit-select${form.business_unit_id ? '' : ' is-unassigned'}`} value={form.business_unit_id ? String(form.business_unit_id) : ''} ariaLabel={t('Unidad de negocio')} onAdd={onAddBusinessUnit} addLabel="Agregar unidad" options={[{ value: '', label: t('Sin asignar') }, ...catalogs.business_units.filter((unit) => unit.is_active !== false).map((unit) => ({ value: String(unit.business_unit_id), label: businessUnitLabel(unit) }))]} onChange={(value) => updateForm({ business_unit_id: value ? Number(value) : '' })} /></Field>
+          <Field label={t('Responsable')}><CompactSelect className="drawer-assignment-select responsible-select" value={form.responsible_id ? String(form.responsible_id) : ''} ariaLabel={t('Responsable')} onAdd={onAddResponsible} addLabel="Agregar responsable" options={[{ value: '', label: t('Sin asignar') }, ...catalogs.responsibles.filter((person) => person.is_active !== false).map((person) => ({ value: String(person.responsible_id), label: person.display_name }))]} onChange={(value) => updateForm({ responsible_id: value ? Number(value) : '' })} /></Field>
+          <Field label={t('Notas')} full><textarea value={form.notes} onChange={(event) => updateForm({ notes: event.target.value })} placeholder={t('Observaciones de clasificación')} /></Field>
         </div>
         <details className="safe-classification-advanced">
-          <summary>Más datos de clasificación <span>Opcional</span></summary>
+          <summary>{t('Más datos de clasificación')} <span>{t('Opcional')}</span></summary>
           <div className="form-grid">
-            <Field label="Nombre interno"><input value={form.internal_name} onChange={(event) => updateForm({ internal_name: event.target.value })} placeholder="Pendiente de nomenclatura" /></Field>
-            <Field label="Alcance del inventario"><CompactSelect ariaLabel="Alcance del inventario" value={form.inventory_scope} options={(['pending', 'business', 'internal'] as const).map((value) => ({ value, label: inventoryScopeLabel(value) }))} onChange={(value) => updateForm({ inventory_scope: value as MetadataForm['inventory_scope'] })} /></Field>
-            <Field label="Calidad del dato"><CompactSelect ariaLabel="Calidad del dato" value={form.data_quality_status} options={(['pending', 'clean', 'obsolete', 'duplicate'] as const).map((value) => ({ value, label: qualityStatusLabel(value) }))} onChange={(value) => updateForm({ data_quality_status: value as MetadataForm['data_quality_status'] })} /></Field>
-            <Field label="Clasificación"><CompactSelect ariaLabel="Clasificación" value={form.classification_status} options={[{ value: 'pending', label: 'Pendiente' }, { value: 'assigned', label: 'Asignada' }, { value: 'review', label: 'Revisión' }]} onChange={(value) => updateForm({ classification_status: value as MetadataForm['classification_status'] })} /></Field>
-            <Field label="Asignado por"><input value={form.assigned_by} onChange={(event) => updateForm({ assigned_by: event.target.value })} placeholder="Usuario web" /></Field>
+            <Field label={t('Nombre interno')}><input value={form.internal_name} onChange={(event) => updateForm({ internal_name: event.target.value })} placeholder={t('Pendiente de nomenclatura')} /></Field>
+            <Field label={t('Alcance del inventario')}><CompactSelect ariaLabel={t('Alcance del inventario')} value={form.inventory_scope} options={(['pending', 'business', 'internal'] as const).map((value) => ({ value, label: inventoryScopeLabel(value) }))} onChange={(value) => updateForm({ inventory_scope: value as MetadataForm['inventory_scope'] })} /></Field>
+            <Field label={t('Calidad del dato')}><CompactSelect ariaLabel={t('Calidad del dato')} value={form.data_quality_status} options={(['pending', 'clean', 'obsolete', 'duplicate'] as const).map((value) => ({ value, label: qualityStatusLabel(value) }))} onChange={(value) => updateForm({ data_quality_status: value as MetadataForm['data_quality_status'] })} /></Field>
+            <Field label={t('Clasificación')}><CompactSelect ariaLabel={t('Clasificación')} value={form.classification_status} options={[{ value: 'pending', label: t('Pendiente') }, { value: 'assigned', label: t('Asignada') }, { value: 'review', label: t('Revisión') }]} onChange={(value) => updateForm({ classification_status: value as MetadataForm['classification_status'] })} /></Field>
+            <Field label={t('Asignado por')}><input value={form.assigned_by} onChange={(event) => updateForm({ assigned_by: event.target.value })} placeholder={t('Usuario web')} /></Field>
           </div>
         </details>
-        <section className="drawer-change-summary" aria-label="Resumen de cambios pendientes">
-          <div className="detail-section-heading"><div><h3>Cambios pendientes</h3><p className="detail-summary-copy">Revisá qué se enviará antes de guardar.</p></div><strong>{formatNumber(draftChanges.length)}</strong></div>
-          {draftChanges.length ? <div className="drawer-change-list">{draftChanges.map((change) => <div key={change.label}><span>{change.label}</span><del>{change.before}</del><b>{change.after}</b></div>)}</div> : <p className="muted">No hay cambios pendientes.</p>}
+        <section className="drawer-change-summary" aria-label={t('Resumen de cambios pendientes')}>
+          <div className="detail-section-heading"><div><h3>{t('Cambios pendientes')}</h3><p className="detail-summary-copy">{t('Revisá qué se enviará antes de guardar.')}</p></div><strong>{formatNumber(draftChanges.length)}</strong></div>
+          {draftChanges.length ? <div className="drawer-change-list">{draftChanges.map((change) => <div key={change.label}><span>{change.label}</span><del>{change.before}</del><b>{change.after}</b></div>)}</div> : <p className="muted">{t('No hay cambios pendientes.')}</p>}
         </section>
         <div className="form-actions"><OverflowActions
           className="catalog-actions"
-          ariaLabel="Acciones de catálogos"
+          ariaLabel={t('Acciones de catálogos')}
           actions={[
-            { id: 'business-unit', label: 'Unidad', icon: <Plus size={14} />, title: 'Crear una unidad de negocio para clasificar Safes', onSelect: onAddBusinessUnit },
-            { id: 'responsible', label: 'Responsable', icon: <Plus size={14} />, title: 'Crear un responsable para asignar Safes', onSelect: onAddResponsible },
+            { id: 'business-unit', label: t('Unidad'), icon: <Plus size={14} />, title: t('Crear una unidad de negocio para clasificar Safes'), onSelect: onAddBusinessUnit },
+            { id: 'responsible', label: t('Responsable'), icon: <Plus size={14} />, title: t('Crear un responsable para asignar Safes'), onSelect: onAddResponsible },
           ]}
-        /><div className="drawer-save-area">{saveState === 'saved' && <span className="drawer-save-feedback success" role="status">Guardado correctamente</span>}{saveState === 'error' && <span className="drawer-save-feedback error" role="alert">{saveError}</span>}<button className="button primary" type="button" title="Guardar los cambios de clasificación en Custodia" onClick={() => void save()} disabled={saving || !draftChanges.length}><Save size={15} /> {saving ? 'Guardando...' : saveState === 'saved' ? 'Guardado' : 'Guardar clasificación'}</button></div></div>
+        /><div className="drawer-save-area">{saveState === 'saved' && <span className="drawer-save-feedback success" role="status">{t('Guardado correctamente')}</span>}{saveState === 'error' && <span className="drawer-save-feedback error" role="alert">{saveError}</span>}<button className="button primary" type="button" title={t('Guardar los cambios de clasificación en Custodia')} onClick={() => void save()} disabled={saving || !draftChanges.length}><Save size={15} /> {saving ? 'Guardando...' : saveState === 'saved' ? t('Guardado') : t('Guardar clasificación')}</button></div></div>
       </section>}
 
       {activeTab === 'history' && <section className="detail-section audit-section">
-        <div className="detail-section-heading"><h3>Historial de cambios <span>{formatNumber(audit.length)}</span></h3></div>
-        <div className="audit-list">{audit.length ? audit.map((entry) => <div className="audit-row" key={entry.audit_id}><div><strong>{entry.action === 'create' ? 'Creación' : 'Actualización'}</strong><span>{entry.entity_type} · {entry.actor_id}</span></div><time dateTime={entry.created_at} title={dateTimeHint(entry.created_at)}>{formatDate(entry.created_at)}</time></div>) : <p className="muted">Sin cambios manuales registrados.</p>}</div>
+        <div className="detail-section-heading"><h3>{t('Historial de cambios')} <span>{formatNumber(audit.length)}</span></h3></div>
+        <div className="audit-list">{audit.length ? audit.map((entry) => <div className="audit-row" key={entry.audit_id}><div><strong>{entry.action === 'create' ? t('Creación') : t('Actualización')}</strong><span>{entry.entity_type} · {entry.actor_id}</span></div><time dateTime={entry.created_at} title={dateTimeHint(entry.created_at)}>{formatDate(entry.created_at)}</time></div>) : <p className="muted">{t('Sin cambios manuales registrados.')}</p>}</div>
       </section>}
 
       {activeTab === 'accounts' && <SafeAccountList accounts={accounts} total={detail.safe.account_count} />}

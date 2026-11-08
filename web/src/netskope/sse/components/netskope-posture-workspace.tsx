@@ -18,6 +18,7 @@ import {
 } from '../lib/netskope-posture-checks';
 import type { NetskopeDeviceQuery, NetskopePostureCheck, NetskopePostureResponse, NetskopePostureSeverity } from '../types/netskope';
 import './netskope-posture-workspace.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Props = {
   refreshKey: number;
@@ -51,31 +52,31 @@ function SeverityBadge({ severity }: { severity: NetskopePostureSeverity }) {
 
 function SourceContext({ data }: { data: NetskopePostureResponse }) {
   const evidence = data.source_evidence;
-  if (!evidence.source_completed_at) return <span className="nsk-posture-source is-warning">Sin sincronización completa del inventario Netskope</span>;
+  if (!evidence.source_completed_at) return <span className="nsk-posture-source is-warning">{t('Sin sincronización completa del inventario Netskope')}</span>;
   return <span className={`nsk-posture-source${evidence.source_fresh ? '' : ' is-warning'}`}>
-    Inventario sincronizado {relativeTime(evidence.source_completed_at)}{evidence.source_fresh ? '' : ' · no es una corrida completa de las últimas 24 h'}
+    Inventario sincronizado {relativeTime(evidence.source_completed_at)}{evidence.source_fresh ? '' : t(' · no es una corrida completa de las últimas 24 h')}
   </span>;
 }
 
 function FindingSample({ check }: { check: NetskopePostureCheck }) {
-  const signal = (value: string | null) => value ? <DateTime value={value} /> : <span className="muted">Sin dato</span>;
+  const signal = (value: string | null) => value ? <DateTime value={value} /> : <span className="muted">{t('Sin dato')}</span>;
   if (check.entity === 'user') return <table className="compact-table nsk-posture-sample" aria-label={`Muestra de ${check.title}`}>
-    <thead><tr><th>Usuario</th><th>Correo</th><th>Índice de confianza</th><th>Calculado</th></tr></thead>
+    <thead><tr><th>{t('Usuario')}</th><th>{t('Correo')}</th><th>{t('Índice de confianza')}</th><th>{t('Calculado')}</th></tr></thead>
     <tbody>{check.findings.map((finding, index) => <tr key={index}>
       <td><span className="cell-lead">{finding.name || 'Sin nombre informado'}</span></td>
-      <td>{finding.user || <span className="muted">Sin dato</span>}</td>
-      <td>{finding.score ?? <span className="muted">Sin dato</span>}</td>
+      <td>{finding.user || <span className="muted">{t('Sin dato')}</span>}</td>
+      <td>{finding.score ?? <span className="muted">{t('Sin dato')}</span>}</td>
       <td>{signal(finding.detected_at)}</td>
     </tr>)}</tbody>
   </table>;
   return <table className="compact-table nsk-posture-sample" aria-label={`Muestra de ${check.title}`}>
-    <thead><tr><th>Equipo</th><th>Usuario informado</th><th>Sistema operativo</th><th>Cliente</th><th>Último evento</th><th>Última señal</th></tr></thead>
+    <thead><tr><th>{t('Equipo')}</th><th>{t('Usuario informado')}</th><th>{t('Sistema operativo')}</th><th>{t('Cliente')}</th><th>{t('Último evento')}</th><th>{t('Última señal')}</th></tr></thead>
     <tbody>{check.findings.map((finding) => <tr key={finding.object_id ?? finding.name}>
       <td><span className="cell-lead">{finding.name || 'Sin nombre informado'}</span></td>
-      <td>{finding.user || <span className="muted">Sin dato</span>}</td>
-      <td>{finding.os || <span className="muted">Sin dato</span>}</td>
-      <td>{finding.client_version || <span className="muted">Sin dato</span>}</td>
-      <td>{finding.last_event || <span className="muted">Sin dato</span>}</td>
+      <td>{finding.user || <span className="muted">{t('Sin dato')}</span>}</td>
+      <td>{finding.os || <span className="muted">{t('Sin dato')}</span>}</td>
+      <td>{finding.client_version || <span className="muted">{t('Sin dato')}</span>}</td>
+      <td>{finding.last_event || <span className="muted">{t('Sin dato')}</span>}</td>
       <td>{signal(finding.detected_at)}</td>
     </tr>)}</tbody>
   </table>;
@@ -112,39 +113,39 @@ export function NetskopePostureWorkspace({ refreshKey, authChecked, authenticate
   const rows = data ? postureRows(data.checks, severity) : [];
   const maxCount = Math.max(0, ...rows.map((check) => check.status === 'evaluated' ? check.count : 0));
 
-  return <section className="netskope-workspace nsk-posture" aria-label="Postura Netskope">
+  return <section className="netskope-workspace nsk-posture" aria-label={t('Postura Netskope')}>
     <div className="nsk-posture-toolbar">
-      <div className="section-title nsk-posture-heading"><ShieldCheck size={17} aria-hidden="true" /><h2 id="nsk-posture-title">Qué está mal y qué hago</h2><HelpHint label="Postura"><p>{HELP}</p></HelpHint></div>
+      <div className="section-title nsk-posture-heading"><ShieldCheck size={17} aria-hidden="true" /><h2 id="nsk-posture-title">{t('Qué está mal y qué hago')}</h2><HelpHint label={t('Postura')}><p>{HELP}</p></HelpHint></div>
       <div className="nsk-posture-toolbar-end">
         {data ? <SourceContext data={data} /> : null}
-        <button type="button" className="button subtle" disabled={panel.loading} onClick={() => void panel.reload()}><RefreshCw size={14} aria-hidden="true" /> Volver a evaluar</button>
+        <button type="button" className="button subtle" disabled={panel.loading} onClick={() => void panel.reload()}><RefreshCw size={14} aria-hidden="true" /> {t('Volver a evaluar')}</button>
       </div>
     </div>
-    {panel.loading && !data ? <section className="list-panel database-surface"><StateBlock variant="loading" title="Evaluando la postura Netskope…" /></section>
-      : panel.error && !data ? <section className="list-panel database-surface"><StateBlock variant="error" title="No se pudo evaluar la postura Netskope" hint={panel.error} action={<button type="button" className="button subtle" onClick={() => void panel.reload()}>Reintentar</button>} /></section>
+    {panel.loading && !data ? <section className="list-panel database-surface"><StateBlock variant="loading" title={t('Evaluando la postura Netskope…')} /></section>
+      : panel.error && !data ? <section className="list-panel database-surface"><StateBlock variant="error" title={t('No se pudo evaluar la postura Netskope')} hint={panel.error} action={<button type="button" className="button subtle" onClick={() => void panel.reload()}>{t('Reintentar')}</button>} /></section>
       : !data || !summary ? null
       : <>
-        <SummaryStats ariaLabel="Totales de postura Netskope" stats={[
-          { key: 'total', label: 'Hallazgos', value: formatNumber(summary.total), detail: `${formatNumber(summary.withFindings)} de ${formatNumber(summary.evaluated)} chequeos con hallazgos` },
+        <SummaryStats ariaLabel={t('Totales de postura Netskope')} stats={[
+          { key: 'total', label: t('Hallazgos'), value: formatNumber(summary.total), detail: `${formatNumber(summary.withFindings)} de ${formatNumber(summary.evaluated)} chequeos con hallazgos` },
           ...POSTURE_SEVERITIES.map((key) => ({ key, label: `Severidad ${POSTURE_SEVERITY_LABELS[key].toLowerCase()}`, value: formatNumber(summary.bySeverity[key]) })),
-          { key: 'devices', label: 'En equipos', value: summary.evaluatedDevices ? formatNumber(summary.devices) : 'No evaluado', detail: 'Un equipo puede estar en más de un chequeo' },
-          { key: 'users', label: 'En usuarios', value: summary.evaluatedUsers ? formatNumber(summary.users) : 'No evaluado', detail: summary.evaluatedUsers ? 'Índice de confianza (UCI)' : 'Sin permiso para confianza de usuarios o captura no habilitada' },
+          { key: 'devices', label: t('En equipos'), value: summary.evaluatedDevices ? formatNumber(summary.devices) : 'No evaluado', detail: t('Un equipo puede estar en más de un chequeo') },
+          { key: 'users', label: t('En usuarios'), value: summary.evaluatedUsers ? formatNumber(summary.users) : 'No evaluado', detail: summary.evaluatedUsers ? t('Índice de confianza (UCI)') : t('Sin permiso para confianza de usuarios o captura no habilitada') },
         ]} />
-        <section className="list-panel database-surface nsk-posture-surface" aria-label="Hallazgos por chequeo">
-          <div className="nsk-posture-filter" role="group" aria-label="Filtrar por severidad">
+        <section className="list-panel database-surface nsk-posture-surface" aria-label={t('Hallazgos por chequeo')}>
+          <div className="nsk-posture-filter" role="group" aria-label={t('Filtrar por severidad')}>
             <button type="button" className="button subtle" aria-pressed={severity === ''} onClick={() => setSeverity('')}>Todas · {formatNumber(summary.total)}</button>
             {POSTURE_SEVERITIES.map((key) => <button key={key} type="button" className="button subtle" aria-pressed={severity === key} onClick={() => setSeverity(key)}>{POSTURE_SEVERITY_LABELS[key]} · {formatNumber(summary.bySeverity[key])}</button>)}
           </div>
-          {!rows.length ? <StateBlock compact variant="empty" title="Sin chequeos con esta severidad" />
-            : <div className="compact-table-wrap"><table className="compact-table nsk-posture-table" aria-label="Hallazgos de postura Netskope por chequeo">
-              <thead><tr><th>Chequeo</th><th>Hallazgos</th><th>Severidad</th><th><span className="sr-only">Acciones</span></th></tr></thead>
+          {!rows.length ? <StateBlock compact variant="empty" title={t('Sin chequeos con esta severidad')} />
+            : <div className="compact-table-wrap"><table className="compact-table nsk-posture-table" aria-label={t('Hallazgos de postura Netskope por chequeo')}>
+              <thead><tr><th>{t('Chequeo')}</th><th>{t('Hallazgos')}</th><th>{t('Severidad')}</th><th><span className="sr-only">{t('Acciones')}</span></th></tr></thead>
               <tbody>{rows.map((check) => {
                 const evaluated = check.status === 'evaluated';
                 const expandable = evaluated && (check.count > 0 || Boolean(details[check.id]));
                 const isOpen = expandable && open[check.id] === true;
                 const rowsId = `nsk-posture-group-${check.id}`;
                 const entity = postureEntityLabel(check, check.count);
-                const target = check.entity === 'user' ? 'Usuarios con señales de riesgo' : 'el inventario';
+                const target = check.entity === 'user' ? t('Usuarios con señales de riesgo') : t('el inventario');
                 return <Fragment key={check.id}>
                   <tr className={`nsk-posture-group${isOpen ? ' is-open' : ''}${evaluated ? '' : ' is-pending'}`}>
                     <td>{expandable
@@ -157,7 +158,7 @@ export function NetskopePostureWorkspace({ refreshKey, authChecked, authenticate
                       ? <BarCell label={`${formatNumber(check.count)} ${entity}`} share={maxCount ? check.count / maxCount : 0} muted={!check.count} />
                       : <span className="nsk-posture-status"><StatusBadge tone="neutral">{postureStatusLabel(check)}</StatusBadge><small className="nsk-posture-hint">{posturePendingHint(check)}</small></span>}</td>
                     <td><SeverityBadge severity={check.severity} /></td>
-                    <td>{evaluated && check.count ? <button type="button" className="button subtle nsk-posture-drill" onClick={() => drill(check)}><ExternalLink size={13} aria-hidden="true" /> {check.entity === 'user' ? 'Ver usuarios con señales de riesgo' : 'Ver en inventario'}</button> : null}</td>
+                    <td>{evaluated && check.count ? <button type="button" className="button subtle nsk-posture-drill" onClick={() => drill(check)}><ExternalLink size={13} aria-hidden="true" /> {check.entity === 'user' ? t('Ver usuarios con señales de riesgo') : t('Ver en inventario')}</button> : null}</td>
                   </tr>
                   {isOpen ? <tr id={rowsId} className="nsk-posture-child"><td colSpan={4}>
                     {check.count > 0 ? <>
@@ -172,7 +173,7 @@ export function NetskopePostureWorkspace({ refreshKey, authChecked, authenticate
                 </Fragment>;
               })}</tbody>
             </table></div>}
-          {data.uci_captured_at ? <p className="nsk-posture-footnote">Índice de confianza capturado <DateTime value={data.uci_captured_at} />.</p> : null}
+          {data.uci_captured_at ? <p className="nsk-posture-footnote">{t('Índice de confianza capturado')} <DateTime value={data.uci_captured_at} />.</p> : null}
         </section>
       </>}
   </section>;

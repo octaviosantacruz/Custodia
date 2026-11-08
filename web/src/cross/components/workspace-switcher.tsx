@@ -13,6 +13,7 @@ import {
 import { WORKSPACE_META } from '../lib/workspace-meta';
 import type { WorkspacePreferences } from '../lib/workspace-preferences-api';
 import './workspace-switcher.css';
+import { t } from '../i18n/index.ts';
 
 type WorkspaceSwitcherProps = {
   isHome?: boolean;
@@ -31,9 +32,9 @@ type WorkspaceSwitcherProps = {
 const PRODUCT_MARKS: Record<Domain, { label: string; image?: { dark: string; light: string }; fallback: string }> = {
   pam: { label: domainMeta('pam').product.label, image: { dark: '/cyberark-logo-lime.png', light: '/cyberark-logo-dark.png' }, fallback: 'C' },
   dlp: { label: domainMeta('dlp').product.label, image: { dark: '/netskope-full-lime.png', light: '/netskope-full-black.png' }, fallback: 'N' },
-  cross: { label: 'Conexiones', fallback: 'C' },
-  admin: { label: 'Administración', fallback: 'A' },
-  dspm: { label: 'BigID DSPM', fallback: 'B' },
+  cross: { label: t('Conexiones'), fallback: 'C' },
+  admin: { label: t('Administración'), fallback: 'A' },
+  dspm: { label: t('BigID DSPM'), fallback: 'B' },
 };
 
 function ProductMark({ view, compact = false }: { view: WorkspaceView; compact?: boolean }) {
@@ -144,16 +145,16 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
   };
 
   return <div className="workspace-launcher" ref={ref}>
-    {crossTool ? <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label="Abrir accesos rápidos" aria-expanded={open} title="Vistas fijadas y recientes de todas las herramientas" onClick={() => setOpen((current) => !current)}>
-      <Star size={14} aria-hidden /><span>Accesos rápidos</span><ChevronDown size={15} aria-hidden />
-    </button> : <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label={`Cambiar workspace. Actual: ${triggerLabel}`} aria-expanded={open} title="Cambiar de workspace" onClick={() => setOpen((current) => !current)}>
+    {crossTool ? <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label={t('Abrir accesos rápidos')} aria-expanded={open} title={t('Vistas fijadas y recientes de todas las herramientas')} onClick={() => setOpen((current) => !current)}>
+      <Star size={14} aria-hidden /><span>{t('Accesos rápidos')}</span><ChevronDown size={15} aria-hidden />
+    </button> : <button ref={triggerRef} className={'workspace-switcher-trigger' + (open ? ' active' : '')} type="button" aria-label={`Cambiar workspace. Actual: ${triggerLabel}`} aria-expanded={open} title={t('Cambiar de workspace')} onClick={() => setOpen((current) => !current)}>
       <span>{triggerLabel}</span><ChevronDown size={15} aria-hidden />
     </button>}
-    {open && <section className="workspace-menu" aria-label="Workspaces" ref={menuRef}>
+    {open && <section className="workspace-menu" aria-label={t('Workspaces')} ref={menuRef}>
       {editing ? <div ref={editorRef} className="workspace-preferences-editor" role="dialog" aria-labelledby="workspace-editor-title" tabIndex={-1}>
         <div className="workspace-editor-header">
-          <div><strong id="workspace-editor-title">Accesos rápidos</strong><span>Personalizá accesos de todas las herramientas.</span></div>
-          <button className="workspace-editor-close" type="button" aria-label="Cancelar edición" onClick={closeEditing} disabled={saving}><X size={16} /></button>
+          <div><strong id="workspace-editor-title">{t('Accesos rápidos')}</strong><span>{t('Personalizá accesos de todas las herramientas.')}</span></div>
+          <button className="workspace-editor-close" type="button" aria-label={t('Cancelar edición')} onClick={closeEditing} disabled={saving}><X size={16} /></button>
         </div>
         <div className="workspace-editor-limit"><span>{draft.length} seleccionados</span><small>Hasta {limit}</small></div>
         <div className="workspace-editor-options">
@@ -170,24 +171,24 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
         </div>
         {saveError ? <p className="workspace-editor-error" role="alert">{saveError}</p> : null}
         <div className="workspace-editor-actions">
-          <button className="button subtle" type="button" onClick={closeEditing} disabled={saving}>Cancelar</button>
+          <button className="button subtle" type="button" onClick={closeEditing} disabled={saving}>{t('Cancelar')}</button>
           <button className="button primary" type="button" onClick={() => void saveDraft()} disabled={!dirty || saving}>
-            {saving ? <LoaderCircle className="spin" size={14} /> : <Save size={14} />}{saving ? 'Guardando...' : 'Guardar'}
+            {saving ? <LoaderCircle className="spin" size={14} /> : <Save size={14} />}{saving ? t('Guardando...') : t('Guardar')}
           </button>
         </div>
       </div> : <>
         <div className="workspace-menu-header">
           {crossTool
-            ? <div><strong>Accesos rápidos</strong><span>Tus vistas de cualquier herramienta.</span></div>
-            : <div><strong>Vistas de {activeProduct.label}</strong><span>Para cambiar de herramienta, usá el selector anterior.</span></div>}
+            ? <div><strong>{t('Accesos rápidos')}</strong><span>{t('Tus vistas de cualquier herramienta.')}</span></div>
+            : <div><strong>Vistas de {activeProduct.label}</strong><span>{t('Para cambiar de herramienta, usá el selector anterior.')}</span></div>}
         </div>
         {quickAccess.length ? <>
-          <p className="workspace-menu-section-label">Vistas rápidas</p>
+          <p className="workspace-menu-section-label">{t('Vistas rápidas')}</p>
           <div className="workspace-domain-nav" data-section="quick-access">
             {quickAccess.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} showProduct={crossTool} />)}
           </div>
-        </> : <button className="workspace-quick-empty-action" type="button" onClick={beginEditing}><Settings2 size={14} /><span><strong>Fijar vistas rápidas</strong><small>Guardá tus accesos frecuentes{crossTool ? ' de cualquier herramienta' : ` de ${activeProduct.label}`}.</small></span></button>}
-        {recent.length ? <><p className="workspace-menu-section-label">Recientes</p><div className="workspace-domain-nav" data-section="recent">{recent.map((view) => <WorkspaceLink key={view} view={view} onSelect={pickWorkspace} showProduct={crossTool} />)}</div></> : null}
+        </> : <button className="workspace-quick-empty-action" type="button" onClick={beginEditing}><Settings2 size={14} /><span><strong>{t('Fijar vistas rápidas')}</strong><small>Guardá tus accesos frecuentes{crossTool ? ' de cualquier herramienta' : ` de ${activeProduct.label}`}.</small></span></button>}
+        {recent.length ? <><p className="workspace-menu-section-label">{t('Recientes')}</p><div className="workspace-domain-nav" data-section="recent">{recent.map((view) => <WorkspaceLink key={view} view={view} onSelect={pickWorkspace} showProduct={crossTool} />)}</div></> : null}
         {crossTool ? null : <>
           <p className="workspace-menu-section-label">Todas las vistas de {activeProduct.label}</p>
           <div className="workspace-domain-nav" data-section="tool-workspaces">
@@ -195,7 +196,7 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
           </div>
         </>}
         {quickAccess.length ? <div className="workspace-preferences">
-          <button className="workspace-preferences-trigger" type="button" onClick={beginEditing}><Settings2 size={14} /> Editar vistas rápidas</button>
+          <button className="workspace-preferences-trigger" type="button" onClick={beginEditing}><Settings2 size={14} /> {t('Editar vistas rápidas')}</button>
         </div> : null}
       </>}
     </section>}

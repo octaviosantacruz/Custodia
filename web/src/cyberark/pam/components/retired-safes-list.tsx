@@ -8,6 +8,7 @@ import { usePamRefreshKey } from '../../shared/refresh-context';
 import { fetchRetiredSafes } from '../lib/retired-safes-api';
 import { RETIRED_PAGE_SIZE, hasMoreRetired, nextRetiredLimit, retiredLimitNote } from '../lib/retired-safes';
 import './retired-safes-list.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 /**
  * Read-only list of Safes that stopped appearing after a complete sync run.
@@ -31,27 +32,27 @@ export function RetiredSafesList() {
   const total = query.data?.total ?? 0;
   const capNote = retiredLimitNote(rows.length, total);
 
-  return <section className="list-panel database-surface retired-safes-panel" aria-label="Safes retiradas">
-    <header className="retired-safes-heading"><span className="retired-safes-kicker">SOLO LECTURA</span></header>
+  return <section className="list-panel database-surface retired-safes-panel" aria-label={t('Safes retiradas')}>
+    <header className="retired-safes-heading"><span className="retired-safes-kicker">{t('SOLO LECTURA')}</span></header>
     {query.isPending
-      ? <StateBlock variant="loading" title="Cargando Safes retiradas…" />
+      ? <StateBlock variant="loading" title={t('Cargando Safes retiradas…')} />
       : query.isError
         ? <StateBlock
             variant="error"
-            title="No se pudieron cargar las Safes retiradas"
+            title={t('No se pudieron cargar las Safes retiradas')}
             hint={query.error instanceof Error ? query.error.message : 'Reintentá la consulta.'}
-            action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>Reintentar</button>}
+            action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>{t('Reintentar')}</button>}
           />
         : rows.length === 0
-          ? <StateBlock variant="empty" title="No hay Safes retiradas" hint="Ninguna Safe dejó de aparecer en una corrida completa de sincronización." />
+          ? <StateBlock variant="empty" title={t('No hay Safes retiradas')} hint="Ninguna Safe dejó de aparecer en una corrida completa de sincronización." />
           : <>
             <div className="compact-table-wrap retired-safes-table-wrap">
               <table className="compact-table retired-safes-table">
-                <caption className="sr-only">Safes retiradas: nombre, fecha de retiro y miembros retirados</caption>
+                <caption className="sr-only">{t('Safes retiradas: nombre, fecha de retiro y miembros retirados')}</caption>
                 <thead><tr>
-                  <th scope="col">Safe</th>
-                  <th scope="col">Fecha de retiro</th>
-                  <th scope="col">Miembros retirados</th>
+                  <th scope="col">{t('Safe')}</th>
+                  <th scope="col">{t('Fecha de retiro')}</th>
+                  <th scope="col">{t('Miembros retirados')}</th>
                 </tr></thead>
                 <tbody>
                   {rows.map((row) => <tr key={row.safe_number}>

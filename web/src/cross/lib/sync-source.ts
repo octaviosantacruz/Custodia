@@ -2,6 +2,7 @@ import { REGISTERED_SYNCS, REGISTERED_RUNTIMES, SYNC_BY_SOURCE } from '../../sou
 import { CATALOG_BY_ID } from './workspace-catalog.ts';
 import { domainOf, type Domain } from './domains.ts';
 import type { WorkspaceView } from './workspaces.ts';
+import { t, localeTag } from '../i18n/index.ts';
 
 export type SyncSource = 'cyberark' | 'identity_administration' | 'sia' | 'access' | 'netskope' | string;
 export type SyncSourceMeta = { label: string; image?: string; fallback: string };
@@ -21,8 +22,8 @@ const STATUS_LABELS: Record<string, string> = {
  *  workspace intro and the runs view. Unknown values stay visible as-is
  *  rather than hiding a status the contract does not define yet. */
 export function syncStatusLabel(status: string | null | undefined): string {
-  if (!status) return 'Sin estado';
-  return STATUS_LABELS[status] || status;
+  if (!status) return t('Sin estado');
+  return STATUS_LABELS[status] ? t(STATUS_LABELS[status]) : status;
 }
 
 export function syncSourceLabel(source: SyncSource | null | undefined, sourceFile?: string | null): string {
@@ -303,20 +304,20 @@ export function presentNotice(notice: string, workspaceSource: SyncSource | null
     return {
       source,
       eyebrow,
-      title: 'Sincronización automática completada',
+      title: t('Sincronización automática completada'),
       detail: `${completed[1]} · ${completed[2]}`,
     };
   }
 
   const failed = automaticBody.match(/^terminó una sincronización automática con errores\. (.+)$/i);
-  if (failed) return { source, eyebrow, title: 'Sincronización automática con errores', detail: failed[1] };
+  if (failed) return { source, eyebrow, title: t('Sincronización automática con errores'), detail: failed[1] };
 
   const partial = automaticBody.match(/^sincronizó parcialmente: (.+)$/i);
-  if (partial) return { source, eyebrow, title: 'Sincronización automática parcial', detail: partial[1] };
+  if (partial) return { source, eyebrow, title: t('Sincronización automática parcial'), detail: partial[1] };
 
   const finished = automaticBody.match(/^terminó una sincronización automática\. (.+)$/i);
-  if (finished) return { source, eyebrow, title: 'Sincronización automática finalizada', detail: finished[1] };
-  return { source, eyebrow, title: 'Sincronización automática finalizada', detail: withoutSource };
+  if (finished) return { source, eyebrow, title: t('Sincronización automática finalizada'), detail: finished[1] };
+  return { source, eyebrow, title: t('Sincronización automática finalizada'), detail: withoutSource };
 }
 
 type CompletedSync = {
@@ -331,14 +332,14 @@ export function automaticSyncNotice(run: CompletedSync): string {
   const source = syncToolLabel(syncToolForSource(run.source_system));
   const objects = run.received_object_count ?? run.received_safe_count;
   if (run.status === 'partial') {
-    const landed = typeof objects === 'number' ? ` Llegaron ${objects.toLocaleString('es-AR')} ${objects === 1 ? 'objeto' : 'objetos'}.` : '';
+    const landed = typeof objects === 'number' ? ` Llegaron ${objects.toLocaleString(localeTag())} ${objects === 1 ? 'objeto' : 'objetos'}.` : '';
     return `${source} sincronizó parcialmente: parte del inventario no se actualizó.${landed} Tu vista actual se conserva; revisá Actividad.`;
   }
   if (run.status !== 'completed' || (run.error_count || 0) > 0) {
     return `${source} terminó una sincronización automática con errores. Tu vista actual se conserva; revisá Actividad para el detalle.`;
   }
   if (typeof objects !== 'number') return `${source} terminó una sincronización automática. Tu vista actual se conserva.`;
-  return `${source} sincronizó automáticamente ${objects.toLocaleString('es-AR')} ${objects === 1 ? 'objeto' : 'objetos'}. Tu vista actual se conserva.`;
+  return `${source} sincronizó automáticamente ${objects.toLocaleString(localeTag())} ${objects === 1 ? 'objeto' : 'objetos'}. Tu vista actual se conserva.`;
 }
 
 /** Collapse the several source runs that make up one scheduled CyberArk pass

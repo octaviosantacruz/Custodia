@@ -15,6 +15,7 @@ import { SummaryStats } from '../../../cross/components/summary-stats';
 import { StackedBar } from '../../../cross/components/stacked-bar';
 import { HelpHint } from '../../../cross/components/help-hint';
 import type { Account, AccountPlatformStatus, Analytics, ClassificationStatus, SafeClassificationCounts, SafeHealthFilter, SafeRow, WorkflowStatus } from '../types/safe';
+import { t } from '../../../cross/i18n/index.ts';
 
 const EMPTY_ACCOUNTS: Account[] = [];
 
@@ -166,11 +167,11 @@ export function SafeTable({
   useEffect(() => { safesRef.current = safes; }, [safes]);
   /* Shared option lists: rebuilt per row before, now built once per catalog. */
   const unitOptions = useMemo(() => [
-    { value: '', label: 'Sin asignar' },
+    { value: '', label: t('Sin asignar') },
     ...catalogs.business_units.filter((unit) => unit.is_active !== false).map((unit) => ({ value: String(unit.business_unit_id), label: unit.unit_code })),
   ], [catalogs.business_units]);
   const responsibleOptions = useMemo(() => [
-    { value: '', label: 'Sin asignar' },
+    { value: '', label: t('Sin asignar') },
     ...catalogs.responsibles.filter((person) => person.is_active !== false).map((person) => ({ value: String(person.responsible_id), label: person.display_name })),
   ], [catalogs.responsibles]);
   useEffect(() => { if (page === 0) setCheckedSafes(new Set()); }, [page]);
@@ -299,16 +300,16 @@ export function SafeTable({
       onBusinessUnitChange={onBusinessUnitChange} onResponsibleChange={onResponsibleChange}
       onClearFilters={onClearFilters} onExport={onExport}
     />
-      <section className="safe-classification-progress" aria-label="Progreso de clasificación de Safes"><div className="safe-classification-progress-heading"><strong>Clasificación de Safes</strong><span>{classificationProgress.total === 1 ? '1 Safe' : `${formatNumber(classificationProgress.total)} Safes`}{safes.length < total ? ` · ${formatNumber(safes.length)} cargadas en la tabla` : ''}</span><HelpHint label="Progreso de clasificación visible"><p>Cuenta todas las Safes del resultado con los filtros activos (menos el de clasificación), estén o no cargadas en la tabla. Hacé clic en un estado para filtrar la tabla.</p></HelpHint></div><SummaryStats ariaLabel="Estados de clasificación de las Safes" stats={[{ key: 'assigned', label: 'Asignadas', value: formatNumber(classificationProgress.assigned), active: classificationFilter === 'assigned', onSelect: () => onClassificationChange(classificationFilter === 'assigned' ? '' : 'assigned') }, { key: 'review', label: 'En revisión', value: formatNumber(classificationProgress.review), active: classificationFilter === 'review', onSelect: () => onClassificationChange(classificationFilter === 'review' ? '' : 'review') }, { key: 'pending', label: 'Pendientes', value: formatNumber(classificationProgress.pending), active: classificationFilter === 'pending', onSelect: () => onClassificationChange(classificationFilter === 'pending' ? '' : 'pending') }]} /><StackedBar ariaLabel="Distribución de estados de clasificación de las Safes" total={classificationProgress.total} segments={[{ key: 'assigned', label: 'Asignadas', count: classificationProgress.assigned, tone: 'good' }, { key: 'review', label: 'En revisión', count: classificationProgress.review, tone: 'warn' }, { key: 'pending', label: 'Pendientes', count: classificationProgress.pending, tone: 'muted' }]} /></section>
-    {checkedSafes.size > 0 && <div className="bulk-action-bar" role="region" aria-label="Reclasificación masiva">
+      <section className="safe-classification-progress" aria-label={t('Progreso de clasificación de Safes')}><div className="safe-classification-progress-heading"><strong>{t('Clasificación de Safes')}</strong><span>{classificationProgress.total === 1 ? '1 Safe' : `${formatNumber(classificationProgress.total)} Safes`}{safes.length < total ? ` · ${formatNumber(safes.length)} cargadas en la tabla` : ''}</span><HelpHint label={t('Progreso de clasificación visible')}><p>Cuenta todas las Safes del resultado con los filtros activos (menos el de clasificación), estén o no cargadas en la tabla. Hacé clic en un estado para filtrar la tabla.</p></HelpHint></div><SummaryStats ariaLabel={t('Estados de clasificación de las Safes')} stats={[{ key: 'assigned', label: t('Asignadas'), value: formatNumber(classificationProgress.assigned), active: classificationFilter === 'assigned', onSelect: () => onClassificationChange(classificationFilter === 'assigned' ? '' : 'assigned') }, { key: 'review', label: t('En revisión'), value: formatNumber(classificationProgress.review), active: classificationFilter === 'review', onSelect: () => onClassificationChange(classificationFilter === 'review' ? '' : 'review') }, { key: 'pending', label: t('Pendientes'), value: formatNumber(classificationProgress.pending), active: classificationFilter === 'pending', onSelect: () => onClassificationChange(classificationFilter === 'pending' ? '' : 'pending') }]} /><StackedBar ariaLabel={t('Distribución de estados de clasificación de las Safes')} total={classificationProgress.total} segments={[{ key: 'assigned', label: t('Asignadas'), count: classificationProgress.assigned, tone: 'good' }, { key: 'review', label: t('En revisión'), count: classificationProgress.review, tone: 'warn' }, { key: 'pending', label: t('Pendientes'), count: classificationProgress.pending, tone: 'muted' }]} /></section>
+    {checkedSafes.size > 0 && <div className="bulk-action-bar" role="region" aria-label={t('Reclasificación masiva')}>
       <span className="bulk-action-count">{checkedSafes.size} {checkedSafes.size === 1 ? 'seleccionada' : 'seleccionadas'}</span>
-      <label>Tipo de cuenta<CompactSelect className="bulk-action-select" value={bulkAccountType} ariaLabel="Tipo de cuenta a aplicar" disabled={bulkApplying} options={[{ value: '__unchanged__', label: 'No cambiar' }, { value: 'nominal', label: 'Nominal' }, { value: 'no_nominal', label: 'No nominal' }, { value: 'internal', label: 'Interno CyberArk' }]} onChange={setBulkAccountType} /></label>
-      <label>Estado<CompactSelect className="bulk-action-select" value={bulkStatus} ariaLabel="Estado a aplicar" disabled={bulkApplying} options={[{ value: '__unchanged__', label: 'No cambiar' }, ...WORKFLOW_STATUSES.map((status) => ({ value: status, label: workflowLabel(status) }))]} onChange={setBulkStatus} /></label>
-      <label>Acción siguiente<CompactSelect className="bulk-action-select" value={bulkAction} ariaLabel="Acción siguiente a aplicar" disabled={bulkApplying} options={[{ value: '__unchanged__', label: 'No cambiar' }, { value: '', label: 'Sin definir' }, ...nextActionOptions.map((action) => ({ value: action, label: action }))]} onChange={setBulkAction} /></label>
-      <label>Unidad<CompactSelect className="bulk-action-select" value={bulkUnit} ariaLabel="Unidad a aplicar" disabled={bulkApplying} options={[{ value: '__unchanged__', label: 'No cambiar' }, ...unitOptions]} onChange={setBulkUnit} /></label>
-      <label>Responsable<CompactSelect className="bulk-action-select" value={bulkResponsible} ariaLabel="Responsable a aplicar" disabled={bulkApplying} options={[{ value: '__unchanged__', label: 'No cambiar' }, ...responsibleOptions]} onChange={setBulkResponsible} /></label>
+      <label>{t('Tipo de cuenta')}<CompactSelect className="bulk-action-select" value={bulkAccountType} ariaLabel={t('Tipo de cuenta a aplicar')} disabled={bulkApplying} options={[{ value: '__unchanged__', label: t('No cambiar') }, { value: 'nominal', label: t('Nominal') }, { value: 'no_nominal', label: t('No nominal') }, { value: 'internal', label: t('Interno CyberArk') }]} onChange={setBulkAccountType} /></label>
+      <label>{t('Estado')}<CompactSelect className="bulk-action-select" value={bulkStatus} ariaLabel={t('Estado a aplicar')} disabled={bulkApplying} options={[{ value: '__unchanged__', label: t('No cambiar') }, ...WORKFLOW_STATUSES.map((status) => ({ value: status, label: workflowLabel(status) }))]} onChange={setBulkStatus} /></label>
+      <label>{t('Acción siguiente')}<CompactSelect className="bulk-action-select" value={bulkAction} ariaLabel={t('Acción siguiente a aplicar')} disabled={bulkApplying} options={[{ value: '__unchanged__', label: t('No cambiar') }, { value: '', label: t('Sin definir') }, ...nextActionOptions.map((action) => ({ value: action, label: action }))]} onChange={setBulkAction} /></label>
+      <label>{t('Unidad')}<CompactSelect className="bulk-action-select" value={bulkUnit} ariaLabel={t('Unidad a aplicar')} disabled={bulkApplying} options={[{ value: '__unchanged__', label: t('No cambiar') }, ...unitOptions]} onChange={setBulkUnit} /></label>
+      <label>{t('Responsable')}<CompactSelect className="bulk-action-select" value={bulkResponsible} ariaLabel={t('Responsable a aplicar')} disabled={bulkApplying} options={[{ value: '__unchanged__', label: t('No cambiar') }, ...responsibleOptions]} onChange={setBulkResponsible} /></label>
       <OverflowActions
-        ariaLabel="Acciones de reclasificación masiva"
+        ariaLabel={t('Acciones de reclasificación masiva')}
         minVisible={0}
         actions={[
           {
@@ -322,12 +323,12 @@ export function SafeTable({
               if (bulkAccountType !== '__unchanged__' || bulkStatus !== '__unchanged__' || bulkAction !== '__unchanged__') void applyBulkClassification();
             },
           },
-          { id: 'cancel', label: 'Cancelar selección', disabled: bulkApplying, onSelect: clearBulkSelection },
+          { id: 'cancel', label: t('Cancelar selección'), disabled: bulkApplying, onSelect: clearBulkSelection },
         ]}
       />
     </div>}
     <div className={'table-wrap' + (headerStuck ? ' header-stuck' : '')} ref={tableWrapRef}><div className="table-sticky-sentinel" ref={stickySentinelRef} aria-hidden="true" /><table className="safe-table"><SafeTableHead allLoadedChecked={allLoadedChecked} bulkApplying={bulkApplying} hasSafes={safes.length > 0} onToggleCheckAllLoaded={toggleCheckAllLoaded} /><tbody>
-      {loading && !safes.length ? Array.from({ length: 8 }, (_, index) => <tr key={`skeleton-${index}`} className="safe-row-skeleton" aria-hidden={index !== 0}><td colSpan={8}>{index === 0 && <span className="sr-only" role="status">Cargando inventario...</span>}<span className="skeleton-bar" /></td></tr>) : safes.length ? safes.map((safe) => {
+      {loading && !safes.length ? Array.from({ length: 8 }, (_, index) => <tr key={`skeleton-${index}`} className="safe-row-skeleton" aria-hidden={index !== 0}><td colSpan={8}>{index === 0 && <span className="sr-only" role="status">{t('Cargando inventario...')}</span>}<span className="skeleton-bar" /></td></tr>) : safes.length ? safes.map((safe) => {
         const assignment = assignmentDrafts[safe.safe_number] || assignmentFallbacks.get(safe.safe_number)!;
         const assignmentChanged = assignment.business_unit_id !== safe.business_unit_id || assignment.responsible_id !== safe.responsible_id;
         return <SafeTableRow
@@ -361,7 +362,7 @@ export function SafeTable({
           onAddBusinessUnit={onAddBusinessUnit}
           onAddResponsible={onAddResponsible}
         />;
-      }) : loadError ? <tr><td colSpan={8} className="state-cell"><StateBlock variant="error" title="No se pudo cargar el inventario de Safes" hint={loadError} action={onRetry ? <button type="button" className="button subtle" onClick={onRetry}>Reintentar</button> : undefined} /></td></tr> : <tr><td colSpan={8} className="state-cell"><StateBlock variant="no-results" title="Sin resultados" hint="Ninguna Safe coincide con los filtros activos. Ajustá la búsqueda o limpiá los filtros." /></td></tr>}
+      }) : loadError ? <tr><td colSpan={8} className="state-cell"><StateBlock variant="error" title={t('No se pudo cargar el inventario de Safes')} hint={loadError} action={onRetry ? <button type="button" className="button subtle" onClick={onRetry}>{t('Reintentar')}</button> : undefined} /></td></tr> : <tr><td colSpan={8} className="state-cell"><StateBlock variant="no-results" title={t('Sin resultados')} hint="Ninguna Safe coincide con los filtros activos. Ajustá la búsqueda o limpiá los filtros." /></td></tr>}
     </tbody></table></div>
     <LoadMore loaded={safes.length} total={total} pageSize={pageSize} loading={loading && page > 0} onLoadMore={() => onPageChange(page + 1)} />
   </section>;

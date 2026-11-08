@@ -1,13 +1,15 @@
-export const formatNumber = (value: number) => new Intl.NumberFormat('es-AR').format(value || 0);
+import { localeTag, t } from '../i18n/index.ts';
 
-export const resultCountLabel = (count: number) => `${formatNumber(count)} ${count === 1 ? 'resultado' : 'resultados'}`;
+export const formatNumber = (value: number) => new Intl.NumberFormat(localeTag()).format(value || 0);
+
+export const resultCountLabel = (count: number) => `${formatNumber(count)} ${count === 1 ? t('resultado') : t('resultados')}`;
 
 export const formatDate = (value: string | null) => {
-  if (!value) return 'Sin dato';
+  if (!value) return t('Sin dato');
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Sin dato';
+  if (Number.isNaN(date.getTime())) return t('Sin dato');
   const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
-  return new Intl.DateTimeFormat('es-AR', {
+  return new Intl.DateTimeFormat(localeTag(), {
     dateStyle: 'medium',
     ...(dateOnly ? {} : { timeStyle: 'short' as const }),
     ...(dateOnly ? { timeZone: 'UTC' } : {}),
@@ -15,36 +17,36 @@ export const formatDate = (value: string | null) => {
 };
 
 export const relativeTime = (value: string | null) => {
-  if (!value) return 'Sin fecha';
+  if (!value) return t('Sin fecha');
   const elapsed = Date.now() - new Date(value).getTime();
-  if (Number.isNaN(elapsed)) return 'Sin fecha';
+  if (Number.isNaN(elapsed)) return t('Sin fecha');
   const minutes = Math.round(Math.abs(elapsed) / 60000);
-  if (minutes < 1) return 'hace instantes';
-  if (minutes < 60) return `hace ${minutes} min`;
+  if (minutes < 1) return t('hace instantes');
+  if (minutes < 60) return t('hace {n} min', { n: minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `hace ${hours} h`;
+  if (hours < 24) return t('hace {n} h', { n: hours });
   const days = Math.round(hours / 24);
-  if (days < 30) return `hace ${days} d`;
+  if (days < 30) return t('hace {n} d', { n: days });
   const months = Math.round(days / 30);
-  if (months < 12) return `hace ${months} mes${months === 1 ? '' : 'es'}`;
-  return `hace ${Math.round(months / 12)} a`;
+  if (months < 12) return months === 1 ? t('hace {n} mes', { n: months }) : t('hace {n} meses', { n: months });
+  return t('hace {n} a', { n: Math.round(months / 12) });
 };
 
 export const timeUntil = (value: string | null) => {
-  if (!value) return 'sin fecha programada';
+  if (!value) return t('sin fecha programada');
   const remaining = new Date(value).getTime() - Date.now();
-  if (Number.isNaN(remaining)) return 'sin fecha programada';
-  if (remaining <= 60_000) return 'en menos de 1 min';
+  if (Number.isNaN(remaining)) return t('sin fecha programada');
+  if (remaining <= 60_000) return t('en menos de 1 min');
   const minutes = Math.round(remaining / 60000);
-  if (minutes < 60) return `en ${minutes} min`;
+  if (minutes < 60) return t('en {n} min', { n: minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `en ${hours} h`;
-  return `en ${Math.round(hours / 24)} d`;
+  if (hours < 24) return t('en {n} h', { n: hours });
+  return t('en {n} d', { n: Math.round(hours / 24) });
 };
 
 // Presentation keeps the original string; this only chooses the tooltip.
 export const dateTimeHint = (value: string | null | undefined) => {
-  if (!value || !Number.isFinite(new Date(value).getTime())) return 'Sin fecha';
+  if (!value || !Number.isFinite(new Date(value).getTime())) return t('Sin fecha');
   return new Date(value).getTime() > Date.now() ? timeUntil(value) : relativeTime(value);
 };
 

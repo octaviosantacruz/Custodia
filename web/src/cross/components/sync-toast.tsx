@@ -2,6 +2,7 @@ import { AlertCircle, Check, LoaderCircle } from 'lucide-react';
 import type { SyncToast as SyncToastState } from '../hooks/use-ingestion';
 import { syncToolMeta, syncToolsForSources } from '../lib/sync-source';
 import './sync-toast.css';
+import { t } from '../i18n/index.ts';
 
 type SyncToastProps = { state: SyncToastState; leaving?: boolean; elapsedSeconds: number; formatElapsed: (seconds: number) => string; onOpenActivity?: () => void };
 
@@ -29,8 +30,8 @@ function SourceIdentity({ source }: { source: string }) {
 
 function SourceSummary({ sources }: { sources: string[] }) {
   const tools = syncToolsForSources(sources);
-  if (!tools.length) return <span className="sync-toast-source-summary">Custodia · Sincronización</span>;
-  return <div className="sync-toast-source-list" role="group" aria-label="Herramientas de la sincronización">
+  if (!tools.length) return <span className="sync-toast-source-summary">{t('Custodia · Sincronización')}</span>;
+  return <div className="sync-toast-source-list" role="group" aria-label={t('Herramientas de la sincronización')}>
     {tools.map((tool) => <SourceIdentity key={tool} source={tool} />)}
   </div>;
 }
@@ -46,6 +47,6 @@ function SyncStatusIcon({ state }: { state: SyncToastState }) {
 export function SyncToast({ state, leaving = false, elapsedSeconds, formatElapsed, onOpenActivity }: SyncToastProps) {
   return <div className={'sync-toast ' + state.tone + (leaving ? ' is-leaving' : '')} role="status" aria-live="polite" aria-atomic="true">
     <SyncStatusIcon state={state} />
-    <div className="sync-toast-copy"><SourceSummary sources={state.sources} /><strong>{state.title}</strong><span>{state.detail}{state.tone === 'running' && ` Activa hace ${formatElapsed(elapsedSeconds)}. Podés seguir navegando.`}</span>{onOpenActivity && <button type="button" className="sync-toast-link" onClick={onOpenActivity}>Ver sincronizaciones</button>}</div>
+    <div className="sync-toast-copy"><SourceSummary sources={state.sources} /><strong>{state.title}</strong><span>{state.detail}{state.tone === 'running' && ` Activa hace ${formatElapsed(elapsedSeconds)}. Podés seguir navegando.`}</span>{onOpenActivity && <button type="button" className="sync-toast-link" onClick={onOpenActivity}>{t('Ver sincronizaciones')}</button>}</div>
   </div>;
 }

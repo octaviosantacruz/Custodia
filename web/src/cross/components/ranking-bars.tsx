@@ -2,6 +2,7 @@ import { formatNumber } from '../lib/format';
 import { summarizeCategoryPopulation } from '../lib/category-population';
 import type { AnalyticsBucket } from '../types/analytics';
 import './ranking-bars.css';
+import { t } from '../i18n/index.ts';
 
 type Props = {
   title: string;
@@ -56,6 +57,6 @@ export function RankingBars({ title, buckets, population, populationLabel, limit
         <strong>{formatNumber(rest)}</strong>
         <span className="ranking-percent">{percentLabel(summary.restPercentage)}</span>
       </li> : null}
-    </ul> : <p className="ranking-empty">Sin categorías visibles.</p>}
+    </ul> : <p className="ranking-empty">{t('Sin categorías visibles.')}</p>}
   </div>;
 }

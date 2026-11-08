@@ -22,18 +22,19 @@ import {
 import { previewDashboardWidget } from '../lib/dashboard-preferences-api';
 import { ApiError } from '../../../cross/lib/api';
 import '../../../cross/components/dashboard-widget.css';
+import { t } from '../../../cross/i18n/index.ts';
 
-const EMPTY_OPTION = { value: '', label: 'No filtrar' };
+const EMPTY_OPTION = { value: '', label: t('No filtrar') };
 
 /** Shared filter selects for a PAM widget's Estado/Clasificación/Alcance/Señal
  * técnica. Used by the in-place editor and (until VIEW-008 finishes) by the
  * dashboard customizer. */
 export const FILTER_OPTIONS: Record<keyof DashboardWidgetFilters, CompactSelectOption[]> = {
   workflow_status: [EMPTY_OPTION, ...WORKFLOW_STATUSES.map((status) => ({ value: status, label: workflowLabel(status) }))],
-  classification_status: [EMPTY_OPTION, { value: 'pending', label: 'Pendiente' }, { value: 'assigned', label: 'Asignada' }, { value: 'review', label: 'En revisión' }],
-  inventory_scope: [EMPTY_OPTION, { value: 'pending', label: 'Pendiente' }, { value: 'business', label: 'Negocio' }, { value: 'internal', label: 'Interno CyberArk' }],
-  data_quality_status: [EMPTY_OPTION, { value: 'pending', label: 'Pendiente' }, { value: 'clean', label: 'Depurado' }, { value: 'obsolete', label: 'Obsoleto' }, { value: 'duplicate', label: 'Duplicado' }],
-  health_filter: [EMPTY_OPTION, { value: 'missing_cpm', label: 'Sin CPM' }, { value: 'no_accounts', label: 'Sin cuentas' }, { value: 'retention_unconfigured', label: 'Sin retención' }, { value: 'manage_safe_concentration', label: 'Manage Safe compartido' }],
+  classification_status: [EMPTY_OPTION, { value: 'pending', label: t('Pendiente') }, { value: 'assigned', label: t('Asignada') }, { value: 'review', label: t('En revisión') }],
+  inventory_scope: [EMPTY_OPTION, { value: 'pending', label: t('Pendiente') }, { value: 'business', label: t('Negocio') }, { value: 'internal', label: t('Interno CyberArk') }],
+  data_quality_status: [EMPTY_OPTION, { value: 'pending', label: t('Pendiente') }, { value: 'clean', label: t('Depurado') }, { value: 'obsolete', label: t('Obsoleto') }, { value: 'duplicate', label: t('Duplicado') }],
+  health_filter: [EMPTY_OPTION, { value: 'missing_cpm', label: t('Sin CPM') }, { value: 'no_accounts', label: t('Sin cuentas') }, { value: 'retention_unconfigured', label: t('Sin retención') }, { value: 'manage_safe_concentration', label: t('Manage Safe compartido') }],
 };
 
 export function ShortcutIcon({ id }: { id: DashboardShortcutId }) {
@@ -80,12 +81,12 @@ export function DashboardWidgetPreview({ widget, includeInternal = true }: { wid
   }, [signature, widget.title, includeInternal]);
 
   if (error) return <p className="dashboard-widget-preview-hint">{error}</p>;
-  if (!result) return <p className="dashboard-widget-preview-hint">{loading ? 'Calculando…' : 'Escribí un nombre para ver la previsualización.'}</p>;
+  if (!result) return <p className="dashboard-widget-preview-hint">{loading ? t('Calculando…') : t('Escribí un nombre para ver la previsualización.')}</p>;
   // A real 0 under active filters is not the same as an empty source: warn
   // that the block would stay at 0 so the operator can adjust the toolbar
   // filters before saving (VIEW-005).
   const warning = dashboardWidgetEmptyAfterFilters(result)
-    ? <p className={`dashboard-widget-preview-warning${loading ? ' is-stale' : ''}`} role="status"><AlertTriangle size={13} aria-hidden="true" />Ningún dato cumple los filtros aplicados: el bloque quedaría en 0. Quitá o ajustá filtros en la barra.</p>
+    ? <p className={`dashboard-widget-preview-warning${loading ? ' is-stale' : ''}`} role="status"><AlertTriangle size={13} aria-hidden="true" />{t('Ningún dato cumple los filtros aplicados: el bloque quedaría en 0. Quitá o ajustá filtros en la barra.')}</p>
     : null;
   if (result.kind === 'chart' && result.chart) {
     const buckets = result.buckets ?? [];
@@ -103,7 +104,7 @@ export function DashboardWidgetPreview({ widget, includeInternal = true }: { wid
   return <>
     {warning}
     <div className={`dashboard-widget-preview ${loading ? 'is-stale' : ''}`.trim()}>
-      <Metric label="Resultado actual" value={result.value} detail={DASHBOARD_MEASURE_LABELS[result.measure]} />
+      <Metric label={t('Resultado actual')} value={result.value} detail={DASHBOARD_MEASURE_LABELS[result.measure]} />
     </div>
   </>;
 }
@@ -113,11 +114,11 @@ export function DashboardWidgetPreview({ widget, includeInternal = true }: { wid
 const MEASURE_OPTIONS: CompactSelectOption[] = Object.entries(DASHBOARD_MEASURE_LABELS).map(([value, label]) => ({ value, label }));
 const CHART_MEASURE_OPTIONS: CompactSelectOption[] = ['safes', 'accounts'].map((value) => ({ value, label: DASHBOARD_MEASURE_LABELS[value as 'safes' | 'accounts'] }));
 const STYLE_OPTIONS: CompactSelectOption[] = [
-  { value: 'pie', label: 'Torta' }, { value: 'bars', label: 'Barras' },
-  { value: 'line', label: 'Línea · evolución' }, { value: 'heatmap', label: 'Mapa de calor · cruce' },
-  { value: 'scatter', label: 'Dispersión · correlación' }, { value: 'combo', label: 'Combinado · barras y línea' },
+  { value: 'pie', label: t('Torta') }, { value: 'bars', label: t('Barras') },
+  { value: 'line', label: t('Línea · evolución') }, { value: 'heatmap', label: t('Mapa de calor · cruce') },
+  { value: 'scatter', label: t('Dispersión · correlación') }, { value: 'combo', label: t('Combinado · barras y línea') },
 ];
-const KIND_OPTIONS: CompactSelectOption[] = [{ value: 'count', label: 'Dato destacado' }, { value: 'goal', label: 'Objetivo' }, { value: 'chart', label: 'Gráfico' }];
+const KIND_OPTIONS: CompactSelectOption[] = [{ value: 'count', label: t('Dato destacado') }, { value: 'goal', label: t('Objetivo') }, { value: 'chart', label: t('Gráfico') }];
 const DIMENSION_OPTIONS: CompactSelectOption[] = DASHBOARD_DIMENSIONS.map((dimension) => ({ value: dimension, label: `Por ${DASHBOARD_DIMENSION_LABELS[dimension]}` }));
 
 function WidgetCardShell({ index, title, onRemove, children }: { index: number; title: string; onRemove?: () => void; children: React.ReactNode }) {
@@ -132,9 +133,9 @@ function WidgetCardShell({ index, title, onRemove, children }: { index: number; 
 
 export function WidgetBasicsCard({ widget, index, onChange, onRemove }: { widget: DashboardWidget; index: number; onChange: (widget: DashboardWidget) => void; onRemove?: () => void }) {
   return <WidgetCardShell index={index} title={widget.title} onRemove={onRemove}>
-    <label className="dashboard-widget-name">Nombre<input value={widget.title} maxLength={100} onChange={(event) => onChange({ ...widget, title: event.target.value })} placeholder="Ej. Safes por unidad" /></label>
+    <label className="dashboard-widget-name">{t('Nombre')}<input value={widget.title} maxLength={100} onChange={(event) => onChange({ ...widget, title: event.target.value })} placeholder={t('Ej. Safes por unidad')} /></label>
     <div className="dashboard-widget-sentence">
-      <span>Medir</span>
+      <span>{t('Medir')}</span>
       <CompactSelect value={widget.measure} ariaLabel={`Qué medir en ${widget.title}`} options={MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as DashboardWidget['measure'], value_format: DASHBOARD_PERCENTAGE_MEASURES.has(value as DashboardWidget['measure']) ? 'percentage' : 'count', baseline_value: null })} />
     </div>
   </WidgetCardShell>;
@@ -155,17 +156,17 @@ export function WidgetDisplayCard({ widget, index, onChange }: { widget: Dashboa
     position: kind === 'count' ? null : widget.position,
   });
   return <WidgetCardShell index={index} title={widget.title}>
-    <div className="dashboard-widget-core"><label>Tipo<CompactSelect value={widget.kind} ariaLabel={`Tipo de ${widget.title}`} options={KIND_OPTIONS} onChange={setKind} /></label>{widget.kind === 'chart' && !(widget.chart && DASHBOARD_ADVANCED_CHART_DIMENSIONS.has(widget.chart.group_by)) ? <label>Medida<CompactSelect value={widget.measure} ariaLabel={`Medida del gráfico de ${widget.title}`} options={CHART_MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as 'safes' | 'accounts', value_format: 'count' })} /></label> : null}</div>
+    <div className="dashboard-widget-core"><label>{t('Tipo')}<CompactSelect value={widget.kind} ariaLabel={`Tipo de ${widget.title}`} options={KIND_OPTIONS} onChange={setKind} /></label>{widget.kind === 'chart' && !(widget.chart && DASHBOARD_ADVANCED_CHART_DIMENSIONS.has(widget.chart.group_by)) ? <label>{t('Medida')}<CompactSelect value={widget.measure} ariaLabel={`Medida del gráfico de ${widget.title}`} options={CHART_MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as 'safes' | 'accounts', value_format: 'count' })} /></label> : null}</div>
     {widget.kind === 'chart' ? <div className="dashboard-widget-chart-options">
-      {widget.chart && ADVANCED_STYLE_DIMENSION[widget.chart.style as keyof typeof ADVANCED_STYLE_DIMENSION] ? <label>Mostrar como<CompactSelect value={widget.chart.style} ariaLabel={`Gráfico de ${widget.title}`} options={STYLE_OPTIONS} onChange={(value) => onChange(withChartStyle(widget, value as NonNullable<DashboardWidget['chart']>['style']))} /></label> : null}
+      {widget.chart && ADVANCED_STYLE_DIMENSION[widget.chart.style as keyof typeof ADVANCED_STYLE_DIMENSION] ? <label>{t('Mostrar como')}<CompactSelect value={widget.chart.style} ariaLabel={`Gráfico de ${widget.title}`} options={STYLE_OPTIONS} onChange={(value) => onChange(withChartStyle(widget, value as NonNullable<DashboardWidget['chart']>['style']))} /></label> : null}
       {widget.chart && !ADVANCED_STYLE_DIMENSION[widget.chart.style as keyof typeof ADVANCED_STYLE_DIMENSION]
-        ? <label>Agrupar por<CompactSelect value={widget.chart.group_by} ariaLabel={`Agrupar gráfico de ${widget.title}`} options={DIMENSION_OPTIONS} onChange={(value) => onChange({ ...widget, chart: { style: widget.chart?.style ?? 'pie', group_by: value as DashboardChartDimension } })} /></label>
-        : <div className="dashboard-chart-cross-note"><strong>Cruce preconfigurado</strong><small>{widget.chart ? DASHBOARD_DIMENSION_LABELS[widget.chart.group_by] : ''}</small></div>}
+        ? <label>{t('Agrupar por')}<CompactSelect value={widget.chart.group_by} ariaLabel={`Agrupar gráfico de ${widget.title}`} options={DIMENSION_OPTIONS} onChange={(value) => onChange({ ...widget, chart: { style: widget.chart?.style ?? 'pie', group_by: value as DashboardChartDimension } })} /></label>
+        : <div className="dashboard-chart-cross-note"><strong>{t('Cruce preconfigurado')}</strong><small>{widget.chart ? DASHBOARD_DIMENSION_LABELS[widget.chart.group_by] : ''}</small></div>}
     </div> : null}
     {widget.kind === 'goal' ? <div className="dashboard-widget-goal">
-      <label>Meta<input type="number" aria-label="Meta" min="0" max="10000000" value={widget.target_value === null ? '' : widget.target_value} onChange={(event) => { const raw = event.target.value; onChange({ ...widget, target_value: raw === '' ? null : Number(raw), baseline_value: null }); }} aria-invalid={widget.target_value === null} />{widget.target_value === null ? <small className="dashboard-field-error">Definí una meta para continuar.</small> : null}</label>
-      <label>Objetivo<CompactSelect value={widget.target_direction || 'at_most'} ariaLabel={`Dirección de la meta ${widget.title}`} options={[{ value: 'at_most', label: 'Llegar como máximo a' }, { value: 'at_least', label: 'Llegar como mínimo a' }]} onChange={(value) => onChange({ ...widget, target_direction: value as 'at_most' | 'at_least', baseline_value: null })} /></label>
-      <label>Período<input value={widget.period_label || ''} maxLength={40} onChange={(event) => onChange({ ...widget, period_label: event.target.value })} placeholder="Ej. Q4 2026" /></label>
+      <label>{t('Meta')}<input type="number" aria-label={t('Meta')} min="0" max="10000000" value={widget.target_value === null ? '' : widget.target_value} onChange={(event) => { const raw = event.target.value; onChange({ ...widget, target_value: raw === '' ? null : Number(raw), baseline_value: null }); }} aria-invalid={widget.target_value === null} />{widget.target_value === null ? <small className="dashboard-field-error">{t('Definí una meta para continuar.')}</small> : null}</label>
+      <label>{t('Objetivo')}<CompactSelect value={widget.target_direction || 'at_most'} ariaLabel={`Dirección de la meta ${widget.title}`} options={[{ value: 'at_most', label: t('Llegar como máximo a') }, { value: 'at_least', label: t('Llegar como mínimo a') }]} onChange={(value) => onChange({ ...widget, target_direction: value as 'at_most' | 'at_least', baseline_value: null })} /></label>
+      <label>{t('Período')}<input value={widget.period_label || ''} maxLength={40} onChange={(event) => onChange({ ...widget, period_label: event.target.value })} placeholder={t('Ej. Q4 2026')} /></label>
     </div> : null}
   </WidgetCardShell>;
 }

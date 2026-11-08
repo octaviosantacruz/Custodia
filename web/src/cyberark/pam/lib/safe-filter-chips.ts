@@ -1,4 +1,5 @@
 import type { SafeFilterValues } from './safe-filters';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type SafeFilterChipKey =
   | 'workflowFilter'
@@ -18,35 +19,35 @@ export type SafeFilterChipLabels = Partial<Record<SafeFilterChipKey, ReadonlyMap
 export type SafeFilterChip = { key: SafeFilterChipKeyWithAccountSearch; label: string; value: string | true; displayValue: string };
 
 const FILTER_LABELS: Record<SafeFilterChipKeyWithAccountSearch, string> = {
-  workflowFilter: 'Estado',
-  classificationFilter: 'Clasificación',
-  accountTypeFilter: 'Tipo de cuenta',
-  inventoryScopeFilter: 'Alcance',
-  qualityFilter: 'Calidad',
-  scopeHintFilter: 'Revisión',
-  healthFilter: 'Safe Health',
-  businessUnitFilter: 'Unidad',
-  responsibleFilter: 'Responsable',
-  nextActionFilter: 'Acción siguiente',
-  includeAccounts: 'Incluir cuentas',
+  workflowFilter: t('Estado'),
+  classificationFilter: t('Clasificación'),
+  accountTypeFilter: t('Tipo de cuenta'),
+  inventoryScopeFilter: t('Alcance'),
+  qualityFilter: t('Calidad'),
+  scopeHintFilter: t('Revisión'),
+  healthFilter: t('Safe Health'),
+  businessUnitFilter: t('Unidad'),
+  responsibleFilter: t('Responsable'),
+  nextActionFilter: t('Acción siguiente'),
+  includeAccounts: t('Incluir cuentas'),
 };
 
 const KNOWN_VALUES: Partial<Record<SafeFilterChipKey, Record<string, string>>> = {
-  workflowFilter: { pending: 'Pendiente', in_progress: 'En curso', blocked: 'Bloqueada', resolved: 'Resuelto', retired: 'Retirada', retention_hold: 'Baja retenida' },
-  classificationFilter: { pending: 'Pendiente', assigned: 'Asignada', review: 'Revisión' },
-  accountTypeFilter: { __empty__: 'Sin clasificar' },
-  nextActionFilter: { __empty__: 'Sin definir' },
-  inventoryScopeFilter: { pending: 'Pendiente', business: 'Negocio', internal: 'Interno CyberArk' },
-  qualityFilter: { pending: 'Pendiente', clean: 'Depurado', obsolete: 'Obsoleto', duplicate: 'Duplicado' },
-  scopeHintFilter: { possible_internal_accounts_safe: 'Candidatos internos' },
+  workflowFilter: { pending: t('Pendiente'), in_progress: t('En curso'), blocked: t('Bloqueada'), resolved: t('Resuelto'), retired: t('Retirada'), retention_hold: t('Baja retenida') },
+  classificationFilter: { pending: t('Pendiente'), assigned: t('Asignada'), review: t('Revisión') },
+  accountTypeFilter: { __empty__: t('Sin clasificar') },
+  nextActionFilter: { __empty__: t('Sin definir') },
+  inventoryScopeFilter: { pending: t('Pendiente'), business: t('Negocio'), internal: t('Interno CyberArk') },
+  qualityFilter: { pending: t('Pendiente'), clean: t('Depurado'), obsolete: t('Obsoleto'), duplicate: t('Duplicado') },
+  scopeHintFilter: { possible_internal_accounts_safe: t('Candidatos internos') },
   healthFilter: {
-    missing_cpm: 'Sin CPM',
-    no_accounts: 'Sin cuentas',
-    retention_unconfigured: 'Sin retención/purga',
-    manage_safe_concentration: '2+ Manage Safe',
+    missing_cpm: t('Sin CPM'),
+    no_accounts: t('Sin cuentas'),
+    retention_unconfigured: t('Sin retención/purga'),
+    manage_safe_concentration: t('2+ Manage Safe'),
   },
-  businessUnitFilter: { unassigned: 'Sin unidad' },
-  responsibleFilter: { unassigned: 'Sin responsable' },
+  businessUnitFilter: { unassigned: t('Sin unidad') },
+  responsibleFilter: { unassigned: t('Sin responsable') },
 };
 
 const FILTER_ORDER: SafeFilterChipKeyWithAccountSearch[] = [

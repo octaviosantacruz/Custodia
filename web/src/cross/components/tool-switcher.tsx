@@ -5,6 +5,7 @@ import {
   areaOf, domainAccessible, domainLanding, domainMeta, domains, domainWorkspaces, firstAccessibleDomainWorkspace, type Domain,
 } from '../lib/domains';
 import { hasWorkspaceAccess, type WorkspaceView } from '../lib/workspaces';
+import { t } from '../i18n/index.ts';
 
 type ToolSwitcherProps = {
   isHome?: boolean;
@@ -19,11 +20,11 @@ type ToolLogo = { dark: string; selectedDark?: string; light: string };
 type ToolMeta = { label: string; detail: string } & ({ icon: LucideIcon; logo?: never } | { logo: ToolLogo; icon?: never });
 
 const TOOL_META: Record<Domain, ToolMeta> = {
-  cross: { label: 'Conexiones', detail: 'Alcance de cada persona en las herramientas', icon: Waypoints },
-  admin: { label: 'Administración', detail: 'Usuarios, permisos y actividad', icon: SlidersHorizontal },
+  cross: { label: t('Conexiones'), detail: t('Alcance de cada persona en las herramientas'), icon: Waypoints },
+  admin: { label: t('Administración'), detail: t('Usuarios, permisos y actividad'), icon: SlidersHorizontal },
   pam: { label: domainMeta('pam').product.label, detail: domainMeta('pam').product.description, logo: { dark: '/cyberark-logo-lime.png', selectedDark: '/cyberark-logo-white.png', light: '/cyberark-logo-dark.png' } },
   dlp: { label: domainMeta('dlp').product.label, detail: domainMeta('dlp').product.description, logo: { dark: '/netskope-full-lime.png', selectedDark: '/netskope-full-white.png', light: '/netskope-full-black.png' } },
-  dspm: { label: 'BigID DSPM', detail: 'Descubrimiento y postura de seguridad de datos', logo: { dark: '/bigid-full-white.png', light: '/bigid-full-black.png' } },
+  dspm: { label: t('BigID DSPM'), detail: t('Descubrimiento y postura de seguridad de datos'), logo: { dark: '/bigid-full-white.png', light: '/bigid-full-black.png' } },
 };
 
 /** The launcher names the platform only; the tool inside it is shown by the workspace switcher next to it. */
@@ -65,18 +66,18 @@ export function ToolSwitcher({ isHome = false, workspaceView, permissions, onWor
     <button
       className={'tool-switcher-trigger' + (open ? ' active' : '')}
       type="button"
-      aria-label={`Cambiar herramienta. Actual: ${current?.label || 'Inicio'}`}
+      aria-label={t('Cambiar herramienta. Actual: {name}', { name: current?.label || t('Inicio') })}
       aria-expanded={open}
-      title="Cambiar herramienta"
+      title={t('Cambiar herramienta')}
       onClick={() => setOpen((value) => !value)}
     >
       <ToolMark meta={current} size={16} selected />
-      <span>{current?.label || 'Inicio'}</span>
+      <span>{current?.label || t('Inicio')}</span>
     </button>
-    {open ? <section className="tool-menu" aria-label="Herramientas">
+    {open ? <section className="tool-menu" aria-label={t('Herramientas')}>
       <div className="tool-menu-header">
-        <strong>Herramientas</strong>
-        <span>Elegí qué querés revisar.</span>
+        <strong>{t('Herramientas')}</strong>
+        <span>{t('Elegí qué querés revisar.')}</span>
       </div>
       <button
         className={'tool-menu-home' + (isHome ? ' active' : '')}
@@ -85,7 +86,7 @@ export function ToolSwitcher({ isHome = false, workspaceView, permissions, onWor
         onClick={goHome}
       >
         <span className="tool-menu-icon"><Home size={18} aria-hidden /></span>
-        <span className="tool-menu-copy"><strong>Inicio</strong><small>Resumen general de Custodia</small></span>
+        <span className="tool-menu-copy"><strong>{t('Inicio')}</strong><small>{t('Resumen general de Custodia')}</small></span>
       </button>
       <div className="tool-menu-grid">
         {visibleDomains.map((domain) => {
@@ -103,7 +104,7 @@ export function ToolSwitcher({ isHome = false, workspaceView, permissions, onWor
           >
             <span className="tool-menu-icon"><ToolMark meta={meta} size={18} /></span>
             <span className="tool-menu-copy"><strong>{meta.label}</strong><small>{meta.detail}</small></span>
-            {soon ? <span className="tool-menu-status">Próximamente</span> : null}
+            {soon ? <span className="tool-menu-status">{t('Próximamente')}</span> : null}
           </button>;
         })}
       </div>

@@ -28,6 +28,7 @@ import type { PersonSource, PersonToolSummary } from '../lib/chains-api';
 import type { WorkspaceView } from '../lib/workspaces';
 import './chain-workspace.css';
 import './person-chains-workspace.css';
+import { t } from '../i18n/index.ts';
 
 type PersonChainsWorkspaceProps = {
   authChecked: boolean;
@@ -49,15 +50,15 @@ const PLATFORM_LOGOS: Record<PersonNodeId, { dark: string; light: string }> = {
 
 /* What each platform answers about the person, as the panel eyebrow. */
 const PLATFORM_QUESTIONS: Record<PersonNodeId, string> = {
-  pam: 'ACCESO PRIVILEGIADO',
-  netskope: 'CLIENTE NETSKOPE',
+  pam: t('ACCESO PRIVILEGIADO'),
+  netskope: t('CLIENTE NETSKOPE'),
 };
 
 const LINK_LEGEND: ReadonlyArray<{ style: PersonLinkStyle; label: string }> = [
-  { style: 'linked', label: 'Vinculado por correo' },
-  { style: 'reference', label: 'Referencia por nombre' },
-  { style: 'ambiguous', label: 'Ambiguo' },
-  { style: 'none', label: 'Sin registro' },
+  { style: 'linked', label: t('Vinculado por correo') },
+  { style: 'reference', label: t('Referencia por nombre') },
+  { style: 'ambiguous', label: t('Ambiguo') },
+  { style: 'none', label: t('Sin registro') },
 ];
 
 /* Workspace-local platform slots on the wide stage; Home and the shared radial
@@ -115,7 +116,7 @@ function PersonRadial({ name, email, platforms, sia, selected, onSelect }: {
         {name ? <span className="mono">{email}</span> : null}
       </div>
 
-      <div className="person-radial-tools" role="group" aria-label="Herramientas de la persona">
+      <div className="person-radial-tools" role="group" aria-label={t('Herramientas de la persona')}>
         {platforms.map(({ source, tool }, index) => {
           const platformSia = source === 'pam' ? sia : undefined;
           const style = personLinkStyle(tool, platformSia);
@@ -153,14 +154,14 @@ function PersonRadial({ name, email, platforms, sia, selected, onSelect }: {
 
 /* Identity and SIA are how CyberArk grants the access, not separate platforms. */
 const CAPABILITY_LABELS: Record<CyberArkCapability, string> = {
-  identity: 'Roles en Identity',
-  sia: 'Políticas de SIA',
+  identity: t('Roles en Identity'),
+  sia: t('Políticas de SIA'),
 };
 
 function CyberArkCapabilityDetails({ capabilities }: { capabilities: CyberArkCapabilityEntry[] }) {
   if (!capabilities.length) return null;
-  return <section className="person-cyberark-capabilities" aria-label="Cómo obtiene el acceso">
-    <p className="eyebrow">CÓMO OBTIENE EL ACCESO</p>
+  return <section className="person-cyberark-capabilities" aria-label={t('Cómo obtiene el acceso')}>
+    <p className="eyebrow">{t('CÓMO OBTIENE EL ACCESO')}</p>
     <ul>
       {capabilities.map(({ source, tool }) => {
         const view = personToolView(source, tool);
@@ -215,7 +216,7 @@ function PersonToolPanel({ source, tool, sia, cyberArkCapabilities, evidence, on
       type="button"
       className="button secondary person-hub-action"
       onClick={() => onOpen(source)}
-    ><ArrowUpRight size={14} aria-hidden /> Abrir {PLATFORM_LABELS[source]}</button> : null}
+    ><ArrowUpRight size={14} aria-hidden /> {t('Abrir {name}', { name: PLATFORM_LABELS[source] })}</button> : null}
   </aside>;
 }
 
@@ -267,20 +268,20 @@ export function PersonChainsWorkspace({ authChecked, authenticated, onUnauthoriz
   };
 
   return <>
-    <section className="chain-explorer person-explorer" aria-label="Vista por persona">
+    <section className="chain-explorer person-explorer" aria-label={t('Vista por persona')}>
       <div className="chain-search">
         <label className="search-box"><Search size={16} /><input
           type="search"
-          aria-label="Buscar persona por correo o nombre"
-          placeholder="Correo o nombre"
+          aria-label={t('Buscar persona por correo o nombre')}
+          placeholder={t('Correo o nombre')}
           value={controller.query}
           onChange={(event) => { controller.setQuery(event.target.value); setShowSuggestions(true); }}
           onFocus={() => setShowSuggestions(true)}
         /></label>
-        {searchVisible ? <div className="chain-search-results" role="listbox" aria-label="Personas encontradas">
-          {controller.searchLoading ? <StateBlock variant="loading" title="Buscando personas…" /> : null}
-          {controller.searchError ? <StateBlock variant="error" title="No se pudo buscar" hint={controller.searchError} /> : null}
-          {!controller.searchLoading && !controller.searchError && !controller.people.length ? <p className="chain-search-empty">Sin coincidencias. Probá con otro nombre o con el correo completo.</p> : null}
+        {searchVisible ? <div className="chain-search-results" role="listbox" aria-label={t('Personas encontradas')}>
+          {controller.searchLoading ? <StateBlock variant="loading" title={t('Buscando personas…')} /> : null}
+          {controller.searchError ? <StateBlock variant="error" title={t('No se pudo buscar')} hint={controller.searchError} /> : null}
+          {!controller.searchLoading && !controller.searchError && !controller.people.length ? <p className="chain-search-empty">{t('Sin coincidencias. Probá con otro nombre o con el correo completo.')}</p> : null}
           {controller.people.map((person) => <button
             key={person.email}
             type="button"
@@ -291,15 +292,15 @@ export function PersonChainsWorkspace({ authChecked, authenticated, onUnauthoriz
           >
             <strong>{person.name || person.email}</strong>
             <small className="mono">{person.email}</small>
-            <span className="person-source-chips" aria-label="Plataformas con registro">
+            <span className="person-source-chips" aria-label={t('Plataformas con registro')}>
               {personPlatformSources(person.sources).map((platform) => <span key={platform} className="person-source-chip is-present" aria-label={`Registro en ${platform}`}>{platform}</span>)}
             </span>
           </button>)}
         </div> : null}
       </div>
 
-      {controller.summaryLoading ? <StateBlock variant="loading" title="Resolviendo la persona…" /> : null}
-      {controller.summaryError ? <StateBlock variant="error" title="No se pudo resolver la persona" hint={controller.summaryError} /> : null}
+      {controller.summaryLoading ? <StateBlock variant="loading" title={t('Resolviendo la persona…')} /> : null}
+      {controller.summaryError ? <StateBlock variant="error" title={t('No se pudo resolver la persona')} hint={controller.summaryError} /> : null}
       {summary && !controller.summaryLoading ? <section className="person-hub" aria-label={`Persona ${summary.name || summary.email}`}>
         <PersonRadial
           name={summary.name}
@@ -315,7 +316,7 @@ export function PersonChainsWorkspace({ authChecked, authenticated, onUnauthoriz
           sia={summary.tools.sia}
           cyberArkCapabilities={cyberArkCapabilities}
           evidence={hasConnection ? <details key={summary.email} className="person-client-coverage-disclosure person-connection-disclosure">
-            <summary>Evidencia del cliente Netskope</summary>
+            <summary>{t('Evidencia del cliente Netskope')}</summary>
             <PersonConnectionPanel
               identity={summary.tools.identity}
               netskope={summary.tools.netskope}
@@ -328,12 +329,12 @@ export function PersonChainsWorkspace({ authChecked, authenticated, onUnauthoriz
           </details> : null}
           onOpen={openTool}
         /> : null}
-        <div className="chain-relation-legend person-radial-legend" aria-label="Leyenda de vínculos">
+        <div className="chain-relation-legend person-radial-legend" aria-label={t('Leyenda de vínculos')}>
           {LINK_LEGEND.map((item) => <span key={item.style} className={`is-${item.style}`}>{item.label}</span>)}
         </div>
       </section> : null}
 
-      {!summary && !controller.summaryLoading && !controller.summaryError && !(searchVisible && !controller.searchLoading && !controller.searchError && !controller.people.length) ? <StateBlock compact title="Elegí una persona para ver sus herramientas" /> : null}
+      {!summary && !controller.summaryLoading && !controller.summaryError && !(searchVisible && !controller.searchLoading && !controller.searchError && !controller.people.length) ? <StateBlock compact title={t('Elegí una persona para ver sus herramientas')} /> : null}
     </section>
   </>;
 }

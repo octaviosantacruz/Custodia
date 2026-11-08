@@ -1,16 +1,17 @@
 import { Activity, Database, LayoutGrid, ListChecks, Network, PlugZap, Server, ShieldAlert, Users } from 'lucide-react';
 import type { FrontendRegistration } from '../../source-contract.ts';
+import { t } from '../../cross/i18n/index.ts';
 
 /** Static declarations; runtime components stay behind a literal lazy import. */
 export const registration = {
   id: 'cyberark/pam',
-  toolLabel: 'CyberArk',
+  toolLabel: t('CyberArk'),
   workspaces: [
     {
       id: 'general', path: '/pam', legacyPaths: ['/', '/operations'], domain: 'pam',
-      label: 'Métricas', detail: '¿Cómo va la gestión de Safes y cuentas?', icon: LayoutGrid,
-      description: 'Revisá indicadores de inventario, clasificación y cobertura PAM.',
-      introHelp: { label: 'Lectura del tablero PAM', paragraphs: ['Indicadores, filtros y objetivos sobre el inventario actual. Cada indicador conserva su población, cálculo y límites en su ayuda.', 'Podés editar el orden, tamaño y filtros de los bloques. Los cambios se guardan sólo al confirmarlos.'] },
+      label: t('Métricas'), detail: t('¿Cómo va la gestión de Safes y cuentas?'), icon: LayoutGrid,
+      description: t('Revisá indicadores de inventario, clasificación y cobertura PAM.'),
+      introHelp: { label: t('Lectura del tablero PAM'), paragraphs: [t(t('Indicadores, filtros y objetivos sobre el inventario actual. Cada indicador conserva su población, cálculo y límites en su ayuda.')), t(t('Podés editar el orden, tamaño y filtros de los bloques. Los cambios se guardan sólo al confirmarlos.'))] },
       catalog: true, switcher: true, gate: 'open',
       order: 0,
       runtime: 'cyberark',
@@ -20,9 +21,9 @@ export const registration = {
     },
     {
       id: 'posture', path: '/pam/posture', domain: 'pam',
-      label: 'Postura', detail: '¿Qué hallazgos requieren atención?', icon: ShieldAlert,
-      description: 'Revisá riesgos y problemas del inventario, y registrá su seguimiento.',
-      introHelp: { label: 'Acerca de Postura PAM', paragraphs: ['Hallazgos de Custodia y CyberArk Risk Management. La severidad y el estado corresponden a cada fuente y sus reglas; los datos de CyberArk son una lectura en vivo y Custodia no los persiste.', 'Podés cambiar los filtros o, si tenés permiso, actualizar las reglas locales con el inventario vigente.'] },
+      label: t('Postura'), detail: t('¿Qué hallazgos requieren atención?'), icon: ShieldAlert,
+      description: t('Revisá riesgos y problemas del inventario, y registrá su seguimiento.'),
+      introHelp: { label: t('Acerca de Postura PAM'), paragraphs: [t(t('Hallazgos de Custodia y CyberArk Risk Management. La severidad y el estado corresponden a cada fuente y sus reglas; los datos de CyberArk son una lectura en vivo y Custodia no los persiste.')), t(t('Podés cambiar los filtros o, si tenés permiso, actualizar las reglas locales con el inventario vigente.'))] },
       catalog: true, switcher: true, gate: 'open',
       order: 1,
       runtime: 'cyberark',
@@ -32,8 +33,8 @@ export const registration = {
     },
     {
       id: 'graph', path: '/pam/graph', legacyPaths: ['/pam/identity/chain'], domain: 'pam',
-      label: 'Acceso', detail: '¿Quién llega a qué Safe y por qué?', icon: Network,
-      description: 'Recorré los vínculos confirmados de acceso PAM, desde personas, usuarios y roles hasta Safes, plataformas y conectores PSM.',
+      label: t('Acceso'), detail: t('¿Quién llega a qué Safe y por qué?'), icon: Network,
+      description: t('Recorré los vínculos confirmados de acceso PAM, desde personas, usuarios y roles hasta Safes, plataformas y conectores PSM.'),
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'pam:catalogs_read',
       order: 2,
       runtime: 'cyberark',
@@ -43,9 +44,9 @@ export const registration = {
     },
     {
       id: 'safes', path: '/pam/safes', legacyPaths: ['/safes'], domain: 'pam',
-      label: 'Safes', detail: '¿Qué Safes hay y quién los cuida?', icon: Database,
-      description: "Clasificá Safes y revisá sus miembros y cuentas.",
-      introHelp: { label: "Inventario de Safes", paragraphs: ["La clasificación local de responsable y unidad se conserva al sincronizar CyberArk. Revisá los miembros y cuentas desde el detalle de cada Safe.", "Una Safe retirada estuvo ausente en una corrida completa de sincronización. El retiro no borra registros ni ejecuta una baja en CyberArk. No entra en KPIs ni en el alcance de negocio y esta vista no ofrece acciones de borrado."] },
+      label: t('Safes'), detail: t('¿Qué Safes hay y quién los cuida?'), icon: Database,
+      description: t('Clasificá Safes y revisá sus miembros y cuentas.'),
+      introHelp: { label: t('Inventario de Safes'), paragraphs: ["La clasificación local de responsable y unidad se conserva al sincronizar CyberArk. Revisá los miembros y cuentas desde el detalle de cada Safe.", "Una Safe retirada estuvo ausente en una corrida completa de sincronización. El retiro no borra registros ni ejecuta una baja en CyberArk. No entra en KPIs ni en el alcance de negocio y esta vista no ofrece acciones de borrado."] },
       catalog: true, switcher: true, gate: 'open',
       order: 3,
       runtime: 'cyberark',
@@ -58,9 +59,9 @@ export const registration = {
          cuentas); catalog:true keeps the deep link, but it is no longer a
          switcher destination. */
       id: 'platforms', path: '/pam/platforms', domain: 'pam',
-      label: 'Plataformas', detail: 'Safes y cuentas por plataforma', icon: Server,
-      description: "Revisá plataformas PAM y sus relaciones con Safes y cuentas.",
-      introHelp: { label: "Inventario de plataformas PAM", paragraphs: ["Relaciones verificadas con Safes, cuentas y conectores PSM. El inventario muestra plataformas activas.", "El catálogo CPM se mantiene separado: su identificador no siempre coincide con el de la plataforma base."] },
+      label: t('Plataformas'), detail: t('Safes y cuentas por plataforma'), icon: Server,
+      description: t('Revisá plataformas PAM y sus relaciones con Safes y cuentas.'),
+      introHelp: { label: t('Inventario de plataformas PAM'), paragraphs: ["Relaciones verificadas con Safes, cuentas y conectores PSM. El inventario muestra plataformas activas.", "El catálogo CPM se mantiene separado: su identificador no siempre coincide con el de la plataforma base."] },
       catalog: true, switcher: false, gate: 'manage', alternatePermission: 'pam:catalogs_read',
       order: 4,
       runtime: 'cyberark',
@@ -72,9 +73,9 @@ export const registration = {
       /* UX-AUD-013(c): canonical path is the Safes hub tab (Infraestructura
          PAM → Conectores). */
       id: 'connectors', path: '/pam/connectors', legacyPaths: ['/pam/sia/connectors'], domain: 'pam',
-      label: 'Conectores', detail: 'Inventarios de PSM, SIA y Connector Manager', icon: PlugZap,
-      description: "Consultá los inventarios independientes de PSM, SIA y los pools y redes de Connector Manager.",
-      introHelp: { label: "Inventarios de conectores", paragraphs: ["Cada inventario conserva su fuente. PSM y SIA muestran sus sincronizaciones; los pools y redes de Connector Manager se consultan en vivo y sólo muestran nombres, fechas y conteos. No se infieren vínculos entre esos inventarios."] },
+      label: t('Conectores'), detail: t('Inventarios de PSM, SIA y Connector Manager'), icon: PlugZap,
+      description: t('Consultá los inventarios independientes de PSM, SIA y los pools y redes de Connector Manager.'),
+      introHelp: { label: t('Inventarios de conectores'), paragraphs: ["Cada inventario conserva su fuente. PSM y SIA muestran sus sincronizaciones; los pools y redes de Connector Manager se consultan en vivo y sólo muestran nombres, fechas y conteos. No se infieren vínculos entre esos inventarios."] },
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'pam:catalogs_read',
       recentWorkspace: 'pamHealth',
       order: 5,
@@ -87,8 +88,8 @@ export const registration = {
       /* UX-AUD-013(c): canonical path is the Safes hub tab (Infraestructura
          PAM → Salud PAM). */
       id: 'pamHealth', path: '/pam/health', domain: 'pam',
-      label: 'Servicio', detail: '¿Qué componentes reportan problemas?', icon: Activity,
-      description: 'Revisá el estado de los componentes, su conectividad y las versiones informadas.',
+      label: t('Servicio'), detail: t('¿Qué componentes reportan problemas?'), icon: Activity,
+      description: t('Revisá el estado de los componentes, su conectividad y las versiones informadas.'),
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'pam:catalogs_read',
       order: 6,
       runtime: 'cyberark',
@@ -98,8 +99,8 @@ export const registration = {
     },
     {
       id: 'pamCleanup', path: '/pam/cleanup', domain: 'pam',
-      label: 'Depuración', detail: 'Señales de depuración del inventario', icon: ListChecks,
-      description: 'Consultá grupos, PSM, plataformas y Safes con señales calculadas sobre el inventario activo. La vista es de sólo lectura.',
+      label: t('Depuración'), detail: t('Señales de depuración del inventario'), icon: ListChecks,
+      description: t('Consultá grupos, PSM, plataformas y Safes con señales calculadas sobre el inventario activo. La vista es de sólo lectura.'),
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'pam:catalogs_read',
       recentWorkspace: 'posture',
       order: 7,
@@ -109,9 +110,9 @@ export const registration = {
     },
     {
       id: 'roles', path: '/pam/roles', domain: 'pam',
-      label: 'Roles CyberArk', detail: 'Roles nativos y alcance', icon: Users,
-      description: "Revisá roles PAM, sus miembros y su alcance sobre Safes.",
-      introHelp: { label: "Clasificación de roles PAM", paragraphs: ["Objetos clasificados por nombre dentro del inventario PAM. La clasificación no modifica las relaciones verificadas."] },
+      label: t('Roles CyberArk'), detail: t('Roles nativos y alcance'), icon: Users,
+      description: t('Revisá roles PAM, sus miembros y su alcance sobre Safes.'),
+      introHelp: { label: t('Clasificación de roles PAM'), paragraphs: ["Objetos clasificados por nombre dentro del inventario PAM. La clasificación no modifica las relaciones verificadas."] },
       catalog: false, switcher: false, gate: 'open',
       order: 20,
       runtime: 'cyberark',
@@ -123,6 +124,6 @@ export const registration = {
   ],
   domains: [],
   categories: [],
-  sync: { source: 'cyberark', meta: { label: 'CyberArk PAM', image: '/cyberark-logo-lime.png', fallback: 'C' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: 'CyberArk', image: '/cyberark-logo-lime.png', fallback: 'C' }, componentLabel: 'PAM', componentLabelsByFile: { 'cyberark-psm-api': 'PAM · catálogo PSM' }, sourceHints: ['cyberark', 'pam'], noticeHints: ['cyberark', 'pam', 'safe'], hintOrder: 1 },
-  manualSync: { domain: 'pam', kind: 'batch', scope: 'cyberark', label: 'Actualizar datos', detail: 'Sincroniza sólo CyberArk' },
+  sync: { source: 'cyberark', meta: { label: t('CyberArk PAM'), image: '/cyberark-logo-lime.png', fallback: 'C' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: t('CyberArk'), image: '/cyberark-logo-lime.png', fallback: 'C' }, componentLabel: 'PAM', componentLabelsByFile: { 'cyberark-psm-api': t('PAM · catálogo PSM') }, sourceHints: ['cyberark', 'pam'], noticeHints: ['cyberark', 'pam', 'safe'], hintOrder: 1 },
+  manualSync: { domain: 'pam', kind: 'batch', scope: 'cyberark', label: t('Actualizar datos'), detail: t('Sincroniza sólo CyberArk') },
 } as const satisfies FrontendRegistration;

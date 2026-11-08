@@ -19,6 +19,7 @@ import type {
   PamConnectorRow, PamPlatformRow, PlatformCatalogsResponse, PlatformTargetRow,
 } from '../types/pam';
 import type { SiaConnectorRow } from '../../sia/types/sia';
+import { t } from '../../../cross/i18n/index.ts';
 
 type SharedProps = {
   authChecked: boolean;
@@ -45,7 +46,7 @@ function PlatformCatalogsSummary({ catalogs }: { catalogs: PlatformCatalogsRespo
   const groups = Array.isArray(catalogs.groups) ? catalogs.groups : [];
   const rotationalGroups = Array.isArray(catalogs.rotational_groups) ? catalogs.rotational_groups : [];
   if (!dependents.length && !groups.length && !rotationalGroups.length) return null;
-  return <p className="pam-platforms-note" title="Catálogos técnicos separados de las plataformas destino: dependientes (CPM: servicios/tareas Windows, etc.), agrupadas y rotacionales.">
+  return <p className="pam-platforms-note" title={t('Catálogos técnicos separados de las plataformas destino: dependientes (CPM: servicios/tareas Windows, etc.), agrupadas y rotacionales.')}>
     <Network size={13} aria-hidden /> Catálogos relacionados: {formatNumber(dependents.length)} dependientes · {formatNumber(groups.length)} agrupadas · {formatNumber(rotationalGroups.length)} rotacionales.
   </p>;
 }
@@ -73,10 +74,10 @@ function PlatformTargetsSection({ refreshKey, authChecked, authenticated, onUnau
   });
 
   return <CatalogListPanel<PlatformTargetRow>
-    ariaLabel="Política de plataformas destino"
+    ariaLabel={t('Política de plataformas destino')}
     icon={ShieldCheck}
-    title="Política por plataforma destino"
-    description="Dual control, verify/change/reconcile periódicos y el servidor PSM asignado. Catálogo propio de CyberArk: su identificador no siempre coincide con el de la plataforma base, por eso no se fusiona con la tabla de arriba."
+    title={t('Política por plataforma destino')}
+    description={t('Dual control, verify/change/reconcile periódicos y el servidor PSM asignado. Catálogo propio de CyberArk: su identificador no siempre coincide con el de la plataforma base, por eso no se fusiona con la tabla de arriba.')}
     countLabel={(count) => catalogCount(count, 'plataforma destino', 'plataformas destino')}
     searchLabel="Buscar plataforma destino"
     searchPlaceholder="Buscar por nombre o plataforma base"
@@ -97,14 +98,14 @@ function PlatformTargetsSection({ refreshKey, authChecked, authenticated, onUnau
     footerNote="Catálogo separado de plataformas base; su identificador no siempre coincide."
     renderRow={(target) => <tr key={target.object_id}>
       <td><span className="pam-platform-name"><ShieldCheck size={15} aria-hidden /><span><strong>{target.display_name}</strong><small>{target.source_id}</small></span></span></td>
-      <td>{target.platform_base_id || <span className="muted">Sin base</span>}</td>
-      <td>{target.dual_control_required ? <span className="status-pill status-active">Requerido</span> : <span className="muted">No requerido</span>}</td>
+      <td>{target.platform_base_id || <span className="muted">{t('Sin base')}</span>}</td>
+      <td>{target.dual_control_required ? <span className="status-pill status-active">{t('Requerido')}</span> : <span className="muted">{t('No requerido')}</span>}</td>
       <td><span className="muted">
         {target.credentials_change_automatic ? `Change c/${target.credentials_change_interval_days ?? '?'}d` : 'Change manual'}
         {' · '}{target.credentials_verify_automatic ? `Verify c/${target.credentials_verify_interval_days ?? '?'}d` : 'Verify manual'}
-        {' · '}{target.credentials_reconcile_automatic ? 'Reconcile automático' : 'Reconcile manual'}
+        {' · '}{target.credentials_reconcile_automatic ? t('Reconcile automático') : t('Reconcile manual')}
       </span></td>
-      <td>{target.psm_server_id ? <span className="muted">{target.psm_server_id}</span> : <span className="muted">Sin PSM</span>}</td>
+      <td>{target.psm_server_id ? <span className="muted">{target.psm_server_id}</span> : <span className="muted">{t('Sin PSM')}</span>}</td>
     </tr>}
   />;
 }
@@ -132,39 +133,39 @@ export function PamPlatformsWorkspace({
   }, [authChecked, authenticated]);
 
   return <>
-    <section className="list-panel database-surface pam-platforms-panel" aria-label="Plataformas PAM">
+    <section className="list-panel database-surface pam-platforms-panel" aria-label={t('Plataformas PAM')}>
       <div className="pam-platforms-heading">
         <div className="pam-platforms-heading-copy">
-          {section === 'policy' && <h2>Política CPM por plataforma</h2>}
+          {section === 'policy' && <h2>{t('Política CPM por plataforma')}</h2>}
         </div>
         <div className="pam-platforms-actions">
           <span className="pam-platforms-count">{section === 'inventory' ? <><strong>{formatNumber(total)}</strong> activas</> : 'Catálogo CPM'}</span>
           <CompactSelect
             className="pam-platforms-section-select"
             value={section}
-            ariaLabel="Elegir vista de plataformas"
-            options={[{ value: 'inventory', label: 'Inventario activo' }, { value: 'policy', label: 'Política CPM' }]}
+            ariaLabel={t('Elegir vista de plataformas')}
+            options={[{ value: 'inventory', label: t('Inventario activo') }, { value: 'policy', label: t('Política CPM') }]}
             onChange={(value) => setSection(value as 'inventory' | 'policy')}
           />
         </div>
       </div>
       {section === 'inventory' && <>
-      <div className="search-row"><label className="search-box"><Search size={16} /><input type="search" aria-label="Buscar plataformas PAM" placeholder="Buscar plataforma activa" value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
-      <div className="compact-table-wrap"><table className="compact-table pam-platforms-table pam-platforms-inventory-table"><caption className="sr-only">Plataformas PAM activas y sus relaciones observadas</caption><thead><tr><th>Plataforma</th><th>Tipo</th><th>Safes permitidos</th><th>Safes</th><th>Cuentas</th><th>Conectores PSM</th></tr></thead><tbody>
-        {loading && rows.length === 0 ? <tr><td colSpan={6}><StateBlock variant="loading" title="Cargando plataformas PAM activas…" /></td></tr>
-          : error ? <tr><td colSpan={6}><StateBlock variant="error" title="No se pudieron cargar las plataformas PAM" hint={error} action={<button type="button" className="button subtle" onClick={retry}>Reintentar</button>} /></td></tr>
+      <div className="search-row"><label className="search-box"><Search size={16} /><input type="search" aria-label={t('Buscar plataformas PAM')} placeholder={t('Buscar plataforma activa')} value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
+      <div className="compact-table-wrap"><table className="compact-table pam-platforms-table pam-platforms-inventory-table"><caption className="sr-only">{t('Plataformas PAM activas y sus relaciones observadas')}</caption><thead><tr><th>{t('Plataforma')}</th><th>{t('Tipo')}</th><th>{t('Safes permitidos')}</th><th>{t('Safes')}</th><th>{t('Cuentas')}</th><th>{t('Conectores PSM')}</th></tr></thead><tbody>
+        {loading && rows.length === 0 ? <tr><td colSpan={6}><StateBlock variant="loading" title={t('Cargando plataformas PAM activas…')} /></td></tr>
+          : error ? <tr><td colSpan={6}><StateBlock variant="error" title={t('No se pudieron cargar las plataformas PAM')} hint={error} action={<button type="button" className="button subtle" onClick={retry}>{t('Reintentar')}</button>} /></td></tr>
             : rows.length ? rows.map((platform) => <tr key={platform.object_id}>
               <td><button type="button" className="pam-platform-name" title={`Buscar Safes con ${platform.display_name}`} onClick={() => onNavigate('safes', platform.display_name)}><PlatformIdentity platform={platform} /></button></td>
               <td><span className="pam-platform-type" title={platformTypeLabel(platform.system_type).raw ?? undefined}>{platformTypeLabel(platform.system_type).label}</span></td>
-              <td>{platform.allowed_safes_pattern ? <code className="pam-platform-pattern" title={platform.allowed_safes_pattern}>{platform.allowed_safes_pattern}</code> : <span className="muted">Sin patrón</span>}</td>
+              <td>{platform.allowed_safes_pattern ? <code className="pam-platform-pattern" title={platform.allowed_safes_pattern}>{platform.allowed_safes_pattern}</code> : <span className="muted">{t('Sin patrón')}</span>}</td>
               <td><PlatformMetric value={platform.safe_count} max={maxSafes} /></td><td><PlatformMetric value={platform.account_count} max={maxAccounts} /></td>
               <td>{platform.psms.length
                 ? <button type="button" className="pam-platform-related" title={`Ver conectores PSM de ${platform.display_name}`} onClick={() => onOpenConnectors(platform.display_name)}><Monitor size={13} aria-hidden />{formatNumber(platform.psms.length)} {platform.psms.length === 1 ? 'conector' : 'conectores'}</button>
-                : <span className="pam-platform-no-psm">Sin conector</span>}</td>
-            </tr>) : <tr><td colSpan={6}><StateBlock variant="empty" title={search ? 'Sin plataformas activas para esta búsqueda' : 'Todavía no hay plataformas PAM activas sincronizadas'} action={search ? <button type="button" className="button subtle" onClick={() => setSearch('')}>Limpiar búsqueda</button> : undefined} /></td></tr>}
+                : <span className="pam-platform-no-psm">{t('Sin conector')}</span>}</td>
+            </tr>) : <tr><td colSpan={6}><StateBlock variant="empty" title={search ? t('Sin plataformas activas para esta búsqueda') : t('Todavía no hay plataformas PAM activas sincronizadas')} action={search ? <button type="button" className="button subtle" onClick={() => setSearch('')}>{t('Limpiar búsqueda')}</button> : undefined} /></td></tr>}
       </tbody></table></div>
       {!error && <LoadMore loaded={rows.length} total={total} pageSize={pageSize} loading={loading} onLoadMore={loadMore} />}
-      <div className="pam-platforms-note">Cómo leer esta tabla<HelpHint label="Cómo leer Plataformas"><p>“Safes permitidos” es el patrón configurado por la plataforma, no una garantía de uso. Abrir una plataforma busca Safes asociados; los conectores no son telemetría de capacidad o salud.</p></HelpHint></div>
+      <div className="pam-platforms-note">{t('Cómo leer esta tabla')}<HelpHint label={t('Cómo leer Plataformas')}><p>“Safes permitidos” es el patrón configurado por la plataforma, no una garantía de uso. Abrir una plataforma busca Safes asociados; los conectores no son telemetría de capacidad o salud.</p></HelpHint></div>
       <PlatformCatalogsSummary catalogs={catalogs} />
        <PsmConnectorTypesSection refreshKey={refreshKey} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} onError={onError} />
       </>}
@@ -182,9 +183,9 @@ function PsmConnectorTypesSection({ refreshKey, authChecked, authenticated, onUn
   });
 
   if (loading || error || !rows.length) return null;
-  return <section className="pam-platform-catalog-section" aria-label="Tipos de conector de sesión PSM">
+  return <section className="pam-platform-catalog-section" aria-label={t('Tipos de conector de sesión PSM')}>
     <div className="pam-platforms-heading">
-      <div><h2>Tipos de conector de sesión</h2><p>Catálogo técnico de conectores PSM (ej. RDP, SSH). No son servidores PSM.</p></div>
+      <div><h2>{t('Tipos de conector de sesión')}</h2><p>Catálogo técnico de conectores PSM (ej. RDP, SSH). No son servidores PSM.</p></div>
       <span className="database-toolbar-count">{formatNumber(total)} tipos</span>
     </div>
     <div className="pam-platform-psms" style={{ padding: '0 16px 14px' }}>
@@ -223,47 +224,47 @@ export function PamConnectorsWorkspace({
   const setSearch = section === 'psm' ? setPsmSearch : setSiaSearch;
 
   return <>
-    <section className="list-panel database-surface pam-platforms-panel" aria-label="Conectores PSM y SIA">
+    <section className="list-panel database-surface pam-platforms-panel" aria-label={t('Conectores PSM y SIA')}>
       <div className="pam-platforms-heading">
         <div className="pam-platforms-actions">
           <span className="database-toolbar-count">{section === 'psm' ? `${formatNumber(psmTotal)} servidores PSM` : `${formatNumber(siaTotal)} conectores SIA`}</span>
           {inventorySelector ?? <CompactSelect
             className="pam-platforms-section-select"
             value={section}
-            ariaLabel="Elegir inventario de conectores"
+            ariaLabel={t('Elegir inventario de conectores')}
             options={[{ value: 'psm', label: 'PSM' }, { value: 'sia', label: 'SIA' }]}
             onChange={(value) => setSection(value as 'psm' | 'sia')}
           />}
         </div>
       </div>
-      <div className="search-row"><label className="search-box"><Search size={16} /><input type="search" aria-label={section === 'psm' ? 'Buscar conectores PSM' : 'Buscar conectores SIA'} placeholder={section === 'psm' ? 'Buscar conector o plataforma' : 'Buscar por id'} value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
-      {section === 'psm' ? <><div className="compact-table-wrap"><table className="compact-table pam-platforms-table pam-connectors-table"><thead><tr><th>Servidor PSM</th><th>Dirección</th><th>Identificador</th><th>Plataformas asociadas</th></tr></thead><tbody>
-        {psmLoading && psmRows.length === 0 ? <tr><td colSpan={4}><StateBlock variant="loading" title="Cargando conectores PSM…" /></td></tr>
-          : psmError ? <tr><td colSpan={4}><StateBlock variant="error" title="No se pudieron cargar los conectores PSM" hint={psmError} action={<button type="button" className="button subtle" onClick={retryPsm}>Reintentar</button>} /></td></tr>
+      <div className="search-row"><label className="search-box"><Search size={16} /><input type="search" aria-label={section === 'psm' ? t('Buscar conectores PSM') : t('Buscar conectores SIA')} placeholder={section === 'psm' ? t('Buscar conector o plataforma') : t('Buscar por id')} value={search} onChange={(event) => setSearch(event.target.value)} /></label></div>
+      {section === 'psm' ? <><div className="compact-table-wrap"><table className="compact-table pam-platforms-table pam-connectors-table"><thead><tr><th>{t('Servidor PSM')}</th><th>{t('Dirección')}</th><th>{t('Identificador')}</th><th>{t('Plataformas asociadas')}</th></tr></thead><tbody>
+        {psmLoading && psmRows.length === 0 ? <tr><td colSpan={4}><StateBlock variant="loading" title={t('Cargando conectores PSM…')} /></td></tr>
+          : psmError ? <tr><td colSpan={4}><StateBlock variant="error" title={t('No se pudieron cargar los conectores PSM')} hint={psmError} action={<button type="button" className="button subtle" onClick={retryPsm}>{t('Reintentar')}</button>} /></td></tr>
             : psmRows.length ? psmRows.map((connector) => <tr key={connector.object_id}>
               <td><span className="pam-platform-name"><Monitor size={15} aria-hidden /><span><strong title={connector.display_name}>{connector.display_name}</strong><small>{formatNumber(connector.platform_count)} {connector.platform_count === 1 ? 'plataforma' : 'plataformas'}</small></span></span></td>
-              <td>{connector.address ? <code className="pam-platform-pattern" title={connector.address}>{connector.address}</code> : <span className="muted">Sin dirección</span>}</td>
+              <td>{connector.address ? <code className="pam-platform-pattern" title={connector.address}>{connector.address}</code> : <span className="muted">{t('Sin dirección')}</span>}</td>
               <td>{connector.source_id !== connector.display_name ? <span className="muted pam-connector-id" title={connector.source_id}>{connector.source_id}</span> : <span className="muted">—</span>}</td>
               <td>{connector.platforms.length
                 ? <ConnectorPlatforms platforms={connector.platforms} name={connector.display_name} onOpen={onOpenPlatforms} />
-                : <span className="muted">Sin plataformas</span>}</td>
-            </tr>) : <tr><td colSpan={4}><StateBlock variant="empty" title={psmSearch ? 'Sin conectores PSM para esta búsqueda' : 'Todavía no hay conectores PSM sincronizados'} action={psmSearch ? <button type="button" className="button subtle" onClick={() => setPsmSearch('')}>Limpiar búsqueda</button> : undefined} /></td></tr>}
+                : <span className="muted">{t('Sin plataformas')}</span>}</td>
+            </tr>) : <tr><td colSpan={4}><StateBlock variant="empty" title={psmSearch ? t('Sin conectores PSM para esta búsqueda') : t('Todavía no hay conectores PSM sincronizados')} action={psmSearch ? <button type="button" className="button subtle" onClick={() => setPsmSearch('')}>{t('Limpiar búsqueda')}</button> : undefined} /></td></tr>}
       </tbody></table></div>
       {!psmError && <LoadMore loaded={psmRows.length} total={psmTotal} pageSize={psmPageSize} loading={psmLoading} onLoadMore={loadMorePsm} />}
-      </> : <><div className="compact-table-wrap"><table className="compact-table pam-platforms-table sia-connectors-table"><thead><tr><th>Conector</th><th>Estado</th><th>Versión</th><th>Región</th><th>Sesiones activas</th></tr></thead><tbody>
-        {siaLoading && siaRows.length === 0 ? <tr><td colSpan={5}><StateBlock variant="loading" title="Cargando conectores SIA…" /></td></tr>
-          : siaError ? <tr><td colSpan={5}><StateBlock variant="error" title="No se pudieron cargar los conectores SIA" hint={siaError} action={<button type="button" className="button subtle" onClick={retrySia}>Reintentar</button>} /></td></tr>
+      </> : <><div className="compact-table-wrap"><table className="compact-table pam-platforms-table sia-connectors-table"><thead><tr><th>{t('Conector')}</th><th>{t('Estado')}</th><th>{t('Versión')}</th><th>{t('Región')}</th><th>{t('Sesiones activas')}</th></tr></thead><tbody>
+        {siaLoading && siaRows.length === 0 ? <tr><td colSpan={5}><StateBlock variant="loading" title={t('Cargando conectores SIA…')} /></td></tr>
+          : siaError ? <tr><td colSpan={5}><StateBlock variant="error" title={t('No se pudieron cargar los conectores SIA')} hint={siaError} action={<button type="button" className="button subtle" onClick={retrySia}>{t('Reintentar')}</button>} /></td></tr>
             : siaRows.length ? siaRows.map((connector) => <tr key={connector.object_id}>
               <td><span className="pam-platform-name"><Cable size={15} aria-hidden /><span><strong title={connector.display_name}>{connector.display_name}</strong><small>{connector.attributes.os || 'Sin SO'}</small></span></span></td>
-              <td><span className={connector.attributes.status === 'connected' ? 'status-pill status-active' : 'status-pill status-warning'}>{connector.attributes.status || 'Sin estado'}</span>{connector.attributes.is_latest_version ? null : <small> · actualización disponible</small>}</td>
+              <td><span className={connector.attributes.status === 'connected' ? 'status-pill status-active' : 'status-pill status-warning'}>{connector.attributes.status || 'Sin estado'}</span>{connector.attributes.is_latest_version ? null : <small> {t('· actualización disponible')}</small>}</td>
               <td className="pam-connector-version">{connector.attributes.version || <span className="muted">—</span>}</td>
               <td>{connector.attributes.region || <span className="muted">—</span>}</td>
               <td>{connector.attributes.active_sessions_count ?? <span className="muted">—</span>}</td>
-            </tr>) : <tr><td colSpan={5}><StateBlock variant="empty" title={siaSearch ? 'Sin conectores SIA para esta búsqueda' : 'Todavía no hay conectores SIA sincronizados'} action={siaSearch ? <button type="button" className="button subtle" onClick={() => setSiaSearch('')}>Limpiar búsqueda</button> : undefined} /></td></tr>}
+            </tr>) : <tr><td colSpan={5}><StateBlock variant="empty" title={siaSearch ? t('Sin conectores SIA para esta búsqueda') : t('Todavía no hay conectores SIA sincronizados')} action={siaSearch ? <button type="button" className="button subtle" onClick={() => setSiaSearch('')}>{t('Limpiar búsqueda')}</button> : undefined} /></td></tr>}
       </tbody></table></div>
       {!siaError && <LoadMore loaded={siaRows.length} total={siaTotal} pageSize={siaPageSize} loading={siaLoading} onLoadMore={loadMoreSia} />}
       </>}
-      <div className="pam-platforms-note">{section === 'psm' ? 'Cómo leer los conectores' : 'Inventario SIA de sólo lectura'}<HelpHint label={section === 'psm' ? 'Cómo leer los conectores PSM' : 'Acerca del inventario SIA'}><p>{section === 'psm' ? 'Abrir una plataforma cambia a la sección Plataformas. Usá “Actualizar datos” en el menú de usuario para actualizar PAM, PSM, SIA, Identity y Access en una sola acción.' : 'Inventario SIA de sólo lectura; no mezcla sus objetos con los servidores PSM.'}</p></HelpHint></div>
+      <div className="pam-platforms-note">{section === 'psm' ? t('Cómo leer los conectores') : t('Inventario SIA de sólo lectura')}<HelpHint label={section === 'psm' ? t('Cómo leer los conectores PSM') : t('Acerca del inventario SIA')}><p>{section === 'psm' ? t('Abrir una plataforma cambia a la sección Plataformas. Usá “Actualizar datos” en el menú de usuario para actualizar PAM, PSM, SIA, Identity y Access en una sola acción.') : t('Inventario SIA de sólo lectura; no mezcla sus objetos con los servidores PSM.')}</p></HelpHint></div>
     </section>
   </>;
 }

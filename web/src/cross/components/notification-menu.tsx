@@ -7,6 +7,7 @@ import type { IngestionRun } from '../types/ingestion';
 import type { ActivityEvent } from '../lib/activity-events-api';
 import { fetchIngestionRuns, INGESTION_RUNS_QUERY_KEY } from '../lib/ingestion-api';
 import { latestCyclePerTool, type LatestToolCycle } from '../lib/sync-notification';
+import { t } from '../i18n/index.ts';
 
 type NotificationMenuProps = {
   latestRun: IngestionRun | null;
@@ -42,7 +43,7 @@ function relativeTime(value: string | null): string {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return 'hace ' + hours + (hours === 1 ? ' hora' : ' horas');
   const days = Math.floor(hours / 24);
-  return 'hace ' + days + (days === 1 ? ' día' : ' días');
+  return 'hace ' + days + (days === 1 ? t(' día') : t(' días'));
 }
 
 function actorLabel(event: ActivityEvent): string {
@@ -97,17 +98,17 @@ export function NotificationMenu({
   const cycles = latestCyclePerTool(runsQuery.data ?? (latestRun ? [latestRun] : []));
   const hasContent = Boolean(latestEvent) || cycles.length > 0;
   return <div className="notification-wrap" ref={ref}>
-    <button className={'icon-button notification-button ' + (open ? 'active' : '')} type="button" aria-label="Abrir notificaciones" aria-expanded={open} title="Notificaciones" onClick={() => setOpen((current) => !current)}>
+    <button className={'icon-button notification-button ' + (open ? 'active' : '')} type="button" aria-label={t('Abrir notificaciones')} aria-expanded={open} title={t('Notificaciones')} onClick={() => setOpen((current) => !current)}>
       <Bell size={17} />{(unseen || hasLiveEvents) && <span className={'notification-dot ' + (hasLiveEvents || completed ? 'success' : 'warning')} />}
     </button>
-    {open && <section className="notification-popover" aria-label="Notificaciones">
-      <div className="notification-header"><strong>Notificaciones</strong><span>{unreadEventCount > 0 ? `${formatNumber(unreadEventCount)} actividad${unreadEventCount === 1 ? '' : 'es'} nueva${unreadEventCount === 1 ? '' : 's'}` : hasContent ? `${formatNumber((latestEvent ? 1 : 0) + cycles.length)} actividad${(latestEvent ? 1 : 0) + cycles.length === 1 ? '' : 'es'}` : 'Sin actividad'}</span></div>
+    {open && <section className="notification-popover" aria-label={t('Notificaciones')}>
+      <div className="notification-header"><strong>{t('Notificaciones')}</strong><span>{unreadEventCount > 0 ? `${formatNumber(unreadEventCount)} actividad${unreadEventCount === 1 ? '' : 'es'} nueva${unreadEventCount === 1 ? '' : 's'}` : hasContent ? `${formatNumber((latestEvent ? 1 : 0) + cycles.length)} actividad${(latestEvent ? 1 : 0) + cycles.length === 1 ? '' : 'es'}` : 'Sin actividad'}</span></div>
       {latestEvent ? <div className="notification-item success">
         <span className="notification-icon"><Check size={15} /></span>
         <div><strong>{eventLabel(latestEvent)}</strong><span>{actorLabel(latestEvent)} · {relativeTime(latestEvent.created_at)}</span></div>
       </div> : null}
       {cycles.map((cycle) => <CycleItem key={cycle.tool} cycle={cycle} />)}
-      {!cycles.length && !latestEvent ? <p className="notification-empty">Todavía no hay sincronizaciones registradas.</p> : null}
+      {!cycles.length && !latestEvent ? <p className="notification-empty">{t('Todavía no hay sincronizaciones registradas.')}</p> : null}
     </section>}
   </div>;
 }

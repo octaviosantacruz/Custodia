@@ -1,5 +1,6 @@
 import type { ChainGraphNode } from '../components/chain-graph';
 import type { IdentityPamChainRole, PamUserChain } from '../types/identity-pam-chain';
+import { t } from '../i18n/index.ts';
 
 export function personGraphNodes(
   chain: PamUserChain,
@@ -14,10 +15,10 @@ export function personGraphNodes(
   const psms = uniquePlatforms.flatMap((platform) => platform.psms || []);
   const uniquePsms = [...new Map(psms.map((psm) => [psm.object_id, psm])).values()];
   return [
-    { id: 'person', label: 'Usuario', count: 1, description: userDescription, items: [chain.pam_user?.display_name || fallbackName] },
-    { id: 'roles', label: 'Roles', count: chain.totals.roles, description: 'acceso concedido', items: roles.map((role) => role.display_name) },
-    { id: 'safes', label: 'Safes', count: chain.totals.safes, description: 'alcanzables', items: uniqueSafes.map((safe) => safe.display_name), actionLabel: 'Abrir Safes' },
-    { id: 'platforms', label: 'Plataformas', count: chain.totals.platforms, description: 'cuentas administradas', items: uniquePlatforms.map((platform) => platform.display_name), actionLabel: 'Abrir plataformas' },
-    { id: 'psm', label: 'PSM', count: chain.totals.psms, description: 'sesiones controladas', items: uniquePsms.map((psm) => psm.display_name), actionLabel: 'Abrir conectores' },
+    { id: 'person', label: t('Usuario'), count: 1, description: userDescription, items: [chain.pam_user?.display_name || fallbackName] },
+    { id: 'roles', label: t('Roles'), count: chain.totals.roles, description: t('acceso concedido'), items: roles.map((role) => role.display_name) },
+    { id: 'safes', label: t('Safes'), count: chain.totals.safes, description: 'alcanzables', items: uniqueSafes.map((safe) => safe.display_name), actionLabel: t('Abrir Safes') },
+    { id: 'platforms', label: t('Plataformas'), count: chain.totals.platforms, description: t('cuentas administradas'), items: uniquePlatforms.map((platform) => platform.display_name), actionLabel: t('Abrir plataformas') },
+    { id: 'psm', label: 'PSM', count: chain.totals.psms, description: t('sesiones controladas'), items: uniquePsms.map((psm) => psm.display_name), actionLabel: t('Abrir conectores') },
   ];
 }

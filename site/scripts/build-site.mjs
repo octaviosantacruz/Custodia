@@ -13,15 +13,18 @@ const template = await readFile(join(root, 'site/template.html'), 'utf8');
 // Las capturas no llevan hash en el nombre: la versión en la URL cambia con su
 // contenido, así una captura nueva no queda escondida detrás de la caché.
 const shots = createHash('sha256');
-for (const name of ['summary', 'person', 'tools']) {
-  // Cada captura va en PNG y WebP (el WebP pesa ~5 veces menos); los dos entran en la versión.
-  for (const ext of ['png', 'webp']) shots.update(await readFile(join(root, `public/shots/${name}.${ext}`)));
+// Una carpeta por idioma (shots/en, shots/es), cada captura en PNG y WebP
+// (el WebP pesa ~5 veces menos); todo entra en la versión.
+for (const lang of ['en', 'es']) {
+  for (const name of ['summary', 'person', 'tools']) {
+    for (const ext of ['png', 'webp']) shots.update(await readFile(join(root, `public/shots/${lang}/${name}.${ext}`)));
+  }
 }
 const shotVersion = shots.digest('hex').slice(0, 10);
 
 for (const [lang, strings] of Object.entries(pages)) {
   // Dirección de la demo (otra app, otro proyecto de Pages). Se puede cambiar al publicar.
-  const values = { ...strings, shotVersion, demo: (process.env.CUSTODIA_DEMO_URL || 'https://custodia-demo.pages.dev').replace(/\/$/, '') };
+  const values = { ...strings, shotVersion, demoLang: `?lang=${lang}`, demo: (process.env.CUSTODIA_DEMO_URL || 'https://custodia-demo.pages.dev').replace(/\/$/, '') };
   strings.m_rows.forEach((row, i) => { values[`m_row${i}`] = row; });
   const missing = new Set();
   const html = template.replace(/\{\{(\w+)\}\}/g, (_, key) => {

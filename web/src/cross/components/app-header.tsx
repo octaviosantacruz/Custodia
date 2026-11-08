@@ -22,6 +22,7 @@ import { fetchIngestionRuns, INGESTION_RUNS_QUERY_KEY } from '../lib/ingestion-a
 import { syncDomainForSource, syncToolForSource, syncToolLabel } from '../lib/sync-source';
 import { syncStatusLabel } from '../lib/sync-status-label';
 import './app-header.css';
+import { t } from '../i18n/index.ts';
 
 export type { WorkspaceView } from '../lib/workspaces';
 
@@ -103,12 +104,12 @@ export function AppHeader({
         preferences={workspacePreferences}
         onPreferencesChange={onWorkspacePreferencesChange}
       />}
-      <button className="brand" type="button" onClick={onHome} aria-label="Ir al inicio de Custodia" title="Ir al inicio de Custodia"><span className="brand-mark"><CustodiaMark /></span><span className="brand-copy"><strong>Custodia</strong></span></button>
+      <button className="brand" type="button" onClick={onHome} aria-label={t('Ir al inicio de Custodia')} title={t('Ir al inicio de Custodia')}><span className="brand-mark"><CustodiaMark /></span><span className="brand-copy"><strong>{t('Custodia')}</strong></span></button>
       <GlobalSearch includeInternal={includeInternalMetrics} permissions={authStatus.permissions || []} commands={commandCenterCommands} preferences={workspacePreferences} onWorkspaceSelect={onWorkspaceChange} onSelect={onSearchSelect} />
-      {!isHome && <div className="topbar-location" role="group" aria-label="Ubicación actual"><span>{WORKSPACE_TOOL_LABELS[workspaceView]}</span>{locationRepeatsTool(WORKSPACE_TOOL_LABELS[workspaceView], workspaceLabels[workspaceView]) ? null : <><ChevronRight size={14} aria-hidden /><strong>{workspaceLabels[workspaceView]}</strong></>}</div>}
+      {!isHome && <div className="topbar-location" role="group" aria-label={t('Ubicación actual')}><span>{WORKSPACE_TOOL_LABELS[workspaceView]}</span>{locationRepeatsTool(WORKSPACE_TOOL_LABELS[workspaceView], workspaceLabels[workspaceView]) ? null : <><ChevronRight size={14} aria-hidden /><strong>{workspaceLabels[workspaceView]}</strong></>}</div>}
     </div>
     <div className="topbar-actions">
-      {!isHome && (presentation || canSync) && <div className={'sync-status-control ' + ((presentation ? presentation.running : busy || latestStatus === 'running') ? 'is-running' : '')} role="status" title={presentation?.observedAt ? dateTimeHint(presentation.observedAt) : syncState.title ?? (canSync ? 'El refresco manual está disponible en el menú de usuario' : 'Estado del último intento de sincronización del inventario')}>
+      {!isHome && (presentation || canSync) && <div className={'sync-status-control ' + ((presentation ? presentation.running : busy || latestStatus === 'running') ? 'is-running' : '')} role="status" title={presentation?.observedAt ? dateTimeHint(presentation.observedAt) : syncState.title ?? (canSync ? t('El refresco manual está disponible en el menú de usuario') : t('Estado del último intento de sincronización del inventario'))}>
         <span className="sync-status-dot" aria-hidden="true" />{syncLabel}
       </div>}
       <NotificationMenu latestRun={latestRun} latestEvent={latestEvent} unreadEventCount={unreadEventCount} onEventsSeen={onEventsSeen} />

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Bot } from 'lucide-react';
 import './semantic.css';
+import { t } from '../i18n/index.ts';
 
 /* Shared connective pieces for the Roles / SIA / Activity tables.
    StatusBadge tone -> the existing --status-* pill tokens; only
@@ -25,7 +26,7 @@ export function TagChip({ label, title }: { label: string; title?: string }) {
 /* Renders up to `max` tag chips from a list, then a "+N" overflow chip.
    The overflow chip's title lists the hidden values so nothing is lost. */
 export function TagChipList({ values, max = 3 }: { values: string[]; max?: number }) {
-  if (!values.length) return <span className="muted">Sin dato</span>;
+  if (!values.length) return <span className="muted">{t('Sin dato')}</span>;
   const shown = values.slice(0, max);
   const rest = values.slice(max);
   return (

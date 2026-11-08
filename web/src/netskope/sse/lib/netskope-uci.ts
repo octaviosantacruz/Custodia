@@ -1,5 +1,6 @@
 import { formatNumber } from '../../../cross/lib/format.ts';
 import type { NetskopeUciRating, NetskopeUciRow } from '../types/netskope';
+import { localeTag } from '../../../cross/i18n/index.ts';
 
 /* NSK-UBA-002: labels and pure helpers for the UCI view. The list holds only
    users Netskope rated Poor or Moderate among the recently active; an absent
@@ -65,7 +66,7 @@ export function uciRiskShare(company: { users: number; poor: number; moderate: n
 }
 
 export function uciRiskLabel(company: { users: number; poor: number; moderate: number }): string {
-  return `${(uciRiskShare(company) * 100).toLocaleString('es-AR', { maximumFractionDigits: 1 })} %`;
+  return `${(uciRiskShare(company) * 100).toLocaleString(localeTag(), { maximumFractionDigits: 1 })} %`;
 }
 
 /** Change in the at-risk share versus the last weekly snapshot, in percentage points; null without a snapshot. */
@@ -78,5 +79,5 @@ export function uciRiskChangeLabel(change: number | null): string {
   if (change === null) return 'Sin dato';
   const rounded = Math.round(change * 10) / 10;
   if (rounded === 0) return 'Sin cambio';
-  return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString('es-AR', { maximumFractionDigits: 1 })} pp`;
+  return `${rounded > 0 ? '+' : '−'}${Math.abs(rounded).toLocaleString(localeTag(), { maximumFractionDigits: 1 })} pp`;
 }

@@ -1,5 +1,6 @@
 import { formatNumber } from './format.ts';
 import type { PersonSource, PersonToolSummary } from './chains-api';
+import { t } from '../i18n/index.ts';
 
 /* UX-PERSON-002: the person map represents platforms, not CyberArk internal
    capabilities. The only branches are CyberArk PAM and Netskope; Identity
@@ -115,34 +116,34 @@ export function siaAccessDetail(sia: PersonToolSummary | undefined): string {
   const access = sia?.sia_access;
   if (!access || !access.policies) return '';
   const parts: string[] = [];
-  if (access.user_policies) parts.push(`${formatNumber(access.user_policies)} por usuario`);
-  if (access.role_policies) parts.push(`${formatNumber(access.role_policies)} por rol de Identity`);
+  if (access.user_policies) parts.push(t('{n} por usuario', { n: formatNumber(access.user_policies) }));
+  if (access.role_policies) parts.push(t('{n} por rol de Identity', { n: formatNumber(access.role_policies) }));
   return parts.join(' · ');
 }
 
 /** The one number shown under a tool node. */
 export function personToolHeadline(source: PersonSource, tool: PersonToolSummary | undefined): string {
-  if (!tool || tool.status === 'unmatched') return 'Sin registro';
-  if (tool.status === 'ambiguous') return 'Vínculo ambiguo';
+  if (!tool || tool.status === 'unmatched') return t('Sin registro');
+  if (tool.status === 'ambiguous') return t('Vínculo ambiguo');
   if (source === 'sia') return plural(tool.policy_count ?? 0, 'política', 'políticas');
   if (source === 'netskope') return plural(tool.device_count ?? 0, 'dispositivo', 'dispositivos');
   if (source === 'identity') return plural(tool.role_count ?? 0, 'rol', 'roles');
   if (tool.totals) return plural(tool.totals.safes, 'Safe', 'Safes');
-  return 'Usuario resuelto';
+  return t('Usuario resuelto');
 }
 
 function plural(count: number, one: string, many: string): string {
-  return `${formatNumber(count)} ${count === 1 ? one : many}`;
+  return `${formatNumber(count)} ${count === 1 ? t(one) : t(many)}`;
 }
 
 /** Second-orbit facts; only what the tool reported, nothing inferred. */
 export function personToolFacts(source: PersonSource, tool: PersonToolSummary | undefined): PersonFact[] {
   if (source === 'pam' && tool?.status === 'unmatched' && tool.role_access && (tool.role_access.matched_roles || tool.role_access.ambiguous_roles)) {
     const facts: PersonFact[] = [
-      { label: 'Roles vinculados', value: formatNumber(tool.role_access.matched_roles) },
-      { label: 'Safes por rol', value: formatNumber(tool.role_access.safes) },
+      { label: t('Roles vinculados'), value: formatNumber(tool.role_access.matched_roles) },
+      { label: t('Safes por rol'), value: formatNumber(tool.role_access.safes) },
     ];
-    if (tool.role_access.ambiguous_roles) facts.push({ label: 'Roles ambiguos', value: formatNumber(tool.role_access.ambiguous_roles) });
+    if (tool.role_access.ambiguous_roles) facts.push({ label: t('Roles ambiguos'), value: formatNumber(tool.role_access.ambiguous_roles) });
     return facts;
   }
   if (!tool || tool.status === 'unmatched' || tool.status === 'ambiguous') return [];
@@ -150,29 +151,29 @@ export function personToolFacts(source: PersonSource, tool: PersonToolSummary | 
     const totals = tool.totals;
     if (!totals) return [];
     return [
-      { label: 'Roles', value: formatNumber(totals.roles) },
-      { label: 'Safes', value: formatNumber(totals.safes) },
-      { label: 'Plataformas', value: formatNumber(totals.platforms) },
+      { label: t('Roles'), value: formatNumber(totals.roles) },
+      { label: t('Safes'), value: formatNumber(totals.safes) },
+      { label: t('Plataformas'), value: formatNumber(totals.platforms) },
       { label: 'PSM', value: formatNumber(totals.psms) },
-      { label: 'Cuentas', value: formatNumber(totals.accounts) },
+      { label: t('Cuentas'), value: formatNumber(totals.accounts) },
     ];
   }
   if (source === 'identity') {
     const facts: PersonFact[] = [
-      { label: 'Roles', value: formatNumber(tool.role_count ?? 0) },
-      { label: 'Federación', value: tool.federation?.display_name ?? 'Sin federación' },
+      { label: t('Roles'), value: formatNumber(tool.role_count ?? 0) },
+      { label: t('Federación'), value: tool.federation?.display_name ?? 'Sin federación' },
     ];
-    if (tool.user?.last_login_date) facts.push({ label: 'Último acceso', value: tool.user.last_login_date });
+    if (tool.user?.last_login_date) facts.push({ label: t('Último acceso'), value: tool.user.last_login_date });
     return facts;
   }
   if (source === 'sia') {
-    return [{ label: 'Políticas', value: formatNumber(tool.policy_count ?? 0) }];
+    return [{ label: t('Políticas'), value: formatNumber(tool.policy_count ?? 0) }];
   }
-  const facts: PersonFact[] = [{ label: 'Recientes · 7 días', value: formatNumber(tool.device_count ?? 0) }];
-  if (tool.stale_device_count) facts.push({ label: 'Sin actividad', value: formatNumber(tool.stale_device_count) });
-  if (tool.company) facts.push({ label: 'Empresa', value: tool.company });
-  if (tool.client_versions?.length) facts.push({ label: 'Cliente', value: tool.client_versions.join(', ') });
-  if (tool.operating_systems?.length) facts.push({ label: 'Sistema', value: tool.operating_systems.join(', ') });
+  const facts: PersonFact[] = [{ label: t('Recientes · 7 días'), value: formatNumber(tool.device_count ?? 0) }];
+  if (tool.stale_device_count) facts.push({ label: t('Sin actividad'), value: formatNumber(tool.stale_device_count) });
+  if (tool.company) facts.push({ label: t('Empresa'), value: tool.company });
+  if (tool.client_versions?.length) facts.push({ label: t('Cliente'), value: tool.client_versions.join(', ') });
+  if (tool.operating_systems?.length) facts.push({ label: t('Sistema'), value: tool.operating_systems.join(', ') });
   return facts;
 }
 
@@ -194,7 +195,7 @@ export type PersonPlatformAnswer = {
   tone: 'success' | 'warning' | 'neutral' | 'info';
 };
 
-export const PERSON_PLATFORM_LABELS: Record<PersonNodeId, string> = { pam: 'CyberArk', netskope: 'Netskope' };
+export const PERSON_PLATFORM_LABELS: Record<PersonNodeId, string> = { pam: t('CyberArk'), netskope: t('Netskope') };
 
 /* CyberArk access has two paths: Safes (PAM) and SIA policies (on-demand
    access to servers). Both count as "yes"; the count names each. */
@@ -206,30 +207,30 @@ function cyberArkCount(safes: number, policies: number): string | null {
 }
 
 export function personPlatformAnswer(source: PersonNodeId, tool: PersonToolSummary | undefined, sia?: PersonToolSummary): PersonPlatformAnswer {
-  if (!tool) return { answer: 'unknown', label: 'Sin permiso de lectura', count: null, tone: 'neutral' };
+  if (!tool) return { answer: 'unknown', label: t('Sin permiso de lectura'), count: null, tone: 'neutral' };
   const policies = source === 'pam' ? siaPolicyCount(sia) : 0;
   if (tool.status === 'unmatched') {
     if (source === 'pam' && hasRoleAccess(tool)) {
-      return { answer: 'yes', label: 'Con acceso por rol', count: cyberArkCount(tool.role_access!.safes, policies), tone: 'info' };
+      return { answer: 'yes', label: t('Con acceso por rol'), count: cyberArkCount(tool.role_access!.safes, policies), tone: 'info' };
     }
-    if (policies > 0) return { answer: 'yes', label: 'Acceso por SIA', count: cyberArkCount(0, policies), tone: 'info' };
-    return { answer: 'no', label: source === 'pam' ? 'Sin acceso registrado' : 'Sin cliente registrado', count: null, tone: 'neutral' };
+    if (policies > 0) return { answer: 'yes', label: t('Acceso por SIA'), count: cyberArkCount(0, policies), tone: 'info' };
+    return { answer: 'no', label: source === 'pam' ? t('Sin acceso registrado') : t('Sin cliente registrado'), count: null, tone: 'neutral' };
   }
-  if (tool.status === 'ambiguous') return { answer: 'ambiguous', label: 'Vínculo ambiguo', count: null, tone: 'warning' };
-  if (tool.status === 'reference') return { answer: 'reference', label: 'Referencia por nombre', count: null, tone: 'info' };
+  if (tool.status === 'ambiguous') return { answer: 'ambiguous', label: t('Vínculo ambiguo'), count: null, tone: 'warning' };
+  if (tool.status === 'reference') return { answer: 'reference', label: t('Referencia por nombre'), count: null, tone: 'info' };
   if (source === 'pam') {
     const safes = tool.totals?.safes;
-    if (tool.user?.suspended) return { answer: 'yes', label: 'Usuario suspendido', count: cyberArkCount(safes ?? 0, policies), tone: 'warning' };
-    if (safes === undefined || safes === null) return { answer: 'yes', label: 'Usuario de CyberArk', count: cyberArkCount(0, policies), tone: 'success' };
-    if (safes === 0 && policies > 0) return { answer: 'yes', label: 'Acceso por SIA', count: cyberArkCount(0, policies), tone: 'success' };
-    if (safes === 0) return { answer: 'no', label: 'Usuario sin Safes', count: null, tone: 'neutral' };
-    return { answer: 'yes', label: 'Con acceso privilegiado', count: cyberArkCount(safes, policies), tone: 'success' };
+    if (tool.user?.suspended) return { answer: 'yes', label: t('Usuario suspendido'), count: cyberArkCount(safes ?? 0, policies), tone: 'warning' };
+    if (safes === undefined || safes === null) return { answer: 'yes', label: t('Usuario de CyberArk'), count: cyberArkCount(0, policies), tone: 'success' };
+    if (safes === 0 && policies > 0) return { answer: 'yes', label: t('Acceso por SIA'), count: cyberArkCount(0, policies), tone: 'success' };
+    if (safes === 0) return { answer: 'no', label: t('Usuario sin Safes'), count: null, tone: 'neutral' };
+    return { answer: 'yes', label: t('Con acceso privilegiado'), count: cyberArkCount(safes, policies), tone: 'success' };
   }
   const recent = tool.device_count ?? 0;
   const stale = tool.stale_device_count ?? 0;
-  if (recent > 0) return { answer: 'yes', label: 'Cliente activo', count: plural(recent, 'equipo reciente', 'equipos recientes'), tone: 'success' };
-  if (stale > 0) return { answer: 'no', label: 'Cliente sin actividad reciente', count: plural(stale, 'equipo', 'equipos'), tone: 'warning' };
-  return { answer: 'no', label: 'Sin equipos', count: null, tone: 'neutral' };
+  if (recent > 0) return { answer: 'yes', label: t('Cliente activo'), count: plural(recent, 'equipo reciente', 'equipos recientes'), tone: 'success' };
+  if (stale > 0) return { answer: 'no', label: t('Cliente sin actividad reciente'), count: plural(stale, 'equipo', 'equipos'), tone: 'warning' };
+  return { answer: 'no', label: t('Sin equipos'), count: null, tone: 'neutral' };
 }
 
 /** The platforms a search result has a record in: Identity and SIA belong to CyberArk. */

@@ -17,6 +17,7 @@ import type { AccountManagementSummary, AccountPlatformCoverage, AccountPlatform
 import type { Summary } from '../types/dashboard';
 import './inventory-insights.css';
 import './safe-table.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 
 type SafesWorkspaceProps = {
@@ -69,15 +70,15 @@ export function SafesWorkspace({
   return <>
     <section className="database-toolbar">
       <div className="database-toolbar-actions">
-        <div className="scope-segmented" role="tablist" aria-label="Vigencia de Safes" onKeyDown={handleTablistKeyDown}>
-          <button type="button" role="tab" aria-selected={scope === 'active'} tabIndex={scope === 'active' ? 0 : -1} className={scope === 'active' ? 'active' : ''} onClick={() => changeScope('active')}>Vigentes</button>
-          <button type="button" role="tab" aria-selected={scope === 'retired'} tabIndex={scope === 'retired' ? 0 : -1} className={scope === 'retired' ? 'active' : ''} onClick={() => changeScope('retired')}>Retiradas{retiredTotal ? <span className="scope-segmented-count">{formatNumber(retiredTotal)}</span> : null}</button>
+        <div className="scope-segmented" role="tablist" aria-label={t('Vigencia de Safes')} onKeyDown={handleTablistKeyDown}>
+          <button type="button" role="tab" aria-selected={scope === 'active'} tabIndex={scope === 'active' ? 0 : -1} className={scope === 'active' ? 'active' : ''} onClick={() => changeScope('active')}>{t('Vigentes')}</button>
+          <button type="button" role="tab" aria-selected={scope === 'retired'} tabIndex={scope === 'retired' ? 0 : -1} className={scope === 'retired' ? 'active' : ''} onClick={() => changeScope('retired')}>{t('Retiradas')}{retiredTotal ? <span className="scope-segmented-count">{formatNumber(retiredTotal)}</span> : null}</button>
         </div>
         {scope === 'active' && canManageCatalogs && <OverflowActions
-          ariaLabel="Acciones del inventario de Safes"
+          ariaLabel={t('Acciones del inventario de Safes')}
           actions={[{
             id: 'catalogs',
-            label: 'Administrar catálogos',
+            label: t('Administrar catálogos'),
             icon: <Settings2 size={14} />,
             onSelect: onOpenCatalogManager,
           }]}
@@ -86,39 +87,39 @@ export function SafesWorkspace({
       </div>
     </section>
     <div className={scope === 'retired' ? 'is-hidden' : undefined}>
-    <section className="inventory-insights" aria-label="Indicadores rápidos">
+    <section className="inventory-insights" aria-label={t('Indicadores rápidos')}>
       <details>
-        <summary><span className="inventory-insights-title">Indicadores rápidos</span><span className="inventory-insights-summary">{health ? `${formatNumber(health.denominator)} Safes activos · ${formatNumber(accountPlatformCoverage.accounts_active)} cuentas activas` : 'Señales técnicas y cobertura de cuentas'}</span><ChevronDown size={15} /></summary>
+        <summary><span className="inventory-insights-title">{t('Indicadores rápidos')}</span><span className="inventory-insights-summary">{health ? t('{safes} Safes activos · {accounts} cuentas activas', { safes: formatNumber(health.denominator), accounts: formatNumber(accountPlatformCoverage.accounts_active) }) : t('Señales técnicas y cobertura de cuentas')}</span><ChevronDown size={15} /></summary>
          <div className="inventory-insights-body">
-          {health && <section className="safe-health-section" aria-label="Safe Health">
-            <div className="section-heading"><div><h2 className="heading-with-help">Safe Health <StatusGlossary scope="safe_health" compact /></h2><span className="database-caption">Inventario actual</span><HelpHint label="Cómo usar Safe Health"><p>Seleccioná una señal para llevarla a la tabla. Los indicadores describen datos observados; no infieren obligaciones de política que no estén informadas.</p></HelpHint></div></div>
+          {health && <section className="safe-health-section" aria-label={t('Safe Health')}>
+            <div className="section-heading"><div><h2 className="heading-with-help">{t('Safe Health')} <StatusGlossary scope="safe_health" compact /></h2><span className="database-caption">{t('Inventario actual')}</span><HelpHint label={t('Cómo usar Safe Health')}><p>Seleccioná una señal para llevarla a la tabla. Los indicadores describen datos observados; no infieren obligaciones de política que no estén informadas.</p></HelpHint></div></div>
             <div className="metrics compact safe-health-metrics">
-              <button type="button" className="metric-button" onClick={() => setHealth('missing_cpm')} aria-pressed={healthFilter === 'missing_cpm'}><Metric label="Sin CPM" value={health.missing_cpm} detail="CPM no informado" tone={health.missing_cpm ? 'amber' : 'green'} /></button>
-              <button type="button" className="metric-button" onClick={() => setHealth('no_accounts')} aria-pressed={healthFilter === 'no_accounts'}><Metric label="Sin cuentas" value={health.no_accounts} detail="sin cuentas activas" tone={health.no_accounts ? 'amber' : 'green'} /></button>
-              <button type="button" className="metric-button" onClick={() => setHealth('retention_unconfigured')} aria-pressed={healthFilter === 'retention_unconfigured'}><Metric label="Sin retención/purga" value={health.retention_unconfigured} detail="política no configurada" tone={health.retention_unconfigured ? 'amber' : 'green'} /></button>
-              <button type="button" className="metric-button" onClick={() => setHealth('manage_safe_concentration')} aria-pressed={healthFilter === 'manage_safe_concentration'}><Metric label="2+ Manage Safe" value={health.manage_safe_concentration} detail="principales registrados" /></button>
+              <button type="button" className="metric-button" onClick={() => setHealth('missing_cpm')} aria-pressed={healthFilter === 'missing_cpm'}><Metric label={t('Sin CPM')} value={health.missing_cpm} detail="CPM no informado" tone={health.missing_cpm ? 'amber' : 'green'} /></button>
+              <button type="button" className="metric-button" onClick={() => setHealth('no_accounts')} aria-pressed={healthFilter === 'no_accounts'}><Metric label={t('Sin cuentas')} value={health.no_accounts} detail="sin cuentas activas" tone={health.no_accounts ? 'amber' : 'green'} /></button>
+              <button type="button" className="metric-button" onClick={() => setHealth('retention_unconfigured')} aria-pressed={healthFilter === 'retention_unconfigured'}><Metric label={t('Sin retención/purga')} value={health.retention_unconfigured} detail="política no configurada" tone={health.retention_unconfigured ? 'amber' : 'green'} /></button>
+              <button type="button" className="metric-button" onClick={() => setHealth('manage_safe_concentration')} aria-pressed={healthFilter === 'manage_safe_concentration'}><Metric label={t('2+ Manage Safe')} value={health.manage_safe_concentration} detail="principales registrados" /></button>
             </div>
           </section>}
-          <section className="account-platform-section" aria-label="Cobertura de cuentas y plataformas">
-             <div className="section-heading"><div><h2>Cuentas y plataformas</h2><HelpHint label="Cobertura de cuentas y plataformas"><p>Relaciones observadas en la última sincronización PAM. Esta vista excluye credenciales y no presenta estos valores como evidencia de rotación.</p></HelpHint></div></div>
+          <section className="account-platform-section" aria-label={t('Cobertura de cuentas y plataformas')}>
+             <div className="section-heading"><div><h2>{t('Cuentas y plataformas')}</h2><HelpHint label={t('Cobertura de cuentas y plataformas')}><p>{t('Relaciones observadas en la última sincronización PAM. Esta vista excluye credenciales y no presenta estos valores como evidencia de rotación.')}</p></HelpHint></div></div>
             <div className="metrics compact safe-health-metrics">
-              <button type="button" className="metric-button" onClick={() => setPlatformStatus('')}><Metric label="Cuentas activas" value={accountPlatformCoverage.accounts_active} detail="inventario vigente" /></button>
-              <button type="button" className="metric-button" onClick={() => setPlatformStatus('with_platform')}><Metric label="Con plataforma" value={accountPlatformCoverage.accounts_with_platform} detail={`${formatNumber(accountPlatformCoverage.platforms_observed)} plataformas observadas`} tone="green" /></button>
-              <button type="button" className="metric-button" onClick={() => setPlatformStatus('without_platform')}><Metric label="Sin plataforma informada" value={accountPlatformCoverage.accounts_without_platform} detail="requiere revisión de fuente" tone={accountPlatformCoverage.accounts_without_platform ? 'amber' : 'green'} /></button>
-              <button type="button" className="metric-button" onClick={() => setPlatformStatus('partial_platform')}><Metric label="Relación parcial" value={accountPlatformCoverage.accounts_with_partial_platform} detail="ID o nombre incompleto" tone={accountPlatformCoverage.accounts_with_partial_platform ? 'amber' : 'green'} /></button>
-              <button type="button" className="metric-button" onClick={() => { setPlatformStatus(''); onHealthChange('no_accounts'); }}><Metric label="Safes sin cuentas" value={accountPlatformCoverage.safes_without_accounts} detail="no implica incumplimiento" /></button>
+              <button type="button" className="metric-button" onClick={() => setPlatformStatus('')}><Metric label={t('Cuentas activas')} value={accountPlatformCoverage.accounts_active} detail="inventario vigente" /></button>
+              <button type="button" className="metric-button" onClick={() => setPlatformStatus('with_platform')}><Metric label={t('Con plataforma')} value={accountPlatformCoverage.accounts_with_platform} detail={`${formatNumber(accountPlatformCoverage.platforms_observed)} plataformas observadas`} tone="green" /></button>
+              <button type="button" className="metric-button" onClick={() => setPlatformStatus('without_platform')}><Metric label={t('Sin plataforma informada')} value={accountPlatformCoverage.accounts_without_platform} detail="requiere revisión de fuente" tone={accountPlatformCoverage.accounts_without_platform ? 'amber' : 'green'} /></button>
+              <button type="button" className="metric-button" onClick={() => setPlatformStatus('partial_platform')}><Metric label={t('Relación parcial')} value={accountPlatformCoverage.accounts_with_partial_platform} detail="ID o nombre incompleto" tone={accountPlatformCoverage.accounts_with_partial_platform ? 'amber' : 'green'} /></button>
+              <button type="button" className="metric-button" onClick={() => { setPlatformStatus(''); onHealthChange('no_accounts'); }}><Metric label={t('Safes sin cuentas')} value={accountPlatformCoverage.safes_without_accounts} detail="no implica incumplimiento" /></button>
             </div>
             {accountManagementSummary && <>
               <div className="metrics compact safe-health-metrics">
-                <Metric label="Gestión automática deshabilitada" value={accountManagementSummary.automatic_disabled} detail={`de ${formatNumber(accountManagementSummary.accounts_active)} cuentas activas`} tone={accountManagementSummary.automatic_disabled ? 'amber' : 'green'} />
-                <Metric label="Gestión automática activa" value={accountManagementSummary.automatic_enabled} detail="cuentas activas" tone="green" />
-                <Metric label="Sin dato de gestión" value={accountManagementSummary.management_unknown} detail="cuentas activas" />
+                <Metric label={t('Gestión automática deshabilitada')} value={accountManagementSummary.automatic_disabled} detail={`de ${formatNumber(accountManagementSummary.accounts_active)} cuentas activas`} tone={accountManagementSummary.automatic_disabled ? 'amber' : 'green'} />
+                <Metric label={t('Gestión automática activa')} value={accountManagementSummary.automatic_enabled} detail={t('cuentas activas')} tone="green" />
+                <Metric label={t('Sin dato de gestión')} value={accountManagementSummary.management_unknown} detail={t('cuentas activas')} />
               </div>
               <p className="database-caption">Último cambio de secreto o alta: hasta 30 días {formatNumber(accountManagementSummary.changed_30d)} · 31–90 días {formatNumber(accountManagementSummary.changed_90d)} · 91–365 días {formatNumber(accountManagementSummary.changed_365d)} · más de 365 días {formatNumber(accountManagementSummary.changed_older)} · sin dato {formatNumber(accountManagementSummary.changed_unknown)}</p>
             </>}
-            {accountManagementSummaryLoading && <StateBlock variant="loading" title="Cargando el resumen de gestión de cuentas..." />}
-            {accountManagementSummaryError && <StateBlock variant="error" title="No se pudo cargar el resumen de gestión" hint="La cobertura de plataformas y las cuentas por Safe siguen disponibles." />}
-             {accountManagementSummary && <HelpHint label="Interpretación de gestión de cuentas"><p>Estado de gestión según CyberArk. El último cambio combina alta de la cuenta y cambio de secreto; no equivale a rotación. CyberArk no entrega fecha de verificación ni de reconciliación en este tenant.</p></HelpHint>}
+            {accountManagementSummaryLoading && <StateBlock variant="loading" title={t('Cargando el resumen de gestión de cuentas...')} />}
+            {accountManagementSummaryError && <StateBlock variant="error" title={t('No se pudo cargar el resumen de gestión')} hint="La cobertura de plataformas y las cuentas por Safe siguen disponibles." />}
+             {accountManagementSummary && <HelpHint label={t('Interpretación de gestión de cuentas')}><p>Estado de gestión según CyberArk. El último cambio combina alta de la cuenta y cambio de secreto; no equivale a rotación. CyberArk no entrega fecha de verificación ni de reconciliación en este tenant.</p></HelpHint>}
           </section>
         </div>
       </details>

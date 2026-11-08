@@ -1,6 +1,7 @@
 import type { ReactNode, RefObject } from 'react';
 import { X } from 'lucide-react';
 import { useDialogFocusTrap } from '../hooks/use-dialog-focus-trap';
+import { t } from '../i18n/index.ts';
 
 type ConfirmDialogProps = {
   icon: ReactNode;
@@ -55,7 +56,7 @@ export function ConfirmDialog({
     <section ref={dialogRef} className="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} tabIndex={-1}>
       <div className="confirm-dialog-header">
         <div className="confirm-dialog-icon">{icon}</div>
-        <button className="icon-button" type="button" aria-label="Cerrar" title="Cerrar" onClick={onClose} disabled={closeDisabled}><X size={16} /></button>
+        <button className="icon-button" type="button" aria-label={t('Cerrar')} title={t('Cerrar')} onClick={onClose} disabled={closeDisabled}><X size={16} /></button>
       </div>
       <h2 id={titleId}>{title}</h2>
       <p id={descriptionId}>{description}</p>

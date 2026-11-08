@@ -6,11 +6,12 @@ import { formatNumber } from '../lib/format';
 import type { PolicyCapability, SiaPolicyRow } from '../types/connection';
 import { CompactSelect } from './compact-select';
 import { ConfirmDialog } from './confirm-dialog';
+import { t } from '../i18n/index.ts';
 
 type Props = { onSaved: (changed: number) => void; onClose: () => void };
 
 const UNSET = '';
-const OPTIONS = [{ value: UNSET, label: 'Sin clasificar' }, ...(Object.entries(POLICY_CAPABILITY_LABELS) as [PolicyCapability, string][]).map(([value, label]) => ({ value, label }))];
+const OPTIONS = [{ value: UNSET, label: t('Sin clasificar') }, ...(Object.entries(POLICY_CAPABILITY_LABELS) as [PolicyCapability, string][]).map(([value, label]) => ({ value, label }))];
 
 /** A person decides what each SIA policy is (Platform, DBA or other); the name only offers a suggestion. */
 export function SiaPolicyDialog({ onSaved, onClose }: Props) {
@@ -41,15 +42,15 @@ export function SiaPolicyDialog({ onSaved, onClose }: Props) {
   };
 
   return <ConfirmDialog
-    icon={<ListChecks size={18} aria-hidden />} titleId="sia-policy-title" title="Clasificar políticas SIA"
+    icon={<ListChecks size={18} aria-hidden />} titleId="sia-policy-title" title={t('Clasificar políticas SIA')}
     descriptionId="sia-policy-description"
-    description="Decidí qué es cada política. Con eso se compara lo declarado en la planilla contra lo que SIA muestra."
+    description={t('Decidí qué es cada política. Con eso se compara lo declarado en la planilla contra lo que SIA muestra.')}
     confirmTone="primary" confirmLabel={changes.length ? `Guardar ${changes.length}` : 'Guardar'} confirmBusyLabel="Guardando…"
     confirmBusy={saving} confirmDisabled={changes.length === 0} onConfirm={() => void save()} onClose={onClose} closeDisabled={saving}
     backdropClassName="connection-import-backdrop"
   >
     {failure && <p className="connection-import-error" role="alert">{failure}</p>}
-    {!policies && !failure && <p className="muted" role="status">Cargando políticas…</p>}
+    {!policies && !failure && <p className="muted" role="status">{t('Cargando políticas…')}</p>}
     {policies && <>
       <div className="policy-dialog-tools">
         <button type="button" className="button subtle" disabled={saving || suggestable.length === 0} onClick={() => setDraft((current) => ({ ...current, ...Object.fromEntries(suggestable.map((row) => [row.source_id, row.suggested as string])) }))}>Usar sugerencias por nombre ({suggestable.length})</button>

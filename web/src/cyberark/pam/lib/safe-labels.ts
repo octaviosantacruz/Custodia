@@ -1,7 +1,8 @@
 import type { ClassificationStatus, WorkflowStatus } from '../types/safe';
+import { t } from '../../../cross/i18n/index.ts';
 
 export const statusLabel = (value: ClassificationStatus) =>
-  ({ pending: 'Pendiente', assigned: 'Asignada', review: 'Revisión' })[value];
+  ({ pending: t('Pendiente'), assigned: t('Asignada'), review: t('Revisión') })[value];
 
 // Daily Safe workflow choices remain limited to these three statuses;
 // historical statuses remain readable and filterable when already present.
@@ -23,20 +24,20 @@ export function workflowStatusesFromCounts(
 
 export const workflowLabel = (value: WorkflowStatus) =>
   ({
-    pending: 'Pendiente',
-    in_progress: 'En curso',
-    blocked: 'Bloqueada',
-    resolved: 'Resuelto',
-    retired: 'Retirada',
-    retention_hold: 'Baja retenida',
+    pending: t('Pendiente'),
+    in_progress: t('En curso'),
+    blocked: t('Bloqueada'),
+    resolved: t('Resuelto'),
+    retired: t('Retirada'),
+    retention_hold: t('Baja retenida'),
   })[value];
 
 /** Retention CyberArk reports for a Safe, as shown next to a decommission in
  *  progress. Describes configuration only; it is not a deletion date. */
 export function retentionLabel(days?: number | null, versions?: number | null): string {
   const parts = [
-    days != null ? `${days} ${days === 1 ? 'día' : 'días'}` : '',
-    versions != null ? `${versions} ${versions === 1 ? 'versión' : 'versiones'}` : '',
+    days != null ? `${days} ${days === 1 ? t('día') : t('días')}` : '',
+    versions != null ? `${versions} ${versions === 1 ? t('versión') : 'versiones'}` : '',
   ].filter(Boolean);
   return parts.length ? `Retención: ${parts.join(' / ')}` : 'Retención no informada';
 }
@@ -46,4 +47,4 @@ export const showsRetiredAccounts = (safe: { workflow_status: string; next_actio
   (safe.retired_account_count ?? 0) > 0 && (safe.workflow_status === 'retention_hold' || (safe.next_action || '').trim().toLowerCase() === 'dar de baja');
 
 export const retiredAccountsLabel = (count: number, detectedAt: string | null | undefined, format: (value: string | null) => string): string =>
-  `${count} ${count === 1 ? 'cuenta retirada' : 'cuentas retiradas'}${detectedAt ? ` · detectada ${format(detectedAt)}` : ''}`;
+  `${count} ${count === 1 ? t('cuenta retirada') : t('cuentas retiradas')}${detectedAt ? ` · detectada ${format(detectedAt)}` : ''}`;

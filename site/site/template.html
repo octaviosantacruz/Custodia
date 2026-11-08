@@ -15,7 +15,7 @@
     <meta property="og:url" content="https://custodia.octaviosantacruz.com{{path}}" />
     <meta property="og:title" content="{{title}}" />
     <meta property="og:description" content="{{description}}" />
-    <meta property="og:image" content="https://custodia.octaviosantacruz.com/shots/summary.png?v={{shotVersion}}" />
+    <meta property="og:image" content="https://custodia.octaviosantacruz.com/shots/{{lang}}/summary.png?v={{shotVersion}}" />
     <meta property="og:image:width" content="1440" />
     <meta property="og:image:height" content="900" />
     <meta property="og:image:alt" content="{{ogImageAlt}}" />
@@ -45,7 +45,7 @@
           <a href="#how" class="hide-sm">{{navHow}}</a>
           <a href="#status" class="hide-sm">{{navStatus}}</a>
           <a href="{{otherHref}}" class="lang" hreflang="{{otherLang}}" lang="{{otherLang}}" aria-label="{{otherLabel}}">{{otherCode}}</a>
-          <a href="{{demo}}/" class="button is-primary">{{cta}}</a>
+          <a href="{{demo}}/{{demoLang}}" class="button is-primary">{{cta}}</a>
         </nav>
       </header>
 
@@ -56,7 +56,7 @@
             <h1 id="hero-title">{{h1}}</h1>
             <p class="hero-lede">{{lede}}</p>
             <div class="hero-actions">
-              <a href="{{demo}}/" class="button is-primary">{{ctaDemo}} <span aria-hidden="true">→</span></a>
+              <a href="{{demo}}/{{demoLang}}" class="button is-primary">{{ctaDemo}} <span aria-hidden="true">→</span></a>
               <a href="#how" class="button">{{ctaHow}}</a>
             </div>
             <p class="hero-note">{{heroNote}}</p>
@@ -144,22 +144,22 @@
           <h2 id="questions-title">{{qTitle}}</h2>
           <p class="section-lede">{{qLede}}</p>
           <div class="questions">
-            <a class="question reveal" href="{{demo}}/chains/person" data-verdict="gap">
+            <a class="question reveal" href="{{demo}}/chains/person{{demoLang}}" data-verdict="gap">
               <p class="q">{{q1}}</p>
               <p class="a">{{a1}}</p>
               <span class="q-foot"><span class="verdict"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8 11.2 6 6 11.2.8 6z" fill="var(--tone)" /></svg><span>{{v1}}</span></span><span class="go">{{seeDemo}} →</span></span>
             </a>
-            <a class="question reveal" href="{{demo}}/chains/person" data-verdict="partial">
+            <a class="question reveal" href="{{demo}}/chains/person{{demoLang}}" data-verdict="partial">
               <p class="q">{{q2}}</p>
               <p class="a">{{a2}}</p>
               <span class="q-foot"><span class="verdict"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.4" fill="none" stroke="var(--tone)" stroke-width="1.4" /><path d="M6 1.6a4.4 4.4 0 0 1 0 8.8z" fill="var(--tone)" /></svg><span>{{v2}}</span></span><span class="go">{{seeDemo}} →</span></span>
             </a>
-            <a class="question reveal" href="{{demo}}/chains/person" data-verdict="unknown">
+            <a class="question reveal" href="{{demo}}/chains/person{{demoLang}}" data-verdict="unknown">
               <p class="q">{{q3}}</p>
               <p class="a">{{a3}}</p>
               <span class="q-foot"><span class="verdict"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.4" fill="none" stroke="var(--tone)" stroke-width="1.4" stroke-dasharray="2.2 1.6" /></svg><span>{{v3}}</span></span><span class="go">{{seeDemo}} →</span></span>
             </a>
-            <a class="question reveal" href="{{demo}}/pam/safes" data-src="pam">
+            <a class="question reveal" href="{{demo}}/pam/safes{{demoLang}}" data-src="pam">
               <p class="q">{{q4}}</p>
               <p class="a">{{a4}}</p>
               <span class="q-foot"><span class="seal" data-src="pam"><span class="seal-mono" aria-hidden="true">PA</span><span class="seal-text">{{v4}}</span></span><span class="go">{{seeDemo}} →</span></span>
@@ -220,9 +220,9 @@
           <p class="section-kicker">{{insideKicker}}</p>
           <h2 id="inside-title">{{insideTitle}}</h2>
           <div class="shots">
-            <figure class="shot is-feature reveal"><a href="{{demo}}/chains/person"><picture><source srcset="/shots/person.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/person.png?v={{shotVersion}}" alt="{{shotAlt2}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot2}}</figcaption></figure>
-            <figure class="shot reveal"><a href="{{demo}}/"><picture><source srcset="/shots/summary.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/summary.png?v={{shotVersion}}" alt="{{shotAlt1}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot1}}</figcaption></figure>
-            <figure class="shot reveal"><a href="{{demo}}/pam/safes"><picture><source srcset="/shots/tools.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/tools.png?v={{shotVersion}}" alt="{{shotAlt3}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot3}}</figcaption></figure>
+            <figure class="shot is-feature reveal"><a href="{{demo}}/chains/person{{demoLang}}"><picture><source srcset="/shots/{{lang}}/person.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/person.png?v={{shotVersion}}" alt="{{shotAlt2}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot2}}</figcaption></figure>
+            <figure class="shot reveal"><a href="{{demo}}/{{demoLang}}"><picture><source srcset="/shots/{{lang}}/summary.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/summary.png?v={{shotVersion}}" alt="{{shotAlt1}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot1}}</figcaption></figure>
+            <figure class="shot reveal"><a href="{{demo}}/pam/safes{{demoLang}}"><picture><source srcset="/shots/{{lang}}/tools.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/tools.png?v={{shotVersion}}" alt="{{shotAlt3}}" width="1440" height="900" loading="lazy" /></picture></a><figcaption>{{shot3}}</figcaption></figure>
           </div>
           <p class="hint">{{shotsNote}}</p>
         </section>
@@ -283,7 +283,7 @@
         </div>
         <div class="foot-links">
           <a href="https://octaviosantacruz.com">Octavio Santacruz</a>
-          <a href="{{demo}}/">{{footDemo}}</a>
+          <a href="{{demo}}/{{demoLang}}">{{footDemo}}</a>
           <small>{{footNote}}</small>
         </div>
       </footer>

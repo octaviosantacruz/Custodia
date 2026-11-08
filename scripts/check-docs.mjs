@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 // Documentation-only gate. Product checks belong to the packages added later.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const docs = (await readdir(join(root, 'docs'))).filter(name => name.endsWith('.md'));
-const files = ['README.md', 'AGENTS.md', ...docs.map(name => `docs/${name}`)];
+const files = ['README.md', 'README.es.md', 'AGENTS.md', ...docs.map(name => `docs/${name}`)];
 const sources = new Map(await Promise.all(files.map(async name => [name, await readFile(join(root, name), 'utf8')])));
 const failures = [];
 let links = 0;

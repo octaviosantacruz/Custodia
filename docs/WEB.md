@@ -40,6 +40,15 @@ usando sólo `mock-api.ts`.
 La demo entra con una sesión de lectura («Demo»). Una ruta que la API
 simulada no conoce responde «No disponible en la demo».
 
+## Idiomas
+
+La app está en español (fuente) e inglés con `web/src/cross/i18n/`: `t('texto
+en español')` busca la traducción en `en.ts` y, si falta, muestra el español.
+El idioma sale de `?lang=`, luego de lo guardado; la demo publicada sigue al
+navegador y la app con backend arranca en español. Cambiar de idioma recarga
+la página. El sitio enlaza la demo con `?lang=` de su idioma.
+`node scripts/i18n-report.mjs --missing` (en `web/`) lista lo pendiente.
+
 ## Datos
 
 Todo nombre de la demo y las pruebas es ficticio: `acme.example`, Globex,

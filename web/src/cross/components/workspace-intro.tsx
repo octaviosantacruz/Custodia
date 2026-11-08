@@ -4,6 +4,7 @@ import type { WorkspaceIntroHelp } from '../../source-contract';
 import './workspace-intro.css';
 import { syncStatusLabel } from '../lib/sync-source';
 import type { IngestionRun } from '../types/ingestion';
+import { t } from '../i18n/index.ts';
 
 type WorkspaceIntroProps = {
   title: string;
@@ -16,6 +17,6 @@ type WorkspaceIntroProps = {
 export function WorkspaceIntro({ title, description, help, latestRun, showRunSummary }: WorkspaceIntroProps) {
   return <section className="intro">
     <div><div className="workspace-intro-heading"><h1>{title}</h1>{help && <HelpHint label={help.label}>{help.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</HelpHint>}</div><p className="intro-copy">{description}</p></div>
-    {showRunSummary && <div className="run-summary">{latestRun ? <><strong>Última sincronización {syncStatusLabel(latestRun.status).toLocaleLowerCase('es')}</strong><span><DateTime value={latestRun.completed_at || latestRun.started_at} /></span></> : 'Sin sincronizaciones registradas'}</div>}
+    {showRunSummary && <div className="run-summary">{latestRun ? <><strong>{t('Última sincronización {status}', { status: syncStatusLabel(latestRun.status).toLocaleLowerCase() })}</strong><span><DateTime value={latestRun.completed_at || latestRun.started_at} /></span></> : t('Sin sincronizaciones registradas')}</div>}
   </section>;
 }

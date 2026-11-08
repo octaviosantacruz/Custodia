@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { AlertCircle, Check, X } from 'lucide-react';
 import { usePresence } from '../hooks/use-presence';
 import { presentNotice, syncToolForSource, syncToolMeta } from '../lib/sync-source';
+import { t } from '../i18n/index.ts';
 
 // Must match the duration of `toast-exit` in styles.css.
 export const TOAST_EXIT_MS = 260;
@@ -39,7 +40,7 @@ export function AppNotifications({ error, notice, noticeSource = null, onDismiss
 
   if (!shownError && !shownNotice) return null;
   return <div className="app-notifications" aria-live="polite">
-    {shownError && <div className={'alert error app-toast' + (errorPresence.leaving ? ' is-leaving' : '')} role="alert"><span className="app-toast-icon" aria-hidden="true"><AlertCircle size={17} /></span><div className="app-toast-body"><small>CUSTODIA · ATENCIÓN</small><strong>{shownError}</strong></div><button className="alert-dismiss" type="button" aria-label="Cerrar error" title="Cerrar" onClick={onDismissError} disabled={errorPresence.leaving}><X size={15} /></button></div>}
-    {shownNotice && <div key={shownNotice} className={'alert success app-toast app-toast-notice' + (noticePresence.leaving ? ' is-leaving' : '')} role="status"><NoticeIcon notice={shownNotice} source={noticeSource} /><NoticeCopy notice={shownNotice} source={noticeSource} /><button className="alert-dismiss" type="button" aria-label="Cerrar aviso" title="Cerrar" onClick={onDismissNotice} disabled={noticePresence.leaving}><X size={15} /></button></div>}
+    {shownError && <div className={'alert error app-toast' + (errorPresence.leaving ? ' is-leaving' : '')} role="alert"><span className="app-toast-icon" aria-hidden="true"><AlertCircle size={17} /></span><div className="app-toast-body"><small>{t('CUSTODIA · ATENCIÓN')}</small><strong>{shownError}</strong></div><button className="alert-dismiss" type="button" aria-label={t('Cerrar error')} title={t('Cerrar')} onClick={onDismissError} disabled={errorPresence.leaving}><X size={15} /></button></div>}
+    {shownNotice && <div key={shownNotice} className={'alert success app-toast app-toast-notice' + (noticePresence.leaving ? ' is-leaving' : '')} role="status"><NoticeIcon notice={shownNotice} source={noticeSource} /><NoticeCopy notice={shownNotice} source={noticeSource} /><button className="alert-dismiss" type="button" aria-label={t('Cerrar aviso')} title={t('Cerrar')} onClick={onDismissNotice} disabled={noticePresence.leaving}><X size={15} /></button></div>}
   </div>;
 }

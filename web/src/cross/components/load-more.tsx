@@ -1,5 +1,6 @@
 import { formatNumber } from '../lib/format';
 import './table-footer.css';
+import { t } from '../i18n/index.ts';
 
 type LoadMoreProps = {
   loaded: number;
@@ -33,9 +34,9 @@ export function LoadMore({ loaded, total, pageSize, loading, onLoadMore }: LoadM
   const percent = Math.min(100, Math.floor((shown / total) * 100));
   return <div className="load-more-footer table-footer" aria-live="polite">
     <div className="table-footer-info">
-      <span className="table-footer-summary">Mostrando {formatNumber(shown)} de {formatNumber(total)}</span>
+      <span className="table-footer-summary">{t('Mostrando {shown} de {total}', { shown: formatNumber(shown), total: formatNumber(total) })}</span>
       <span className="table-footer-progress" aria-hidden="true"><span style={{ width: `${percent}%` }} /></span>
-      <span className="table-footer-meta">{hasMore ? `Faltan ${formatNumber(remaining)}` : 'Todo cargado'}</span>
+      <span className="table-footer-meta">{hasMore ? t('Faltan {n}', { n: formatNumber(remaining) }) : t('Todo cargado')}</span>
     </div>
     {hasMore && <button className="button subtle" type="button" title={`Agregar las próximas ${formatNumber(nextBatch)} filas sin perder las actuales`} disabled={loading} onClick={onLoadMore}>
       {loading ? 'Cargando…' : `Cargar ${formatNumber(nextBatch)} más`}

@@ -14,6 +14,7 @@ import { netskopeSyncStatement } from '../lib/netskope-sync-evidence';
 import { useNetskopePanel, type NetskopePanelState } from '../hooks/use-netskope-panel';
 import type { NetskopeClientEvents, NetskopeDeviceReviewSummary, NetskopeReviewSuggestion, NetskopeDeviceChanges, NetskopeDeviceChangeKind, NetskopeDeviceFilterKey, NetskopeDeviceQuery } from '../types/netskope';
 import './netskope-operations.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 type PanelProps = {
   enabled: boolean;
@@ -32,7 +33,7 @@ function drillFilter(key: NetskopeDeviceFilterKey, value: string): NetskopeDevic
 
 function PanelState({ loading, error, errorInfo, onRetry, title }: { loading: boolean; error: string; errorInfo: ErrorDetails | null; onRetry: () => void; title: string }) {
   if (loading) return <StateBlock variant="loading" title={`Cargando ${title.toLowerCase()}…`} />;
-  return <StateBlock variant="error" title={`No se pudo cargar ${title.toLowerCase()}`} hint={error} action={<><button type="button" className="button subtle" onClick={onRetry}>Reintentar</button>{errorInfo ? <ErrorDetailsButton details={errorInfo} /> : null}</>} />;
+  return <StateBlock variant="error" title={`No se pudo cargar ${title.toLowerCase()}`} hint={error} action={<><button type="button" className="button subtle" onClick={onRetry}>{t('Reintentar')}</button>{errorInfo ? <ErrorDetailsButton details={errorInfo} /> : null}</>} />;
 }
 
 /** NSK-INV-002: why the devices without a signal for 30 days stopped reporting, as far as Netskope's own data says.
@@ -51,12 +52,12 @@ export function NetskopeDiagnosisPanel({ panel, onDrill }: { panel: NetskopePane
   const rows: Array<{ key: NetskopeReviewSuggestion | 'none'; count: number }> = suggestions && unexplained !== null ? [...suggestions, { key: 'none', count: unexplained }] : [];
   return <article className="netskope-ops-panel" aria-labelledby="netskope-diagnosis-title">
     <header className="netskope-ops-heading">
-      <div className="netskope-ops-title"><h3 id="netskope-diagnosis-title"><BadgeCheck size={15} aria-hidden="true" /> {title}</h3><HelpHint label="Equipos sin señal"><p>Equipos activos cuyo último evento tiene más de 30 días, agrupados por lo que explica Netskope. Saber si un equipo se sigue usando necesita una fuente corporativa (JumpCloud o Cortex), todavía no integrada.</p></HelpHint></div>
+      <div className="netskope-ops-title"><h3 id="netskope-diagnosis-title"><BadgeCheck size={15} aria-hidden="true" /> {title}</h3><HelpHint label={t('Equipos sin señal')}><p>Equipos activos cuyo último evento tiene más de 30 días, agrupados por lo que explica Netskope. Saber si un equipo se sigue usando necesita una fuente corporativa (JumpCloud o Cortex), todavía no integrada.</p></HelpHint></div>
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} /> : <>
       <p className="database-caption" role="status">{formatNumber(data.candidates)} equipos sin señal hace más de 30 días · {sync.text}</p>
       {!rows.length
-        ? <div className="netskope-review-callout is-unavailable" role="status"><strong>Agrupación no disponible: sin sync vigente</strong><span>Se calcula sólo con un sync completo de las últimas 24 h.</span></div>
+        ? <div className="netskope-review-callout is-unavailable" role="status"><strong>{t('Agrupación no disponible: sin sync vigente')}</strong><span>{t('Se calcula sólo con un sync completo de las últimas 24 h.')}</span></div>
         : <ul className="netskope-event-list">
           {rows.map((item) => <li key={item.key}>
             <button type="button" className="netskope-event-row is-pair" disabled={!item.count} onClick={() => onDrill({ ...base, reviewSuggestion: item.key })} aria-label={`${STALE_EXPLANATION_LABELS[item.key]}: ${formatNumber(item.count)} equipos. Ver en la tabla`}>
@@ -64,7 +65,7 @@ export function NetskopeDiagnosisPanel({ panel, onDrill }: { panel: NetskopePane
             </button>
           </li>)}
         </ul>}
-      {decided > 0 ? <p className="database-caption">{formatNumber(decided)} {decided === 1 ? 'equipo tiene' : 'equipos tienen'} una decisión guardada antes y no se agrupan.</p> : null}
+      {decided > 0 ? <p className="database-caption">{formatNumber(decided)} {decided === 1 ? t('equipo tiene') : t('equipos tienen')} una decisión guardada antes y no se agrupan.</p> : null}
       <MetricReading title={title} meaning="Por qué dejaron de reportar los equipos con más de 30 días sin señal, según los datos de Netskope" population={`${formatNumber(data.candidates)} dispositivos activos con último evento de más de 30 días`} capture={sync.text} formula="Cada equipo cae en un solo grupo: desinstalación informada, reemplazo (mismo hostname y usuario en un registro de los últimos 7 días), registro histórico (más de 180 días) o sin explicación." source="Inventario de dispositivos Netskope sincronizado en Custodia." limits="Ningún grupo prueba que el equipo se siga usando ni que se haya dado de baja; eso necesita una fuente corporativa." unknowns="Sin fecha de evento válida: el equipo no entra en esta población." />
     </>}
   </article>;
@@ -91,14 +92,14 @@ export function NetskopeClientEventsPanel({ panel, onDrill }: { panel: NetskopeP
   const visibleEvents = otherEvents.slice(0, VISIBLE_EVENTS);
   return <article className="netskope-ops-panel" aria-labelledby="netskope-events-title">
     <header className="netskope-ops-heading">
-      <div className="netskope-ops-title"><h3 id="netskope-events-title"><Activity size={15} aria-hidden="true" /> {title}</h3><HelpHint label="Último evento del cliente"><p>Es el último evento reportado por el cliente: evidencia histórica, no una sesión en vivo ni el estado actual del equipo.</p></HelpHint></div>
+      <div className="netskope-ops-title"><h3 id="netskope-events-title"><Activity size={15} aria-hidden="true" /> {title}</h3><HelpHint label={t('Último evento del cliente')}><p>{t('Es el último evento reportado por el cliente: evidencia histórica, no una sesión en vivo ni el estado actual del equipo.')}</p></HelpHint></div>
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} /> : <>
       <section className="netskope-event-signal-block" aria-labelledby="netskope-risk-title">
-        <div className="section-title"><h4 id="netskope-risk-title">Último evento: desinstalación o deshabilitación · {formatNumber(data.coverage_risk_total)}</h4><HelpHint label="Último evento"><p>Señal histórica del último evento informado por Netskope; no confirma pérdida actual de cobertura.</p></HelpHint></div>
+        <div className="section-title"><h4 id="netskope-risk-title">Último evento: desinstalación o deshabilitación · {formatNumber(data.coverage_risk_total)}</h4><HelpHint label={t('Último evento')}><p>Señal histórica del último evento informado por Netskope; no confirma pérdida actual de cobertura.</p></HelpHint></div>
         {riskEvents.length
           ? <ul className="netskope-event-list">{riskEvents.map((event) => <li key={event.key}><button type="button" className="netskope-event-row is-pair" onClick={() => drill(event.key)}><NetskopeEventName literal={event.key} /><strong>{formatNumber(event.count)}</strong></button></li>)}</ul>
-          : <p className="database-caption">No hay valores de desinstalación o deshabilitación entre los eventos informados.</p>}
+          : <p className="database-caption">{t('No hay valores de desinstalación o deshabilitación entre los eventos informados.')}</p>}
       </section>
       <ul className="netskope-event-list">
         {visibleEvents.map((event) => <li key={event.key}>
@@ -115,13 +116,13 @@ export function NetskopeClientEventsPanel({ panel, onDrill }: { panel: NetskopeP
 }
 
 const CHANGE_ROWS: Array<{ kind: NetskopeDeviceChangeKind; label: string }> = [
-  { kind: 'added', label: 'Dispositivos nuevos' },
-  { kind: 'removed', label: 'Dejaron de reportarse (retirados)' },
-  { kind: 'upgraded', label: 'Actualizaron el cliente' },
-  { kind: 'downgraded', label: 'Bajaron de versión del cliente' },
-  { kind: 'version_changed', label: 'Versión cambiada no comparable' },
-  { kind: 'os_changed', label: 'Cambiaron de sistema operativo' },
-  { kind: 'classification_changed', label: 'Cambiaron de clasificación' },
+  { kind: 'added', label: t('Dispositivos nuevos') },
+  { kind: 'removed', label: t('Dejaron de reportarse (retirados)') },
+  { kind: 'upgraded', label: t('Actualizaron el cliente') },
+  { kind: 'downgraded', label: t('Bajaron de versión del cliente') },
+  { kind: 'version_changed', label: t('Versión cambiada no comparable') },
+  { kind: 'os_changed', label: t('Cambiaron de sistema operativo') },
+  { kind: 'classification_changed', label: t('Cambiaron de clasificación') },
 ];
 
 /* NSK-CHG-001. Diff between the two latest *completed* Netskope runs; the
@@ -132,16 +133,16 @@ export function NetskopeChangesPanel({ panel, onDrill }: { panel: NetskopePanelS
   const title = 'Qué cambió desde la última sync';
   return <article className="netskope-ops-panel" aria-labelledby="netskope-changes-title">
     <header className="netskope-ops-heading">
-      <div><h3 id="netskope-changes-title"><GitCompareArrows size={15} aria-hidden="true" /> {title}</h3><p>{data?.available && data.previous_run && data.latest_run ? <>Corrida anterior: <DateTime value={data.previous_run.captured_at} /> · última: <DateTime value={data.latest_run.captured_at} /></> : 'Compara las dos últimas corridas Netskope completas.'}</p></div>
+      <div><h3 id="netskope-changes-title"><GitCompareArrows size={15} aria-hidden="true" /> {title}</h3><p>{data?.available && data.previous_run && data.latest_run ? <>{t('Corrida anterior:')} <DateTime value={data.previous_run.captured_at} /> {t('· última:')} <DateTime value={data.latest_run.captured_at} /></> : 'Compara las dos últimas corridas Netskope completas.'}</p></div>
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} />
-      : !data.available ? <StateBlock variant="empty" title="Todavía no hay dos corridas para comparar" hint={`El historial por corrida empezó con la migración 058; hay ${data.completed_runs} ${data.completed_runs === 1 ? 'corrida completa' : 'corridas completas'} con historial. La comparación aparece después de la próxima sincronización completa.`} />
+      : !data.available ? <StateBlock variant="empty" title={t('Todavía no hay dos corridas para comparar')} hint={`El historial por corrida empezó con la migración 058; hay ${data.completed_runs} ${data.completed_runs === 1 ? t('corrida completa') : t('corridas completas')} con historial. La comparación aparece después de la próxima sincronización completa.`} />
       : <ul className="netskope-event-list">{CHANGE_ROWS.map(({ kind, label }) => {
         const count = data.counts[kind];
         if (kind === 'removed') return <li key={kind}>
           <details className="netskope-change-details">
             <summary className="netskope-event-row is-pair"><span>{label}</span><strong>{formatNumber(count)}</strong></summary>
-            {data.samples.removed.length ? <ul className="netskope-change-samples">{data.samples.removed.map((sample) => <li key={sample.device_id}>{sample.hostname || sample.device_id}{sample.before_value ? ` · ${sample.before_value}` : ''}</li>)}</ul> : <p className="database-caption">Ninguno.</p>}
+            {data.samples.removed.length ? <ul className="netskope-change-samples">{data.samples.removed.map((sample) => <li key={sample.device_id}>{sample.hostname || sample.device_id}{sample.before_value ? ` · ${sample.before_value}` : ''}</li>)}</ul> : <p className="database-caption">{t('Ninguno.')}</p>}
             {count > data.samples.removed.length ? <p className="database-caption">Mostrando {data.samples.removed.length} de {formatNumber(count)}.</p> : null}
           </details>
         </li>;
@@ -165,7 +166,7 @@ export function NetskopeDuplicatesPanel({ enabled, refreshKey, onUnauthorized, o
     return <section aria-labelledby={`netskope-dup-${kind}`}>
       <h4 id={`netskope-dup-${kind}`}>{heading}</h4>
       <button type="button" className="netskope-event-row is-pair" disabled={!group.groups} onClick={() => onDrill({ ...EMPTY_NETSKOPE_DEVICE_QUERY, duplicate: kind })}>
-        <span>{formatNumber(group.groups)} {kind === 'hostname' ? 'hostnames' : 'usuarios'} · {formatNumber(group.devices)} dispositivos</span><strong>Ver</strong>
+        <span>{formatNumber(group.groups)} {kind === 'hostname' ? 'hostnames' : 'usuarios'} · {formatNumber(group.devices)} dispositivos</span><strong>{t('Ver')}</strong>
       </button>
       <ul className="netskope-event-list">{visibleGroups.map((item) => <li key={item.key}>
         <button type="button" className="netskope-event-row is-pair" onClick={() => onDrill(drillFilter(kind, item.key))} title={`${item.distinct_other} ${otherLabel} distintos`}>
@@ -177,7 +178,7 @@ export function NetskopeDuplicatesPanel({ enabled, refreshKey, onUnauthorized, o
   };
   return <article className="netskope-ops-panel" aria-labelledby="netskope-duplicates-title">
     <header className="netskope-ops-heading">
-      <div className="netskope-ops-title"><h3 id="netskope-duplicates-title"><Copy size={15} aria-hidden="true" /> {title}</h3><HelpHint label="Posibles duplicados — revisar"><p>Hipótesis de revisión: una coincidencia exacta suele corresponder a reimagen, reasignación o cuenta compartida. No se fusiona ni se retira nada desde acá.</p></HelpHint></div>
+      <div className="netskope-ops-title"><h3 id="netskope-duplicates-title"><Copy size={15} aria-hidden="true" /> {title}</h3><HelpHint label={t('Posibles duplicados — revisar')}><p>{t('Hipótesis de revisión: una coincidencia exacta suele corresponder a reimagen, reasignación o cuenta compartida. No se fusiona ni se retira nada desde acá.')}</p></HelpHint></div>
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} /> : <div className="netskope-duplicates-grid">
       {section('hostname', 'Mismo hostname, varios device_id', 'usuarios')}

@@ -14,10 +14,11 @@ import { NetskopeOfficeAverages } from './netskope-office-averages';
 import { NetskopeOfficeTrend } from './netskope-office-trend';
 import './netskope-attention-queue.css';
 import './netskope-office-experience.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 const BAND_LABELS: Record<NetskopePerformanceBand, string> = { poor: 'Malo', fair: 'Regular', good: 'Bglobex' };
 const BAND_TONES = { poor: 'danger', fair: 'warning', good: 'success' } as const;
-const score = (value: number | null) => value === null ? <span className="nsk-attention-empty">Sin dato</span> : formatNumber(Math.round(value));
+const score = (value: number | null) => value === null ? <span className="nsk-attention-empty">{t('Sin dato')}</span> : formatNumber(Math.round(value));
 
 type Scope = 'flagged' | 'all';
 type Chart = 'flagged' | 'average';
@@ -54,7 +55,7 @@ function MeasurementStatus({ configured, measurement, daysMeasured }: { configur
   return <div className="nsk-office-status" role="status">
     <StatusBadge tone={tone}>{label}</StatusBadge>
     <span><strong>{daysMeasured} de 7 días medidos.</strong> {text}</span>
-    {since ? <small>{isMeasuring(measurement?.status) ? 'Desde' : 'Última corrida'}: <DateTime value={since} /></small> : null}
+    {since ? <small>{isMeasuring(measurement?.status) ? t('Desde') : t('Última corrida')}: <DateTime value={since} /></small> : null}
   </div>;
 }
 
@@ -78,17 +79,17 @@ export function NetskopeOfficeExperience({ enabled, refreshKey, onUnauthorized, 
     if (query.error instanceof ApiError && query.error.status === 401) onUnauthorized();
   }, [query.error, onUnauthorized]);
 
-  if (query.isPending) return <StateBlock variant="loading" title="Leyendo el rendimiento en la oficina…" />;
+  if (query.isPending) return <StateBlock variant="loading" title={t('Leyendo el rendimiento en la oficina…')} />;
   const data = query.data;
   // A malformed answer is an error inside this view, never a crash of the workspace.
   if (query.isError || !data || !Array.isArray(data.series) || !Array.isArray(data.people) || !data.summary) {
-    return <StateBlock variant="error" title="No se pudo leer el rendimiento en la oficina" action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>Reintentar lectura</button>} />;
+    return <StateBlock variant="error" title={t('No se pudo leer el rendimiento en la oficina')} action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>{t('Reintentar lectura')}</button>} />;
   }
   const everMeasured = data.series.some((week) => week.days_measured > 0) || data.summary.days_measured > 0;
   // Before the first measured day: only where the measurement stands.
   if (!everMeasured) {
-    return <section className="list-panel database-surface nsk-office" aria-label="Rendimiento en la oficina">
-      <div className="nsk-attention-head"><h2>Rendimiento en la oficina</h2></div>
+    return <section className="list-panel database-surface nsk-office" aria-label={t('Rendimiento en la oficina')}>
+      <div className="nsk-attention-head"><h2>{t('Rendimiento en la oficina')}</h2></div>
       <MeasurementStatus configured={data.configured} measurement={data.measurement ?? null} daysMeasured={0} />
     </section>;
   }
@@ -100,17 +101,17 @@ export function NetskopeOfficeExperience({ enabled, refreshKey, onUnauthorized, 
   const people = effectiveScope === 'flagged' ? data.people.filter(isFlagged) : data.people;
   const series = measuredSpan(data.series);
   const withoutScore = summary.office_people - summary.measured;
-  return <section className="list-panel database-surface nsk-office" aria-label="Rendimiento en la oficina">
+  return <section className="list-panel database-surface nsk-office" aria-label={t('Rendimiento en la oficina')}>
     <div className="nsk-attention-head">
-      <h2>Rendimiento en la oficina</h2>
-      <HelpHint label="Rendimiento en la oficina">
+      <h2>{t('Rendimiento en la oficina')}</h2>
+      <HelpHint label={t('Rendimiento en la oficina')}>
         <p>Puntaje de rendimiento digital (ADEM) medido solo en los horarios en que el equipo de cada persona estuvo en la oficina, según la detección on-premises de Netskope. Se promedia por minutos y no se mezcla con los días remotos. Se compara con el puntaje de sus horarios remotos: «Peor en oficina» marca {data.office_gap} puntos o más por debajo.</p>
         <p>{PERFORMANCE_EXPLANATION} {PERFORMANCE_SCALE} Bandas de Netskope: malo 0–30, regular 31–70, bglobex 71–100.</p>
         <p>Se miden días completos (UTC), hasta ayer. Una persona sin puntaje en la oficina figura «Sin dato», nunca como buena. Una semana sin días medidos no es cero.</p>
       </HelpHint>
       <small className="nsk-office-freshness">{summary.days_measured} de 7 días medidos{data.last_measured_at ? <> · <DateTime value={data.last_measured_at} /></> : null}</small>
     </div>
-    <div className="nsk-office-headline" role="group" aria-label="Resumen de los últimos 7 días">
+    <div className="nsk-office-headline" role="group" aria-label={t('Resumen de los últimos 7 días')}>
       <p><strong>{formatNumber(flaggedCount)}</strong> de {formatNumber(summary.measured)} personas medidas en la oficina tuvieron rendimiento malo o regular <small>· {dayLabel(data.window_start)} al {dayLabel(data.window_end)}</small></p>
       <p className="nsk-office-facts">
         <span><i className="nsk-office-dot is-poor" aria-hidden />Malo {formatNumber(summary.poor)}</span>
@@ -123,39 +124,39 @@ export function NetskopeOfficeExperience({ enabled, refreshKey, onUnauthorized, 
     </div>
     {summary.days_measured < 7 || isMeasuring(data.measurement?.status) || data.measurement?.status === 'failed'
       ? <MeasurementStatus configured={data.configured} measurement={data.measurement ?? null} daysMeasured={summary.days_measured} /> : null}
-    <section className="nsk-office-block" aria-label="Evolución por semana">
+    <section className="nsk-office-block" aria-label={t('Evolución por semana')}>
       <div className="nsk-office-block-head">
-        <h3 className="nsk-office-subtitle">Evolución por semana</h3>
-        <OfficeSwitch label="Métrica de la evolución" value={chart} onChange={setChart} options={[['flagged', 'Malo o regular'], ['average', 'Promedio']]} />
+        <h3 className="nsk-office-subtitle">{t('Evolución por semana')}</h3>
+        <OfficeSwitch label={t('Métrica de la evolución')} value={chart} onChange={setChart} options={[['flagged', 'Malo o regular'], ['average', 'Promedio']]} />
       </div>
       {series.filter((week) => week.days_measured > 0).length < 2
         ? <p className="nsk-attention-explanation">La evolución aparece cuando haya dos semanas medidas. Por ahora: {series.map((week) => `${weekRange(week.week_start)}, ${week.days_measured} de 7 días`).join('; ')}.</p>
         : chart === 'flagged'
-          ? <section aria-label="Personas con rendimiento malo o regular por semana"><NetskopeOfficeTrend series={series} /></section>
-          : <section aria-label="Puntaje promedio por semana"><NetskopeOfficeAverages series={series} /></section>}
+          ? <section aria-label={t('Personas con rendimiento malo o regular por semana')}><NetskopeOfficeTrend series={series} /></section>
+          : <section aria-label={t('Puntaje promedio por semana')}><NetskopeOfficeAverages series={series} /></section>}
     </section>
-    <section className="nsk-office-block" aria-label="Detalle">
+    <section className="nsk-office-block" aria-label={t('Detalle')}>
       <div className="nsk-office-block-head">
-        <OfficeSwitch label="Detalle" value={detail} onChange={(value) => { setDetail(value); setShown(PAGE); }} options={[['people', 'Personas'], ['weekdays', 'Por día'], ['companies', 'Por empresa']]} />
-        {detail === 'people' ? <OfficeSwitch label="Alcance" value={effectiveScope} onChange={(value) => { setScope(value); setShown(PAGE); }}
+        <OfficeSwitch label={t('Detalle')} value={detail} onChange={(value) => { setDetail(value); setShown(PAGE); }} options={[['people', 'Personas'], ['weekdays', 'Por día'], ['companies', 'Por empresa']]} />
+        {detail === 'people' ? <OfficeSwitch label={t('Alcance')} value={effectiveScope} onChange={(value) => { setScope(value); setShown(PAGE); }}
           options={[['flagged', `Malo, regular o peor en oficina · ${formatNumber(flaggedPeople)}`], ['all', `Todas en oficina · ${formatNumber(data.people_total)}`]]} /> : null}
       </div>
-      {detail === 'weekdays' ? <section aria-label="Por día de la semana">
+      {detail === 'weekdays' ? <section aria-label={t('Por día de la semana')}>
         <div className="compact-table-wrap"><table className="compact-table">
-          <caption className="sr-only">Por día de la semana, en los días medidos de las semanas del gráfico</caption>
-          <thead><tr><th scope="col">Día</th><th scope="col">Personas en oficina por día</th><th scope="col">Puntaje en oficina</th><th scope="col">Días-persona malos o regulares</th></tr></thead>
+          <caption className="sr-only">{t('Por día de la semana, en los días medidos de las semanas del gráfico')}</caption>
+          <thead><tr><th scope="col">{t('Día')}</th><th scope="col">{t('Personas en oficina por día')}</th><th scope="col">{t('Puntaje en oficina')}</th><th scope="col">{t('Días-persona malos o regulares')}</th></tr></thead>
           <tbody>{(data.weekdays ?? []).map((day) => <tr key={day.weekday}>
             <th scope="row">{day.name}</th>
-            {day.days_measured === 0 ? <td colSpan={3} className="nsk-attention-empty">Sin medición</td> : <>
+            {day.days_measured === 0 ? <td colSpan={3} className="nsk-attention-empty">{t('Sin medición')}</td> : <>
               <td>{formatNumber(day.office_people_per_day ?? 0)}</td><td>{score(day.office_avg)}</td><td>{formatNumber(day.flagged_person_days ?? 0)}</td>
             </>}
           </tr>)}</tbody>
         </table></div>
       </section>
-        : detail === 'companies' ? <section aria-label="Por empresa">
+        : detail === 'companies' ? <section aria-label={t('Por empresa')}>
           <div className="compact-table-wrap"><table className="compact-table">
-            <caption className="sr-only">Por empresa, últimos 7 días</caption>
-            <thead><tr><th scope="col">Empresa</th><th scope="col">En oficina</th><th scope="col">Malo o regular</th><th scope="col">Peor en oficina</th><th scope="col">Promedio</th></tr></thead>
+            <caption className="sr-only">{t('Por empresa, últimos 7 días')}</caption>
+            <thead><tr><th scope="col">{t('Empresa')}</th><th scope="col">{t('En oficina')}</th><th scope="col">{t('Malo o regular')}</th><th scope="col">{t('Peor en oficina')}</th><th scope="col">{t('Promedio')}</th></tr></thead>
             <tbody>{(data.companies?.rows ?? []).map((company) => <tr key={company.company}>
               <th scope="row">{company.company}</th>
               <td>{formatNumber(company.office_people)}</td><td>{formatNumber(company.flagged)} de {formatNumber(company.measured)}</td>
@@ -164,11 +165,11 @@ export function NetskopeOfficeExperience({ enabled, refreshKey, onUnauthorized, 
           </table></div>
           {data.companies && data.companies.omitted_people > 0 ? <p className="nsk-attention-explanation">Otras empresas: {formatNumber(data.companies.omitted_people)} personas.</p> : null}
         </section>
-        : !people.length ? <StateBlock compact variant="empty" title={effectiveScope === 'flagged' ? 'Nadie tuvo rendimiento malo, regular o peor en la oficina' : 'Nadie fue a la oficina en los días medidos'} />
+        : !people.length ? <StateBlock compact variant="empty" title={effectiveScope === 'flagged' ? t('Nadie tuvo rendimiento malo, regular o peor en la oficina') : t('Nadie fue a la oficina en los días medidos')} />
         : <>
           <div className="compact-table-wrap"><table className="compact-table nsk-office-table">
-            <caption className="sr-only">Personas que fueron a la oficina, peor rendimiento primero</caption>
-            <thead><tr><th scope="col">Usuario</th><th scope="col">Días en oficina</th><th scope="col">En la oficina</th><th scope="col">En remoto</th><th scope="col">Diferencia</th></tr></thead>
+            <caption className="sr-only">{t('Personas que fueron a la oficina, peor rendimiento primero')}</caption>
+            <thead><tr><th scope="col">{t('Usuario')}</th><th scope="col">{t('Días en oficina')}</th><th scope="col">{t('En la oficina')}</th><th scope="col">{t('En remoto')}</th><th scope="col">{t('Diferencia')}</th></tr></thead>
             <tbody>{people.slice(0, shown).map((person) => {
               const gap = person.office_score !== null && person.remote_score !== null ? Math.round(person.office_score - person.remote_score) : null;
               return <tr key={person.email}>
@@ -178,7 +179,7 @@ export function NetskopeOfficeExperience({ enabled, refreshKey, onUnauthorized, 
                 <td>{person.office_days} de 7</td>
                 <td><span className="nsk-attention-uci">{person.office_band ? <StatusBadge tone={BAND_TONES[person.office_band]}>{BAND_LABELS[person.office_band]}</StatusBadge> : null}{score(person.office_score)}</span></td>
                 <td>{score(person.remote_score)}</td>
-                <td>{gap === null ? <span className="nsk-attention-empty">Sin dato</span> : person.worse_in_office ? <StatusBadge tone="warning">{`Peor en oficina ${gap}`}</StatusBadge> : `${gap > 0 ? '+' : ''}${gap}`}</td>
+                <td>{gap === null ? <span className="nsk-attention-empty">{t('Sin dato')}</span> : person.worse_in_office ? <StatusBadge tone="warning">{`Peor en oficina ${gap}`}</StatusBadge> : `${gap > 0 ? '+' : ''}${gap}`}</td>
               </tr>;
             })}</tbody>
           </table></div>

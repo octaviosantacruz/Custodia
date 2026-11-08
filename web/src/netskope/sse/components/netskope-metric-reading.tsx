@@ -6,6 +6,7 @@ import { CircleHelp } from 'lucide-react';
 import { MetricReading } from '../../../cross/components/metric-reading';
 import { netskopeSyncStatement } from '../lib/netskope-sync-evidence';
 import { usePopover } from '../../../cross/hooks/use-popover';
+import { t } from '../../../cross/i18n/index.ts';
 
 // Bounded pilot: only inventory metrics with existing counts and
 // semantics. Alert aggregates and cross-user metrics keep their own contracts.
@@ -33,8 +34,8 @@ const WINDOW_LIMIT = 'La ventana se mide contra la hora de la consulta y los dat
 
 function repeatedExplanation(gap: number, repeated: number | null | undefined): string {
   if (typeof repeated !== 'number') return 'La última sincronización no guardó cuántas filas llegaron repetidas, así que la diferencia no se puede conciliar con exactitud.';
-  if (repeated === gap) return `En la última sincronización la API devolvió ${formatNumber(repeated)} ${repeated === 1 ? 'fila repetida' : 'filas repetidas'}: explican exactamente la diferencia.`;
-  return `En la última sincronización la API devolvió ${formatNumber(repeated)} ${repeated === 1 ? 'fila repetida' : 'filas repetidas'}, que no explican por completo la diferencia de ${formatNumber(Math.abs(gap))}: queda ${formatNumber(Math.abs(gap - repeated))} sin explicar y conviene revisar el sync.`;
+  if (repeated === gap) return `En la última sincronización la API devolvió ${formatNumber(repeated)} ${repeated === 1 ? t('fila repetida') : t('filas repetidas')}: explican exactamente la diferencia.`;
+  return `En la última sincronización la API devolvió ${formatNumber(repeated)} ${repeated === 1 ? t('fila repetida') : t('filas repetidas')}, que no explican por completo la diferencia de ${formatNumber(Math.abs(gap))}: queda ${formatNumber(Math.abs(gap - repeated))} sin explicar y conviene revisar el sync.`;
 }
 
 function usersReferenceLimit(metrics: NetskopeMetrics | null): string {
@@ -54,19 +55,19 @@ export function NetskopeMetricReading({ instance, metrics, activityDays = 7, exp
   const users = instance.id.startsWith('users_');
   const stale = instance.id === 'devices_stale_30d';
   const population = users ? metrics?.users_total : stale ? metrics?.devices_stale_30d : metrics?.devices_total;
-  const filters = Object.entries(instance.filters ?? {}).filter(([, value]) => value).map(([key, value]) => `${key === 'os' ? 'SO' : key === 'company' ? 'Empresa' : 'Clasificación'}: ${value}`).join(' · ');
+  const filters = Object.entries(instance.filters ?? {}).filter(([, value]) => value).map(([key, value]) => `${key === 'os' ? 'SO' : key === 'company' ? t('Empresa') : t('Clasificación')}: ${value}`).join(' · ');
   const buckets = metrics?.[instance.id as 'devices_by_os'];
   const unknownBucket = Array.isArray(buckets) ? buckets.find((bucket) => bucket.key === 'Sin dato') : undefined;
   const unknown = unknownBucket?.count;
   const noPopulation = population === 0;
   const activityMissing = instance.id === 'users_recent_activity' && typeof metrics?.[`users_with_device_activity_${activityDays}d`] !== 'number';
-  const period = users ? instance.id === 'users_recent_activity' ? `Últimos ${activityDays} días` : 'Inventario vigente' : stale ? 'Inventario observado · último evento de más de 30 días' : 'Últimos 7 días';
+  const period = users ? instance.id === 'users_recent_activity' ? `Últimos ${activityDays} días` : 'Inventario vigente' : stale ? t('Inventario observado · último evento de más de 30 días') : t('Últimos 7 días');
   return <MetricReading expanded={expanded} title={definition.title} meaning={definition.description}
-    population={`${stale ? 'Dispositivos activos de todo el inventario' : `${typeof population === 'number' ? formatNumber(population) : 'Cantidad no informada'} ${users ? 'identidades en inventario' : 'dispositivos con evento en 7 días'}`}${filters ? ` · ${filters}` : ''}`}
-    capture={<>{period} · {metrics?.last_observed_at ? <>último inventario observado <DateTime value={metrics.last_observed_at} /></> : 'Fecha de observación no informada'}</>}
+    population={`${stale ? 'Dispositivos activos de todo el inventario' : `${typeof population === 'number' ? formatNumber(population) : 'Cantidad no informada'} ${users ? t('identidades en inventario') : t('dispositivos con evento en 7 días')}`}${filters ? ` · ${filters}` : ''}`}
+    capture={<>{period} · {metrics?.last_observed_at ? <>{t('último inventario observado')} <DateTime value={metrics.last_observed_at} /></> : 'Fecha de observación no informada'}</>}
     formula={formula} source="Inventario Netskope sincronizado en Custodia; filtros del widget aplicados en su consulta."
-    limits={`${instance.id === 'users_total' ? usersReferenceLimit(metrics) : ''}${instance.id === 'devices_total' ? CONSOLE_DEVICES_GAP : ''}${instance.id === 'users_recent_activity' ? CONSOLE_USERS_GAP : ''}${instance.id === 'devices_total' ? 'Un latido de DEM prueba que el cliente reportó, no que alguien use el equipo; un evento de desinstalación o de falla también cuenta como señal reciente. ' : ''}${users ? '' : WINDOW_LIMIT}No prueba login, conexión en vivo, uso humano, propiedad del equipo ni cobertura DLP. La fecha de observación del inventario no es la fecha del último evento del cliente.${stale ? ` ${netskopeSyncStatement(metrics?.source_evidence).text}: la cifra cuenta lo observado en el último inventario; «candidato a revisión» sólo se evalúa con un sync completo vigente.` : ''}`}
-    unknowns={`${stale ? 'Equipos con fecha de último evento ausente, no numérica, no positiva o futura quedan fuera de este conteo. ' : ''}${noPopulation ? stale ? '0 equipos cumplen el corte de más de 30 días. ' : 'Sin población: porcentaje no calculable. ' : ''}${activityMissing || typeof population !== 'number' ? 'No calculable con la información disponible. ' : ''}${typeof unknown === 'number' ? `Sin dato en el gráfico: ${formatNumber(unknown)}.` : 'Desconocidos: conteo no informado; no se asume cero.'}`} />;
+    limits={`${instance.id === 'users_total' ? usersReferenceLimit(metrics) : ''}${instance.id === 'devices_total' ? CONSOLE_DEVICES_GAP : ''}${instance.id === 'users_recent_activity' ? CONSOLE_USERS_GAP : ''}${instance.id === 'devices_total' ? t('Un latido de DEM prueba que el cliente reportó, no que alguien use el equipo; un evento de desinstalación o de falla también cuenta como señal reciente. ') : ''}${users ? '' : WINDOW_LIMIT}No prueba login, conexión en vivo, uso humano, propiedad del equipo ni cobertura DLP. La fecha de observación del inventario no es la fecha del último evento del cliente.${stale ? ` ${netskopeSyncStatement(metrics?.source_evidence).text}: la cifra cuenta lo observado en el último inventario; «candidato a revisión» sólo se evalúa con un sync completo vigente.` : ''}`}
+    unknowns={`${stale ? t('Equipos con fecha de último evento ausente, no numérica, no positiva o futura quedan fuera de este conteo. ') : ''}${noPopulation ? stale ? t('0 equipos cumplen el corte de más de 30 días. ') : t('Sin población: porcentaje no calculable. ') : ''}${activityMissing || typeof population !== 'number' ? t('No calculable con la información disponible. ') : ''}${typeof unknown === 'number' ? `Sin dato en el gráfico: ${formatNumber(unknown)}.` : 'Desconocidos: conteo no informado; no se asume cero.'}`} />;
 }
 
 export const hasNetskopeMetricReading = (id: NetskopeWidgetInstance['id']) => Boolean(FORMULAS[id]);
@@ -81,9 +82,9 @@ export function NetskopeDataHelp({ instance }: { instance: NetskopeWidgetInstanc
   return <div ref={ref}>
     <button type="button" className={`dashboard-data-help ${open ? 'active' : ''}`.trim()} aria-label={`Qué mide: ${definition.title}`} aria-controls={tooltipId} aria-expanded={open} title={`Qué mide ${definition.title}`} onClick={() => setOpen((current) => !current)}><CircleHelp size={15} aria-hidden /></button>
     {open ? <section className="dashboard-data-tooltip netskope-data-tooltip" id={tooltipId} role="note">
-      <strong>Qué mide</strong>
+      <strong>{t('Qué mide')}</strong>
       <p>{definition.description}</p>
-      <a href="/help?section=netskope">Más detalles en Ayuda <span aria-hidden="true">→</span></a>
+      <a href="/help?section=netskope">{t('Más detalles en Ayuda')} <span aria-hidden="true">→</span></a>
     </section> : null}
   </div>;
 }

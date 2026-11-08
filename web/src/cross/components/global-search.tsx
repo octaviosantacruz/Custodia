@@ -13,6 +13,7 @@ import {
 import { WORKSPACE_ICONS } from '../lib/workspace-meta';
 import { canonicalWorkspaceList, type WorkspaceView } from '../lib/workspaces';
 import type { WorkspacePreferences } from '../lib/workspace-preferences-api';
+import { t } from '../i18n/index.ts';
 
 const KIND_LABELS: Record<CommandKind, string> = {
   view: 'Vista',
@@ -31,10 +32,10 @@ const PLATFORM_LABELS: Record<CommandPlatform, string> = {
 };
 
 const PLATFORM_FILTERS: ReadonlyArray<{ value: CommandPlatformFilter; label: string }> = [
-  { value: 'all', label: 'Todos' },
-  { value: 'cyberark', label: 'CyberArk' },
-  { value: 'netskope', label: 'Netskope' },
-  { value: 'dshub', label: 'Custodia' },
+  { value: 'all', label: t('Todos') },
+  { value: 'cyberark', label: t('CyberArk') },
+  { value: 'netskope', label: t('Netskope') },
+  { value: 'dshub', label: t('Custodia') },
 ];
 
 type GlobalSearchProps = {
@@ -269,16 +270,16 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
       onClick={() => setOpen(true)}
       onMouseEnter={() => void ensureWidgetSources().catch(() => {})}
       onFocus={() => void ensureWidgetSources().catch(() => {})}
-      aria-label="Abrir command center"
+      aria-label={t('Abrir command center')}
       title={`Buscar inventario, herramientas y acciones (${shortcutLabel})`}
     >
       <Search size={16} aria-hidden />
-      <span>Buscar</span>
+      <span>{t('Buscar')}</span>
       <kbd>{shortcutLabel}</kbd>
     </button>
     {open && createPortal(
-      <div ref={dialogRef} className="global-search-layer" role="dialog" aria-modal="true" aria-label="Command center">
-        <button className="global-search-backdrop" type="button" aria-label="Cerrar búsqueda" onClick={close} />
+      <div ref={dialogRef} className="global-search-layer" role="dialog" aria-modal="true" aria-label={t('Command center')}>
+        <button className="global-search-backdrop" type="button" aria-label={t('Cerrar búsqueda')} onClick={close} />
         <section className="global-search-panel">
           <div className="global-search-input">
             <Search size={18} aria-hidden />
@@ -286,20 +287,20 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
               ref={inputRef}
               type="text"
               role="combobox"
-              aria-label="Buscar inventario, herramientas y acciones"
+              aria-label={t('Buscar inventario, herramientas y acciones')}
               aria-controls="global-search-results"
               aria-expanded="true"
               aria-activedescendant={options[safeActiveIndex] ? `global-search-result-${safeActiveIndex}` : undefined}
-              placeholder="Buscar inventario, herramientas o acciones"
+              placeholder={t('Buscar inventario, herramientas o acciones')}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={handleKeys}
             />
-            <button className="icon-button" type="button" aria-label="Cerrar búsqueda" title="Cerrar búsqueda" onClick={close}><X size={16} aria-hidden /></button>
+            <button className="icon-button" type="button" aria-label={t('Cerrar búsqueda')} title={t('Cerrar búsqueda')} onClick={close}><X size={16} aria-hidden /></button>
           </div>
           <div className="global-search-filters">
-            <div className="global-search-chip-group" role="group" aria-label="Filtrar por plataforma">
-              <span className="global-search-chip-label">Plataforma</span>
+            <div className="global-search-chip-group" role="group" aria-label={t('Filtrar por plataforma')}>
+              <span className="global-search-chip-label">{t('Plataforma')}</span>
               {PLATFORM_FILTERS.map((filter) => <button
                 key={filter.value}
                 className="global-search-chip"
@@ -310,15 +311,15 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
             </div>
           </div>
           <div className="global-search-results">
-            {trimmedQuery && loading && remoteSearchable ? <p className="global-search-empty" role="status">Buscando…</p> : null}
+            {trimmedQuery && loading && remoteSearchable ? <p className="global-search-empty" role="status">{t('Buscando…')}</p> : null}
             {trimmedQuery && searchError ? <p className="global-search-empty" role="alert">{searchError}</p> : null}
             {/* Widgets load lazily: while a query/filter could still surface
                them, an incomplete widget list is never presented as final --
                a loading (or error) state takes over the "no matches" message
                below instead. */}
-            {trimmedQuery && widgetsRelevant && widgetsStatus === 'loading' ? <p className="global-search-empty" role="status">Cargando widgets…</p> : null}
-            {trimmedQuery && widgetsRelevant && widgetsStatus === 'error' ? <p className="global-search-empty" role="alert">No se pudieron cargar los widgets. Probá de nuevo.</p> : null}
-            <div id="global-search-results" role="listbox" aria-label="Resultados del command center">
+            {trimmedQuery && widgetsRelevant && widgetsStatus === 'loading' ? <p className="global-search-empty" role="status">{t('Cargando widgets…')}</p> : null}
+            {trimmedQuery && widgetsRelevant && widgetsStatus === 'error' ? <p className="global-search-empty" role="alert">{t('No se pudieron cargar los widgets. Probá de nuevo.')}</p> : null}
+            <div id="global-search-results" role="listbox" aria-label={t('Resultados del command center')}>
               {!trimmedQuery ? (sections.length
                 ? sections.map((section) => <div className="global-search-group" key={section.id} role="group" aria-label={section.label}>
                   <h2 aria-hidden="true">{section.label}</h2>
@@ -329,8 +330,8 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
                 </div>)
                 : null)
                 : <>
-                  {localCommands.length ? <div className="global-search-group" role="group" aria-label="Resultados">
-                    <h2 aria-hidden="true">Resultados</h2>
+                  {localCommands.length ? <div className="global-search-group" role="group" aria-label={t('Resultados')}>
+                    <h2 aria-hidden="true">{t('Resultados')}</h2>
                     {localCommands.map(renderCommandOption)}
                   </div> : null}
                   {groupedRemote.map(([type, items]) => <div className="global-search-group" key={type} role="group" aria-label={SEARCH_RESULT_META[type].groupLabel}>
@@ -339,12 +340,12 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
                   </div>)}
                 </>}
             </div>
-            {!trimmedQuery && !sections.length ? <p className="global-search-empty">No hay destinos disponibles.</p> : null}
+            {!trimmedQuery && !sections.length ? <p className="global-search-empty">{t('No hay destinos disponibles.')}</p> : null}
             {trimmedQuery && !loading && !searchError && !(widgetsRelevant && (widgetsStatus === 'loading' || widgetsStatus === 'error')) && !localCommands.length && !visibleRemote.length
-              ? <p className="global-search-empty">{remoteSearchable ? 'No se encontraron coincidencias.' : 'Ingresá al menos dos caracteres para buscar inventario.'}</p>
+              ? <p className="global-search-empty">{remoteSearchable ? t('No se encontraron coincidencias.') : t('Ingresá al menos dos caracteres para buscar inventario.')}</p>
               : null}
           </div>
-          <p className="global-search-help">↑↓ para seleccionar · Enter para abrir · Esc para cerrar</p>
+          <p className="global-search-help">{t('↑↓ para seleccionar · Enter para abrir · Esc para cerrar')}</p>
         </section>
       </div>,
       document.body,

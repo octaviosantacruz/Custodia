@@ -30,6 +30,7 @@ import {
   moveDashboardWidget, resolveDashboardRenderLayout, swapDashboardWidgets, type DashboardWidgetSize,
 } from '../../../cross/lib/dashboard-layout';
 import type { AnalyticsBucket } from '../types/safe';
+import { t, localeTag } from '../../../cross/i18n/index.ts';
 
 const PICKER_GROUP_ICONS: Record<string, React.ReactNode> = {
   coverage: <CircleCheck size={20} aria-hidden="true" />,
@@ -86,7 +87,7 @@ function shortcutPreviewFields(shortcut: DashboardShortcut, preview?: ShortcutPr
   if (!preview) return {};
   if (shortcut.kind !== 'chart') {
     if (preview.data_status === 'unavailable') return { previewLabel: 'Sin datos' };
-    const value = preview.value.toLocaleString('es-AR');
+    const value = preview.value.toLocaleString(localeTag());
     return { previewLabel: DASHBOARD_PERCENTAGE_MEASURES.has(shortcut.measure) ? `${value}%` : value };
   }
   if (shortcut.chart?.style !== 'pie' && shortcut.chart?.style !== 'bars') return preview.chart_data ? { previewChartData: preview.chart_data } : {};
@@ -118,8 +119,8 @@ function shortcutPickerGroups(kind: 'data' | 'chart', selectedWidgets: Dashboard
   if (kind !== 'chart') return groups;
   return [...groups, {
     id: 'unavailable',
-    title: 'Requieren más datos',
-    description: 'Opciones disponibles cuando exista una fuente verificable',
+    title: t('Requieren más datos'),
+    description: t('Opciones disponibles cuando exista una fuente verificable'),
     icon: <LayoutGrid size={20} aria-hidden="true" />,
     options: DASHBOARD_UNAVAILABLE_CHARTS.map((chart) => ({
       id: chart.id,
@@ -142,13 +143,13 @@ function PamEmptyDashboard({ saving, onAddData, onAddChart, onUseRecommended }: 
 }) {
   return <section className="dashboard-empty-state" aria-labelledby="pam-empty-title">
     <div className="dashboard-empty-copy">
-      <div className="workspace-intro-heading"><h2 id="pam-empty-title">Todavía no elegiste qué seguir</h2><HelpHint label="Vista recomendada"><p>Armá tu tablero con indicadores del inventario CyberArk (Safes, cuentas, cobertura) y comparaciones por empresa, tipo o estado operativo. Podés empezar con la vista sugerida y ajustarla después.</p><p>La vista sugerida incluye Safes sin cuentas, pendientes de clasificar, usuarios PAM y tres distribuciones. Se guarda sólo si la aceptás; también podés elegir bloque por bloque.</p></HelpHint></div>
-      <p>Elegí datos o gráficos para armar tu tablero.</p>
+      <div className="workspace-intro-heading"><h2 id="pam-empty-title">{t('Todavía no elegiste qué seguir')}</h2><HelpHint label={t('Vista recomendada')}><p>Armá tu tablero con indicadores del inventario CyberArk (Safes, cuentas, cobertura) y comparaciones por empresa, tipo o estado operativo. Podés empezar con la vista sugerida y ajustarla después.</p><p>La vista sugerida incluye Safes sin cuentas, pendientes de clasificar, usuarios PAM y tres distribuciones. Se guarda sólo si la aceptás; también podés elegir bloque por bloque.</p></HelpHint></div>
+      <p>{t('Elegí datos o gráficos para armar tu tablero.')}</p>
     </div>
     <div className="dashboard-empty-actions">
-      <button type="button" className="button primary" onClick={onAddData}><Plus size={14} aria-hidden="true" /> Agregar datos</button>
-      <button type="button" className="button subtle" onClick={onAddChart}><Plus size={14} aria-hidden="true" /> Agregar gráficos</button>
-      <button type="button" className="button subtle" onClick={onUseRecommended} disabled={saving}><LayoutDashboard size={14} aria-hidden="true" /> {saving ? 'Guardando…' : 'Usar vista recomendada'}</button>
+      <button type="button" className="button primary" onClick={onAddData}><Plus size={14} aria-hidden="true" /> {t('Agregar datos')}</button>
+      <button type="button" className="button subtle" onClick={onAddChart}><Plus size={14} aria-hidden="true" /> {t('Agregar gráficos')}</button>
+      <button type="button" className="button subtle" onClick={onUseRecommended} disabled={saving}><LayoutDashboard size={14} aria-hidden="true" /> {saving ? t('Guardando…') : t('Usar vista recomendada')}</button>
     </div>
   </section>;
 }
@@ -221,7 +222,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
     const invalidTitle = draft.some((widget) => !widget.title.trim());
     const invalidGoal = draft.some((widget) => widget.kind === 'goal' && (widget.target_value === null || !Number.isFinite(widget.target_value)));
     if (invalidTitle || invalidGoal) {
-      setAnnouncement(invalidGoal ? 'Completá la meta de los objetivos antes de guardar.' : 'Poné un nombre a cada métrica antes de guardar.');
+      setAnnouncement(invalidGoal ? t('Completá la meta de los objetivos antes de guardar.') : t('Poné un nombre a cada métrica antes de guardar.'));
       return;
     }
     const normalized = draft.map((widget) => widget.kind === 'count' ? { ...widget, size: 'sm' as const, position: null } : widget);
@@ -245,7 +246,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
     widgets: template.widgets.map((widget) => ({ ...widget, filters: { ...widget.filters } })),
   });
   const resetView = () => setPendingView({
-    title: 'Restablecer a predeterminada',
+    title: t('Restablecer a predeterminada'),
     description: `Vuelve a los ${DEFAULT_PAM_SHORTCUT_IDS.length} bloques por defecto de CyberArk y reemplaza tu vista guardada.`,
     confirmLabel: 'Restablecer',
     notice: 'Vista predeterminada restablecida',
@@ -253,8 +254,8 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
     widgets: DEFAULT_PAM_SHORTCUT_IDS.map((id, index) => createDashboardShortcut(id, index)),
   });
   const clearView = () => setPendingView({
-    title: 'Vaciar vista',
-    description: 'Quita todos los bloques de tu vista de CyberArk y la deja vacía para armarla desde cero. Hasta que confirmes, tu vista actual no cambia.',
+    title: t('Vaciar vista'),
+    description: t('Quita todos los bloques de tu vista de CyberArk y la deja vacía para armarla desde cero. Hasta que confirmes, tu vista actual no cambia.'),
     confirmLabel: 'Vaciar',
     notice: 'Vista vaciada',
     icon: <Trash2 size={18} aria-hidden="true" />,
@@ -349,7 +350,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
   const settingsFor = (widget: DashboardWidget, index: number) => <>
     <WidgetBasicsCard widget={widget} index={index} onChange={updateWidget} />
     <WidgetDisplayCard widget={widget} index={index} onChange={updateWidget} />
-    {dashboardWidgetAcceptsFilters(widget) ? <section><h4>Filtros</h4><div className="dashboard-widget-filter-panel"><DashboardWidgetFilterControls widget={widget} disabled={preferences.saving || recalculating.has(widget.widget_id)} onChange={(key, value) => void updateWidgetFilter(widget.widget_id, key, value)} /></div></section> : null}
+    {dashboardWidgetAcceptsFilters(widget) ? <section><h4>{t('Filtros')}</h4><div className="dashboard-widget-filter-panel"><DashboardWidgetFilterControls widget={widget} disabled={preferences.saving || recalculating.has(widget.widget_id)} onChange={(key, value) => void updateWidgetFilter(widget.widget_id, key, value)} /></div></section> : null}
     <DashboardWidgetPreview widget={widget} includeInternal={includeInternal} />
   </>;
   const chartModeFor = (widget: DashboardWidget) => widget.kind === 'chart' && (widget.chart?.style === 'pie' || widget.chart?.style === 'bars') ? (widget.chart.style === 'pie' ? 'donut' as const : 'bars' as const) : undefined;
@@ -367,30 +368,30 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
     : <button type="button" className="metric-button personal-metric-button" data-status={widget.data_status ?? 'available'} style={style} onClick={() => onWidgetNavigate(widget)} aria-label={`${widget.title}: ${dashboardValueLabel(widget)}. Abrir resultados`}><div className="metric dashboard-goal"><span className="metric-label">{widget.title}</span><strong>{dashboardValueLabel(widget)}<small> / {widget.target_value}</small></strong><span className="dashboard-goal-meta">{widget.period_label || 'Sin período'} · {dashboardGoalProgress(widget)}%</span><span className="dashboard-goal-track" aria-hidden="true"><span style={{ width: `${dashboardGoalProgress(widget)}%` }} /></span><small>{dashboardWidgetDetail(widget)}</small></div><ArrowRight size={15} /></button>;
 
   return <>
-    <section ref={dashboardRef} className={`personal-dashboard pam-personal-dashboard${editing ? ' is-editing' : ''}`} aria-label="Mi panel de métricas">
+    <section ref={dashboardRef} className={`personal-dashboard pam-personal-dashboard${editing ? ' is-editing' : ''}`} aria-label={t('Mi panel de métricas')}>
       <div className="personal-dashboard-heading">
         {editing ? null : <div className="personal-dashboard-heading-actions">
-          {preferences.canUndo ? <button type="button" className="button subtle" disabled={preferences.saving} title="Deshacer el último guardado" onClick={() => void preferences.undo()}><Undo2 size={14} aria-hidden="true" /> Deshacer</button> : null}
+          {preferences.canUndo ? <button type="button" className="button subtle" disabled={preferences.saving} title={t('Deshacer el último guardado')} onClick={() => void preferences.undo()}><Undo2 size={14} aria-hidden="true" /> {t('Deshacer')}</button> : null}
           <DashboardPresetMenu presets={DASHBOARD_PRESETS} teamTemplates={teamTemplates.templates} disabled={preferences.saving} onSelect={applyPreset} onTeamSelect={applyTeamTemplate} onReset={resetView} onClear={clearView} />
           {permissions.includes('access:roles_manage') ? <DashboardTemplatePublisher disabled={preferences.saving || teamTemplates.publishing} blockCount={preferences.widgets.length} onPublish={(roleCode) => teamTemplates.publish(roleCode, preferences.widgets)} /> : null}
-          <button type="button" className="button subtle" title="Editar el diseño de tu vista" onClick={startEditing}><SlidersHorizontal size={14} /> Editar vista</button>
+          <button type="button" className="button subtle" title={t('Editar el diseño de tu vista')} onClick={startEditing}><SlidersHorizontal size={14} /> {t('Editar vista')}</button>
         </div>}
       </div>
-      {editing ? <DashboardEditToolbar label="Edición del tablero PAM" hint="Arrastrá o usá las flechas para ordenar" dirty={dirty} saving={preferences.saving} onCancel={requestCancel} onSave={() => void saveEditing()} /> : null}
+      {editing ? <DashboardEditToolbar label={t('Edición del tablero PAM')} hint="Arrastrá o usá las flechas para ordenar" dirty={dirty} saving={preferences.saving} onCancel={requestCancel} onSave={() => void saveEditing()} /> : null}
       <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
-      {preferences.loading ? <StateBlock variant="loading" title="Cargando tu panel..." />
+      {preferences.loading ? <StateBlock variant="loading" title={t('Cargando tu panel...')} />
         : !widgets.length && !editing
         ? <PamEmptyDashboard saving={preferences.saving} onAddData={() => requestPicker('data')} onAddChart={() => requestPicker('chart')} onUseRecommended={() => void preferences.save(RECOMMENDED_PAM_SHORTCUT_IDS.map((id, index) => createDashboardShortcut(id, index)))} />
         : <div className="personal-dashboard-content">
           {dataWidgets.length || editing ? <section className="dashboard-data-section" aria-labelledby="dashboard-data-title">
-            <div className="dashboard-section-heading"><h2 id="dashboard-data-title">Datos clave</h2></div>
+            <div className="dashboard-section-heading"><h2 id="dashboard-data-title">{t('Datos clave')}</h2></div>
             <div className={`dashboard-data-strip${editing ? ' editing' : ''}`} role={editing ? 'list' : undefined}>{dataWidgets.map((widget, index) => editing
               ? <DashboardEditItem key={widget.widget_id} id={widget.widget_id} title={widget.title} index={index} count={dataWidgets.length} saving={preferences.saving} showSize={false} onMove={moveDataWidget} onMoveBefore={dropDataWidget} onSize={resizeWidget} onRemove={removeWidget} onAnnounce={setAnnouncement} mode={chartModeFor(widget)} onMode={(mode) => setChartMode(widget, mode)} onDuplicate={duplicateWidget} settings={settingsFor(widget, index)} openSettingsOnMount={configWidgetId === widget.widget_id} onSettingsChange={(open) => setConfigWidgetId(open ? widget.widget_id : null)}><DashboardDataItem widget={widget} onNavigate={onWidgetNavigate} /></DashboardEditItem>
               : <DashboardDataItem key={widget.widget_id} widget={widget} onNavigate={onWidgetNavigate} />)}</div>
             {editing ? <DashboardWidgetPicker kind="data" eyebrow="DATOS CLAVE" heading="Elegí un dato para tu tablero" helper="Indicadores rápidos para saber qué está pasando ahora." groups={dataShortcutGroups} disabled={dataWidgets.length >= 6} limitReached={dataWidgets.length >= 6} openRequest={pickerRequest?.kind === 'data' ? pickerRequest.token : undefined} onCreateCustom={() => createCustom('data')} onAdd={addShortcut} /> : null}
           </section> : null}
           {visualWidgets.length || editing ? <section className="dashboard-visual-section" aria-labelledby="dashboard-visual-title">
-            <div className="dashboard-section-heading"><h2 id="dashboard-visual-title">Gráficos</h2></div>
+            <div className="dashboard-section-heading"><h2 id="dashboard-visual-title">{t('Gráficos')}</h2></div>
             <div className={`metrics personal-dashboard-metrics ${usesCompactVisualGrid ? 'compact-visual-grid' : ''}${editing ? ' editing' : ''}`.trim()} role={editing ? 'list' : undefined}>{layout.map(({ widget, position, size }, index) => {
               const style = dashboardGridPlacement(position, size);
               return editing
@@ -399,15 +400,15 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
             })}</div>
             {editing ? <DashboardWidgetPicker kind="chart" eyebrow="INVENTARIO Y POSTURA" heading="Elegí un gráfico para tu tablero" helper="Comparaciones visuales para encontrar patrones y desvíos." groups={chartShortcutGroups} disabled={visualWidgets.length >= 6} limitReached={visualWidgets.length >= 6} openRequest={pickerRequest?.kind === 'chart' ? pickerRequest.token : undefined} onCreateCustom={() => createCustom('chart')} onAdd={addShortcut} /> : null}
           </section> : null}
-          {editing ? null : <button type="button" className="dashboard-create-card" title="Editar la vista para agregar un dato o gráfico" onClick={startEditing}><span className="dashboard-create-icon"><Plus size={18} /></span><span><strong>Agregar a la vista</strong><small>Dato compacto, gráfico u objetivo</small></span></button>}
+          {editing ? null : <button type="button" className="dashboard-create-card" title={t('Editar la vista para agregar un dato o gráfico')} onClick={startEditing}><span className="dashboard-create-icon"><Plus size={18} /></span><span><strong>{t('Agregar a la vista')}</strong><small>{t('Dato compacto, gráfico u objetivo')}</small></span></button>}
         </div>}
     </section>
     {pendingCancel ? <ConfirmDialog
       icon={<Undo2 size={18} />}
       titleId="discard-dashboard-title"
-      title="Descartar cambios"
+      title={t('Descartar cambios')}
       descriptionId="discard-dashboard-copy"
-      description="Vas a perder los cambios sin guardar de tu vista."
+      description={t('Vas a perder los cambios sin guardar de tu vista.')}
       onClose={() => setPendingCancel(false)}
       closeDisabled={preferences.saving}
       confirmLabel="Descartar cambios"

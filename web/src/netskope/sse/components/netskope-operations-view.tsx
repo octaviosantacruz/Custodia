@@ -8,6 +8,7 @@ import { useNetskopePanel } from '../hooks/use-netskope-panel';
 import { fetchNetskopeClientEvents, fetchNetskopeDeviceChanges, fetchNetskopeDeviceFacets, fetchNetskopeDeviceReviewSummary, fetchNetskopeFleetGroups } from '../lib/netskope-api';
 import { netskopeSyncStatement } from '../lib/netskope-sync-evidence';
 import type { NetskopeDeviceQuery, NetskopeFleetGroupBy } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 type EquiposTab = 'fleet' | 'changes';
 
@@ -61,13 +62,13 @@ export function NetskopeOperationsView({ refreshKey, canAdminBaselines, authChec
   }, [enabled, refreshKey]);
 
   return <>
-    <section className="netskope-operations" aria-label="Equipos Netskope">
+    <section className="netskope-operations" aria-label={t('Equipos Netskope')}>
       {!sync.fresh && (!diagnosis.loading || diagnosis.data) ? <p className="nsk-fleet-sync-warning" role="status">
         <TriangleAlert size={14} aria-hidden="true" />
         <span>{sync.text} · Cifras del último inventario disponible.</span>
       </p> : null}
       <NetskopeFleetBand fleet={fleet.data} changes={changes.data} clientEvents={clientEvents.data} diagnosis={diagnosis.data} onDrill={onDrill} onOpenPosture={onOpenPosture} onOpenChanges={() => setTab('changes')} />
-      <nav className="workspace-subnav workspace-subnav-nested" aria-label="Secciones de Equipos" role="tablist" onKeyDown={handleTablistKeyDown}>
+      <nav className="workspace-subnav workspace-subnav-nested" aria-label={t('Secciones de Equipos')} role="tablist" onKeyDown={handleTablistKeyDown}>
         {([['fleet', 'Flota'], ['changes', 'Cambios']] as const).map(([id, label]) => <button
           key={id} type="button" role="tab" id={`nsk-equipos-tab-${id}`} aria-controls={`nsk-equipos-panel-${id}`}
           aria-selected={tab === id} tabIndex={tab === id ? 0 : -1} className={tab === id ? 'active' : ''}
@@ -77,9 +78,9 @@ export function NetskopeOperationsView({ refreshKey, canAdminBaselines, authChec
       <div role="tabpanel" id={`nsk-equipos-panel-${tab}`} aria-labelledby={`nsk-equipos-tab-${tab}`}>
         {tab === 'fleet'
           ? <NetskopeFleetTable panel={fleet} groupBy={groupBy} onGroupBy={setGroupBy} canAdmin={canAdminBaselines} onDrill={onDrill} onEditBaseline={setEditingBaseline} />
-          : <><h2 className="sr-only">Cambios</h2><NetskopeChangesPanel panel={changes} onDrill={onDrill} /></>}
+          : <><h2 className="sr-only">{t('Cambios')}</h2><NetskopeChangesPanel panel={changes} onDrill={onDrill} /></>}
       </div>
     </section>
-    {editingBaseline ? <NetskopeBaselineEditor kind={editingBaseline} osOptions={osOptions} onClose={() => setEditingBaseline(null)} onSaved={() => { setEditingBaseline(null); setBaselineVersion((current) => current + 1); onNotice('Línea base Netskope guardada y auditada.'); }} /> : null}
+    {editingBaseline ? <NetskopeBaselineEditor kind={editingBaseline} osOptions={osOptions} onClose={() => setEditingBaseline(null)} onSaved={() => { setEditingBaseline(null); setBaselineVersion((current) => current + 1); onNotice(t('Línea base Netskope guardada y auditada.')); }} /> : null}
   </>;
 }

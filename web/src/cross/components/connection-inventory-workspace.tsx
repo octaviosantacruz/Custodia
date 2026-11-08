@@ -28,12 +28,13 @@ import { CoverageProgress } from './coverage-progress';
 import { UNINVENTORIED_QUERY_KEY, UninventoriedAddresses } from './uninventoried-addresses';
 import { handleTablistKeyDown } from '../lib/tablist-keyboard';
 import './connection-inventory-workspace.css';
+import { t } from '../i18n/index.ts';
 
 const PAGE_SIZE = 50;
 const BULK_LIMIT = 500;
 type FlagField = (typeof FLAG_FIELDS)[number]['field'];
 const KEEP = '__keep__';
-const FLAG_CHOICES = [{ value: KEEP, label: 'No cambiar' }, { value: 'yes', label: 'Sí' }, { value: 'no', label: 'No' }, { value: 'none', label: 'Sin dato' }];
+const FLAG_CHOICES = [{ value: KEEP, label: t('No cambiar') }, { value: 'yes', label: t('Sí') }, { value: 'no', label: t('No') }, { value: 'none', label: t('Sin dato') }];
 
 function serviceHint(port: number | null): string {
   const labels: Record<number, string> = {
@@ -45,9 +46,9 @@ function serviceHint(port: number | null): string {
 }
 
 function CoverageBadge({ row }: { row: ConnectionInventoryRow }) {
-  if (row.safe_match_count && row.sia_match_count) return <StatusBadge tone="success">Cubierta en Safe + SIA</StatusBadge>;
-  if (row.safe_match_count || row.sia_match_count) return <StatusBadge tone="warning">Cobertura parcial</StatusBadge>;
-  return <StatusBadge tone="neutral">Sin coincidencia</StatusBadge>;
+  if (row.safe_match_count && row.sia_match_count) return <StatusBadge tone="success">{t('Cubierta en Safe + SIA')}</StatusBadge>;
+  if (row.safe_match_count || row.sia_match_count) return <StatusBadge tone="warning">{t('Cobertura parcial')}</StatusBadge>;
+  return <StatusBadge tone="neutral">{t('Sin coincidencia')}</StatusBadge>;
 }
 
 /** The four sheet flags as small marks. With `onCycle` each one is a button: a click moves it Sin dato -> Sí -> No. */
@@ -132,7 +133,7 @@ export function ConnectionInventoryWorkspace({ refreshKey, authChecked, authenti
 
   const exportCsv = async () => {
     onError('');
-    try { await exportConnectionInventory(); onNotice('CSV de destinos descargado'); }
+    try { await exportConnectionInventory(); onNotice(t('CSV de destinos descargado')); }
     catch (error) { onError(error instanceof Error ? error.message : 'No se pudo exportar el inventario'); }
   };
 
@@ -145,10 +146,10 @@ export function ConnectionInventoryWorkspace({ refreshKey, authChecked, authenti
         const changes: ConnectionDestinationChanges = {};
         for (const key of Object.keys(values) as (keyof ConnectionDestinationValues)[]) if (values[key] !== before[key]) Object.assign(changes, { [key]: values[key] });
         if (Object.keys(changes).length) await updateConnectionDestination(before.inventory_id, changes);
-        onNotice(Object.keys(changes).length ? 'Destino actualizado' : 'Sin cambios');
+        onNotice(Object.keys(changes).length ? t('Destino actualizado') : t('Sin cambios'));
       } else {
         await createConnectionDestination(values);
-        onNotice('Destino agregado');
+        onNotice(t('Destino agregado'));
       }
       setEditing(null);
       await reload(); await executive.reload(); await deviations.reload();
@@ -221,19 +222,19 @@ export function ConnectionInventoryWorkspace({ refreshKey, authChecked, authenti
   const platformDeviations = deviations.data ? deviations.data.platform.missing + deviations.data.platform.undeclared : 0;
   const dbaDeviations = deviations.data ? deviations.data.dba.missing + deviations.data.dba.undeclared : 0;
   const stats = coverageSummary ? [
-    { label: 'Destinos activos', value: coverageSummary.totals.total, coverage: '', deviation: '' as ConnectionDeviationFilter },
-    { label: 'En Safe y SIA', value: coverageSummary.totals.both, coverage: 'both', deviation: '' as ConnectionDeviationFilter, tone: 'success' },
-    { label: 'Cobertura parcial', value: coverageSummary.totals.pam_only + coverageSummary.totals.sia_only, coverage: null, deviation: '' as ConnectionDeviationFilter, tone: 'warning' },
-    { label: 'Sin coincidencia', value: coverageSummary.totals.none, coverage: 'none', deviation: '' as ConnectionDeviationFilter, tone: 'neutral' },
+    { label: t('Destinos activos'), value: coverageSummary.totals.total, coverage: '', deviation: '' as ConnectionDeviationFilter },
+    { label: t('En Safe y SIA'), value: coverageSummary.totals.both, coverage: 'both', deviation: '' as ConnectionDeviationFilter, tone: 'success' },
+    { label: t('Cobertura parcial'), value: coverageSummary.totals.pam_only + coverageSummary.totals.sia_only, coverage: null, deviation: '' as ConnectionDeviationFilter, tone: 'warning' },
+    { label: t('Sin coincidencia'), value: coverageSummary.totals.none, coverage: 'none', deviation: '' as ConnectionDeviationFilter, tone: 'neutral' },
     ...(deviations.data ? [
-      { label: 'Desvíos Platform', value: platformDeviations, coverage: '', deviation: 'platform' as ConnectionDeviationFilter, tone: platformDeviations ? 'danger' : 'success' },
-      { label: 'Desvíos DBA', value: dbaDeviations, coverage: '', deviation: 'dba' as ConnectionDeviationFilter, tone: dbaDeviations ? 'danger' : 'success' },
+      { label: t('Desvíos Platform'), value: platformDeviations, coverage: '', deviation: 'platform' as ConnectionDeviationFilter, tone: platformDeviations ? 'danger' : 'success' },
+      { label: t('Desvíos DBA'), value: dbaDeviations, coverage: '', deviation: 'dba' as ConnectionDeviationFilter, tone: dbaDeviations ? 'danger' : 'success' },
     ] : []),
   ] : [];
   const columns = canManage ? 8 : 6;
 
   return <>
-    <nav className="coverage-tabs" role="tablist" aria-label="Vistas de Cobertura" onKeyDown={handleTablistKeyDown}>
+    <nav className="coverage-tabs" role="tablist" aria-label={t('Vistas de Cobertura')} onKeyDown={handleTablistKeyDown}>
       {([['destinations', 'Destinos'], ['uninventoried', 'Sin inventariar'], ['progress', 'Avance']] as const).map(([id, label]) => <button key={id} id={`coverage-tab-${id}`} type="button" role="tab" aria-selected={view === id} aria-controls="coverage-tabpanel" tabIndex={view === id ? 0 : -1} className={view === id ? 'active' : ''} onClick={() => setView(id)}>{label}</button>)}
     </nav>
     <div role="tabpanel" id="coverage-tabpanel" aria-labelledby={`coverage-tab-${view}`}>
@@ -242,12 +243,12 @@ export function ConnectionInventoryWorkspace({ refreshKey, authChecked, authenti
       : <>
     <section className="database-toolbar">
       <div className="database-toolbar-actions"><span className="database-toolbar-count">{formatNumber(total)} {total === 1 ? 'destino' : 'destinos'}</span>{canManage && <><input ref={fileInput} type="file" accept=".csv,text/csv" onChange={(event) => void handleFile(event)} hidden />
-        <button className="button subtle" type="button" onClick={() => { setSaveError(''); setEditing({ row: null }); }}><Plus size={15} aria-hidden /> Agregar destino</button>
-        <button className="button subtle" type="button" disabled={importing} title="Importar un CSV por IP y puerto, con vista previa" onClick={() => fileInput.current?.click()}><FileUp size={15} aria-hidden /> Importar CSV</button>
-        <button className="button subtle" type="button" title="Decidir si cada política SIA es Platform, DBA u otra" onClick={() => setClassifying(true)}><ListChecks size={15} aria-hidden /> Políticas SIA</button>
-        <button className="button subtle" type="button" title="Descargar los destinos activos con lo observado en Safes y SIA" onClick={() => void exportCsv()}><Download size={15} aria-hidden /> Exportar CSV</button></>}</div>
+        <button className="button subtle" type="button" onClick={() => { setSaveError(''); setEditing({ row: null }); }}><Plus size={15} aria-hidden /> {t('Agregar destino')}</button>
+        <button className="button subtle" type="button" disabled={importing} title={t('Importar un CSV por IP y puerto, con vista previa')} onClick={() => fileInput.current?.click()}><FileUp size={15} aria-hidden /> {t('Importar CSV')}</button>
+        <button className="button subtle" type="button" title={t('Decidir si cada política SIA es Platform, DBA u otra')} onClick={() => setClassifying(true)}><ListChecks size={15} aria-hidden /> {t('Políticas SIA')}</button>
+        <button className="button subtle" type="button" title={t('Descargar los destinos activos con lo observado en Safes y SIA')} onClick={() => void exportCsv()}><Download size={15} aria-hidden /> {t('Exportar CSV')}</button></>}</div>
     </section>
-    {stats.length > 0 && <section className="coverage-stats" aria-label="Resumen de cobertura">
+    {stats.length > 0 && <section className="coverage-stats" aria-label={t('Resumen de cobertura')}>
       {stats.map((stat) => {
         const filtering = stat.coverage !== null;
         const active = filtering && coverage === stat.coverage && deviation === stat.deviation && !environment && status === 'active';
@@ -259,47 +260,47 @@ export function ConnectionInventoryWorkspace({ refreshKey, authChecked, authenti
     </section>}
     {deviations.data && deviations.data.policies.total > 0 && deviations.data.policies.classified < deviations.data.policies.total && <p className="coverage-policy-banner" role="status">
       {deviations.data.policies.classified === 0 ? 'Todavía no clasificaste las políticas SIA, así que Platform y DBA no se pueden medir.' : `Hay ${deviations.data.policies.total - deviations.data.policies.classified} de ${deviations.data.policies.total} políticas SIA sin clasificar.`}
-      {canManage && <button type="button" className="button subtle" onClick={() => setClassifying(true)}>Clasificar políticas</button>}
+      {canManage && <button type="button" className="button subtle" onClick={() => setClassifying(true)}>{t('Clasificar políticas')}</button>}
     </p>}
     <section className="list-panel database-surface connection-inventory-panel">
-      <div className="search-row connection-inventory-filters"><label className="search-box"><Search size={16} aria-hidden /><input type="search" aria-label="Buscar conexiones por IP o instancia" placeholder="Buscar por IP, instancia o ambiente" value={search} onChange={(event) => { setSearch(event.target.value); resetSelection(); }} /></label>
-        <CompactSelect ariaLabel="Filtrar por ambiente" value={environment} onChange={(value) => { setEnvironment(value); resetSelection(); }} options={environmentOptions(coverageSummary?.by_environment ?? null, coverageSummary ? coverageSummary.totals.total : null, environment, formatNumber)} />
-        <CompactSelect ariaLabel="Filtrar por cobertura" value={coverage} onChange={(value) => { setCoverage(value as ConnectionCoverageFilter | ''); resetSelection(); }} options={coverageOptions(coverageSummary?.totals ?? null, coverage, formatNumber)} />
-        <CompactSelect ariaLabel="Filtrar por desvío" value={deviation} onChange={(value) => { setDeviation(value as ConnectionDeviationFilter); resetSelection(); }} options={[{ value: '', label: 'Con o sin desvío' }, { value: 'any', label: 'Con desvíos' }, { value: 'platform', label: 'Desvío de Platform' }, { value: 'dba', label: 'Desvío de DBA' }]} />
-        <CompactSelect ariaLabel="Filtrar por estado de trabajo" value={workStatus} onChange={(value) => { setWorkStatus(value as WorkStatus | ''); resetSelection(); }} options={[{ value: '', label: 'Todo el trabajo' }, ...WORK_STATUSES.map((item) => ({ value: item.value, label: deviations.data ? `${item.label} (${formatNumber(deviations.data.work[item.value] ?? 0)})` : item.label }))]} />
-        <CompactSelect ariaLabel="Filtrar por responsable" value={responsible} onChange={(value) => { setResponsible(value); resetSelection(); }} options={[{ value: '', label: 'Todo responsable' }, { value: 'none', label: 'Sin responsable' }, ...responsibles.map((name) => ({ value: name, label: name })), ...(responsible && responsible !== 'none' && !responsibles.includes(responsible) ? [{ value: responsible, label: responsible }] : [])]} />
-        <CompactSelect ariaLabel="Filtrar por estado" value={status} onChange={(value) => { setStatus(value as ConnectionStatusFilter); resetSelection(); }} options={[{ value: 'active', label: 'Activos' }, { value: 'retired', label: 'Retirados' }, { value: 'all', label: 'Todos' }]} />
-        {!coverageSummary && !executive.loading ? <span className="connection-inventory-summary-error" role="status">Conteos no disponibles <button type="button" className="button subtle" onClick={() => void executive.reload()}>Reintentar</button></span> : null}
+      <div className="search-row connection-inventory-filters"><label className="search-box"><Search size={16} aria-hidden /><input type="search" aria-label={t('Buscar conexiones por IP o instancia')} placeholder={t('Buscar por IP, instancia o ambiente')} value={search} onChange={(event) => { setSearch(event.target.value); resetSelection(); }} /></label>
+        <CompactSelect ariaLabel={t('Filtrar por ambiente')} value={environment} onChange={(value) => { setEnvironment(value); resetSelection(); }} options={environmentOptions(coverageSummary?.by_environment ?? null, coverageSummary ? coverageSummary.totals.total : null, environment, formatNumber)} />
+        <CompactSelect ariaLabel={t('Filtrar por cobertura')} value={coverage} onChange={(value) => { setCoverage(value as ConnectionCoverageFilter | ''); resetSelection(); }} options={coverageOptions(coverageSummary?.totals ?? null, coverage, formatNumber)} />
+        <CompactSelect ariaLabel={t('Filtrar por desvío')} value={deviation} onChange={(value) => { setDeviation(value as ConnectionDeviationFilter); resetSelection(); }} options={[{ value: '', label: t('Con o sin desvío') }, { value: 'any', label: t('Con desvíos') }, { value: 'platform', label: t('Desvío de Platform') }, { value: 'dba', label: t('Desvío de DBA') }]} />
+        <CompactSelect ariaLabel={t('Filtrar por estado de trabajo')} value={workStatus} onChange={(value) => { setWorkStatus(value as WorkStatus | ''); resetSelection(); }} options={[{ value: '', label: t('Todo el trabajo') }, ...WORK_STATUSES.map((item) => ({ value: item.value, label: deviations.data ? `${item.label} (${formatNumber(deviations.data.work[item.value] ?? 0)})` : item.label }))]} />
+        <CompactSelect ariaLabel={t('Filtrar por responsable')} value={responsible} onChange={(value) => { setResponsible(value); resetSelection(); }} options={[{ value: '', label: t('Todo responsable') }, { value: 'none', label: t('Sin responsable') }, ...responsibles.map((name) => ({ value: name, label: name })), ...(responsible && responsible !== 'none' && !responsibles.includes(responsible) ? [{ value: responsible, label: responsible }] : [])]} />
+        <CompactSelect ariaLabel={t('Filtrar por estado')} value={status} onChange={(value) => { setStatus(value as ConnectionStatusFilter); resetSelection(); }} options={[{ value: 'active', label: t('Activos') }, { value: 'retired', label: t('Retirados') }, { value: 'all', label: t('Todos') }]} />
+        {!coverageSummary && !executive.loading ? <span className="connection-inventory-summary-error" role="status">{t('Conteos no disponibles')} <button type="button" className="button subtle" onClick={() => void executive.reload()}>{t('Reintentar')}</button></span> : null}
       </div>
-      {canManage && checked.size > 0 && <div className="connection-bulk-bar" role="region" aria-label="Edición en lote">
+      {canManage && checked.size > 0 && <div className="connection-bulk-bar" role="region" aria-label={t('Edición en lote')}>
         <span className="connection-bulk-count">{checked.size} {checked.size === 1 ? 'seleccionado' : 'seleccionados'}</span>
-        <label>Ambiente<CompactSelect value={bulk.environment} ariaLabel="Ambiente a aplicar" disabled={saving} options={[{ value: KEEP, label: 'No cambiar' }, ...environments.map((name) => ({ value: name, label: name })), { value: 'none', label: 'Sin ambiente' }]} onChange={(value) => setBulk((current) => ({ ...current, environment: value }))} /></label>
+        <label>{t('Ambiente')}<CompactSelect value={bulk.environment} ariaLabel={t('Ambiente a aplicar')} disabled={saving} options={[{ value: KEEP, label: t('No cambiar') }, ...environments.map((name) => ({ value: name, label: name })), { value: 'none', label: t('Sin ambiente') }]} onChange={(value) => setBulk((current) => ({ ...current, environment: value }))} /></label>
         {FLAG_FIELDS.map(({ field, label }) => <label key={field}>{label}<CompactSelect value={bulk[field]} ariaLabel={`${label} a aplicar`} disabled={saving} options={FLAG_CHOICES} onChange={(value) => setBulk((current) => ({ ...current, [field]: value }))} /></label>)}
-        <label>Trabajo<CompactSelect value={bulk.work_status} ariaLabel="Estado de trabajo a aplicar" disabled={saving} options={[{ value: KEEP, label: 'No cambiar' }, ...WORK_STATUSES.map((item) => ({ value: item.value, label: item.label }))]} onChange={(value) => setBulk((current) => ({ ...current, work_status: value }))} /></label>
-        <label>Responsable<CompactSelect value={bulk.responsible} ariaLabel="Responsable a aplicar" disabled={saving} options={[{ value: KEEP, label: 'No cambiar' }, { value: 'none', label: 'Sin responsable' }, ...responsibles.map((name) => ({ value: name, label: name }))]} onChange={(value) => setBulk((current) => ({ ...current, responsible: value }))} /></label>
-        <label>Estado<CompactSelect value={bulk.lifecycle_status} ariaLabel="Estado a aplicar" disabled={saving} options={[{ value: KEEP, label: 'No cambiar' }, { value: 'active', label: 'Activo' }, { value: 'retired', label: 'Retirado' }]} onChange={(value) => setBulk((current) => ({ ...current, lifecycle_status: value }))} /></label>
+        <label>{t('Trabajo')}<CompactSelect value={bulk.work_status} ariaLabel={t('Estado de trabajo a aplicar')} disabled={saving} options={[{ value: KEEP, label: t('No cambiar') }, ...WORK_STATUSES.map((item) => ({ value: item.value, label: item.label }))]} onChange={(value) => setBulk((current) => ({ ...current, work_status: value }))} /></label>
+        <label>{t('Responsable')}<CompactSelect value={bulk.responsible} ariaLabel={t('Responsable a aplicar')} disabled={saving} options={[{ value: KEEP, label: t('No cambiar') }, { value: 'none', label: t('Sin responsable') }, ...responsibles.map((name) => ({ value: name, label: name }))]} onChange={(value) => setBulk((current) => ({ ...current, responsible: value }))} /></label>
+        <label>{t('Estado')}<CompactSelect value={bulk.lifecycle_status} ariaLabel={t('Estado a aplicar')} disabled={saving} options={[{ value: KEEP, label: t('No cambiar') }, { value: 'active', label: t('Activo') }, { value: 'retired', label: t('Retirado') }]} onChange={(value) => setBulk((current) => ({ ...current, lifecycle_status: value }))} /></label>
         {allChecked && total > rows.length && total <= BULK_LIMIT && checked.size < total && <button type="button" className="button subtle" disabled={saving} onClick={() => void selectAllResults()}>Seleccionar los {formatNumber(total)} resultados</button>}
         <span className="connection-bulk-actions">
           <button type="button" className="button primary" disabled={saving || pendingChanges === 0} onClick={() => void applyBulk()}>{saving ? 'Aplicando…' : `Aplicar a ${checked.size}`}</button>
-          <button type="button" className="button subtle" disabled={saving} onClick={() => setChecked(new Set())}>Cancelar selección</button>
+          <button type="button" className="button subtle" disabled={saving} onClick={() => setChecked(new Set())}>{t('Cancelar selección')}</button>
         </span>
       </div>}
       <div className="compact-table-wrap"><table className="compact-table connection-inventory-table"><thead><tr>
-        {canManage && <th className="connection-select-cell"><input type="checkbox" className="row-select-checkbox" aria-label="Seleccionar los destinos de esta página" checked={allChecked} disabled={!rows.length} onChange={() => setChecked(allChecked ? new Set() : new Set(rows.map((row) => row.inventory_id)))} /></th>}
-        <th className="connection-expand-cell" /><th>Destino</th><th>IP · puerto</th><th>Declarado en la planilla</th><th>Observado</th><th>Trabajo</th>{canManage && <th><span className="sr-only">Acciones</span></th>}
+        {canManage && <th className="connection-select-cell"><input type="checkbox" className="row-select-checkbox" aria-label={t('Seleccionar los destinos de esta página')} checked={allChecked} disabled={!rows.length} onChange={() => setChecked(allChecked ? new Set() : new Set(rows.map((row) => row.inventory_id)))} /></th>}
+        <th className="connection-expand-cell" /><th>{t('Destino')}</th><th>{t('IP · puerto')}</th><th>{t('Declarado en la planilla')}</th><th>{t('Observado')}</th><th>{t('Trabajo')}</th>{canManage && <th><span className="sr-only">{t('Acciones')}</span></th>}
       </tr></thead><tbody>
-        {loading ? <tr><td colSpan={columns + 1}><StateBlock variant="loading" title="Cargando inventario de infraestructura…" /></td></tr>
-          : loadError ? <tr><td colSpan={columns + 1}><StateBlock variant="error" title="No se pudo cargar el inventario de infraestructura" hint={loadError} action={<button type="button" className="button subtle" onClick={() => void reload()}>Reintentar</button>} /></td></tr>
+        {loading ? <tr><td colSpan={columns + 1}><StateBlock variant="loading" title={t('Cargando inventario de infraestructura…')} /></td></tr>
+          : loadError ? <tr><td colSpan={columns + 1}><StateBlock variant="error" title={t('No se pudo cargar el inventario de infraestructura')} hint={loadError} action={<button type="button" className="button subtle" onClick={() => void reload()}>{t('Reintentar')}</button>} /></td></tr>
           : rows.length ? rows.map((row) => {
             const isExpanded = expanded.has(row.inventory_id);
             const retired = row.lifecycle_status === 'retired';
             return <Fragment key={row.inventory_id}><tr className={`${isExpanded ? 'selected' : ''}${retired ? ' is-retired' : ''}`} onClick={() => toggle(setExpanded, row.inventory_id)} style={{ cursor: 'pointer' }}>
               {canManage && <td className="connection-select-cell" onClick={(event) => event.stopPropagation()}><input type="checkbox" className="row-select-checkbox" aria-label={`Seleccionar ${row.instance_name}`} checked={checked.has(row.inventory_id)} onChange={() => toggle(setChecked, row.inventory_id)} /></td>}
-              <td className="connection-expand-cell"><button type="button" className="row-expand-button" aria-expanded={isExpanded} aria-controls={`connection-coverage-${row.inventory_id}`} aria-label={`${isExpanded ? 'Ocultar' : 'Ver'} cobertura de ${row.instance_name}`} title={`${isExpanded ? 'Ocultar' : 'Ver'} cobertura de ${row.instance_name}`} onClick={(event) => { event.stopPropagation(); toggle(setExpanded, row.inventory_id); }}>{isExpanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button></td>
+              <td className="connection-expand-cell"><button type="button" className="row-expand-button" aria-expanded={isExpanded} aria-controls={`connection-coverage-${row.inventory_id}`} aria-label={`${isExpanded ? t('Ocultar') : t('Ver')} cobertura de ${row.instance_name}`} title={`${isExpanded ? t('Ocultar') : t('Ver')} cobertura de ${row.instance_name}`} onClick={(event) => { event.stopPropagation(); toggle(setExpanded, row.inventory_id); }}>{isExpanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button></td>
               <td><strong>{row.instance_name}</strong><span className="table-subvalue">{row.environment || 'Ambiente sin dato'}</span></td>
               <td><strong className="mono">{row.private_ip}</strong><span className="table-subvalue">{row.port ? `:${row.port}` : 'Sin puerto'}</span></td>
               <td onClick={(event) => event.stopPropagation()}><DeclaredMarks row={row} onCycle={canManage && !retired ? (field, value) => void cycleFlag(row, field, value) : undefined} /></td>
-              <td>{retired ? <StatusBadge tone="neutral">Retirado</StatusBadge> : <div className="observed-cell"><CoverageBadge row={row} /><span className="table-subvalue">Safes {formatNumber(row.safe_match_count)} · SIA {formatNumber(row.sia_match_count)}</span></div>}</td>
+              <td>{retired ? <StatusBadge tone="neutral">{t('Retirado')}</StatusBadge> : <div className="observed-cell"><CoverageBadge row={row} /><span className="table-subvalue">Safes {formatNumber(row.safe_match_count)} · SIA {formatNumber(row.sia_match_count)}</span></div>}</td>
               <td className="work-cell" onClick={(event) => event.stopPropagation()}>
                 {canManage && !retired
                   ? <CompactSelect className="work-select" value={row.work_status} ariaLabel={`Estado de trabajo de ${row.instance_name}`} options={WORK_STATUSES.map((item) => ({ value: item.value, label: item.label }))} onChange={(value) => void setWork(row, value as WorkStatus)} />
@@ -307,28 +308,28 @@ export function ConnectionInventoryWorkspace({ refreshKey, authChecked, authenti
                 <span className="table-subvalue">{row.responsible || 'Sin responsable'}</span>
               </td>
               {canManage && <td className="connection-row-actions" onClick={(event) => event.stopPropagation()}>
-                <button type="button" className="icon-button" aria-label={`Editar ${row.instance_name}`} title="Editar" onClick={() => { setSaveError(''); setEditing({ row }); }}><Pencil size={14} aria-hidden /></button>
-                <button type="button" className="icon-button" aria-label={`${retired ? 'Reactivar' : 'Retirar'} ${row.instance_name}`} title={retired ? 'Reactivar' : 'Retirar'} onClick={() => void setLifecycle(row, retired ? 'active' : 'retired')}>{retired ? <RotateCcw size={14} aria-hidden /> : <Archive size={14} aria-hidden />}</button>
+                <button type="button" className="icon-button" aria-label={`Editar ${row.instance_name}`} title={t('Editar')} onClick={() => { setSaveError(''); setEditing({ row }); }}><Pencil size={14} aria-hidden /></button>
+                <button type="button" className="icon-button" aria-label={`${retired ? t('Reactivar') : t('Retirar')} ${row.instance_name}`} title={retired ? t('Reactivar') : t('Retirar')} onClick={() => void setLifecycle(row, retired ? 'active' : 'retired')}>{retired ? <RotateCcw size={14} aria-hidden /> : <Archive size={14} aria-hidden />}</button>
               </td>}</tr>
               {isExpanded && <tr className="connection-inventory-detail-row" id={`connection-coverage-${row.inventory_id}`}><td colSpan={columns + 1}><div className="connection-inventory-detail">
-                <div className="destination-block"><span className="pam-role-graph-label">Declarado</span>
+                <div className="destination-block"><span className="pam-role-graph-label">{t('Declarado')}</span>
                   <dl className="declared-list">{FLAG_FIELDS.map(({ field, label }) => <div key={field}><dt>{label}</dt><dd><StatusBadge tone={flagTone(row[field])}>{flagLabel(row[field])}</StatusBadge></dd></div>)}</dl>
                   {row.description && <p className="muted">{row.description}</p>}
-                  {row.note && <p className="destination-note-line"><strong>Nota:</strong> {row.note}</p>}
+                  {row.note && <p className="destination-note-line"><strong>{t('Nota:')}</strong> {row.note}</p>}
                   {!retired && ([['Platform', capabilityReading('platform', row.platform_result)], ['DBA', capabilityReading('dba', row.dba_result)]] as const).map(([name, reading]) => reading && <p key={name} className={`destination-reading tone-${reading.tone}`}><strong>{name}: {reading.label}</strong> <span>{reading.hint}</span></p>)}
                   <p className="muted">{serviceHint(row.port)} · derivado únicamente del puerto informado.</p>
                 </div>
-                <div className="destination-block"><span className="pam-role-graph-label">Encontrado en Safes</span>{row.safe_matches.length ? <div className="connection-inventory-match-list">{row.safe_matches.slice(0, 8).map((match) => <div className="connection-inventory-match" key={`${match.safe_number}-${match.account_id}`}><IdentityChip kind="role" name={match.safe_name} subtitle={`${match.account_name} · ${match.platform_name || 'Plataforma sin dato'}`} /><TagChip label={`Safe ${match.safe_number}`} /></div>)}</div> : <span className="muted">No se encontró una cuenta activa con esa IP.</span>}</div>
-                <div className="destination-block"><span className="pam-role-graph-label">Encontrado en SIA</span>{row.sia_matches.length ? <div className="pam-role-chip-list">{row.sia_matches.slice(0, 8).map((match) => <div className="connection-inventory-match" key={match.object_id}><IdentityChip kind="system" name={match.display_name} subtitle={`Política SIA · ID ${match.source_id}`} /><TagChip label={match.capability ? POLICY_CAPABILITY_LABELS[match.capability] : 'Sin clasificar'} /></div>)}</div> : <span className="muted">No se encontró una política SIA con esa IP.</span>}</div>
-                <div className="destination-block destination-history-block"><span className="pam-role-graph-label">Historial</span><DestinationHistory inventoryId={row.inventory_id} stamp={`${row.work_status}|${row.responsible}|${row.note}|${row.environment}|${row.lifecycle_status}|${row.ca_sia}|${row.ca_dba}`} /></div>
+                <div className="destination-block"><span className="pam-role-graph-label">{t('Encontrado en Safes')}</span>{row.safe_matches.length ? <div className="connection-inventory-match-list">{row.safe_matches.slice(0, 8).map((match) => <div className="connection-inventory-match" key={`${match.safe_number}-${match.account_id}`}><IdentityChip kind="role" name={match.safe_name} subtitle={`${match.account_name} · ${match.platform_name || 'Plataforma sin dato'}`} /><TagChip label={`Safe ${match.safe_number}`} /></div>)}</div> : <span className="muted">{t('No se encontró una cuenta activa con esa IP.')}</span>}</div>
+                <div className="destination-block"><span className="pam-role-graph-label">{t('Encontrado en SIA')}</span>{row.sia_matches.length ? <div className="pam-role-chip-list">{row.sia_matches.slice(0, 8).map((match) => <div className="connection-inventory-match" key={match.object_id}><IdentityChip kind="system" name={match.display_name} subtitle={`Política SIA · ID ${match.source_id}`} /><TagChip label={match.capability ? POLICY_CAPABILITY_LABELS[match.capability] : 'Sin clasificar'} /></div>)}</div> : <span className="muted">{t('No se encontró una política SIA con esa IP.')}</span>}</div>
+                <div className="destination-block destination-history-block"><span className="pam-role-graph-label">{t('Historial')}</span><DestinationHistory inventoryId={row.inventory_id} stamp={`${row.work_status}|${row.responsible}|${row.note}|${row.environment}|${row.lifecycle_status}|${row.ca_sia}|${row.ca_dba}`} /></div>
               </div></td></tr>}</Fragment>;
-          }) : <tr><td colSpan={columns + 1}><StateBlock variant="empty" title={importInfo ? 'No hay coincidencias para esta búsqueda.' : 'Todavía no hay un inventario de infraestructura cargado.'} hint={importInfo ? 'Probá con otra IP o nombre de instancia.' : 'Descargá tu planilla como CSV UTF-8 e importala para empezar.'} action={!importInfo && canManage ? <button type="button" className="button subtle" onClick={() => fileInput.current?.click()}>Importar el primer CSV</button> : undefined} /></td></tr>}
+          }) : <tr><td colSpan={columns + 1}><StateBlock variant="empty" title={importInfo ? t('No hay coincidencias para esta búsqueda.') : t('Todavía no hay un inventario de infraestructura cargado.')} hint={importInfo ? t('Probá con otra IP o nombre de instancia.') : t('Descargá tu planilla como CSV UTF-8 e importala para empezar.')} action={!importInfo && canManage ? <button type="button" className="button subtle" onClick={() => fileInput.current?.click()}>{t('Importar el primer CSV')}</button> : undefined} /></td></tr>}
       </tbody></table></div>
       {importInfo && <p className="connection-inventory-source">Fuente: {importInfo.file_name} · {formatNumber(importInfo.row_count)} filas · importado <time dateTime={importInfo.imported_at} title={dateTimeHint(importInfo.imported_at)}>{formatDate(importInfo.imported_at)}</time></p>}
       <TablePagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={(nextPage) => { setPage(nextPage); resetSelection(); }} />
     </section>
     {pending && <ConnectionImportDialog fileName={pending.fileName} rows={pending.rows} busy={importing} onConfirm={(mode) => void confirmImport(mode)} onClose={() => setPending(null)} />}
-    {classifying && <SiaPolicyDialog onClose={() => setClassifying(false)} onSaved={(changed) => { setClassifying(false); onNotice(changed ? `${formatNumber(changed)} ${changed === 1 ? 'política clasificada' : 'políticas clasificadas'}` : 'Sin cambios'); void reload(); void executive.reload(); void deviations.reload(); }} />}
+    {classifying && <SiaPolicyDialog onClose={() => setClassifying(false)} onSaved={(changed) => { setClassifying(false); onNotice(changed ? `${formatNumber(changed)} ${changed === 1 ? t('política clasificada') : t('políticas clasificadas')}` : 'Sin cambios'); void reload(); void executive.reload(); void deviations.reload(); }} />}
     </>}
     </div>
     {editing && <ConnectionDestinationDialog row={editing.row} initialIp={editing.ip} environments={environments} responsibles={responsibles} busy={saving} error={saveError} onSave={(values) => void save(values)} onClose={() => setEditing(null)} />}

@@ -10,6 +10,7 @@ import { PieChart } from './pie-chart';
 import type { AnalyticsBucket } from '../types/analytics';
 import type { DashboardWidget } from '../types/dashboard-widgets';
 import './dashboard-widget.css';
+import { t } from '../i18n/index.ts';
 
 type DashboardChartData = NonNullable<DashboardWidget['chart_data']>;
 
@@ -130,7 +131,7 @@ function ExpandedRealPreview({ kind, buckets, chartData }: { kind: NonNullable<D
  * explains the chart form without being mistaken for current inventory. */
 function ExpandedExamplePreview({ kind }: { kind: NonNullable<DashboardPickerOption['previewKind']> }) {
   return <div className="dashboard-widget-picker-example-expanded">
-    <span>Vista de ejemplo</span>
+    <span>{t('Vista de ejemplo')}</span>
     <MiniChartPreview kind={kind} />
     <small>La forma se conserva al agregarlo; los datos se calculan sobre el inventario actual.</small>
   </div>;
@@ -185,7 +186,7 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
     setCategory(null);
     setOpen(true);
   }, [openRequest]);
-  const label = kind === 'data' ? 'dato' : 'gráfico';
+  const label = kind === 'data' ? 'dato' : t('gráfico');
   const availableGroups = groups.filter((group) => group.options.length);
   const allOptions = availableGroups.flatMap((group) => group.options);
   const normalizedQuery = query.trim().toLocaleLowerCase('es');
@@ -210,7 +211,7 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
       {kind === 'chart'
         ? <MiniChartPreview kind={option.previewKind ?? 'bars'} buckets={option.previewBuckets} chartData={option.previewChartData} />
         : <><span className="dashboard-widget-picker-icon">{option.previewIcon}</span><strong className="dashboard-widget-picker-value">{option.previewLabel ?? '—'}</strong></>}
-      <span className="dashboard-widget-picker-example">{hasRealPreview ? 'Datos actuales' : 'Ejemplo'}</span>
+      <span className="dashboard-widget-picker-example">{hasRealPreview ? t('Datos actuales') : t('Ejemplo')}</span>
     </div>
     {/* On hover the larger preview takes the place of the card's own text, so it never covers a neighbour. */}
     {kind === 'chart' ? <span className="dashboard-widget-picker-expanded" aria-hidden="true">
@@ -220,26 +221,26 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
       {option.unavailable ? null : <small className="dashboard-widget-picker-expanded-source">{option.sourceLabel}</small>}
     </span> : null}
     <div className="dashboard-widget-picker-copy">
-      <span className="dashboard-widget-picker-type">{option.visualization ?? (kind === 'data' ? 'Indicador' : 'Comparación')}{option.recommended ? <em className="dashboard-widget-picker-recommended"><Sparkles size={10} aria-hidden="true" /> Recomendado</em> : null}</span>
+      <span className="dashboard-widget-picker-type">{option.visualization ?? (kind === 'data' ? t('Indicador') : t('Comparación'))}{option.recommended ? <em className="dashboard-widget-picker-recommended"><Sparkles size={10} aria-hidden="true" /> {t('Recomendado')}</em> : null}</span>
       <h3>{option.title}</h3><p>{option.description}</p>
       {/* Chart tiles show source and period in their hover preview; data tiles keep them one click away behind a "?".
           An unavailable option keeps them inline, because they are the reason it cannot be added. */}
       {option.unavailable
         ? <small>{option.sourceLabel}</small>
-        : kind === 'data' ? <small className="dashboard-widget-picker-source">Fuente y período<HelpHint label={`Fuente y período de ${option.title}`}><p>{option.sourceLabel}</p></HelpHint></small> : null}
+        : kind === 'data' ? <small className="dashboard-widget-picker-source">{t('Fuente y período')}<HelpHint label={`Fuente y período de ${option.title}`}><p>{option.sourceLabel}</p></HelpHint></small> : null}
     </div>
     </div>
     {option.unavailable
-      ? <span className="dashboard-widget-picker-unavailable">Requiere más datos</span>
+      ? <span className="dashboard-widget-picker-unavailable">{t('Requiere más datos')}</span>
       : option.added
-        ? <span className="dashboard-widget-picker-added"><Check size={13} aria-hidden="true" /> Ya está en la vista</span>
-        : <button type="button" className="button subtle dashboard-widget-picker-add" aria-label={`Agregar ${option.title}`} disabled={disabled || limitReached} onClick={() => { onAdd(option.id); closePicker(); }}><Plus size={13} /> Agregar</button>}
+        ? <span className="dashboard-widget-picker-added"><Check size={13} aria-hidden="true" /> {t('Ya está en la vista')}</span>
+        : <button type="button" className="button subtle dashboard-widget-picker-add" aria-label={`Agregar ${option.title}`} disabled={disabled || limitReached} onClick={() => { onAdd(option.id); closePicker(); }}><Plus size={13} /> {t('Agregar')}</button>}
   </div>;
   };
 
   return <div className="dashboard-add-widget">
     <button type="button" className="button subtle dashboard-add-toggle" aria-expanded={open} aria-haspopup="dialog" title={limitReached ? 'Máximo 6 por sección' : undefined} onClick={() => { setQuery(''); setCategory(null); setOpen(true); }} disabled={disabled || limitReached}><Plus size={14} /> {`Agregar ${label}`}</button>
-    {limitReached ? <small className="dashboard-add-limit" role="status">Máximo 6 por sección</small> : null}
+    {limitReached ? <small className="dashboard-add-limit" role="status">{t('Máximo 6 por sección')}</small> : null}
     {shown ? createPortal(<div
       className={'dashboard-widget-picker-backdrop' + (leaving ? ' is-leaving' : '')}
       role="presentation"
@@ -254,21 +255,21 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
             <h2 id={`dashboard-picker-title-${kind}`}>{heading}</h2>
             <p>{helper}</p>
           </div>
-          <button type="button" className="icon-button" aria-label="Cerrar selector" onClick={closePicker}><X size={17} /></button>
+          <button type="button" className="icon-button" aria-label={t('Cerrar selector')} onClick={closePicker}><X size={17} /></button>
         </header>
-        <div className="dashboard-widget-picker-meta"><span>{matches.length === allOptions.length ? `${allOptions.length} ${label}s` : `${matches.length} de ${allOptions.length} ${label}s`}</span><small>Se agrega al final de esta sección</small></div>
+        <div className="dashboard-widget-picker-meta"><span>{matches.length === allOptions.length ? `${allOptions.length} ${label}s` : `${matches.length} de ${allOptions.length} ${label}s`}</span><small>{t('Se agrega al final de esta sección')}</small></div>
         <label className="dashboard-widget-picker-search-wrap"><Search size={15} aria-hidden="true" /><input type="search" className="dashboard-widget-picker-search" aria-label={`Buscar ${label}`} placeholder={`Buscar ${label} por nombre o descripción`} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
         {availableGroups.length > 1 ? <div className="dashboard-widget-picker-chips" role="group" aria-label={`Filtrar ${label}s por categoría`}>
-          <button type="button" className={`dashboard-widget-picker-chip${category === null ? ' selected' : ''}`} aria-pressed={category === null} onClick={() => setCategory(null)}>Todos</button>
+          <button type="button" className={`dashboard-widget-picker-chip${category === null ? ' selected' : ''}`} aria-pressed={category === null} onClick={() => setCategory(null)}>{t('Todos')}</button>
           {availableGroups.map((group) => <button key={group.id} type="button" className={`dashboard-widget-picker-chip${category === group.id ? ' selected' : ''}`} aria-pressed={category === group.id} title={group.description} onClick={() => setCategory((current) => current === group.id ? null : group.id)}>{group.title}</button>)}
         </div> : null}
         {onCreateCustom ? <button type="button" className="dashboard-widget-picker-create" onClick={() => { closePicker(); onCreateCustom(); }}>
           <span className="dashboard-widget-picker-group-icon"><Wand2 size={20} aria-hidden="true" /></span>
-          <span><strong>Crear desde cero</strong><small>Definí nombre, medida, filtros y objetivo.</small></span>
+          <span><strong>{t('Crear desde cero')}</strong><small>{t('Definí nombre, medida, filtros y objetivo.')}</small></span>
           <ChevronRight size={17} aria-hidden="true" />
         </button> : null}
         {matches.length
-          ? <div className="dashboard-widget-picker-grid" role="list" aria-label={kind === 'data' ? 'Datos disponibles' : 'Gráficos disponibles'}>{matches.map(renderCard)}</div>
+          ? <div className="dashboard-widget-picker-grid" role="list" aria-label={kind === 'data' ? t('Datos disponibles') : t('Gráficos disponibles')}>{matches.map(renderCard)}</div>
           : <p className="dashboard-widget-picker-empty">Sin coincidencias para “{query.trim()}”.</p>}
       </section>
     </div>, document.body) : null}

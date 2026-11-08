@@ -2,19 +2,20 @@ import { NETSKOPE_DEVICE_INVENTORY_HELP, NETSKOPE_USER_INVENTORY_HELP } from './
 import { NETSKOPE_SYNC_PRESENTATION } from './lib/netskope-sync-evidence.ts';
 import { BarChart3, Gauge, ListChecks, Monitor, Network, ShieldAlert, ShieldCheck, ShieldHalf, UserCog, Users } from 'lucide-react';
 import type { FrontendRegistration, RuntimeRegistration } from '../../source-contract.ts';
+import { t } from '../../cross/i18n/index.ts';
 
 const runtime: RuntimeRegistration = { id: 'netskope', refreshDomain: 'dlp', load: () => import('./router.tsx').then((module) => ({ default: module.NetskopeDomainRouter })), gateWorkspace: true, suspense: false, clearErrorOnNotice: true };
 
 /** Static declarations; runtime components stay behind a literal lazy import. */
 export const registration = {
   id: 'netskope/sse',
-  toolLabel: 'Netskope',
+  toolLabel: t('Netskope'),
   workspaces: [
     {
       id: 'netskope', path: '/netskope', legacyPaths: ['/netskope/alerts'], domain: 'dlp',
-      label: 'Métricas', detail: '¿Cómo están los equipos y las alertas?', icon: BarChart3,
-      description: 'Consultá indicadores de equipos, usuarios y volumen de alertas.',
-      introHelp: { label: 'Lectura del tablero Netskope', paragraphs: ['Los dispositivos consideran equipos con evento en los últimos 7 días, salvo los indicadores que declaran otro período. Cada indicador conserva población, filtros y captura en su ayuda. Las alertas son conteos agregados, no eventos individuales.', 'Podés editar el orden, tamaño y filtros de los bloques. Los cambios se guardan sólo al confirmarlos.'] },
+      label: t('Métricas'), detail: t('¿Cómo están los equipos y las alertas?'), icon: BarChart3,
+      description: t('Consultá indicadores de equipos, usuarios y volumen de alertas.'),
+      introHelp: { label: t('Lectura del tablero Netskope'), paragraphs: [t(t('Los dispositivos consideran equipos con evento en los últimos 7 días, salvo los indicadores que declaran otro período. Cada indicador conserva población, filtros y captura en su ayuda. Las alertas son conteos agregados, no eventos individuales.')), t(t('Podés editar el orden, tamaño y filtros de los bloques. Los cambios se guardan sólo al confirmarlos.'))] },
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'netskope:read',
       order: 14,
       runtime: 'netskope',
@@ -24,8 +25,8 @@ export const registration = {
     },
     {
       id: 'netskopePosture', path: '/netskope/posture', legacyPaths: ['/netskope/policies'], domain: 'dlp',
-      label: 'Postura', detail: '¿Qué problemas requieren atención?', icon: ShieldCheck,
-      description: 'Identificá equipos y usuarios con hallazgos y consultá las recomendaciones.',
+      label: t('Postura'), detail: t('¿Qué problemas requieren atención?'), icon: ShieldCheck,
+      description: t('Identificá equipos y usuarios con hallazgos y consultá las recomendaciones.'),
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'netskope:read',
       order: 14.5,
       runtime: 'netskope',
@@ -35,8 +36,8 @@ export const registration = {
     },
     {
       id: 'netskopeOperations', path: '/netskope/operations', legacyPaths: ['/netskope/steering'], domain: 'dlp',
-      label: 'Equipos', detail: '¿Cómo está la flota y qué cambió?', icon: ListChecks,
-      description: 'Compará grupos de equipos y revisá cambios del inventario.',
+      label: t('Equipos'), detail: t('¿Cómo está la flota y qué cambió?'), icon: ListChecks,
+      description: t('Compará grupos de equipos y revisá cambios del inventario.'),
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'netskope:read',
       order: 15,
       runtime: 'netskope',
@@ -46,8 +47,8 @@ export const registration = {
     },
     {
       id: 'netskopeDlp', path: '/netskope/dlp', domain: 'dlp',
-      label: 'Alertas DLP', detail: 'Políticas que disparan alertas', icon: ShieldAlert,
-      description: 'Políticas que disparan alertas DLP en los últimos 30 días. No se muestran archivos ni su contenido.',
+      label: t('Alertas DLP'), detail: t('Políticas que disparan alertas'), icon: ShieldAlert,
+      description: t('Políticas que disparan alertas DLP en los últimos 30 días. No se muestran archivos ni su contenido.'),
       // Pausada (NSK-POLICY-004): sin las reglas de Real-time Protection (NSK-POLICY-003) el nombre de política del incidente no se puede mapear. Sigue abierta por URL con netskope:dlp_read.
       catalog: false, switcher: false, gate: 'strict', alternatePermission: 'netskope:dlp_read',
       order: 16,
@@ -57,8 +58,8 @@ export const registration = {
     },
     {
       id: 'netskopeUci', path: '/netskope/uci', domain: 'dlp',
-      label: 'Usuarios con señales de riesgo', detail: 'Confianza baja o moderada según Netskope', icon: ShieldHalf,
-      description: 'Revisá qué cuentas presentan señales de riesgo y cómo cambió su índice de confianza en la última semana.',
+      label: t('Usuarios con señales de riesgo'), detail: t('Confianza baja o moderada según Netskope'), icon: ShieldHalf,
+      description: t('Revisá qué cuentas presentan señales de riesgo y cómo cambió su índice de confianza en la última semana.'),
       catalog: false, switcher: false, gate: 'strict', alternatePermission: 'netskope:uba_read',
       recentWorkspace: 'netskopeDemSites',
       order: 16.2,
@@ -68,8 +69,8 @@ export const registration = {
     },
     {
       id: 'netskopeChains', path: '/netskope/chains', domain: 'dlp',
-      label: 'Relaciones (enlace histórico)', detail: 'Abre el inventario filtrado', icon: Network,
-      description: 'Enlace histórico al inventario único de equipos Netskope, conservando el usuario o dispositivo seleccionado.',
+      label: t('Relaciones (enlace histórico)'), detail: t('Abre el inventario filtrado'), icon: Network,
+      description: t('Enlace histórico al inventario único de equipos Netskope, conservando el usuario o dispositivo seleccionado.'),
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'netskope:read',
       order: 17,
       runtime: 'netskope',
@@ -79,8 +80,8 @@ export const registration = {
     },
     {
       id: 'netskopeInventory', path: '/netskope/inventory', domain: 'dlp',
-      label: 'Inventario', detail: '¿Qué equipos y usuarios están registrados?', icon: Monitor,
-      description: "Buscá registros y revisá sus atributos y fechas de observación.",
+      label: t('Inventario'), detail: t('¿Qué equipos y usuarios están registrados?'), icon: Monitor,
+      description: t('Buscá registros y revisá sus atributos y fechas de observación.'),
       introHelp: NETSKOPE_DEVICE_INVENTORY_HELP,
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'netskope:read',
       order: 18,
@@ -91,8 +92,8 @@ export const registration = {
     },
     {
       id: 'netskopeDemSites', path: '/netskope/experience', legacyPaths: ['/netskope/dem/sites'], domain: 'dlp',
-      label: 'Riesgo', detail: '¿Qué personas tienen señales de riesgo?', icon: Users,
-      description: 'Priorizá las señales de riesgo y abrí la ficha de cada persona con su confianza, anomalías y equipos.',
+      label: t('Riesgo'), detail: t('¿Qué personas tienen señales de riesgo?'), icon: Users,
+      description: t('Priorizá las señales de riesgo y abrí la ficha de cada persona con su confianza, anomalías y equipos.'),
       catalog: true, switcher: true, gate: 'manage', alternatePermission: 'netskope:read',
       order: 19,
       runtime: 'netskope',
@@ -103,8 +104,8 @@ export const registration = {
     {
       /* NSK-EXP-OFFICE-001/002: the performance (ADEM) measured by Custodia lives here; Riesgo answers only risk. */
       id: 'netskopeOfficeExperience', path: '/netskope/office', domain: 'dlp',
-      label: 'Rendimiento', detail: '¿Cómo funcionan las apps y la red en la oficina?', icon: Gauge,
-      description: 'Seguí semana a semana el rendimiento medido en la oficina y su evolución diaria, por empresa y por persona.',
+      label: t('Rendimiento'), detail: t('¿Cómo funcionan las apps y la red en la oficina?'), icon: Gauge,
+      description: t('Seguí semana a semana el rendimiento medido en la oficina y su evolución diaria, por empresa y por persona.'),
       catalog: true, switcher: true, gate: 'strict', alternatePermission: 'netskope:uba_read',
       order: 19.2,
       runtime: 'netskope',
@@ -114,8 +115,8 @@ export const registration = {
     },
     {
       id: 'netskopeAdmins', path: '/netskope/admins', domain: 'dlp',
-      label: 'Administradores', detail: '¿Quién administra Netskope y con qué permisos?', icon: UserCog,
-      description: 'Revisá las cuentas administrativas del tenant, su rol y qué abre cada rol.',
+      label: t('Administradores'), detail: t('¿Quién administra Netskope y con qué permisos?'), icon: UserCog,
+      description: t('Revisá las cuentas administrativas del tenant, su rol y qué abre cada rol.'),
       catalog: true, switcher: true, gate: 'strict', alternatePermission: 'netskope:admin_inventory_read',
       order: 19.5,
       runtime: 'netskope',
@@ -125,8 +126,8 @@ export const registration = {
     },
     {
       id: 'netskopeUsers', path: '/netskope/users', domain: 'dlp',
-      label: 'Inventario', detail: 'Corte de cobertura por usuario', icon: Users,
-      description: "Consultá usuarios Netskope, estados y fechas de observación.",
+      label: t('Inventario'), detail: t('Corte de cobertura por usuario'), icon: Users,
+      description: t('Consultá usuarios Netskope, estados y fechas de observación.'),
       introHelp: NETSKOPE_USER_INVENTORY_HELP,
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'netskope:read',
       order: 30,
@@ -137,8 +138,8 @@ export const registration = {
     },
     {
       id: 'netskopeDevices', path: '/netskope/devices', domain: 'dlp',
-      label: 'Inventario', detail: '¿De quién es cada equipo?', icon: Monitor,
-      description: "Revisá equipos, versiones de cliente y señales de Netskope.",
+      label: t('Inventario'), detail: t('¿De quién es cada equipo?'), icon: Monitor,
+      description: t('Revisá equipos, versiones de cliente y señales de Netskope.'),
       introHelp: NETSKOPE_DEVICE_INVENTORY_HELP,
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'netskope:read',
       order: 31,
@@ -149,12 +150,12 @@ export const registration = {
     },
   ],
   domains: [
-    { id: 'dlp', order: 2, label: 'Netskope', blurb: 'Inventario, alertas y experiencia de seguridad Netskope', status: 'active', access: 'domain', alternatePermissions: ['access:manage', 'netskope:read', 'netskope:dlp_read', 'netskope:admin_inventory_read'], sectionNav: true, product: { id: 'netskope', label: 'Netskope', description: 'Inventario, alertas y experiencia de seguridad Netskope' } }
+    { id: 'dlp', order: 2, label: t('Netskope'), blurb: t('Inventario, alertas y experiencia de seguridad Netskope'), status: 'active', access: 'domain', alternatePermissions: ['access:manage', 'netskope:read', 'netskope:dlp_read', 'netskope:admin_inventory_read'], sectionNav: true, product: { id: 'netskope', label: t('Netskope'), description: t('Inventario, alertas y experiencia de seguridad Netskope') } }
   ],
   categories: [
-    { id: 'netskope_inventory', label: 'Netskope', order: 7 },
+    { id: 'netskope_inventory', label: t('Netskope'), order: 7 },
   ],
-  sync: { presentation: NETSKOPE_SYNC_PRESENTATION, source: 'netskope', meta: { label: 'Netskope', image: '/netskope-full-white.png', fallback: 'N' }, domain: 'dlp', tool: 'netskope', toolMeta: { label: 'Netskope', image: '/netskope-full-white.png', fallback: 'N' }, componentLabel: 'Netskope', componentLabelsByFile: { 'netskope-alerts-api': 'Netskope · alertas', 'netskope-dlp-api': 'Netskope · captura DLP', 'netskope-uci-api': 'Netskope · confianza de usuarios', 'netskope-steering-api': 'Netskope · steering' }, sourceHints: ['netskope'], noticeHints: ['netskope'], hintOrder: 0 },
+  sync: { presentation: NETSKOPE_SYNC_PRESENTATION, source: 'netskope', meta: { label: t('Netskope'), image: '/netskope-full-white.png', fallback: 'N' }, domain: 'dlp', tool: 'netskope', toolMeta: { label: t('Netskope'), image: '/netskope-full-white.png', fallback: 'N' }, componentLabel: t('Netskope'), componentLabelsByFile: { 'netskope-alerts-api': t('Netskope · alertas'), 'netskope-dlp-api': t('Netskope · captura DLP'), 'netskope-uci-api': t('Netskope · confianza de usuarios'), 'netskope-steering-api': t('Netskope · steering') }, sourceHints: ['netskope'], noticeHints: ['netskope'], hintOrder: 0 },
   runtime,
-  manualSync: { domain: 'dlp', kind: 'direct', source: 'netskope', path: '/ingestion/netskope/runs', label: 'Actualizar Netskope', detail: 'Sincroniza sólo Netskope', runningTitle: 'Sincronización Netskope en progreso', runningDetail: 'Actualizando el inventario Netskope en una corrida independiente.', successTitle: 'Netskope actualizado', successDetail: 'El inventario Netskope se actualizó correctamente.', errorTitle: 'Sincronización Netskope interrumpida', errorFallback: 'No se pudo actualizar Netskope' },
+  manualSync: { domain: 'dlp', kind: 'direct', source: 'netskope', path: '/ingestion/netskope/runs', label: t('Actualizar Netskope'), detail: t('Sincroniza sólo Netskope'), runningTitle: t('Sincronización Netskope en progreso'), runningDetail: t('Actualizando el inventario Netskope en una corrida independiente.'), successTitle: t('Netskope actualizado'), successDetail: t('El inventario Netskope se actualizó correctamente.'), errorTitle: t('Sincronización Netskope interrumpida'), errorFallback: t('No se pudo actualizar Netskope') },
 } as const satisfies FrontendRegistration;

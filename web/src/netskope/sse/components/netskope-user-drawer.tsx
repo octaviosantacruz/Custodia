@@ -12,6 +12,7 @@ import { NetskopeUserDevices } from './netskope-user-devices';
 import { NetskopeUserAnomalies } from './netskope-user-anomalies';
 import { NetskopeUserWeek } from './netskope-user-week';
 import './netskope-user-drawer.css';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type NetskopeUserSelection = { userId: number | null; email: string; name: string };
 type Props = { user: NetskopeUserSelection; refreshKey: number; canReadUba: boolean; onUnauthorized: () => void; onClose: () => void; fallbackFocusRef: RefObject<HTMLInputElement | null> };
@@ -37,28 +38,28 @@ export function NetskopeUserDrawer({ user, refreshKey, canReadUba, onUnauthorize
   const userId = user.userId ?? (resolved.data && resolved.data.total <= resolved.data.rows.length && matches.length === 1 ? matches[0].object_id : null);
   const reading = confidence.data?.rows?.find((row) => row.email.trim().toLowerCase() === user.email.trim().toLowerCase());
   return <div ref={dialogRef} className="drawer-layer" role="dialog" aria-modal="true" aria-labelledby="nsk-user-drawer-title" tabIndex={-1}>
-    <button className="drawer-backdrop" type="button" aria-label="Cerrar ficha del usuario" onClick={onClose} />
+    <button className="drawer-backdrop" type="button" aria-label={t('Cerrar ficha del usuario')} onClick={onClose} />
     <aside className="detail-drawer nsk-user-drawer">
       <div className="detail-title">
         <div className="detail-icon"><UserRound size={18} aria-hidden /></div>
-        <div className="detail-heading"><p className="eyebrow">FICHA DEL USUARIO</p><h2 id="nsk-user-drawer-title">{user.name}</h2><p>{user.email || 'Sin correo informado'}</p></div>
-        <button ref={closeRef} type="button" className="icon-button" aria-label="Cerrar ficha" onClick={onClose}><X size={18} aria-hidden /></button>
+        <div className="detail-heading"><p className="eyebrow">{t('FICHA DEL USUARIO')}</p><h2 id="nsk-user-drawer-title">{user.name}</h2><p>{user.email || 'Sin correo informado'}</p></div>
+        <button ref={closeRef} type="button" className="icon-button" aria-label={t('Cerrar ficha')} onClick={onClose}><X size={18} aria-hidden /></button>
       </div>
-      {canReadUba ? <section className="detail-section nsk-user-confidence" aria-label="Índice de confianza del usuario">
-        <h3>Índice de confianza</h3><p>{UCI_EXPLANATION} <strong>{UCI_SCALE}</strong></p>
-        {confidence.isPending ? <StateBlock compact variant="loading" title="Leyendo el índice de confianza…" />
-          : confidence.isError ? <StateBlock compact variant="error" title="No se pudo consultar el índice de confianza" action={<button className="button subtle" type="button" onClick={() => void confidence.refetch()}>Reintentar confianza</button>} />
+      {canReadUba ? <section className="detail-section nsk-user-confidence" aria-label={t('Índice de confianza del usuario')}>
+        <h3>{t('Índice de confianza')}</h3><p>{UCI_EXPLANATION} <strong>{UCI_SCALE}</strong></p>
+        {confidence.isPending ? <StateBlock compact variant="loading" title={t('Leyendo el índice de confianza…')} />
+          : confidence.isError ? <StateBlock compact variant="error" title={t('No se pudo consultar el índice de confianza')} action={<button className="button subtle" type="button" onClick={() => void confidence.refetch()}>{t('Reintentar confianza')}</button>} />
           : reading ? <><p className="nsk-user-confidence-score"><strong>{reading.score} / 1000</strong> · Confianza {UCI_RATING_LABELS[reading.rating].toLowerCase()} · {uciDeltaLabel(uciDelta(reading))}</p>
-            <p>Lectura: <DateTime value={reading.scored_at} /> · Cambio respecto de hace aproximadamente 7 días.</p></>
-          : <p>Sin lectura de confianza para esta persona en la lista consultada. Su ausencia no confirma que esté libre de riesgo.</p>}
+            <p>{t('Lectura:')} <DateTime value={reading.scored_at} /> {t('· Cambio respecto de hace aproximadamente 7 días.')}</p></>
+          : <p>{t('Sin lectura de confianza para esta persona en la lista consultada. Su ausencia no confirma que esté libre de riesgo.')}</p>}
       </section> : null}
       {canReadUba && user.email ? <NetskopeUserWeek email={user.email} refreshKey={refreshKey} onUnauthorized={onUnauthorized} /> : null}
       {userId !== null ? <>
         <NetskopeUserDevices userId={userId} refreshKey={refreshKey} onUnauthorized={onUnauthorized} />
         {canReadUba ? <NetskopeUserAnomalies userId={userId} refreshKey={refreshKey} onUnauthorized={onUnauthorized} /> : null}
-      </> : resolved.isPending ? <StateBlock variant="loading" title="Buscando la identidad exacta del usuario…" />
-        : resolved.isError ? <StateBlock variant="error" title="No se pudo consultar la identidad" action={<button className="button subtle" type="button" onClick={() => void resolved.refetch()}>Reintentar identidad</button>} />
-        : <StateBlock variant="empty" title="Sin una identidad única en el inventario" hint="No se pueden atribuir equipos o anomalías sin una coincidencia exacta y única por correo." />}
+      </> : resolved.isPending ? <StateBlock variant="loading" title={t('Buscando la identidad exacta del usuario…')} />
+        : resolved.isError ? <StateBlock variant="error" title={t('No se pudo consultar la identidad')} action={<button className="button subtle" type="button" onClick={() => void resolved.refetch()}>{t('Reintentar identidad')}</button>} />
+        : <StateBlock variant="empty" title={t('Sin una identidad única en el inventario')} hint="No se pueden atribuir equipos o anomalías sin una coincidencia exacta y única por correo." />}
     </aside>
   </div>;
 }

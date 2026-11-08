@@ -7,6 +7,7 @@ import { fetchNetskopeExperienceDevices, fetchNetskopeExperienceDetail } from '.
 import { epochSecondsToIso } from '../../../cross/lib/format';
 import { StateBlock } from '../../../cross/components/state-block';
 import { HelpHint } from '../../../cross/components/help-hint';
+import { t } from '../../../cross/i18n/index.ts';
 
 const WINDOWS = [2, 24, 48] as const;
 
@@ -39,21 +40,21 @@ export function NetskopeUserExperience({ userId, user, refreshKey = 0, onUnautho
     if ([devices.error, detail.error].some((error) => error instanceof ApiError && error.status === 401)) onUnauthorized?.();
   }, [devices.error, detail.error, onUnauthorized]);
 
-  return <section className="detail-section" aria-label="Observaciones del usuario Netskope">
+  return <section className="detail-section" aria-label={t('Observaciones del usuario Netskope')}>
     <div className="netskope-experience-toolbar">
-      <h3>Observaciones por dispositivo</h3>
+      <h3>{t('Observaciones por dispositivo')}</h3>
       <div className="netskope-experience-actions">
-        <div className="netskope-window-picker" role="group" aria-label="Ventana de observación ADEM">
+        <div className="netskope-window-picker" role="group" aria-label={t('Ventana de observación ADEM')}>
           {WINDOWS.map((value) => <button key={value} type="button" aria-label={`${value} horas`} aria-pressed={hours === value} onClick={() => { setHours(value); setDeviceId(''); }}>{value} h</button>)}
         </div>
-        <button className="button subtle" type="button" disabled={devices.isFetching || detail.isFetching} onClick={() => void devices.refetch()}><RefreshCw size={13} aria-hidden /> Actualizar</button>
+        <button className="button subtle" type="button" disabled={devices.isFetching || detail.isFetching} onClick={() => void devices.refetch()}><RefreshCw size={13} aria-hidden /> {t('Actualizar')}</button>
       </div>
     </div>
-    {devices.isPending && <StateBlock variant="loading" title="Consultando dispositivos ADEM" />}
-    {devices.isError && <StateBlock variant="error" title="No se pudieron consultar los dispositivos ADEM" hint="Verificá disponibilidad y permisos del token. La consulta puede reintentarse con Actualizar." />}
+    {devices.isPending && <StateBlock variant="loading" title={t('Consultando dispositivos ADEM')} />}
+    {devices.isError && <StateBlock variant="error" title={t('No se pudieron consultar los dispositivos ADEM')} hint="Verificá disponibilidad y permisos del token. La consulta puede reintentarse con Actualizar." />}
     {window && !devices.isError && <>
       <p className="netskope-experience-window" title={`Ventana de ${hours} h · observación histórica de ADEM`}><DateTime value={epochSecondsToIso(window.window_start)} /> – <DateTime value={epochSecondsToIso(window.window_end)} /></p>
-      {window.devices.length === 0 ? <StateBlock variant="empty" title="Sin dispositivos observados en esta ventana" /> : <div className="netskope-experience-observations" role="region" aria-label={`Observaciones de ${user?.label || `usuario Netskope ${userId}`}`}>
+      {window.devices.length === 0 ? <StateBlock variant="empty" title={t('Sin dispositivos observados en esta ventana')} /> : <div className="netskope-experience-observations" role="region" aria-label={`Observaciones de ${user?.label || `usuario Netskope ${userId}`}`}>
         <div className="netskope-experience-device-column">
           <span className="netskope-experience-column-label">{window.devices.length === 1 ? 'Dispositivo observado' : `${window.devices.length} dispositivos observados`}</span>
           {window.devices.map((device) => {
@@ -67,16 +68,16 @@ export function NetskopeUserExperience({ userId, user, refreshKey = 0, onUnautho
         </div>
         <article className="netskope-experience-pop" aria-live="polite">
           <span className="netskope-experience-icon"><MapPin size={18} aria-hidden /></span>
-          <span><small>POP informado por ADEM <HelpHint label="POP informado por ADEM"><p>No representa latencia, ubicación personal, egreso, cobertura ni ruta de red, y no confirma conexión en vivo. No se vincula con el ID del inventario SSE.</p></HelpHint></small>
-            {!selected ? <strong>Elegí un dispositivo</strong> : null}
-            {selected && detail.isPending ? <strong>Consultando…</strong> : null}
-            {selected && detail.isError ? <><strong>No disponible</strong><button className="button subtle" type="button" onClick={() => void detail.refetch()}>Reintentar</button></> : null}
-            {detail.data && !detail.isError ? <><strong className="mono">{detail.data.pop || 'Sin dato'}</strong><em>{detail.data.last_activity === null ? 'Última actividad: Sin dato' : <>Última actividad: <DateTime value={epochSecondsToIso(detail.data.last_activity)} /></>}</em></> : null}
+          <span><small>{t('POP informado por ADEM')} <HelpHint label={t('POP informado por ADEM')}><p>{t('No representa latencia, ubicación personal, egreso, cobertura ni ruta de red, y no confirma conexión en vivo. No se vincula con el ID del inventario SSE.')}</p></HelpHint></small>
+            {!selected ? <strong>{t('Elegí un dispositivo')}</strong> : null}
+            {selected && detail.isPending ? <strong>{t('Consultando…')}</strong> : null}
+            {selected && detail.isError ? <><strong>{t('No disponible')}</strong><button className="button subtle" type="button" onClick={() => void detail.refetch()}>{t('Reintentar')}</button></> : null}
+            {detail.data && !detail.isError ? <><strong className="mono">{detail.data.pop || 'Sin dato'}</strong><em>{detail.data.last_activity === null ? 'Última actividad: Sin dato' : <>{t('Última actividad:')} <DateTime value={epochSecondsToIso(detail.data.last_activity)} /></>}</em></> : null}
           </span>
         </article>
       </div>}
     </>}
-    {detail.data?.activity_status === 'outside_window' ? <p className="netskope-experience-freshness is-warning">Fecha fuera de la ventana consultada.</p> : null}
-    {detail.data?.activity_status === 'unknown' ? <p className="netskope-experience-freshness">Sin dato de última actividad.</p> : null}
+    {detail.data?.activity_status === 'outside_window' ? <p className="netskope-experience-freshness is-warning">{t('Fecha fuera de la ventana consultada.')}</p> : null}
+    {detail.data?.activity_status === 'unknown' ? <p className="netskope-experience-freshness">{t('Sin dato de última actividad.')}</p> : null}
   </section>;
 }

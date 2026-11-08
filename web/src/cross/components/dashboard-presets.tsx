@@ -2,6 +2,7 @@ import { LayoutTemplate, RotateCcw, Trash2 } from 'lucide-react';
 import { usePopover } from '../hooks/use-popover';
 import type { DashboardTeamTemplate } from '../lib/dashboard-team-templates-api';
 import './dashboard-widget.css';
+import { t } from '../i18n/index.ts';
 
 export type DashboardPresetOption = {
   id: string;
@@ -24,8 +25,8 @@ export function DashboardPresetMenu<T extends DashboardPresetOption, W = unknown
 }) {
   const { open, setOpen, ref } = usePopover<HTMLDivElement>();
   return <div className="dashboard-preset-menu" ref={ref}>
-    <button type="button" className="button subtle" aria-haspopup="menu" aria-expanded={open} disabled={disabled} title="Aplicar una vista inicial por rol" onClick={() => setOpen((current) => !current)}><LayoutTemplate size={14} aria-hidden="true" /> Vistas iniciales</button>
-    {open ? <div className="dashboard-preset-popover" role="menu" aria-label="Vistas iniciales">
+    <button type="button" className="button subtle" aria-haspopup="menu" aria-expanded={open} disabled={disabled} title={t('Aplicar una vista inicial por rol')} onClick={() => setOpen((current) => !current)}><LayoutTemplate size={14} aria-hidden="true" /> {t('Vistas iniciales')}</button>
+    {open ? <div className="dashboard-preset-popover" role="menu" aria-label={t('Vistas iniciales')}>
       {presets.map((preset) => <button key={preset.id} type="button" role="menuitem" disabled={disabled} onClick={() => { setOpen(false); onSelect(preset); }}>
         <span><strong>{preset.label}</strong><small>{preset.description}</small></span>
       </button>)}
@@ -33,10 +34,10 @@ export function DashboardPresetMenu<T extends DashboardPresetOption, W = unknown
         <span><strong>{template.role_name}</strong><small>Vista de equipo · versión {template.version}</small></span>
       </button>)}
       <button type="button" role="menuitem" className="dashboard-preset-reset" disabled={disabled} onClick={() => { setOpen(false); onReset(); }}>
-        <RotateCcw size={14} aria-hidden="true" /><span><strong>Restablecer a predeterminada</strong><small>Vuelve a los bloques por defecto de esta fuente.</small></span>
+        <RotateCcw size={14} aria-hidden="true" /><span><strong>{t('Restablecer a predeterminada')}</strong><small>{t('Vuelve a los bloques por defecto de esta fuente.')}</small></span>
       </button>
       <button type="button" role="menuitem" className="dashboard-preset-reset" disabled={disabled} onClick={() => { setOpen(false); onClear(); }}>
-        <Trash2 size={14} aria-hidden="true" /><span><strong>Vaciar vista</strong><small>Quita todos los bloques para armarla desde cero.</small></span>
+        <Trash2 size={14} aria-hidden="true" /><span><strong>{t('Vaciar vista')}</strong><small>{t('Quita todos los bloques para armarla desde cero.')}</small></span>
       </button>
     </div> : null}
   </div>;

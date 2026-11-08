@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNetskopePanel } from '../hooks/use-netskope-panel';
 import { fetchNetskopeRetiredActivity } from '../lib/netskope-api';
 import { formatNumber, relativeTime } from '../../../cross/lib/format';
+import { t } from '../../../cross/i18n/index.ts';
 
 /* The console counts a user as active when any reporting device carries their name, even if every
    account was deleted in Netskope. Custodia retires those identities, so they sit outside the card;
@@ -13,9 +14,9 @@ export function NetskopeRetiredActivity({ days, enabled, refreshKey, onUnauthori
   if (!total) return null;
   return <div className="netskope-retired-activity">
     <button type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
-      +{formatNumber(total)} {total === 1 ? 'usuario dado de baja' : 'usuarios dados de baja'} con equipos activos
+      +{formatNumber(total)} {total === 1 ? t('usuario dado de baja') : t('usuarios dados de baja')} con equipos activos
     </button>
-    {open ? <div className="netskope-retired-activity-list" role="region" aria-label="Usuarios dados de baja con equipos activos">
+    {open ? <div className="netskope-retired-activity-list" role="region" aria-label={t('Usuarios dados de baja con equipos activos')}>
       <p>Todas sus cuentas están borradas en Netskope, pero sus equipos siguen reportando. La consola los cuenta como activos; el inventario no. Vínculo exacto por usuario o correo.</p>
       <ul>{panel.data?.rows.map((row) => <li key={row.object_id}>
         <strong>{row.display_name || row.source_id || `Usuario ${row.object_id}`}</strong>

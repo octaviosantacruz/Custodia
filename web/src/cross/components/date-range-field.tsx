@@ -6,6 +6,7 @@ import {
 } from 'react-aria-components';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import './date-range-field.css';
+import { t } from '../i18n/index.ts';
 
 export type DateRange = { start: string; end: string };
 export type DateRangePreset = { label: string; range: DateRange };
@@ -43,15 +44,15 @@ export function DateRangeField({ label, value, onChange, min, max, presets = [] 
         <DateInput slot="start" className="date-range-field-input">{(segment) => <DateSegment className="date-range-field-segment" segment={segment} />}</DateInput>
         <span className="date-range-field-dash" aria-hidden>–</span>
         <DateInput slot="end" className="date-range-field-input">{(segment) => <DateSegment className="date-range-field-segment" segment={segment} />}</DateInput>
-        <Button className="date-range-field-trigger" aria-label="Abrir calendario"><CalendarDays size={14} aria-hidden /></Button>
+        <Button className="date-range-field-trigger" aria-label={t('Abrir calendario')}><CalendarDays size={14} aria-hidden /></Button>
       </Group>
       <Popover className="date-range-field-popover" offset={6} placement="bottom end">
         <Dialog className="date-range-field-dialog" aria-label={label}>
           <RangeCalendar className="date-range-field-calendar">
             <header className="date-range-field-header">
-              <Button slot="previous" className="date-range-field-nav" aria-label="Mes anterior"><ChevronLeft size={15} aria-hidden /></Button>
+              <Button slot="previous" className="date-range-field-nav" aria-label={t('Mes anterior')}><ChevronLeft size={15} aria-hidden /></Button>
               <Heading className="date-range-field-heading" />
-              <Button slot="next" className="date-range-field-nav" aria-label="Mes siguiente"><ChevronRight size={15} aria-hidden /></Button>
+              <Button slot="next" className="date-range-field-nav" aria-label={t('Mes siguiente')}><ChevronRight size={15} aria-hidden /></Button>
             </header>
             <CalendarGrid className="date-range-field-grid">
               <CalendarGridHeader>{(day) => <CalendarHeaderCell className="date-range-field-weekday">{day}</CalendarHeaderCell>}</CalendarGridHeader>

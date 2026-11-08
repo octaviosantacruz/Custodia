@@ -5,6 +5,7 @@ import { useDialogFocusTrap } from '../hooks/use-dialog-focus-trap';
 import { bucketLabel, formatNumber } from '../lib/format';
 import type { AnalyticsBucket } from '../types/analytics';
 import './pie-chart.css';
+import { t } from '../i18n/index.ts';
 
 const DEFAULT_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)', 'var(--chart-7)', 'var(--chart-8)'];
 
@@ -46,8 +47,8 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
     && population < visibleTotal;
 
   if (!visibleTotal) {
-    if (!populationOptIn) return <div className="pie-chart-empty"><p className="empty">Sin datos</p></div>;
-    return <div className="pie-chart-empty"><p className="empty">{population === 0 ? 'Sin población: porcentaje no calculable' : population === null ? 'Población no informada' : 'Sin datos'}</p></div>;
+    if (!populationOptIn) return <div className="pie-chart-empty"><p className="empty">{t('Sin datos')}</p></div>;
+    return <div className="pie-chart-empty"><p className="empty">{population === 0 ? 'Sin población: porcentaje no calculable' : population === null ? t('Población no informada') : t('Sin datos')}</p></div>;
   }
 
   const center = size / 2;
@@ -89,7 +90,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
   return <>
     {inconsistentPopulation ? <p className="notice warning" role="status">Población inconsistente: total {formatNumber(population)} menor que la suma visible {formatNumber(visibleTotal)}. Porcentajes no calculables.</p> : null}
     <div className="pie-chart">
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Distribución">
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={t('Distribución')}>
       <circle cx={center} cy={center} r={outer - thickness / 2} fill="none" stroke="var(--border-soft)" strokeWidth={thickness} />
       {arcs.map(({ bucket, index, path }) => <path
         key={bucket.key}
@@ -103,7 +104,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
         onMouseLeave={() => { setActiveKey(null); setTooltip(null); }}
       />)}
       <text x="50%" y="48%" textAnchor="middle" className="pie-chart-total">{inconsistentPopulation || populationOptIn && total === null ? '—' : formatNumber(total ?? 0)}</text>
-      <text x="50%" y="64%" textAnchor="middle" className="pie-chart-total-label">{inconsistentPopulation ? 'población inconsistente' : populationOptIn ? centerLabel ?? 'población' : 'total'}</text>
+      <text x="50%" y="64%" textAnchor="middle" className="pie-chart-total-label">{inconsistentPopulation ? 'población inconsistente' : populationOptIn ? centerLabel ?? t('población') : 'total'}</text>
     </svg>
     {activeBucket && tooltip ? <div className="pie-chart-tooltip" role="tooltip" style={{ left: tooltip.x + 12, top: tooltip.y + 12 }}>
       <strong>{labelOf(activeBucket)}</strong> · {formatNumber(activeBucket.count)} · {shareOf(activeBucket)}
@@ -140,7 +141,7 @@ function PieChartDialog({ title, onClose, children }: { title?: string; onClose:
       <section ref={dialogRef} className="catalog-modal pie-chart-dialog" role="dialog" aria-modal="true" aria-label={title ?? 'Distribución completa'} tabIndex={-1}>
         <div className="catalog-modal-header">
           <h2>{title ?? 'Distribución completa'}</h2>
-          <button className="icon-button" type="button" aria-label="Cerrar" title="Cerrar" onClick={onClose}><X size={16} /></button>
+          <button className="icon-button" type="button" aria-label={t('Cerrar')} title={t('Cerrar')} onClick={onClose}><X size={16} /></button>
         </div>
         {children}
       </section>

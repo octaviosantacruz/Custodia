@@ -4,6 +4,7 @@ import type { AuthStatus } from '../types/auth';
 import { hasWorkspaceAccess, type WorkspaceView } from '../lib/workspaces';
 import { HOME_WHEEL_CENTER, radialOrbitLayout, wheelPercent, wheelRay, type RadialWheelNode, type WheelPoint } from '../lib/home-wheel';
 import './home-workspace.css';
+import { t } from '../i18n/index.ts';
 
 type HomeWorkspaceProps = {
   authStatus: AuthStatus;
@@ -30,7 +31,7 @@ export function CustodiaMark({ size }: { size?: number } = {}) {
 /* Keep the greeting typographic and immediately readable. Its short accent
    line adds motion without turning the word itself into an illustration. */
 function GreetingWordmark() {
-  return <span className="home-greeting-wordmark"><span className="home-greeting-text">Hola,</span><span className="home-greeting-accent" aria-hidden="true" /></span>;
+  return <span className="home-greeting-wordmark"><span className="home-greeting-text">{t('Hola,')}</span><span className="home-greeting-accent" aria-hidden="true" /></span>;
 }
 
 function CyberArkLogo() {
@@ -74,18 +75,18 @@ type HomeTool = {
 };
 
 export const HOME_SECTIONS: readonly { id: HomeSection; label: string }[] = [
-  { id: 'transversal', label: 'Conexiones' },
-  { id: 'platform', label: 'Plataformas' },
+  { id: 'transversal', label: t('Conexiones') },
+  { id: 'platform', label: t('Plataformas') },
 ];
 
 /* One list drives both the left actions (grouped by section) and the wheel
    (platform nodes plus the transversal core); a tool without a `view` is
    shown as coming soon. Adding a tool here places it on both. */
 export const HOME_TOOLS: readonly HomeTool[] = [
-  { id: 'people', section: 'transversal', label: 'Conexiones', detail: 'Vista del alcance de cada persona en las herramientas', title: 'Abrir Conexiones para ver el alcance de cada persona en las herramientas, sus registros relacionados y la cobertura de cliente Netskope', logo: CustodiaMark, view: 'person' },
-  { id: 'cyberark', section: 'platform', label: 'CyberArk', detail: 'Gestión de accesos privilegiados', title: 'Abrir el tablero, inventario y accesos de CyberArk', logo: CyberArkLogo, view: 'general' },
-  { id: 'netskope', section: 'platform', label: 'Netskope', detail: 'Visibilidad de equipos, usuarios y alertas de fuga de datos', title: 'Abrir el resumen y el inventario de Netskope', logo: NetskopeLogo, view: 'netskope' },
-  { id: 'bigid', section: 'platform', label: 'BigID DSPM', detail: 'Descubrimiento y postura de seguridad de datos', title: 'BigID DSPM · Próximamente', logo: BigIdLogo },
+  { id: 'people', section: 'transversal', label: t('Conexiones'), detail: t('Vista del alcance de cada persona en las herramientas'), title: t('Abrir Conexiones para ver el alcance de cada persona en las herramientas, sus registros relacionados y la cobertura de cliente Netskope'), logo: CustodiaMark, view: 'person' },
+  { id: 'cyberark', section: 'platform', label: t('CyberArk'), detail: t('Gestión de accesos privilegiados'), title: t('Abrir el tablero, inventario y accesos de CyberArk'), logo: CyberArkLogo, view: 'general' },
+  { id: 'netskope', section: 'platform', label: t('Netskope'), detail: t('Visibilidad de equipos, usuarios y alertas de fuga de datos'), title: t('Abrir el resumen y el inventario de Netskope'), logo: NetskopeLogo, view: 'netskope' },
+  { id: 'bigid', section: 'platform', label: t('BigID DSPM'), detail: t('Descubrimiento y postura de seguridad de datos'), title: t('BigID DSPM · Próximamente'), logo: BigIdLogo },
 ];
 
 export function homeToolsForSection(section: HomeSection): readonly HomeTool[] {
@@ -125,8 +126,8 @@ function HomeWheelSpoke({ id, from, to, active }: { id: string; from: WheelPoint
 function HomeWheelLabel({ tool, active }: { tool: HomeTool; active: boolean }) {
   return <span className={`home-visibility-label home-visibility-label-${tool.id}${active ? ' is-active' : ''}`} aria-hidden="true">
     <strong>{tool.label}</strong>
-    <small>{tool.view ? tool.detail : 'Próximamente'}</small>
-    {tool.view ? <span className="home-visibility-label-action">Abrir <ArrowRight size={12} /></span> : null}
+    <small>{tool.view ? tool.detail : t('Próximamente')}</small>
+    {tool.view ? <span className="home-visibility-label-action">{t('Abrir')} <ArrowRight size={12} /></span> : null}
   </span>;
 }
 
@@ -134,7 +135,7 @@ export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPe
   const platformTools = homeToolsForSection('platform');
   const peopleTool = HOME_TOOLS.find((tool) => tool.id === 'people');
   const peopleView = peopleTool?.view;
-  return <aside className={'home-visibility' + (monochrome ? ' home-visibility-monochrome' : '')} data-active-domain={focus || undefined} data-tools={platformTools.length} aria-label="Fuentes de visibilidad de Custodia">
+  return <aside className={'home-visibility' + (monochrome ? ' home-visibility-monochrome' : '')} data-active-domain={focus || undefined} data-tools={platformTools.length} aria-label={t('Fuentes de visibilidad de Custodia')}>
     <div className="home-visibility-ring" aria-hidden="true" />
     <div className="home-visibility-orbit" aria-hidden="true" />
     {/* One edge per platform tool, drawn only while it is lit (hover or focus on the tool, or on the
@@ -170,8 +171,8 @@ export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPe
         style={style}
         data-wheel-angle={layout.angleDeg}
         type="button"
-        aria-label={`Abrir ${tool.label}`}
-        title={`Abrir ${tool.label}`}
+        aria-label={t('Abrir {name}', { name: tool.label })}
+        title={t('Abrir {name}', { name: tool.label })}
         onClick={() => onNavigate?.(view)}
         onMouseEnter={() => onFocusChange?.(tool.id)}
         onMouseLeave={() => onFocusChange?.(null)}
@@ -186,7 +187,7 @@ export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPe
     <button
       className={'home-visibility-core home-visibility-core-people' + (focus === 'people' ? ' is-active' : '')}
       type="button"
-      aria-label={`Abrir ${peopleTool.label}`}
+      aria-label={t('Abrir {name}', { name: peopleTool.label })}
       title={peopleTool.title}
       onClick={() => onNavigate?.(peopleView)}
       onMouseEnter={() => onFocusChange?.('people')}
@@ -196,7 +197,7 @@ export function HomeVisibilityGraphic({ monochrome = false, focus = null, showPe
     ><span className="home-visibility-core-icon"><Waypoints size={22} /></span><span>{peopleTool.label}</span></button>
     <HomeWheelLabel tool={peopleTool} active={focus === 'people'} />
     </>
-      : <div className="home-visibility-core"><CustodiaMark /><span>Custodia</span></div>}
+      : <div className="home-visibility-core"><CustodiaMark /><span>{t('Custodia')}</span></div>}
   </aside>;
 }
 
@@ -220,7 +221,7 @@ export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
       return <div key={tool.id} className={`home-domain-button home-domain-button-${tool.id} home-domain-button-disabled`} aria-disabled="true" {...hover(tool.id)}>
         <span className="home-domain-icon"><Logo /></span>
         <span><strong>{tool.label}</strong><small>{tool.detail}</small></span>
-        <small className="home-domain-status">Próximamente</small>
+        <small className="home-domain-status">{t('Próximamente')}</small>
       </div>;
     }
     return <button key={tool.id} className={`home-domain-button home-domain-button-${tool.id}` + (active ? ' is-active' : '')} type="button" title={tool.title} onClick={() => onNavigate(view)} {...hover(tool.id)}>
@@ -233,7 +234,7 @@ export function HomeWorkspace({ authStatus, onNavigate }: HomeWorkspaceProps) {
   return <main className="home-workspace">
     <section className="home-content" aria-labelledby="home-title">
       <h1 id="home-title" className="home-title-reveal"><GreetingWordmark /> <span className="home-greeting-name">{firstName(authStatus.user?.name)}</span></h1>
-      <p className="home-copy home-reveal">¿Qué querés revisar hoy?</p>
+      <p className="home-copy home-reveal">{t('¿Qué querés revisar hoy?')}</p>
       <div className="home-actions home-reveal">
         {/* Personas is transversal: the section (and its button) only exist
             when the actor can actually open it, never as an empty shell. */}

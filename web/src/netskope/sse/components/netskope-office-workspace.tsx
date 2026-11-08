@@ -3,6 +3,7 @@ import { handleTablistKeyDown } from '../../../cross/lib/tablist-keyboard';
 import { NetskopeOfficeExperience } from './netskope-office-experience';
 import { NetskopeOfficeTimeline } from './netskope-office-timeline';
 import { NetskopeUserDrawer, type NetskopeUserSelection } from './netskope-user-drawer';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Props = { refreshKey: number; authChecked: boolean; authenticated: boolean; onUnauthorized: () => void };
 type Tab = 'office' | 'timeline';
@@ -17,8 +18,8 @@ export function NetskopeOfficeWorkspace({ refreshKey, authChecked, authenticated
   const fallbackFocusRef = useRef<HTMLInputElement>(null);
   const enabled = authChecked && authenticated;
   const pick = (person: { email: string; name: string | null }) => setSelected({ userId: null, email: person.email, name: person.name || person.email });
-  return <section className="netskope-workspace" aria-label="Vista de rendimiento de Netskope">
-    <nav className="workspace-subnav workspace-subnav-nested" role="tablist" aria-label="Secciones de Rendimiento" onKeyDown={handleTablistKeyDown}>
+  return <section className="netskope-workspace" aria-label={t('Vista de rendimiento de Netskope')}>
+    <nav className="workspace-subnav workspace-subnav-nested" role="tablist" aria-label={t('Secciones de Rendimiento')} onKeyDown={handleTablistKeyDown}>
       {TABS.map(([id, label]) => <button
         key={id} type="button" role="tab" id={`nsk-office-tab-${id}`} aria-controls={`nsk-office-panel-${id}`}
         aria-selected={tab === id} tabIndex={tab === id ? 0 : -1} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}

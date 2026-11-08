@@ -3,6 +3,7 @@ import type { NetskopeGoldenSuggestion } from '../types/netskope';
 import { Plus, Trash2, X } from 'lucide-react';
 import { useDialogFocusTrap } from '../../../cross/hooks/use-dialog-focus-trap';
 import { fetchNetskopeBaselines, fetchNetskopeFleet, fetchNetskopeGoldenSuggestion, saveNetskopeGoldenReleases, saveNetskopeOsMinimums } from '../lib/netskope-api';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type NetskopeBaselineKind = 'client' | 'os';
 
@@ -73,34 +74,34 @@ export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Pr
     }
   };
 
-  const title = isClient ? 'Releases golden del cliente' : 'Versiones mínimas de SO';
+  const title = isClient ? t('Releases golden del cliente') : t('Versiones mínimas de SO');
   return <div className="catalog-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) onClose(); }}>
     <form ref={dialogRef} className="catalog-modal netskope-baseline-editor" role="dialog" aria-modal="true" aria-labelledby="netskope-baseline-title" tabIndex={-1} onSubmit={(event) => void submit(event)}>
       <div className="catalog-modal-header">
-        <div><p className="eyebrow">NETSKOPE · LÍNEA BASE</p><h2 id="netskope-baseline-title">{title}</h2><p>{isClient ? 'Cargá las releases golden vigentes según la documentación oficial de Netskope, de la más nueva a la más vieja. No se infieren del inventario.' : 'Versión mínima soportada por sistema operativo. El nombre debe coincidir exactamente con el que reporta Netskope.'}</p></div>
-        <button className="icon-button" type="button" aria-label="Cerrar" title="Cerrar" onClick={onClose} disabled={saving}><X size={17} /></button>
+        <div><p className="eyebrow">{t('NETSKOPE · LÍNEA BASE')}</p><h2 id="netskope-baseline-title">{title}</h2><p>{isClient ? t('Cargá las releases golden vigentes según la documentación oficial de Netskope, de la más nueva a la más vieja. No se infieren del inventario.') : t('Versión mínima soportada por sistema operativo. El nombre debe coincidir exactamente con el que reporta Netskope.')}</p></div>
+        <button className="icon-button" type="button" aria-label={t('Cerrar')} title={t('Cerrar')} onClick={onClose} disabled={saving}><X size={17} /></button>
       </div>
       <div className="catalog-modal-fields">
-        {loading ? <p className="muted">Cargando línea base…</p> : isClient
-          ? <><label>Releases golden<input value={releases} onChange={(event) => setReleases(event.target.value)} placeholder="141.0.0, 138.1.0, 135.0.0" required /><small className="muted">Al menos dos, separadas por coma. Se ordenan de la más nueva a la más vieja al guardar.</small></label>
-            {suggestion && suggestedText && suggestedText !== releases ? <p className="muted netskope-golden-suggestion">Sugerida por la documentación pública de Netskope: <strong>{suggestedText}</strong> (leída el {suggestion.fetched_at.slice(0, 10)}). No se aplica sola. <button className="button subtle" type="button" onClick={useSuggestion}>Usar sugerida</button></p> : null}</>
+        {loading ? <p className="muted">{t('Cargando línea base…')}</p> : isClient
+          ? <><label>{t('Releases golden')}<input value={releases} onChange={(event) => setReleases(event.target.value)} placeholder="141.0.0, 138.1.0, 135.0.0" required /><small className="muted">{t('Al menos dos, separadas por coma. Se ordenan de la más nueva a la más vieja al guardar.')}</small></label>
+            {suggestion && suggestedText && suggestedText !== releases ? <p className="muted netskope-golden-suggestion">{t('Sugerida por la documentación pública de Netskope:')} <strong>{suggestedText}</strong> (leída el {suggestion.fetched_at.slice(0, 10)}). No se aplica sola. <button className="button subtle" type="button" onClick={useSuggestion}>{t('Usar sugerida')}</button></p> : null}</>
           : <div className="netskope-os-minimums">
             {minimums.map((row, index) => <div className="netskope-os-minimum-row" key={index}>
-              <label>Sistema operativo<input list="netskope-os-options" value={row.os} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, os: event.target.value } : item))} placeholder="Windows" /></label>
-              <label>Versión mínima<input value={row.version} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, version: event.target.value } : item))} placeholder="10.0.19045" /></label>
+              <label>{t('Sistema operativo')}<input list="netskope-os-options" value={row.os} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, os: event.target.value } : item))} placeholder={t('Windows')} /></label>
+              <label>{t('Versión mínima')}<input value={row.version} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, version: event.target.value } : item))} placeholder="10.0.19045" /></label>
               <button className="icon-button" type="button" aria-label={`Quitar ${row.os || 'fila'}`} onClick={() => setMinimums((current) => current.filter((_, i) => i !== index))}><Trash2 size={14} /></button>
             </div>)}
-            {observed.length ? <div className="netskope-os-observed" aria-label="Versiones de SO informadas hoy">
+            {observed.length ? <div className="netskope-os-observed" aria-label={t('Versiones de SO informadas hoy')}>
               <small className="muted">Versiones informadas hoy (referencia, no un mínimo):</small>
               <ul>{observed.map((row) => <li key={`${row.os}-${row.os_version}`}><strong>{row.os}</strong> {row.os_version} <span className="muted">· {row.count} equipos</span></li>)}</ul>
             </div> : null}
             <datalist id="netskope-os-options">{osOptions.map((name) => <option key={name} value={name} />)}</datalist>
-            <button className="button subtle" type="button" onClick={() => setMinimums((current) => [...current, { os: '', version: '' }])} disabled={minimums.length >= 10}><Plus size={13} aria-hidden="true" /> Agregar sistema operativo</button>
+            <button className="button subtle" type="button" onClick={() => setMinimums((current) => [...current, { os: '', version: '' }])} disabled={minimums.length >= 10}><Plus size={13} aria-hidden="true" /> {t('Agregar sistema operativo')}</button>
           </div>}
-        <label>Nota (opcional)<input value={note} onChange={(event) => setNote(event.target.value)} maxLength={500} placeholder="Fuente o motivo del cambio" /></label>
+        <label>Nota (opcional)<input value={note} onChange={(event) => setNote(event.target.value)} maxLength={500} placeholder={t('Fuente o motivo del cambio')} /></label>
         {error ? <p className="netskope-baseline-error" role="alert">{error}</p> : null}
       </div>
-      <div className="catalog-modal-actions"><button className="button subtle" type="button" onClick={onClose} disabled={saving}>Cancelar</button><button className="button primary" type="submit" disabled={saving || loading}>{saving ? 'Guardando...' : 'Guardar línea base'}</button></div>
+      <div className="catalog-modal-actions"><button className="button subtle" type="button" onClick={onClose} disabled={saving}>{t('Cancelar')}</button><button className="button primary" type="submit" disabled={saving || loading}>{saving ? t('Guardando...') : t('Guardar línea base')}</button></div>
     </form>
   </div>;
 }

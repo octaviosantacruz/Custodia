@@ -6,6 +6,7 @@ import type { ChartMode } from '../../../cross/lib/chart-mode';
 import { useNetskopePanel } from '../hooks/use-netskope-panel';
 import { fetchNetskopeAaChart } from '../lib/netskope-api';
 import { NETSKOPE_AA_PREFIX } from '../lib/netskope-dashboard';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Props = { widgetId: string; mode: ChartMode; enabled: boolean; refreshKey?: number; onUnauthorized: () => void };
 
@@ -19,12 +20,12 @@ export function NetskopeAaChart({ widgetId, mode, enabled, refreshKey, onUnautho
       <span className="metric-label">{chart?.title ?? 'Gráfico Advanced Analytics'}</span>
       {chart ? <small>{chart.period} · {chart.unit}</small> : null}
     </div>
-    {panel.error ? <StateBlock variant="error" title="No se pudo consultar Advanced Analytics" hint={panel.error} action={<button className="button subtle" type="button" onClick={() => void panel.reload()}>Reintentar</button>} />
-      : !chart ? <StateBlock variant="loading" title="Consultando Advanced Analytics…" />
-      : chart.state === 'empty' ? <StateBlock title="El widget AA no devolvió filas" hint="No hay un conteo disponible para este gráfico." />
+    {panel.error ? <StateBlock variant="error" title={t('No se pudo consultar Advanced Analytics')} hint={panel.error} action={<button className="button subtle" type="button" onClick={() => void panel.reload()}>{t('Reintentar')}</button>} />
+      : !chart ? <StateBlock variant="loading" title={t('Consultando Advanced Analytics…')} />
+      : chart.state === 'empty' ? <StateBlock title={t('El widget AA no devolvió filas')} hint="No hay un conteo disponible para este gráfico." />
       : <>
         <CategoryChart title={chart.title} mode={mode} buckets={chart.buckets} population={chart.total} populationLabel={chart.unit} limit={100} centerLabel="total" />
-        <small>{formatNumber(chart.total ?? 0)} {chart.unit} · Consultado <DateTime value={chart.fetched_at} />{panel.loading ? ' · Actualizando…' : ''}</small>
+        <small>{formatNumber(chart.total ?? 0)} {chart.unit} · Consultado <DateTime value={chart.fetched_at} />{panel.loading ? t(' · Actualizando…') : ''}</small>
       </>}
   </>;
 }

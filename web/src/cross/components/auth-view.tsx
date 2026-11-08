@@ -4,6 +4,7 @@ import { LOCAL_LOGIN_PATH, passwordChecks, type UseAuthState } from '../hooks/us
 import { CustodiaMark } from './home-workspace';
 import { ErrorDetailsButton } from './error-details';
 import './auth-view.css';
+import { t } from '../i18n/index.ts';
 
 type AuthViewProps = {
   auth: UseAuthState;
@@ -82,7 +83,7 @@ function AuthShell({ children, state, role }: { children: ReactNode; state?: boo
 
 function AuthHeader({ eyebrow, title, detail }: { eyebrow?: string; title: string; detail?: string }) {
   return <header className="auth-card-header">
-    <div className="auth-brand"><span className="auth-logo"><CustodiaMark /></span><span className="auth-wordmark">Custodia</span></div>
+    <div className="auth-brand"><span className="auth-logo"><CustodiaMark /></span><span className="auth-wordmark">{t('Custodia')}</span></div>
     {eyebrow ? <p className="auth-step-label">{eyebrow}</p> : null}
     <h1>{title}</h1>
     {detail ? <p className="auth-card-detail">{detail}</p> : null}
@@ -110,7 +111,7 @@ function PasswordInput({ value, onChange, autoComplete, placeholder, autoFocus }
   const [visible, setVisible] = useState(false);
   return <span className="password-field">
     <input type={visible ? 'text' : 'password'} autoComplete={autoComplete} value={value} placeholder={placeholder} autoFocus={autoFocus} onChange={(event) => onChange(event.target.value)} />
-    <button type="button" className="password-visibility" aria-label={visible ? 'Ocultar' : 'Mostrar'} title={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'} aria-pressed={visible} onClick={() => setVisible((current) => !current)}>{visible ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+    <button type="button" className="password-visibility" aria-label={visible ? t('Ocultar') : t('Mostrar')} title={visible ? t('Ocultar contraseña') : t('Mostrar contraseña')} aria-pressed={visible} onClick={() => setVisible((current) => !current)}>{visible ? <EyeOff size={15} /> : <Eye size={15} />}</button>
   </span>;
 }
 
@@ -122,11 +123,11 @@ export function AuthView({ auth, error }: AuthViewProps) {
     setRegisterName, registerPasswordConfirm, setRegisterPasswordConfirm, registerBusy, setupStep,
     setSetupStep, authMessage, authError, authErrorDetails, retryAuth, submitRegistration, submitLogin, submitPasswordChange,
   } = auth;
-  if (!authChecked) return <AuthShell state role="status"><AuthHeader title="Comprobando tu acceso" detail="Verificando la sesión antes de cargar Custodia." /></AuthShell>;
+  if (!authChecked) return <AuthShell state role="status"><AuthHeader title={t('Comprobando tu acceso')} detail="Verificando la sesión antes de cargar Custodia." /></AuthShell>;
   if (authError) return <AuthShell state role="alert">
-    <AuthHeader title="No se pudo comprobar la sesión" detail={authError} />
+    <AuthHeader title={t('No se pudo comprobar la sesión')} detail={authError} />
     {authErrorDetails ? <p className="auth-error-reference">{authErrorDetails.status ? `HTTP ${authErrorDetails.status}` : 'Sin respuesta'}{authErrorDetails.path ? ` · ${authErrorDetails.path}` : ''}{authErrorDetails.requestId ? ` · Ref. ${authErrorDetails.requestId}` : ''}</p> : null}
-    <button className="button primary auth-submit" type="button" onClick={retryAuth}>Reintentar</button>
+    <button className="button primary auth-submit" type="button" onClick={retryAuth}>{t('Reintentar')}</button>
     {authErrorDetails ? <ErrorDetailsButton details={authErrorDetails} /> : null}
   </AuthShell>;
   if (!authStatus) return null;
@@ -149,20 +150,20 @@ export function AuthView({ auth, error }: AuthViewProps) {
     };
     const header = setupAvailable
       ? !showRegistration
-        ? <AuthHeader title="Creá la cuenta inicial" detail="Vas a usarla para ingresar y administrar Custodia." />
-        : <AuthHeader eyebrow={`PASO ${setupStep} DE 2`} title={setupStep === 1 ? 'Tus datos' : 'Elegí una contraseña'} />
-      : <AuthHeader title="Iniciar sesión" detail="Portal de métricas y relaciones entre herramientas de seguridad" />;
+        ? <AuthHeader title={t('Creá la cuenta inicial')} detail="Vas a usarla para ingresar y administrar Custodia." />
+        : <AuthHeader eyebrow={`PASO ${setupStep} DE 2`} title={setupStep === 1 ? t('Tus datos') : t('Elegí una contraseña')} />
+      : <AuthHeader title={t('Iniciar sesión')} detail="Portal de métricas y relaciones entre herramientas de seguridad" />;
 
     return <AuthShell>
       {header}
       <AuthNotices message={authMessage} error={error} />
-      {setupAvailable && !showRegistration ? <button className="button primary auth-submit" type="button" onClick={() => setShowRegistration(true)}>Crear cuenta</button> : null}
+      {setupAvailable && !showRegistration ? <button className="button primary auth-submit" type="button" onClick={() => setShowRegistration(true)}>{t('Crear cuenta')}</button> : null}
       {setupAvailable && showRegistration && <form className="auth-form" noValidate onSubmit={(event) => { event.preventDefault(); if (setupStep === 1) { if (canContinue) setSetupStep(2); return; } void submitRegistration(event); }}>
-        {setupStep === 1 ? <><label>Nombre<input value={registerName} onChange={(event) => setRegisterName(event.target.value)} autoComplete="name" placeholder="Cómo te llamamos" required /></label><label>Email<input type="email" autoComplete="username" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} placeholder="tu@email.com" required /></label><button className="button primary auth-submit" type="submit" disabled={!canContinue}>Continuar</button></> : <><label>Contraseña<PasswordInput value={loginPassword} onChange={setLoginPassword} autoComplete="new-password" placeholder="Creá una contraseña" autoFocus /><div className="password-strength"><div className="password-strength-bar"><span style={{ width: passwordScore * 20 + '%' }} /></div><small>{passwordScore < 3 ? 'Todavía es débil' : passwordScore < 5 ? 'Casi lista' : 'Contraseña segura'}</small></div><div className="password-checks">{checks.map((check) => <span className={check.valid ? 'valid' : ''} key={check.label}>{check.valid ? '✓' : '○'} {check.label}</span>)}</div></label><label>Confirmar contraseña<PasswordInput value={registerPasswordConfirm} onChange={setRegisterPasswordConfirm} autoComplete="new-password" placeholder="Repetí tu contraseña" /></label><button className="button primary auth-submit" type="submit" disabled={registerBusy || !canCreate}>{registerBusy ? 'Creando cuenta...' : 'Crear cuenta'}</button><button className="auth-link" type="button" onClick={() => setSetupStep(1)}>Volver</button></>}
+        {setupStep === 1 ? <><label>{t('Nombre')}<input value={registerName} onChange={(event) => setRegisterName(event.target.value)} autoComplete="name" placeholder={t('Cómo te llamamos')} required /></label><label>{t('Email')}<input type="email" autoComplete="username" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} placeholder="tu@email.com" required /></label><button className="button primary auth-submit" type="submit" disabled={!canContinue}>{t('Continuar')}</button></> : <><label>{t('Contraseña')}<PasswordInput value={loginPassword} onChange={setLoginPassword} autoComplete="new-password" placeholder={t('Creá una contraseña')} autoFocus /><div className="password-strength"><div className="password-strength-bar"><span style={{ width: passwordScore * 20 + '%' }} /></div><small>{passwordScore < 3 ? 'Todavía es débil' : passwordScore < 5 ? t('Casi lista') : t('Contraseña segura')}</small></div><div className="password-checks">{checks.map((check) => <span className={check.valid ? 'valid' : ''} key={check.label}>{check.valid ? '✓' : '○'} {check.label}</span>)}</div></label><label>{t('Confirmar contraseña')}<PasswordInput value={registerPasswordConfirm} onChange={setRegisterPasswordConfirm} autoComplete="new-password" placeholder={t('Repetí tu contraseña')} /></label><button className="button primary auth-submit" type="submit" disabled={registerBusy || !canCreate}>{registerBusy ? t('Creando cuenta...') : t('Crear cuenta')}</button><button className="auth-link" type="button" onClick={() => setSetupStep(1)}>{t('Volver')}</button></>}
       </form>}
       {!setupAvailable && <>
-        {selectedLoginMethod === 'local' && localLoginAvailable ? <div className="auth-form-stage"><form className="auth-form" noValidate onSubmit={submitLogin}><label>Email<input type="email" autoComplete="username" value={loginEmail} placeholder="nombre@empresa.com" autoFocus onChange={(event) => setLoginEmail(event.target.value)} required /></label><label>Contraseña<PasswordInput value={loginPassword} onChange={setLoginPassword} autoComplete="current-password" /></label><button className="button primary auth-submit" type="submit" disabled={loginBusy}><AuthSubmitContent busy={loginBusy} idle="Iniciar sesión" pending="Ingresando..." /></button></form>{authStatus.mode === 'hybrid' ? <a className="auth-link" href="/">Entrar con Okta</a> : <p className="auth-provider-hint">¿No recordás tu contraseña? Contactá a un administrador.</p>}</div> : null}
-        {selectedLoginMethod === 'oidc' && oidcLoginAvailable ? <div className="auth-form-stage"><form className="auth-form" noValidate onSubmit={submitOidcLogin}><label>Email corporativo<input type="email" autoComplete="username" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} placeholder="tu@empresa.com" required /></label><button className="button primary auth-submit" type="submit">Continuar con Okta</button></form></div> : null}
+        {selectedLoginMethod === 'local' && localLoginAvailable ? <div className="auth-form-stage"><form className="auth-form" noValidate onSubmit={submitLogin}><label>{t('Email')}<input type="email" autoComplete="username" value={loginEmail} placeholder="nombre@empresa.com" autoFocus onChange={(event) => setLoginEmail(event.target.value)} required /></label><label>{t('Contraseña')}<PasswordInput value={loginPassword} onChange={setLoginPassword} autoComplete="current-password" /></label><button className="button primary auth-submit" type="submit" disabled={loginBusy}><AuthSubmitContent busy={loginBusy} idle="Iniciar sesión" pending="Ingresando..." /></button></form>{authStatus.mode === 'hybrid' ? <a className="auth-link" href="/">{t('Entrar con Okta')}</a> : <p className="auth-provider-hint">{t('¿No recordás tu contraseña? Contactá a un administrador.')}</p>}</div> : null}
+        {selectedLoginMethod === 'oidc' && oidcLoginAvailable ? <div className="auth-form-stage"><form className="auth-form" noValidate onSubmit={submitOidcLogin}><label>{t('Email corporativo')}<input type="email" autoComplete="username" value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} placeholder="tu@empresa.com" required /></label><button className="button primary auth-submit" type="submit">{t('Continuar con Okta')}</button></form></div> : null}
       </>}
     </AuthShell>;
   }
@@ -170,9 +171,9 @@ export function AuthView({ auth, error }: AuthViewProps) {
   if (authStatus.authenticated && authStatus.user?.must_change_password) {
     const checks = passwordChecks(newPassword);
     return <AuthShell>
-      <AuthHeader eyebrow="PRIMER ACCESO" title="Elegí tu contraseña" detail="Reemplazá la contraseña temporal antes de entrar." />
+      <AuthHeader eyebrow="PRIMER ACCESO" title={t('Elegí tu contraseña')} detail="Reemplazá la contraseña temporal antes de entrar." />
       <AuthNotices error={error} />
-      <form className="auth-form" noValidate onSubmit={submitPasswordChange}><label>Contraseña actual<PasswordInput value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" /></label><label>Nueva contraseña<PasswordInput value={newPassword} onChange={setNewPassword} autoComplete="new-password" autoFocus /><div className="password-checks">{checks.map((check) => <span className={check.valid ? "valid" : ""} key={check.label}>{check.valid ? "✓" : "○"} {check.label}</span>)}</div></label><label>Confirmar contraseña<PasswordInput value={newPasswordConfirm} onChange={setNewPasswordConfirm} autoComplete="new-password" /></label><button className="button primary auth-submit" type="submit" disabled={passwordChangeBusy}><AuthSubmitContent busy={passwordChangeBusy} idle="Guardar contraseña" pending="Guardando..." /></button></form>
+      <form className="auth-form" noValidate onSubmit={submitPasswordChange}><label>{t('Contraseña actual')}<PasswordInput value={currentPassword} onChange={setCurrentPassword} autoComplete="current-password" /></label><label>{t('Nueva contraseña')}<PasswordInput value={newPassword} onChange={setNewPassword} autoComplete="new-password" autoFocus /><div className="password-checks">{checks.map((check) => <span className={check.valid ? "valid" : ""} key={check.label}>{check.valid ? "✓" : "○"} {check.label}</span>)}</div></label><label>{t('Confirmar contraseña')}<PasswordInput value={newPasswordConfirm} onChange={setNewPasswordConfirm} autoComplete="new-password" /></label><button className="button primary auth-submit" type="submit" disabled={passwordChangeBusy}><AuthSubmitContent busy={passwordChangeBusy} idle="Guardar contraseña" pending="Guardando..." /></button></form>
     </AuthShell>;
   }
 

@@ -6,6 +6,7 @@ import {
 import { GUIDE_CONTENT, type GuideBlock } from '../content/product-guide';
 import { hasWorkspaceAccess, workspacePath, type WorkspaceView } from '../lib/workspaces';
 import './help-workspace.css';
+import { t } from '../i18n/index.ts';
 
 type HelpWorkspaceProps = {
   apiDocsEnabled: boolean;
@@ -64,15 +65,15 @@ export function HelpWorkspace({ apiDocsEnabled, requestedSection = null, permiss
     /* Link only with a true deployment signal; otherwise the guide explains
        that this deployment keeps the reference private. */
     return shouldShowApiReference({ authenticated: true, api_docs_enabled: apiDocsEnabled })
-      ? <p className="help-api-link" key={index}>{block.enabledText} <a href="/docs" target="_blank" rel="noreferrer">Abrir referencia API</a></p>
+      ? <p className="help-api-link" key={index}>{block.enabledText} <a href="/docs" target="_blank" rel="noreferrer">{t('Abrir referencia API')}</a></p>
       : <p className="help-note" key={index}>{block.disabledText}</p>;
   };
 
   const visibleLinks = (content.links ?? []).filter((link) => hasWorkspaceAccess(link.view, permissions));
 
   return <div className="help-workspace">
-    <nav className="help-nav" aria-label="Secciones de la guía">
-      <p className="eyebrow">GUÍA DE PRODUCTO</p>
+    <nav className="help-nav" aria-label={t('Secciones de la guía')}>
+      <p className="eyebrow">{t('GUÍA DE PRODUCTO')}</p>
       <ul>
         {GUIDE_SECTIONS.map((section) => <li key={section.id}>
           <a
@@ -91,7 +92,7 @@ export function HelpWorkspace({ apiDocsEnabled, requestedSection = null, permiss
       <p className="help-owner">Responsable: {active.owner} · Se actualiza: {active.updateRule}</p>
       {content.blocks.map(renderBlock)}
       {visibleLinks.length ? <p className="help-links">
-        <strong>Abrir en Custodia:</strong>
+        <strong>{t('Abrir en Custodia:')}</strong>
         {visibleLinks.map((link) => <a
           key={link.view}
           href={workspacePath(link.view)}

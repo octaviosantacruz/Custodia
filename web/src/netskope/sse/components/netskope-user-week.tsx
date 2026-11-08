@@ -6,6 +6,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { formatNumber } from '../../../cross/lib/format';
 import { fetchNetskopeOfficePerson } from '../lib/netskope-api';
 import { dayLabel, weekdayShort } from '../lib/netskope-office';
+import { t } from '../../../cross/i18n/index.ts';
 
 const PLACE_LABELS = { office: 'Oficina', remote: 'Remoto', no_signal: 'Sin señal' } as const;
 const minutes = (value: number) => value >= 60 ? `${Math.floor(value / 60)} h ${value % 60 ? `${value % 60} min` : ''}`.trim() : `${value} min`;
@@ -13,9 +14,9 @@ const minutes = (value: number) => value >= 60 ? `${Math.floor(value / 60)} h ${
 /** The score of the place where the person worked that day; a day not yet measured says so instead of a score. */
 function DayScore({ day }: { day: NetskopeOfficePersonDay }) {
   if (day.place === 'no_signal') return <span className="nsk-user-week-empty">—</span>;
-  if (!day.measured) return <span className="nsk-user-week-empty">Pendiente</span>;
+  if (!day.measured) return <span className="nsk-user-week-empty">{t('Pendiente')}</span>;
   const [value, spent] = day.place === 'office' ? [day.office_score, day.office_minutes] : [day.remote_score, day.remote_minutes];
-  return value === null ? <span className="nsk-user-week-empty">Sin dato</span>
+  return value === null ? <span className="nsk-user-week-empty">{t('Sin dato')}</span>
     : <span>{formatNumber(Math.round(value))}{spent ? <small> · {minutes(spent)}</small> : null}</span>;
 }
 
@@ -32,17 +33,17 @@ export function NetskopeUserWeek({ email, refreshKey, onUnauthorized }: Props) {
   useEffect(() => {
     if (week.error instanceof ApiError && week.error.status === 401) onUnauthorized();
   }, [week.error, onUnauthorized]);
-  return <section className="detail-section nsk-user-week" aria-label="Últimos 7 días de la persona">
-    <h3>Últimos 7 días</h3>
+  return <section className="detail-section nsk-user-week" aria-label={t('Últimos 7 días de la persona')}>
+    <h3>{t('Últimos 7 días')}</h3>
     <p>Dónde reportaron sus equipos y el puntaje medido en ese lugar. «Sin señal»: ningún equipo envió eventos ese día; «Pendiente»: el día todavía no se midió.</p>
-    {week.isPending ? <StateBlock compact variant="loading" title="Leyendo los últimos 7 días…" />
-      : week.isError || !Array.isArray(week.data?.days) ? <StateBlock compact variant="error" title="No se pudieron leer los últimos 7 días" action={<button className="button subtle" type="button" onClick={() => void week.refetch()}>Reintentar</button>} />
+    {week.isPending ? <StateBlock compact variant="loading" title={t('Leyendo los últimos 7 días…')} />
+      : week.isError || !Array.isArray(week.data?.days) ? <StateBlock compact variant="error" title={t('No se pudieron leer los últimos 7 días')} action={<button className="button subtle" type="button" onClick={() => void week.refetch()}>{t('Reintentar')}</button>} />
       : <div className="compact-table-wrap"><table className="compact-table nsk-user-week-table">
-        <caption className="sr-only">Lugar y puntaje por día</caption>
-        <thead><tr><th scope="col"><span className="sr-only">Dato</span></th>{week.data.days.map((day) => <th key={day.day} scope="col">{weekdayShort(day.day)} <small>{dayLabel(day.day)}</small></th>)}</tr></thead>
+        <caption className="sr-only">{t('Lugar y puntaje por día')}</caption>
+        <thead><tr><th scope="col"><span className="sr-only">{t('Dato')}</span></th>{week.data.days.map((day) => <th key={day.day} scope="col">{weekdayShort(day.day)} <small>{dayLabel(day.day)}</small></th>)}</tr></thead>
         <tbody>
-          <tr><th scope="row">Lugar</th>{week.data.days.map((day) => <td key={day.day} className={`nsk-user-week-place is-${day.place}`}>{PLACE_LABELS[day.place]}</td>)}</tr>
-          <tr><th scope="row">Puntaje</th>{week.data.days.map((day) => <td key={day.day}><DayScore day={day} /></td>)}</tr>
+          <tr><th scope="row">{t('Lugar')}</th>{week.data.days.map((day) => <td key={day.day} className={`nsk-user-week-place is-${day.place}`}>{PLACE_LABELS[day.place]}</td>)}</tr>
+          <tr><th scope="row">{t('Puntaje')}</th>{week.data.days.map((day) => <td key={day.day}><DayScore day={day} /></td>)}</tr>
         </tbody>
       </table></div>}
   </section>;

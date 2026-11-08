@@ -1,15 +1,16 @@
 import { KeyRound, Link2, UserCog, Users } from 'lucide-react';
 import type { FrontendRegistration } from '../../source-contract.ts';
+import { t } from '../../cross/i18n/index.ts';
 
 /** Static declarations; runtime components stay behind a literal lazy import. */
 export const registration = {
   id: 'cyberark/identity_administration',
-  toolLabel: 'CyberArk',
+  toolLabel: t('CyberArk'),
   workspaces: [
     {
       id: 'identity', path: '/pam/identity', legacyPaths: ['/roles', '/identity'], domain: 'pam',
-      label: 'Identidades', detail: '¿Quién existe en Identity y en qué grupos?', icon: UserCog,
-      description: 'Revisá personas, cuentas, roles y grupos de Identity Administration, con sus membresías directas y anidadas.',
+      label: t('Identidades'), detail: t('¿Quién existe en Identity y en qué grupos?'), icon: UserCog,
+      description: t('Revisá personas, cuentas, roles y grupos de Identity Administration, con sus membresías directas y anidadas.'),
       catalog: true, switcher: true, gate: 'open',
       order: 8,
       runtime: 'cyberark',
@@ -19,9 +20,9 @@ export const registration = {
     },
     {
       id: 'identityUsers', path: '/pam/identity/users', domain: 'pam',
-      label: 'Usuarios', detail: 'Personas y cuentas registradas', icon: Users,
-      description: "Revisá cuentas, estados y membresías de Identity Administration.",
-      introHelp: { label: "Usuarios de Identity Administration", paragraphs: ["El directorio pertenece a Identity Administration. Las federaciones por dominio son asociaciones derivadas, no evidencia entregada por su API."] },
+      label: t('Usuarios'), detail: t('Personas y cuentas registradas'), icon: Users,
+      description: t('Revisá cuentas, estados y membresías de Identity Administration.'),
+      introHelp: { label: t('Usuarios de Identity Administration'), paragraphs: ["El directorio pertenece a Identity Administration. Las federaciones por dominio son asociaciones derivadas, no evidencia entregada por su API."] },
       catalog: true, switcher: false, gate: 'open',
       order: 21,
       runtime: 'cyberark',
@@ -32,8 +33,8 @@ export const registration = {
     },
     {
       id: 'identityGroups', path: '/pam/identity/groups', domain: 'pam',
-      label: 'Grupos de Okta', detail: 'Grupos sincronizados desde Identity Administration', icon: Users,
-      description: 'Consultá los grupos de Okta recibidos por Identity Administration y sus miembros registrados.',
+      label: t('Grupos de Okta'), detail: t('Grupos sincronizados desde Identity Administration'), icon: Users,
+      description: t('Consultá los grupos de Okta recibidos por Identity Administration y sus miembros registrados.'),
       catalog: false, switcher: false, gate: 'open',
       order: 22,
       runtime: 'cyberark',
@@ -44,8 +45,8 @@ export const registration = {
     },
     {
       id: 'identityRoles', path: '/pam/identity/roles', domain: 'pam',
-      label: 'Roles y grupos', detail: 'Miembros directos y grupos anidados', icon: KeyRound,
-      description: 'Consultá los roles y grupos recibidos de Identity Administration y las personas incluidas en cada uno.',
+      label: t('Roles y grupos'), detail: t('Miembros directos y grupos anidados'), icon: KeyRound,
+      description: t('Consultá los roles y grupos recibidos de Identity Administration y las personas incluidas en cada uno.'),
       catalog: true, switcher: false, gate: 'open',
       order: 23,
       runtime: 'cyberark',
@@ -59,8 +60,8 @@ export const registration = {
          redirects to Identidades; it must not be advertised as a destination
          (no tab renders it and its component is gone). */
       id: 'identityFederations', path: '/pam/identity/federations', domain: 'pam',
-      label: 'Federaciones', detail: 'Federaciones de Identity Administration', icon: Link2,
-      description: 'Federaciones de Identity Administration; sólo campos núcleo.',
+      label: t('Federaciones'), detail: t('Federaciones de Identity Administration'), icon: Link2,
+      description: t('Federaciones de Identity Administration; sólo campos núcleo.'),
       catalog: false, switcher: false, gate: 'manage', alternatePermission: 'identity:catalogs_read',
       order: 29,
       runtime: 'cyberark',
@@ -71,5 +72,5 @@ export const registration = {
   ],
   domains: [],
   categories: [],
-  sync: { source: 'identity_administration', meta: { label: 'Identity Administration', fallback: 'I' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: 'CyberArk', image: '/cyberark-logo-lime.png', fallback: 'C' }, componentLabel: 'Identity Administration', quietAutomaticSuccess: true },
+  sync: { source: 'identity_administration', meta: { label: t('Identity Administration'), fallback: 'I' }, domain: 'pam', tool: 'cyberark', toolMeta: { label: t('CyberArk'), image: '/cyberark-logo-lime.png', fallback: 'C' }, componentLabel: t('Identity Administration'), quietAutomaticSuccess: true },
 } as const satisfies FrontendRegistration;
