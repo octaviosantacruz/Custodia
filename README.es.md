@@ -2,84 +2,154 @@
 
 [English](README.md) · **Español**
 
-Inventario de herramientas de seguridad con procedencia, cambios explicables
-y decisiones humanas que una sincronización no sobrescribe.
+**Lo que tus herramientas de seguridad saben, juntas.**
 
-Custodia es DS Hub renombrado y abierto, con licencia [Apache 2.0](LICENSE).
-`web/` es su frontend, en español e inglés: inicio con la rueda de fuentes,
-Personas, CyberArk, Netskope y Ayuda. Se puede compilar contra la API real o como demo estática
-que corre en el navegador con una API simulada y datos ficticios
-([WEB.md](docs/WEB.md)). `site/` es el sitio de producto.
-**Todavía no incluye backend Go ni autenticación real**. El orden elegido es Portfolio, instalación autohospedada y,
-después de validar uso, evaluar SaaS.
+Custodia lee las herramientas de seguridad que ya usás, une sus registros con
+reglas explícitas y muestra lo que ninguna ve sola: quién tiene acceso
+privilegiado sin un equipo sano, qué identidades chocan y dónde la cobertura
+es, sencillamente, desconocida. Cada conclusión lleva su regla, su fuente y su
+captura, para que puedas comprobarla antes de actuar.
 
-## Empezar
+[**Demo en vivo**](https://custodia-demo.pages.dev/?lang=es) ·
+[Sitio del producto](https://custodia.octaviosantacruz.com/es/) ·
+[Apache 2.0](LICENSE) · Estado: prototipo open source
 
-1. Leer la [revisión del producto existente](docs/EXISTING-PRODUCT.md): los
-   recorridos y contratos Python son referencia para la interfaz nueva.
-2. Recorrer la [demo](docs/WEB.md) y seguir el
-   [tracker](docs/TO_IMPLEMENT.md): portar los contratos a Go por recorridos.
+![Custodia: una persona cruzada entre CyberArk y Netskope, con el veredicto y su evidencia](site/public/shots/es/person.png)
+
+## El problema
+
+Cada consola responde su propia pregunta. El PAM sabe quién tiene cuentas
+privilegiadas. El proxy SSE sabe qué equipos reportan. El proveedor de
+identidad sabe quién existe. Nadie es dueño de la respuesta *entre* ellas, así
+que vive en planillas que quedan viejas el mismo día y se cruzan por nombre,
+sin que nadie pueda auditarlo.
+
+Custodia reemplaza esa planilla por un inventario que recuerda de dónde salió
+cada dato y se niega a adivinar.
+
+## Preguntas que responde
+
+| Pregunta | Qué dice Custodia | Veredicto |
+|---|---|---|
+| ¿Quién tiene acceso privilegiado sin un equipo visible? | Alice está en un Safe de CyberArk con una cuenta de servicio; Netskope ve su usuario, pero ningún equipo en una captura completa. | **Brecha** |
+| ¿De quién dejaron de reportar los equipos? | Uno de los dos equipos de Bob lleva 12 días en silencio. No prueba que se haya dado de baja, así que la cobertura queda parcial. | **Parcial** |
+| ¿Qué identidad es esta persona? | Dos registros activos de identidad comparten el correo de Eve. Custodia no une ninguno y espera que una persona elija. | **Desconocido** |
+| ¿Qué dice realmente cada herramienta? | Cada registro tal como lo entregó la herramienta, con su ID de origen y su corrida, y el vínculo propuesto aparte. | Registros crudos |
+
+Las cuatro están en la demo, con una empresa ficticia (Acme Corp).
+
+## Cómo funciona
+
+1. **Recolectar.** Adaptadores de sólo lectura por herramienta. Cada registro
+   conserva su ID de origen, la corrida que lo trajo y su antigüedad.
+2. **Unir.** Un vínculo necesita una coincidencia exacta y única. Dos
+   candidatos significan ningún vínculo y una decisión humana, nunca una
+   moneda al aire.
+3. **Concluir.** Reglas versionadas convierten los registros unidos en
+   veredictos con su evidencia: cubierto, parcial, brecha o desconocido.
+
+## Principios de diseño
+
+- **Procedencia en todo.** Cada dato nombra su fuente, ID externo, fecha y
+  corrida.
+- **Desconocido no es brecha.** Una captura parcial o fallida da
+  «desconocido», nunca una falsa alarma. Ausencia, falta de permiso y cero
+  observado son estados distintos.
+- **Sin adivinanzas silenciosas.** Nombres parecidos nunca convierten dos
+  registros en una identidad.
+- **Las personas deciden; la sincronización no pisa.** Lo observado por las
+  herramientas y lo decidido por el equipo son capas separadas.
+- **Sólo lectura.** Custodia consulta tus herramientas; no las modifica.
+
+## Para quién es
+
+Operadores de seguridad e infraestructura que manejan varias consolas y
+responden a mano las mismas preguntas de inventario: revisiones de acceso,
+chequeos de cobertura, bajas y auditorías.
+
+## Fuentes
+
+| Hoy, en la demo | Después |
+|---|---|
+| CyberArk PAM (Safes, cuentas, miembros) · Netskope SSE (usuarios, equipos, postura) | BigID, CrowdStrike, Cortex XDR, Tenable, firewalls |
+
+Cada fuente nueva llega con su contrato y sus reglas; el núcleo no está atado a
+estos dos fabricantes.
+
+## Estado y hoja de ruta
+
+Custodia es un prototipo honesto. La interfaz está completa; el backend,
+todavía no.
+
+| Etapa | Qué | Estado |
+|---|---|---|
+| Demo | Personas cruzadas entre CyberArk y Netskope, veredictos con evidencia e inventario de cada herramienta, en español e inglés. Corre entera en el navegador. | Hecho |
+| Backend | Go y PostgreSQL; las reglas existentes pasan con sus pruebas de regresión. | En curso |
+| Autohospedado | Adaptadores reales de CyberArk y Netskope, ingreso por OIDC e instalación reproducible. | Siguiente |
+| Más fuentes | Herramientas de datos, endpoint, vulnerabilidades y firewalls. | Después |
+
+Una versión alojada (SaaS) sólo se evaluará después de un uso real y
+recurrente de la instalación autohospedada.
+
+## Probarlo
+
+Lo más rápido es la [demo en vivo](https://custodia-demo.pages.dev/?lang=es):
+sin registro y sin que nada salga de tu navegador. Para correrla localmente:
 
 ```bash
 cd web
 npm ci
-npm run preview:demo   # demo estática, sin backend
-# http://127.0.0.1:4184
+npm run preview:demo   # http://127.0.0.1:4184
 ```
 
-El sitio de producto se construye con `npm run build:site` (o
-`cd site && npm ci && npm run dev`). La demo reducida de `demo/` se conserva
-como experimento anterior; no es la demo vigente.
+El idioma se cambia desde el menú de usuario o con `?lang=es` / `?lang=en`.
 
-## Idiomas
+## Repositorio
 
-La interfaz está en español (idioma fuente) e inglés. Los textos se envuelven
-como `t('Texto en español')`; el inglés vive en `web/src/cross/i18n/en.ts`. El
-idioma sale de `?lang=`, luego de la elección guardada, y se cambia desde el
-menú de usuario. La demo publicada sigue el idioma del navegador; la app con
-backend arranca en español. `node scripts/i18n-report.mjs --missing` (en
-`web/`) lista los textos sin traducción.
+| Ruta | Qué |
+|---|---|
+| `web/` | La app: React, Vite y TypeScript. Compila contra una API real o como demo estática con API simulada ([WEB.md](docs/WEB.md)). |
+| `site/` | El sitio del producto (`npm run build:site`). |
+| `docs/` | Producto, arquitectura, conectores, diseño y decisiones. |
+| `demo/` | Un experimento reducido anterior; no es la demo vigente. |
+
+## Desarrollo
+
+```bash
+npm run verify:web      # tipos, lint, estilos, unitarias, build de la demo y e2e de web/
+npm run build:site      # sitio del producto
+npm run verify          # documentos + modelos de empresa y experimento
+```
+
+Requiere Node.js 24 o superior. Las pruebas de navegador usan Playwright con
+Chromium (`npx playwright install chromium`; librerías del sistema con
+`npx playwright install-deps chromium`, con sudo).
+
+La interfaz se escribe en español y se traduce al inglés: los textos se
+envuelven como `t('Texto en español')` y el inglés vive en
+`web/src/cross/i18n/en.ts`. `node scripts/i18n-report.mjs --missing` (en
+`web/`) lista lo que falte traducir.
 
 ## Documentación
 
 | Tema | Documento |
 |---|---|
 | Alcance y etapas | [Producto](docs/PRODUCT.md) |
-| Empresa ficticia, sitio y demo vigentes | [WEB.md](docs/WEB.md) · escenario original en [COMPANY-DEMO.md](docs/COMPANY-DEMO.md) |
+| Empresa ficticia, sitio y demo | [WEB.md](docs/WEB.md) · [COMPANY-DEMO.md](docs/COMPANY-DEMO.md) |
 | Go y PostgreSQL | [Arquitectura](docs/ARCHITECTURE.md) |
 | Configurar y sincronizar herramientas | [Conectores](docs/CONNECTORS.md) |
-| Switchboard (hoy Ozal), OIDC y QA | [Acceso](docs/ACCESS.md) |
+| Ingreso, OIDC y QA | [Acceso](docs/ACCESS.md) |
 | Interfaz y recorrido de ejemplo | [Diseño](docs/DESIGN.md) |
 | Criterios para avanzar | [Validación](docs/VALIDATION.md) |
 | De dónde viene lo que lleva la demo | [Procedencia](docs/PROVENANCE.md) |
-| Capturas, textos ES/EN y paquete para Portfolio | [Presentación](docs/PRESENTATION.md) |
-| Decisiones aceptadas y recomendaciones | [Decisiones](docs/DECISIONS.md) |
-| Qué se aprovechó y qué se retiró | [Referencia de la revisión](docs/REFERENCE.md) |
+| Capturas y textos ES/EN | [Presentación](docs/PRESENTATION.md) |
+| Decisiones aceptadas | [Decisiones](docs/DECISIONS.md) |
+| Versión anterior, qué se aprovechó y qué se retiró | [Referencia](docs/REFERENCE.md) |
 | Pendientes y evidencia entregada | [Pendientes](docs/TO_IMPLEMENT.md) · [Cierres](docs/IMPLEMENTED.md) |
 
-## Verificación disponible
+## Licencia y marcas
 
-```bash
-npm run verify:web      # tipos, lint, estilos, unitarias, build de la demo y e2e de web/
-npm run build:site      # sitio de producto
-npm run verify          # documentos + modelos de empresa y experimento
-npm run verify:demo     # sólo el experimento reducido anterior, en demo/
-```
-
-`verify` requiere Node.js 24 o superior. Las pruebas de navegador usan
-Playwright con Chromium (`npx playwright install chromium`; las librerías del
-sistema con `npx playwright install-deps chromium`, con sudo).
-
-## Relación con la versión anterior
-
-La rama `product/go-reset` parte de `f6a7acc`: primero retiró el árbol heredado;
-luego recuperó su frontend en `company-demo/` (commit `71c68de`) y el 22/10
-lo retiró en favor de la interfaz nueva de `web/`.
-No recupera el backend ni su configuración de despliegue. El checkout
-`/home/saint/projects/Custodia` es el único checkout del producto (`main`).
-Desde el 23/10 la v1 laboral ya no vive en este host: sigue en la rama
-`maintenance/v1` (`f6a7acc`) de `origin` y en su propio entorno. Las unidades
-`custodia-*-dev` se retiraron de este servidor.
-Las bases de datos no se tocaron.
-La historia Git sigue disponible como referencia; no es material listo para
-publicar. La procedencia y distribución se revisan en `PROD-DIST-001`.
+Custodia nació como herramienta interna (DS Hub) y hoy es open source con
+licencia [Apache 2.0](LICENSE). CyberArk, Netskope y los demás nombres de
+producto son marcas de sus dueños e identifican las herramientas que Custodia
+lee; Custodia no está afiliado a ellos.

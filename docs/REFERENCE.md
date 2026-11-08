@@ -1,7 +1,7 @@
 ---
 estado: vigente
 dueño: Octavio Santacruz
-revisado: 2026-10-22
+revisado: 2026-11-08
 ---
 
 # Revisión de la versión anterior y limpieza
@@ -50,3 +50,17 @@ Se descartó traducir toda la aplicación: conservaría el acoplamiento laboral
 y demoraría Portfolio. Tampoco basta una landing sin caso de uso. La ruta
 elegida es demo acotada y producto Go construido por recorridos, conservando
 garantías en vez de todo el backlog. Ver [producto](PRODUCT.md).
+
+## Relación con la versión anterior
+
+La rama `product/go-reset` parte de `f6a7acc`: primero retiró el árbol heredado;
+luego recuperó su frontend en `company-demo/` (commit `71c68de`) y el 22/10
+lo retiró en favor de la interfaz nueva de `web/`.
+No recupera el backend ni su configuración de despliegue. Este checkout es el
+único del producto (`main`).
+Desde el 23/10 la v1 laboral ya no vive en este host: sigue en la rama
+`maintenance/v1` (`f6a7acc`) de `origin` y en su propio entorno. Las unidades
+`custodia-*-dev` se retiraron de este servidor.
+Las bases de datos no se tocaron.
+La historia Git sigue disponible como referencia; no es material listo para
+publicar. La procedencia y distribución se revisan en `PROD-DIST-001`.

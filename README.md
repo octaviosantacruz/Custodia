@@ -2,49 +2,132 @@
 
 **English** · [Español](README.es.md)
 
-A security tool inventory with provenance, explainable changes and human
-decisions that a sync never overwrites.
+**What your security tools know, together.**
 
-Custodia is DS Hub, renamed and open-sourced under the
-[Apache 2.0](LICENSE) license. `web/` is its frontend, in English and Spanish:
-a home page with the wheel of sources, People, CyberArk, Netskope and Help. It
-builds against the real API or as a static demo that runs in the browser with
-a simulated API and fictional data ([WEB.md](docs/WEB.md)). `site/` is the
-product site.
-**It does not include the Go backend or real authentication yet.** The chosen
-order is portfolio first, then a self-hosted install and, once usage is
-validated, an evaluation of SaaS.
+Custodia reads the security tools you already run, joins their records with
+explicit rules and shows what none of them sees alone: who has privileged
+access without a healthy device, which identities collide, where coverage is
+simply unknown. Every conclusion carries its rule, its source and its capture,
+so you can check it before you act.
 
-- Live demo: <https://custodia-demo.pages.dev> (`?lang=en` or `?lang=es`)
-- Product site: <https://custodia.octaviosantacruz.com>
+[**Live demo**](https://custodia-demo.pages.dev/?lang=en) ·
+[Product site](https://custodia.octaviosantacruz.com) ·
+[Apache 2.0](LICENSE) · Status: open source prototype
 
-## Getting started
+![Custodia: one person crossed across CyberArk and Netskope, with the verdict and its evidence](site/public/shots/en/person.png)
 
-1. Read the [review of the existing product](docs/EXISTING-PRODUCT.md): the
-   Python flows and contracts are the reference for the new interface.
-2. Walk through the [demo](docs/WEB.md) and follow the
-   [tracker](docs/TO_IMPLEMENT.md): port the contracts to Go flow by flow.
+## The problem
+
+Each console answers its own question. The PAM vault knows who holds
+privileged accounts. The SSE proxy knows which devices report. The identity
+provider knows who exists. Nobody owns the answer *across* them, so it lives
+in spreadsheets that are stale the day they are built, joined by name
+matching nobody can audit.
+
+Custodia replaces that spreadsheet with an inventory that remembers where
+every fact came from and refuses to guess.
+
+## Questions it answers
+
+| Question | What Custodia says | Verdict |
+|---|---|---|
+| Who has privileged access but no device we can see? | Alice is in a CyberArk Safe with a service account; Netskope sees her user but no device in a complete capture. | **Gap** |
+| Whose devices stopped reporting? | One of Bob's two devices has been silent for 12 days. That is not proof it was retired, so coverage stays partial. | **Partial** |
+| Which identity is this person? | Two active identity records share Eve's email. Custodia joins neither and waits for a person to choose. | **Unknown** |
+| What does each tool actually say? | Every record as the tool delivered it, with its source ID and run, and the proposed link kept apart. | Raw records |
+
+All four are in the demo, with a fictional company (Acme Corp).
+
+## How it works
+
+1. **Collect.** Read-only adapters per tool. Every record keeps its source
+   ID, the run that brought it and how fresh it is.
+2. **Join.** A link needs one exact, unique match. Two candidates means no
+   link and a decision for a human, never a coin toss.
+3. **Conclude.** Versioned rules turn joined records into verdicts with their
+   evidence: covered, partial, gap or unknown.
+
+## Design principles
+
+- **Provenance on everything.** Each fact names its source, external ID,
+  date and run.
+- **Unknown is not a gap.** A partial or failed capture yields "unknown",
+  never a false alarm. Absence, missing permission and zero observed are
+  different states.
+- **No silent guesses.** Similar names never merge two records into one
+  identity.
+- **Humans decide, syncs don't overwrite.** Observations from tools and
+  decisions from people are separate layers.
+- **Read-only by design.** Custodia queries your tools; it does not change
+  them.
+
+## Who it is for
+
+Security and infrastructure operators who juggle several consoles and keep
+answering the same inventory questions by hand: access reviews, coverage
+checks, offboarding, audits.
+
+## Sources
+
+| Today, in the demo | Next |
+|---|---|
+| CyberArk PAM (Safes, accounts, members) · Netskope SSE (users, devices, posture) | BigID, CrowdStrike, Cortex XDR, Tenable, firewalls |
+
+Each new source arrives with its own contract and its own rules; the core is
+not tied to these two vendors.
+
+## Status and roadmap
+
+Custodia is an honest prototype. The interface is complete; the backend is
+not.
+
+| Stage | What | State |
+|---|---|---|
+| Demo | People crossed across CyberArk and Netskope, verdicts with evidence and each tool's inventory, in English and Spanish. Runs fully in the browser. | Done |
+| Backend | Go and PostgreSQL; the existing rules move over with their regression tests. | In progress |
+| Self-hosted | Real CyberArk and Netskope adapters, sign-in through OIDC, a reproducible install. | Next |
+| More sources | Data, endpoint, vulnerability and firewall tools. | Later |
+
+A hosted (SaaS) version will only be evaluated after real, recurring use of
+the self-hosted install.
+
+## Try it
+
+The fastest way is the [live demo](https://custodia-demo.pages.dev/?lang=en):
+no sign-up, nothing leaves your browser. To run it locally:
 
 ```bash
 cd web
 npm ci
-npm run preview:demo   # static demo, no backend
-# http://127.0.0.1:4184
+npm run preview:demo   # http://127.0.0.1:4184
 ```
 
-The product site builds with `npm run build:site` (or
-`cd site && npm ci && npm run dev`). The reduced demo in `demo/` is kept as an
-earlier experiment; it is not the current demo.
+Switch language from the user menu or with `?lang=en` / `?lang=es`.
 
-## Languages
+## Repository
 
-The interface speaks Spanish (the source language) and English. Texts are
-wrapped as `t('Texto en español')`; English lives in
-`web/src/cross/i18n/en.ts`. The language is picked from `?lang=`, then the saved
-choice, and can be switched from the user menu. The published demo follows the
-browser language; the app with a backend starts in Spanish.
-`node scripts/i18n-report.mjs --missing` (in `web/`) lists texts without a
-translation.
+| Path | What |
+|---|---|
+| `web/` | The app: React, Vite and TypeScript. Builds against a real API or as a static demo with a simulated API ([WEB.md](docs/WEB.md)). |
+| `site/` | The product site (`npm run build:site`). |
+| `docs/` | Product, architecture, connectors, design and decisions (in Spanish). |
+| `demo/` | An earlier, reduced experiment; not the current demo. |
+
+## Development
+
+```bash
+npm run verify:web      # types, lint, styles, unit tests, demo build and e2e for web/
+npm run build:site      # product site
+npm run verify          # docs + company and experiment models
+```
+
+Requires Node.js 24 or later. Browser tests use Playwright with Chromium
+(`npx playwright install chromium`).
+
+The interface is written in Spanish and translated to English: texts are
+wrapped as `t('Texto en español')` and English lives in
+`web/src/cross/i18n/en.ts`. `node scripts/i18n-report.mjs --missing` (in
+`web/`) lists anything untranslated.
 
 ## Documentation
 
@@ -53,41 +136,21 @@ The project documentation is written in Spanish.
 | Topic | Document |
 |---|---|
 | Scope and stages | [Product](docs/PRODUCT.md) |
-| Fictional company, current site and demo | [WEB.md](docs/WEB.md) · original scenario in [COMPANY-DEMO.md](docs/COMPANY-DEMO.md) |
+| Fictional company, site and demo | [WEB.md](docs/WEB.md) · [COMPANY-DEMO.md](docs/COMPANY-DEMO.md) |
 | Go and PostgreSQL | [Architecture](docs/ARCHITECTURE.md) |
 | Configuring and syncing tools | [Connectors](docs/CONNECTORS.md) |
-| Switchboard (now Ozal), OIDC and QA | [Access](docs/ACCESS.md) |
+| Sign-in, OIDC and QA | [Access](docs/ACCESS.md) |
 | Interface and sample walkthrough | [Design](docs/DESIGN.md) |
 | Criteria to move forward | [Validation](docs/VALIDATION.md) |
 | Where the demo content comes from | [Provenance](docs/PROVENANCE.md) |
-| Screenshots, ES/EN copy and portfolio package | [Presentation](docs/PRESENTATION.md) |
-| Accepted decisions and recommendations | [Decisions](docs/DECISIONS.md) |
-| What was reused and what was retired | [Review reference](docs/REFERENCE.md) |
+| Screenshots and ES/EN copy | [Presentation](docs/PRESENTATION.md) |
+| Accepted decisions | [Decisions](docs/DECISIONS.md) |
+| Previous version, what was reused and retired | [Reference](docs/REFERENCE.md) |
 | Pending work and delivered evidence | [Pending](docs/TO_IMPLEMENT.md) · [Closed](docs/IMPLEMENTED.md) |
 
-## Verification
+## License and trademarks
 
-```bash
-npm run verify:web      # types, lint, styles, unit tests, demo build and e2e for web/
-npm run build:site      # product site
-npm run verify          # docs + company and experiment models
-npm run verify:demo     # only the earlier reduced experiment, in demo/
-```
-
-`verify` needs Node.js 24 or later. Browser tests use Playwright with Chromium
-(`npx playwright install chromium`; system libraries with
-`npx playwright install-deps chromium`, using sudo).
-
-## Relationship with the previous version
-
-The `product/go-reset` branch starts from `f6a7acc`: it first removed the
-legacy tree, then recovered its frontend in `company-demo/` (commit `71c68de`)
-and on 22/10 retired it in favor of the new interface in `web/`.
-It does not recover the backend or its deployment configuration. The checkout
-at `/home/saint/projects/Custodia` is the product's only checkout (`main`).
-Since 23/10 the work v1 no longer lives on this host: it remains on the
-`maintenance/v1` branch (`f6a7acc`) of `origin` and in its own environment.
-The `custodia-*-dev` units were removed from this server.
-The databases were not touched.
-The Git history stays available as a reference; it is not material ready to
-publish. Provenance and distribution are reviewed in `PROD-DIST-001`.
+Custodia started as an internal tool (DS Hub) and is now open source under
+the [Apache 2.0](LICENSE) license. CyberArk, Netskope and the other product
+names are trademarks of their owners and identify the tools Custodia reads
+from; Custodia is not affiliated with them.
