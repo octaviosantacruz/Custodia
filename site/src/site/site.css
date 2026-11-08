@@ -255,12 +255,33 @@ a.button { text-decoration: none; }
 
 /* ---------- Capturas ---------- */
 .shots { display: grid; gap: var(--s-5) var(--s-4); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--s-6); }
-.shot.is-feature { grid-column: 1 / -1; }
+.shot.is-feature { grid-column: 1 / -1; isolation: isolate; position: relative; }
+.shot.is-feature::before { background: radial-gradient(closest-side, color-mix(in oklch, var(--brand) 20%, transparent), transparent); content: ""; filter: blur(48px); inset: 12% 6% 4%; pointer-events: none; position: absolute; z-index: -1; }
 .shot.is-feature figcaption { font-size: var(--t-md); max-width: 62ch; }
 .shot { margin: 0; }
-.shot a { border: 1px solid var(--ink-300); border-radius: var(--r-lg); display: block; overflow: hidden; }
-.shot img { display: block; height: auto; transition: transform .5s var(--ease); width: 100%; }
-.shot a:hover img { transform: scale(1.03); }
+.shot a { background: var(--ink-100); border: 1px solid var(--ink-300); border-radius: var(--r-lg); box-shadow: 0 1px 0 color-mix(in oklch, var(--ink-900) 6%, transparent) inset, 0 24px 60px -24px rgb(0 0 0 / .7); display: block; overflow: hidden; transition: border-color .25s var(--ease), translate .35s var(--ease); }
+.shot a:hover, .shot a:focus-visible { border-color: color-mix(in oklch, var(--brand) 55%, var(--ink-300)); translate: 0 -3px; }
+.frame-bar { align-items: center; border-bottom: 1px solid var(--ink-300); display: flex; gap: 6px; padding: 9px 12px; }
+.frame-bar > i { background: var(--ink-300); border-radius: 50%; flex: none; height: 9px; width: 9px; }
+.frame-url { background: var(--ink-150); border-radius: var(--r-pill); color: var(--ink-600); font-family: var(--font-data); font-size: 11px; margin: 0 auto; max-width: 60%; overflow: hidden; padding: 2px 14px; text-overflow: ellipsis; white-space: nowrap; }
+.shot:not(.is-feature) .frame-bar { padding: 7px 10px; }
+.shot:not(.is-feature) .frame-bar > i { height: 7px; width: 7px; }
+.shot img { display: block; height: auto; width: 100%; }
+
+@supports (animation-timeline: view()) {
+  /* La captura principal se endereza mientras entra; las otras suben con leve desfase. */
+  .can-animate .shot.reveal { opacity: 1; transform: none; transition: none; }
+  .can-animate .shot { view-timeline: --shot block; }
+  .can-animate .shot.is-feature > a { animation: shot-tilt linear both; animation-range: entry 0% cover 42%; animation-timeline: --shot; transform-origin: 50% 100%; }
+  .can-animate .shot.is-feature::before { animation: shot-glow linear both; animation-range: entry 20% cover 50%; animation-timeline: --shot; }
+  .can-animate .shot:not(.is-feature) > a { animation: shot-rise linear both; animation-range: entry 0% cover 30%; animation-timeline: --shot; }
+  .can-animate .shot:nth-child(3) > a { animation-range: entry 10% cover 38%; }
+  .can-animate .shot figcaption { animation: shot-cap linear both; animation-range: entry 40% cover 35%; animation-timeline: --shot; }
+}
+@keyframes shot-tilt { from { opacity: .35; transform: perspective(1800px) rotateX(16deg) scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes shot-glow { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shot-rise { from { opacity: .2; transform: translateY(48px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes shot-cap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 .shot figcaption { color: var(--ink-700); font-size: var(--t-sm); line-height: 1.55; margin-top: var(--s-3); }
 .shot figcaption strong { color: var(--ink-900); }
 
