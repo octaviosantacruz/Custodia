@@ -1,0 +1,35 @@
+{
+  "metric_code": "CONN-001",
+  "metric_version": "1",
+  "email": "carol.diaz@acme.example",
+  "status": "covered",
+  "identity_records": 1,
+  "netskope_users": 1,
+  "devices_recent": 1,
+  "devices_not_recent": 0,
+  "devices_total": 1,
+  "devices_ambiguous": 0,
+  "sources": {
+    "identity": {
+      "source_system": "identity_administration",
+      "source_file": "fictional-identity_administration",
+      "run_id": "acme-identity_administration-complete",
+      "status": "completed",
+      "started_at": "2026-10-22T12:58:00Z",
+      "completed_at": "2026-10-22T13:00:00Z",
+      "freshness": "fresh",
+      "age_hours": 1
+    },
+    "netskope": {
+      "source_system": "netskope",
+      "source_file": "fictional-netskope",
+      "run_id": "acme-netskope-complete",
+      "status": "completed",
+      "started_at": "2026-10-22T12:58:00Z",
+      "completed_at": "2026-10-22T13:00:00Z",
+      "freshness": "fresh",
+      "age_hours": 1
+    }
+  },
+  "explanation": "Todos los dispositivos vinculados por usuario exacto tienen señal en los últimos 7 días. Sólo demuestra evidencia del cliente Netskope."
+}

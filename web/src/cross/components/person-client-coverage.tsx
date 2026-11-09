@@ -74,12 +74,12 @@ export function PersonConnectionPanel({ identity, netskope, detail, selectedEmai
       {!detailLoading && !detailError && currentDetail ? <>
         <h4>{t('Cobertura del cliente Netskope')}</h4>
         <p><strong>{currentDetail.status === 'unknown' ? 'Por verificar' : STATUS_LABELS[currentDetail.status]}</strong></p>
-        <p>{individualReason ?? currentDetail.explanation}</p>
+        <p>{individualReason ?? t(currentDetail.explanation)}</p>
         <p className="mono">{selectedEmail}</p>
         <p>Dispositivos recientes {formatNumber(currentDetail.devices_recent)} · no recientes / sin fecha {formatNumber(currentDetail.devices_not_recent)} · ambiguos {formatNumber(currentDetail.devices_ambiguous)} · total atribuible {formatNumber(currentDetail.devices_total)}.</p>
         <details className="person-client-coverage-disclosure">
           <summary>{t('Evidencia técnica de la persona')}</summary>
-          <p>{currentDetail.explanation}</p>
+          <p>{t(currentDetail.explanation)}</p>
           <p>Registros Identity: {formatNumber(currentDetail.identity_records)} · usuarios Netskope: {formatNumber(currentDetail.netskope_users)}.</p>
           <CoverageSourceDetails sources={currentDetail.sources} label={t('Corridas usadas por el detalle')} />
         </details>

@@ -1,0 +1,48 @@
+{
+  "email": "alice.morgan@acme.example",
+  "name": "Alice Morgan",
+  "tools": {
+    "pam": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 303,
+        "display_name": "Alice Morgan",
+        "source_id": "acme-pam-3",
+        "user_type": "EPVUser"
+      },
+      "totals": {
+        "roles": 1,
+        "safes": 1,
+        "accounts": 1,
+        "platforms": 1,
+        "psms": 0
+      }
+    },
+    "identity": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 103,
+        "display_name": "Alice Morgan",
+        "source_id": "acme-identity-103",
+        "active": true
+      },
+      "role_count": 1
+    },
+    "netskope": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 203,
+        "display_name": "Alice Morgan",
+        "source_id": "acme-netskope-3"
+      },
+      "device_count": 0,
+      "stale_device_count": 0,
+      "company": "Acme Corp",
+      "client_versions": [],
+      "operating_systems": []
+    }
+  }
+}

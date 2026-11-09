@@ -1,0 +1,38 @@
+{
+  "email": "carol.diaz@acme.example",
+  "name": "Carol Diaz",
+  "tools": {
+    "pam": {
+      "status": "unmatched"
+    },
+    "identity": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 102,
+        "display_name": "Carol Diaz",
+        "source_id": "acme-identity-102",
+        "active": true
+      },
+      "role_count": 0
+    },
+    "netskope": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 202,
+        "display_name": "Carol Diaz",
+        "source_id": "acme-netskope-2"
+      },
+      "device_count": 1,
+      "stale_device_count": 0,
+      "company": "Acme Corp",
+      "client_versions": [
+        "110.0.1"
+      ],
+      "operating_systems": [
+        "Windows"
+      ]
+    }
+  }
+}

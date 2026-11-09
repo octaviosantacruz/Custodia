@@ -1,0 +1,15 @@
+{
+  "listen": "127.0.0.1:8090",
+  "database_url": "env:CUSTODIA_DATABASE_URL",
+  "web_dir": "../web/dist",
+  "ozal": {
+    "issuer": "https://auth.example.com",
+    "audience": "custodia",
+    "public_keys": ["/etc/custodia/ozal-assertion.pub"],
+    "max_skew_seconds": 5
+  },
+  "readers": {
+    "groups": ["security"],
+    "emails": []
+  }
+}

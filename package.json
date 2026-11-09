@@ -7,6 +7,8 @@
     "verify:demo": "cd demo && npm ci && npm run build && npm run test:e2e",
     "package:demo": "npm --prefix demo run build && node scripts/package-demo.mjs",
     "test:web": "npm --prefix web run test:unit",
+    "verify:server": "cd server && f=$(gofmt -l .) && if [ -n \"$f\" ]; then echo \"gofmt: $f\" >&2; exit 1; fi && go vet ./... && go test -race -count=1 ./...",
+    "test:ozal": "node scripts/test-ozal.mjs",
     "verify:web": "npm --prefix web run typecheck && npm --prefix web run lint && npm --prefix web run verify:styles && npm --prefix web run test:unit && npm --prefix web run build:demo && npm --prefix web run test:e2e",
     "build:site": "npm --prefix site run build"
   }

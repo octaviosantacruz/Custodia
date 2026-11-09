@@ -1,0 +1,14 @@
+{
+  "query": "BOB",
+  "people": [
+    {
+      "email": "bob.chen@acme.example",
+      "name": "Bob Chen",
+      "sources": [
+        "pam",
+        "identity",
+        "netskope"
+      ]
+    }
+  ]
+}

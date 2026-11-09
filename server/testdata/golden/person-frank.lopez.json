@@ -1,0 +1,38 @@
+{
+  "email": "frank.lopez@acme.example",
+  "name": "Frank Lopez",
+  "tools": {
+    "pam": {
+      "status": "unmatched"
+    },
+    "identity": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 107,
+        "display_name": "Frank Lopez",
+        "source_id": "acme-identity-107",
+        "active": true
+      },
+      "role_count": 0
+    },
+    "netskope": {
+      "status": "matched",
+      "basis": "email_exact",
+      "user": {
+        "object_id": 206,
+        "display_name": "Frank Lopez",
+        "source_id": "acme-netskope-6"
+      },
+      "device_count": 1,
+      "stale_device_count": 0,
+      "company": "Acme Corp",
+      "client_versions": [
+        "110.0.1"
+      ],
+      "operating_systems": [
+        "Mac OS X"
+      ]
+    }
+  }
+}

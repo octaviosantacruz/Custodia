@@ -1861,6 +1861,7 @@ export const EN: Record<string, string> = {
   // Etiquetas de lib/ y textos armados.
   "Postura de Seguridad de Datos": "Data Security Posture",
   "Lector": "Reader",
+  "Sin rol asignado": "No role assigned",
   "Mostrando {shown} de {total}": "Showing {shown} of {total}",
   "Faltan {n}": "{n} left",
   "Todo cargado": "All loaded",
