@@ -14,7 +14,7 @@ import './cyberark-risk-finding-groups.css';
 const VISIBLE_PER_GROUP = 10;
 
 function entityCell(finding: CyberarkRiskFinding, entityNamesVisible: boolean) {
-  const label = entityNamesVisible ? finding.entity_name || 'Sin nombre informado' : cyberarkEntityLabel(finding.entity_type);
+  const label = entityNamesVisible ? finding.entity_name || t('Sin nombre informado') : cyberarkEntityLabel(finding.entity_type);
   const context = entityNamesVisible ? `${cyberarkEntityLabel(finding.entity_type)} · ${finding.entity_id}` : finding.entity_id;
   return { label, context };
 }
@@ -44,27 +44,29 @@ export function CyberarkRiskFindingGroups({ findings, riskTypes, entityNamesVisi
           <span><strong>{name}</strong>{description ? <span className="risk-group-description">{description}</span> : null}<small className="posture-source-label">CyberArk Risk Management · {group.riskTypeId}</small></span>
         </button></td>
         <td><span className="risk-group-count"><strong>{formatNumber(group.findings.length)}</strong> {group.findings.length === 1 ? 'hallazgo' : 'hallazgos'}</span><small>{cyberarkEntityLabel(group.entityType)}</small></td>
-        <td><span className="posture-review-action">Ver recomendaciones de CyberArk</span></td>
+        <td><span className="posture-review-action">{t('Ver recomendaciones de CyberArk')}</span></td>
         <td><StatusBadge tone={cyberarkSeverityTone(group.severity)}>{cyberarkSeverityLabel(group.severity).label}</StatusBadge></td>
         <td>{group.openCount === group.findings.length
-          ? <StatusBadge tone="danger">{group.openCount === 1 ? 'Abierto' : `${formatNumber(group.openCount)} abiertos`}</StatusBadge>
-          : <span className="risk-group-status">{formatNumber(group.openCount)} de {formatNumber(group.findings.length)} abiertos</span>}</td>
-        <td>{group.lastDetectedAt ? <DateTime value={group.lastDetectedAt} /> : <span className="muted">Sin dato</span>}</td>
+          ? <StatusBadge tone="danger">{group.openCount === 1 ? t('Abierto') : `${formatNumber(group.openCount)} abiertos`}</StatusBadge>
+          : <span className="risk-group-status">{t('{openCount} de {findings} abiertos', { openCount: formatNumber(group.openCount), findings: formatNumber(group.findings.length) })}</span>}</td>
+        <td>{group.lastDetectedAt ? <DateTime value={group.lastDetectedAt} /> : <span className="muted">{t('Sin dato')}</span>}</td>
       </tr>,
       ...(isOpen ? visible.map((finding) => {
         const entity = entityCell(finding, entityNamesVisible);
         return <tr key={`risk:${finding.finding_id}`} id={finding === visible[0] ? rowsId : undefined} className="posture-row risk-group-child" onClick={() => onSelect(finding)}>
-          <td><button type="button" className="posture-row-link risk-group-child-link" aria-label={`Ver hallazgo ${finding.finding_id} de ${name}`} onClick={(event) => { event.stopPropagation(); onSelect(finding); }}>{entity.label}<small>{finding.finding_id}</small></button></td>
+          <td><button type="button" className="posture-row-link risk-group-child-link" aria-label={t('Ver hallazgo {finding_id} de {name}', { finding_id: finding.finding_id, name: name })} onClick={(event) => { event.stopPropagation(); onSelect(finding); }}>{entity.label}<small>{finding.finding_id}</small></button></td>
           <td><span className="muted">{entity.context}</span></td>
-          <td><span className="posture-review-action">Ver detalle</span></td>
+          <td><span className="posture-review-action">{t('Ver detalle')}</span></td>
           <td><StatusBadge tone={cyberarkSeverityTone(finding.severity)}>{cyberarkSeverityLabel(finding.severity).label}</StatusBadge></td>
           <td><StatusBadge tone={cyberarkStatusTone(finding.status)}>{cyberarkStatusLabel(finding.status).label}</StatusBadge></td>
           <td><DateTime value={finding.last_detected_at} /></td>
         </tr>;
       }) : []),
       ...(isOpen && group.findings.length > visible.length ? [<tr key={`more:${group.riskTypeId}`} className="risk-group-more"><td colSpan={6}>
-        <button type="button" className="button subtle" onClick={() => setShowAll((current) => ({ ...current, [group.riskTypeId]: true }))}>Mostrar los {formatNumber(group.findings.length - visible.length)} restantes de {name}</button>
+        <button type="button" className="button subtle" onClick={() => setShowAll((current) => ({ ...current, [group.riskTypeId]: true }))}>{t('Mostrar los {visible} restantes de {name}', { visible: formatNumber(group.findings.length - visible.length), name: name })}</button>
       </td></tr>] : []),
     ];
   })}</>;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

@@ -191,7 +191,7 @@ function PersonToolPanel({ source, tool, sia, cyberArkCapabilities, evidence, on
   const answer = personPlatformAnswer(source, tool, platformSia);
   const link = personToolLink(source, tool);
   const facts = personToolFacts(source, tool);
-  return <aside className={`person-radial-panel is-${personLinkStyle(tool, platformSia)}`} aria-label={`${PLATFORM_LABELS[source]} de la persona`}>
+  return <aside className={`person-radial-panel is-${personLinkStyle(tool, platformSia)}`} aria-label={t('{tool} de la persona', { tool: PLATFORM_LABELS[source] })}>
     <div className="person-radial-panel-head">
       <PlatformLogo source={source} size="panel" />
       <div>
@@ -202,9 +202,9 @@ function PersonToolPanel({ source, tool, sia, cyberArkCapabilities, evidence, on
     <StatusBadge tone={answer.tone}>{answer.label}{answer.count ? ` · ${answer.count}` : ''}</StatusBadge>
     <p className="person-radial-provenance">
       <span>{view.statusLabel}</span>
-      {view.why ? <HelpHint label={`Cómo se conecta con ${PLATFORM_LABELS[source]}`}><p>{view.why}</p></HelpHint> : null}
+      {view.why ? <HelpHint label={t('Cómo se conecta con {tool}', { tool: PLATFORM_LABELS[source] })}><p>{view.why}</p></HelpHint> : null}
     </p>
-    {facts.length ? <ul className="person-radial-facts" aria-label={`Detalle de ${PLATFORM_LABELS[source]}`}>
+    {facts.length ? <ul className="person-radial-facts" aria-label={t('Detalle de {tool}', { tool: PLATFORM_LABELS[source] })}>
       {facts.map((fact) => <li key={fact.label} className="person-radial-fact" title={`${fact.label}: ${fact.value}`}>
         <span>{fact.label}</span>
         <strong>{fact.value}</strong>
@@ -293,7 +293,7 @@ export function PersonChainsWorkspace({ authChecked, authenticated, onUnauthoriz
             <strong>{person.name || person.email}</strong>
             <small className="mono">{person.email}</small>
             <span className="person-source-chips" aria-label={t('Plataformas con registro')}>
-              {personPlatformSources(person.sources).map((platform) => <span key={platform} className="person-source-chip is-present" aria-label={`Registro en ${platform}`}>{platform}</span>)}
+              {personPlatformSources(person.sources).map((platform) => <span key={platform} className="person-source-chip is-present" aria-label={t('Registro en {platform}', { platform: platform })}>{platform}</span>)}
             </span>
           </button>)}
         </div> : null}
@@ -301,7 +301,7 @@ export function PersonChainsWorkspace({ authChecked, authenticated, onUnauthoriz
 
       {controller.summaryLoading ? <StateBlock variant="loading" title={t('Resolviendo la persona…')} /> : null}
       {controller.summaryError ? <StateBlock variant="error" title={t('No se pudo resolver la persona')} hint={controller.summaryError} /> : null}
-      {summary && !controller.summaryLoading ? <section className="person-hub" aria-label={`Persona ${summary.name || summary.email}`}>
+      {summary && !controller.summaryLoading ? <section className="person-hub" aria-label={t('Persona {email}', { email: summary.name || summary.email })}>
         <PersonRadial
           name={summary.name}
           email={summary.email}

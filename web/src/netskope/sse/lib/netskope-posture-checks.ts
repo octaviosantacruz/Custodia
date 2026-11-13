@@ -2,11 +2,12 @@
    count the backend evaluated; a check that could not be evaluated is never
    added as zero, it is reported apart as pending. */
 import type { NetskopePostureCheck, NetskopePostureSeverity } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 export const POSTURE_SEVERITIES: NetskopePostureSeverity[] = ['high', 'medium', 'low'];
 const SEVERITY_RANK: Record<NetskopePostureSeverity, number> = { high: 0, medium: 1, low: 2 };
 
-export const POSTURE_SEVERITY_LABELS: Record<NetskopePostureSeverity, string> = { high: 'Alta', medium: 'Media', low: 'Baja' };
+export const POSTURE_SEVERITY_LABELS: Record<NetskopePostureSeverity, string> = { high: t('Alta'), medium: t('Media'), low: t('Baja') };
 
 export function postureSeverityTone(severity: NetskopePostureSeverity): 'danger' | 'warning' | 'info' {
   return severity === 'high' ? 'danger' : severity === 'medium' ? 'warning' : 'info';
@@ -14,21 +15,21 @@ export function postureSeverityTone(severity: NetskopePostureSeverity): 'danger'
 
 export function postureEntityLabel(check: Pick<NetskopePostureCheck, 'entity'>, count = 2): string {
   if (check.entity === 'user') return count === 1 ? 'usuario' : 'usuarios';
-  return count === 1 ? 'equipo' : 'equipos';
+  return count === 1 ? 'equipo' : t('equipos');
 }
 
 export function postureStatusLabel(check: NetskopePostureCheck): string {
   if (check.status === 'evaluated') return 'Evaluado';
-  if (check.status === 'not_permitted') return 'Requiere el permiso para confianza de usuarios';
-  if (check.entity === 'user') return 'Captura de confianza de usuarios no habilitada';
-  return check.id.startsWith('os_') ? 'Sin versiones mínimas de SO configuradas' : 'Sin releases golden configuradas';
+  if (check.status === 'not_permitted') return t('Requiere el permiso para confianza de usuarios');
+  if (check.entity === 'user') return t('Captura de confianza de usuarios no habilitada');
+  return check.id.startsWith('os_') ? t('Sin versiones mínimas de SO configuradas') : t('Sin releases golden configuradas');
 }
 
 /** Where to configure or obtain what a pending check needs. */
 export function posturePendingHint(check: NetskopePostureCheck): string {
-  if (check.status === 'not_permitted') return 'Sólo quien tiene el permiso para confianza de usuarios ve este chequeo.';
-  if (check.entity === 'user') return 'Un administrador debe habilitar la captura del índice de confianza.';
-  return 'Un administrador de Netskope carga la línea base desde Equipos.';
+  if (check.status === 'not_permitted') return t('Sólo quien tiene el permiso para confianza de usuarios ve este chequeo.');
+  if (check.entity === 'user') return t('Un administrador debe habilitar la captura del índice de confianza.');
+  return t('Un administrador de Netskope carga la línea base desde Equipos.');
 }
 
 export type PostureSummary = {

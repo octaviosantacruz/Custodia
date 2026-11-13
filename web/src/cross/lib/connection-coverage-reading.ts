@@ -1,4 +1,5 @@
 import type { CapabilityResult, PolicyCapability } from '../types/connection';
+import { t } from '../i18n/index.ts';
 
 export type ReadingTone = 'success' | 'warning' | 'danger' | 'neutral';
 export type Reading = { label: string; tone: ReadingTone; hint: string };
@@ -17,11 +18,11 @@ export type ReadableCapability = keyof typeof CAPABILITY_NAMES;
 export function capabilityReading(capability: ReadableCapability, result: CapabilityResult | null): Reading | null {
   const name = CAPABILITY_NAMES[capability];
   switch (result) {
-    case 'match': return { label: 'Coincide', tone: 'success', hint: `Lo declarado para ${name} coincide con SIA.` };
-    case 'missing': return { label: 'Falta en SIA', tone: 'danger', hint: `La planilla declara ${name} y ninguna política SIA clasificada como ${name} tiene esta IP.` };
-    case 'undeclared': return { label: 'No declarado', tone: 'warning', hint: `Una política SIA de ${name} tiene esta IP y la planilla no lo declara.` };
-    case 'unclassified': return { label: 'Sin clasificar', tone: 'neutral', hint: 'Hay políticas SIA con esta IP que todavía no están clasificadas.' };
-    case 'unknown': return { label: 'Sin dato', tone: 'neutral', hint: `La planilla no dice si usa ${name} y SIA no lo muestra.` };
+    case 'match': return { label: 'Coincide', tone: 'success', hint: t('Lo declarado para {name} coincide con SIA.', { name: name }) };
+    case 'missing': return { label: t('Falta en SIA'), tone: 'danger', hint: t('La planilla declara {name} y ninguna política SIA clasificada como {name2} tiene esta IP.', { name: name, name2: name }) };
+    case 'undeclared': return { label: t('No declarado'), tone: 'warning', hint: t('Una política SIA de {name} tiene esta IP y la planilla no lo declara.', { name: name }) };
+    case 'unclassified': return { label: t('Sin clasificar'), tone: 'neutral', hint: t('Hay políticas SIA con esta IP que todavía no están clasificadas.') };
+    case 'unknown': return { label: t('Sin dato'), tone: 'neutral', hint: t('La planilla no dice si usa {name} y SIA no lo muestra.', { name: name }) };
     default: return null;
   }
 }
@@ -33,7 +34,7 @@ export function isDeviation(result: CapabilityResult | null): boolean {
 export const POLICY_CAPABILITY_LABELS: Record<PolicyCapability, string> = { platform: 'Platform', dba: 'DBA', other: 'Otra' };
 
 export function flagLabel(value: boolean | null): string {
-  return value === true ? 'Sí' : value === false ? 'No' : 'Sin dato';
+  return value === true ? t('Sí') : value === false ? 'No' : t('Sin dato');
 }
 
 export function flagTone(value: boolean | null): ReadingTone {

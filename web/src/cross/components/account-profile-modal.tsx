@@ -41,7 +41,7 @@ export function AccountProfileModal({ authStatus, onClose, onNotice, onProfileUp
     event.preventDefault();
     const normalizedName = displayName.trim();
     if (!normalizedName) {
-      setFormError('Ingresá un nombre.');
+      setFormError(t('Ingresá un nombre.'));
       return;
     }
     setNameBusy(true);
@@ -51,7 +51,7 @@ export function AccountProfileModal({ authStatus, onClose, onNotice, onProfileUp
       onProfileUpdated(normalizedName);
       onNotice(t('Nombre actualizado.'));
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'No se pudo actualizar el nombre.');
+      setFormError(error instanceof Error ? error.message : t('No se pudo actualizar el nombre.'));
     } finally {
       setNameBusy(false);
     }
@@ -60,11 +60,11 @@ export function AccountProfileModal({ authStatus, onClose, onNotice, onProfileUp
   const savePassword = async (event: FormEvent) => {
     event.preventDefault();
     if (!checks.every((check) => check.valid)) {
-      setFormError('La nueva contraseña no cumple todas las condiciones.');
+      setFormError(t('La nueva contraseña no cumple todas las condiciones.'));
       return;
     }
     if (newPassword !== passwordConfirmation) {
-      setFormError('Las contraseñas nuevas no coinciden.');
+      setFormError(t('Las contraseñas nuevas no coinciden.'));
       return;
     }
     setPasswordBusy(true);
@@ -76,7 +76,7 @@ export function AccountProfileModal({ authStatus, onClose, onNotice, onProfileUp
       setPasswordConfirmation('');
       onNotice(t('Contraseña actualizada.'));
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'No se pudo actualizar la contraseña.');
+      setFormError(error instanceof Error ? error.message : t('No se pudo actualizar la contraseña.'));
     } finally {
       setPasswordBusy(false);
     }
@@ -88,7 +88,7 @@ export function AccountProfileModal({ authStatus, onClose, onNotice, onProfileUp
         <div className="profile-account-heading"><div className="profile-account-icon"><UserCircle size={20} /></div><div><p className="eyebrow">{t('MI CUENTA')}</p><h2 id="profile-account-title">{t('Datos personales')}</h2><p>{t('Solo podés modificar los datos de tu propia cuenta.')}</p></div></div>
         <button className="icon-button" type="button" aria-label={t('Cerrar Mi cuenta')} title={t('Cerrar')} onClick={onClose} disabled={nameBusy || passwordBusy}><X size={16} /></button>
       </header>
-      <div className="profile-account-summary"><div><span>{t('Email')}</span><strong>{user?.email || 'Sin email disponible'}</strong></div><div><span>{t('Rol')}</span><strong>{primaryRoleLabel(authStatus)}</strong></div></div>
+      <div className="profile-account-summary"><div><span>{t('Email')}</span><strong>{user?.email || t('Sin email disponible')}</strong></div><div><span>{t('Rol')}</span><strong>{primaryRoleLabel(authStatus)}</strong></div></div>
       {!isLocal ? <div className="profile-account-managed"><LockKeyhole size={17} /><div><strong>{t('Cuenta administrada por tu identidad corporativa')}</strong><span>{t('El nombre, email y contraseña se modifican en el proveedor de identidad.')}</span></div></div> : <div className="profile-account-sections">
         <form className="profile-account-section" onSubmit={saveName}>
           <div className="profile-account-section-heading"><div><h3>{t('Nombre visible')}</h3><p>{t('Es el nombre que verán otros usuarios en Custodia.')}</p></div></div>

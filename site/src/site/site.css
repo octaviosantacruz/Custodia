@@ -24,9 +24,9 @@ a.button { text-decoration: none; }
 
 /* ---------- Cabecera y marca ---------- */
 .site-head {
-  align-items: center; backdrop-filter: blur(10px); background: oklch(0.13 0.008 255 / 0.82);
+  align-items: center; backdrop-filter: blur(10px); background: oklch(0.155 0.034 258 / 0.82);
   display: flex; gap: var(--s-5); justify-content: space-between; margin: 0 calc(var(--s-5) * -1);
-  border-bottom: 1px solid oklch(0.28 0.012 255 / 0.6);
+  border-bottom: 1px solid oklch(0.30 0.041 258 / 0.6);
   padding: var(--s-4) var(--s-5); position: sticky; top: 0; z-index: 5;
 }
 .site-head .wordmark { text-decoration: none; }

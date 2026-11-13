@@ -11,8 +11,8 @@ type SignalKey = keyof PamCleanupSignalsResponse;
 
 const SIGNALS: Array<{ key: SignalKey; title: string; denominator: string }> = [
   { key: 'empty_groups', title: t('Grupos sin miembros'), denominator: 'grupos activos' },
-  { key: 'identical_member_groups', title: t('Grupos con miembros idénticos'), denominator: 'grupos activos con miembros' },
-  { key: 'redundant_groups_with_access_peer', title: t('Grupos redundantes frente a un par con acceso'), denominator: 'grupos activos con miembros' },
+  { key: 'identical_member_groups', title: t('Grupos con miembros idénticos'), denominator: t('grupos activos con miembros') },
+  { key: 'redundant_groups_with_access_peer', title: t('Grupos redundantes frente a un par con acceso'), denominator: t('grupos activos con miembros') },
   { key: 'orphan_psm', title: t('PSM activos sin plataforma'), denominator: 'PSM activos' },
   { key: 'platforms_without_accounts', title: t('Plataformas sin cuentas activas'), denominator: 'plataformas activas' },
   { key: 'safes_without_active_users', title: t('Safes sin usuarios activos'), denominator: 'Safes activos' },
@@ -42,7 +42,7 @@ function ScopeLabel({ item }: { item: PamCleanupSignalItem }) {
     ? 'Interno'
     : item.inventory_scope === 'business' ? t('Negocio') : t('Pendiente de clasificación');
   const accountType = item.account_type_classification
-    ? ` · tipo de cuenta: ${item.account_type_classification}`
+    ? t(' · tipo de cuenta: {account_type_classification}', { account_type_classification: item.account_type_classification })
     : '';
   const status = item.classification_status ? ` · estado: ${item.classification_status}` : '';
   return <small className="pam-cleanup-classification">Alcance: {scope}{accountType}{status}</small>;
@@ -55,12 +55,12 @@ function SignalItem({ item }: { item: PamCleanupSignalItem }) {
         <strong>{item.display_name}</strong>
         <small>{item.source_id}</small>
         {item.is_factory && item.factory_label
-          ? <span className="pam-cleanup-factory">{item.factory_label} · no se sugiere baja automática</span>
+          ? <span className="pam-cleanup-factory">{t('{factory_label} · no se sugiere baja automática', { factory_label: item.factory_label })}</span>
           : null}
         {item.member_count !== null ? <small>{formatNumber(item.member_count)} miembros activos</small> : null}
-        {item.safe_count !== null ? <small>{formatNumber(item.safe_count)} Safes con acceso</small> : null}
+        {item.safe_count !== null ? <small>{t('{safe_count} Safes con acceso', { safe_count: formatNumber(item.safe_count) })}</small> : null}
         {item.peer_groups.length ? <span className="pam-cleanup-peers">Par/es: {item.peer_groups.map((peer) =>
-          <small key={peer.object_id}>{peer.display_name} · {peer.source_id} · {formatNumber(peer.safe_count)} Safes con acceso</small>
+          <small key={peer.object_id}>{t('{display_name} · {source_id} · {safe_count} Safes con acceso', { display_name: peer.display_name, source_id: peer.source_id, safe_count: formatNumber(peer.safe_count) })}</small>
         )}</span> : null}
         <ScopeLabel item={item} />
       </span>
@@ -92,14 +92,14 @@ function SignalPanel({ signal, title, denominator, search }: {
       {signal.inventory_runs.map((evidence) => <InventoryEvidence key={evidence.family} evidence={evidence} />)}
       <small>{t('El historial de corridas no atribuye cada fila a una captura histórica. Recalcular no actualiza la ingesta.')}</small>
     </div>
-    <p className="pam-cleanup-results" role="status">Mostrando {formatNumber(items.length)} de {formatNumber(signal.items.length)} objetos de esta categoría</p>
+    <p className="pam-cleanup-results" role="status">{t('Mostrando {items} de {items2} objetos de esta categoría', { items: formatNumber(items.length), items2: formatNumber(signal.items.length) })}</p>
     {items.length ? <div className="compact-table-wrap" role="region" aria-labelledby={captionId} tabIndex={0}>
       <table className="compact-table pam-cleanup-table">
-        <caption id={captionId} className="sr-only">{title}: detalle y motivo</caption>
+        <caption id={captionId} className="sr-only">{t('{title}: detalle y motivo', { title: title })}</caption>
         <thead><tr><th>{t('Objeto')}</th><th>{t('Motivo')}</th></tr></thead>
         <tbody>{items.map((item) => <SignalItem key={item.object_id} item={item} />)}</tbody>
       </table>
-    </div> : <StateBlock variant="empty" title={signal.items.length ? 'Sin coincidencias para esta búsqueda' : signal.denominator === 0 ? t('Sin inventario activo en esta categoría') : t('Sin señales para esta categoría')} />}
+    </div> : <StateBlock variant="empty" title={signal.items.length ? t('Sin coincidencias para esta búsqueda') : signal.denominator === 0 ? t('Sin inventario activo en esta categoría') : t('Sin señales para esta categoría')} />}
   </article>;
 }
 

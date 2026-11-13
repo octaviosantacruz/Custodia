@@ -339,11 +339,11 @@ export function toDashboardPreferencePayload(widgets: DashboardWidget[]) {
 
 function widgetFilterLabels(widget: DashboardWidget): string[] {
   return [
-    widget.filters.workflow_status ? `Estado: ${WORKFLOW_LABELS[widget.filters.workflow_status]}` : '',
-    widget.filters.classification_status ? `Clasificación: ${CLASSIFICATION_LABELS[widget.filters.classification_status]}` : '',
-    widget.filters.inventory_scope ? `Alcance: ${SCOPE_LABELS[widget.filters.inventory_scope]}` : '',
-    widget.filters.data_quality_status ? `Calidad: ${QUALITY_LABELS[widget.filters.data_quality_status]}` : '',
-    widget.filters.health_filter ? `Señal: ${HEALTH_LABELS[widget.filters.health_filter]}` : '',
+    widget.filters.workflow_status ? t('Estado: {value}', { value: WORKFLOW_LABELS[widget.filters.workflow_status] }) : '',
+    widget.filters.classification_status ? t('Clasificación: {value}', { value: CLASSIFICATION_LABELS[widget.filters.classification_status] }) : '',
+    widget.filters.inventory_scope ? t('Alcance: {value}', { value: SCOPE_LABELS[widget.filters.inventory_scope] }) : '',
+    widget.filters.data_quality_status ? t('Calidad: {value}', { value: QUALITY_LABELS[widget.filters.data_quality_status] }) : '',
+    widget.filters.health_filter ? t('Señal: {value}', { value: HEALTH_LABELS[widget.filters.health_filter] }) : '',
   ].filter(Boolean);
 }
 
@@ -362,7 +362,7 @@ function inventoryFreshnessLabel(widget: DashboardWidget): string {
   if (widget.data_status === 'unavailable') return t(' · Sin inventario sincronizado');
   if (!widget.measured_at) return widget.data_status === 'pending' ? t(' · Pendiente') : '';
   const measured = measuredAtLabel(widget.measured_at);
-  return widget.data_status === 'pending' ? ` · Pendiente: corrida del ${measured}` : '';
+  return widget.data_status === 'pending' ? t(' · Pendiente: corrida del {date}', { date: measured }) : '';
 }
 
 const COVERAGE_DETAIL_MEASURES = new Set<DashboardMeasure>(['kr1_safe_bu_coverage', 'kr2_connection_coverage', 'safe_account_coverage', 'pam_sia_coverage', 'zsp_coverage', 'account_platform_coverage']);
@@ -378,36 +378,36 @@ const COVERAGE_DETAIL_FALLBACKS: Partial<Record<DashboardMeasure, string>> = {
 export function dashboardWidgetDetail(widget: DashboardWidget): string {
   if (COVERAGE_DETAIL_MEASURES.has(widget.measure)) {
     if (widget.data_status === 'unavailable') return t('Sin inventario disponible');
-    const unit = widget.measure === 'account_platform_coverage' ? 'cuentas' : widget.measure === 'safe_account_coverage' || widget.measure === 'kr1_safe_bu_coverage' ? t('Safes') : t('conexiones migradas');
-    if (widget.covered_count !== undefined && widget.total_count !== undefined) return `${widget.covered_count} de ${widget.total_count} ${unit}`;
+    const unit = widget.measure === 'account_platform_coverage' ? t('cuentas') : widget.measure === 'safe_account_coverage' || widget.measure === 'kr1_safe_bu_coverage' ? t('Safes') : t('conexiones migradas');
+    if (widget.covered_count !== undefined && widget.total_count !== undefined) return t('{covered} de {total} {unit}', { covered: widget.covered_count, total: widget.total_count, unit });
     return COVERAGE_DETAIL_FALLBACKS[widget.measure] ?? '';
   }
   if (widget.measure === 'cyberark_compliance') {
     if (widget.data_status === 'unavailable') return t('Sin cálculo publicado');
     if (widget.total_accounts !== undefined && widget.compliant_accounts !== undefined) {
-      const counts = `${widget.compliant_accounts} de ${widget.total_accounts} cuentas`;
+      const counts = t('{covered} de {total} cuentas', { covered: widget.compliant_accounts, total: widget.total_accounts });
       if (!widget.measured_at) return counts;
       const measured = measuredAtLabel(widget.measured_at);
-      return widget.data_status === 'pending' ? `${counts} · Pendiente: cálculo del ${measured}` : counts;
+      return widget.data_status === 'pending' ? t('{counts} · Pendiente: cálculo del {date}', { counts, date: measured }) : counts;
     }
     return t('Último cálculo publicado por el script');
   }
   const labels = widgetFilterLabels(widget);
   const freshness = inventoryFreshnessLabel(widget);
   if (widget.kind === 'chart' && widget.chart) {
-    const base = `${DASHBOARD_MEASURE_LABELS[widget.measure]} por ${DASHBOARD_DIMENSION_LABELS[widget.chart.group_by]}`;
+    const base = t('{measure} por {dimension}', { measure: DASHBOARD_MEASURE_LABELS[widget.measure], dimension: DASHBOARD_DIMENSION_LABELS[widget.chart.group_by] });
     return labels.length ? `${base} · ${labels.join(' · ')}${freshness}` : `${base}${freshness}`;
   }
   if (labels.length) return `${labels.join(' · ')}${freshness}`;
-  if (widget.measure === 'accounts') return `Todas las cuentas activas${freshness}`;
+  if (widget.measure === 'accounts') return `${t('Todas las cuentas activas')}${freshness}`;
   if (widget.measure === 'connections') {
     if (widget.data_status === 'unavailable') return t('Sin carga de conexiones migradas publicada');
-    const base = widget.measured_at ? `Última carga del ${measuredAtLabel(widget.measured_at)}` : 'Última carga de conexiones migradas';
-    return widget.data_status === 'pending' ? `${base} · Pendiente de actualizar` : base;
+    const base = widget.measured_at ? t('Última carga del {date}', { date: measuredAtLabel(widget.measured_at) }) : t('Última carga de conexiones migradas');
+    return widget.data_status === 'pending' ? t('{base} · Pendiente de actualizar', { base }) : base;
   }
   if (DASHBOARD_PERCENTAGE_MEASURES.has(widget.measure)) return t('Porcentaje sobre el universo disponible');
-  const base = widget.measure === 'pam_users' ? 'Usuarios PAM activos'
-    : widget.measure === 'pam_roles' ? 'Roles PAM activos'
+  const base = widget.measure === 'pam_users' ? t('Usuarios PAM activos')
+    : widget.measure === 'pam_roles' ? t('Roles PAM activos')
       : widget.measure === 'sia_policies' ? t('Políticas SIA activas') : t('Todos los Safes activos');
   return `${base}${freshness}`;
 }
@@ -439,7 +439,7 @@ export function dashboardWidgetExplanation(widget: DashboardWidget): DashboardWi
   const labels = widgetFilterLabels(widget);
   const includes = labels.length ? `${base.includes} Filtros: ${labels.join(' · ')}.` : base.includes;
   const source = (widget.filters.classification_status || widget.filters.workflow_status || widget.filters.inventory_scope || widget.filters.data_quality_status)
-    ? `${base.source} La clasificación, alcance y estado operativo se mantienen localmente en Custodia.`
+    ? t('{source} La clasificación, alcance y estado operativo se mantienen localmente en Custodia.', { source: base.source })
     : base.source;
   return { includes, source, next: base.next };
 }

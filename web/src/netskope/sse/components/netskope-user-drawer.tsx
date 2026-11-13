@@ -42,7 +42,7 @@ export function NetskopeUserDrawer({ user, refreshKey, canReadUba, onUnauthorize
     <aside className="detail-drawer nsk-user-drawer">
       <div className="detail-title">
         <div className="detail-icon"><UserRound size={18} aria-hidden /></div>
-        <div className="detail-heading"><p className="eyebrow">{t('FICHA DEL USUARIO')}</p><h2 id="nsk-user-drawer-title">{user.name}</h2><p>{user.email || 'Sin correo informado'}</p></div>
+        <div className="detail-heading"><p className="eyebrow">{t('FICHA DEL USUARIO')}</p><h2 id="nsk-user-drawer-title">{user.name}</h2><p>{user.email || t('Sin correo informado')}</p></div>
         <button ref={closeRef} type="button" className="icon-button" aria-label={t('Cerrar ficha')} onClick={onClose}><X size={18} aria-hidden /></button>
       </div>
       {canReadUba ? <section className="detail-section nsk-user-confidence" aria-label={t('Índice de confianza del usuario')}>

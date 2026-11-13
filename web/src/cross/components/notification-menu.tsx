@@ -35,10 +35,10 @@ function readLastSeenRunId(): string | null {
 }
 
 function relativeTime(value: string | null): string {
-  if (!value) return 'Sin actividad registrada';
+  if (!value) return t('Sin actividad registrada');
   const elapsed = Math.max(0, Date.now() - new Date(value).getTime());
   const minutes = Math.floor(elapsed / 60000);
-  if (minutes < 1) return 'hace menos de un minuto';
+  if (minutes < 1) return t('hace menos de un minuto');
   if (minutes < 60) return 'hace ' + minutes + ' min';
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return 'hace ' + hours + (hours === 1 ? ' hora' : ' horas');
@@ -47,15 +47,15 @@ function relativeTime(value: string | null): string {
 }
 
 function actorLabel(event: ActivityEvent): string {
-  if (event.actor_id === 'system:scheduler') return 'Scheduler automático';
-  if (event.actor_id === 'system:ingestion') return 'Worker de sincronización';
+  if (event.actor_id === 'system:scheduler') return t('Scheduler automático');
+  if (event.actor_id === 'system:ingestion') return t('Worker de sincronización');
   return event.actor_name;
 }
 
 function eventLabel(event: ActivityEvent): string {
-  if (event.kind === 'sync') return 'Actividad de sincronización';
-  if (event.kind === 'import') return 'Importación registrada';
-  return 'Clasificación actualizada';
+  if (event.kind === 'sync') return t('Actividad de sincronización');
+  if (event.kind === 'import') return t('Importación registrada');
+  return t('Clasificación actualizada');
 }
 
 function CycleItem({ cycle }: { cycle: LatestToolCycle }) {
@@ -102,7 +102,7 @@ export function NotificationMenu({
       <Bell size={17} />{(unseen || hasLiveEvents) && <span className={'notification-dot ' + (hasLiveEvents || completed ? 'success' : 'warning')} />}
     </button>
     {open && <section className="notification-popover" aria-label={t('Notificaciones')}>
-      <div className="notification-header"><strong>{t('Notificaciones')}</strong><span>{unreadEventCount > 0 ? `${formatNumber(unreadEventCount)} actividad${unreadEventCount === 1 ? '' : 'es'} nueva${unreadEventCount === 1 ? '' : 's'}` : hasContent ? `${formatNumber((latestEvent ? 1 : 0) + cycles.length)} actividad${(latestEvent ? 1 : 0) + cycles.length === 1 ? '' : 'es'}` : 'Sin actividad'}</span></div>
+      <div className="notification-header"><strong>{t('Notificaciones')}</strong><span>{unreadEventCount > 0 ? `${formatNumber(unreadEventCount)} actividad${unreadEventCount === 1 ? '' : 'es'} nueva${unreadEventCount === 1 ? '' : 's'}` : hasContent ? `${formatNumber((latestEvent ? 1 : 0) + cycles.length)} actividad${(latestEvent ? 1 : 0) + cycles.length === 1 ? '' : 'es'}` : t('Sin actividad')}</span></div>
       {latestEvent ? <div className="notification-item success">
         <span className="notification-icon"><Check size={15} /></span>
         <div><strong>{eventLabel(latestEvent)}</strong><span>{actorLabel(latestEvent)} · {relativeTime(latestEvent.created_at)}</span></div>

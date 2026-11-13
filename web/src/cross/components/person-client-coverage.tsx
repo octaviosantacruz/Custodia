@@ -23,8 +23,8 @@ const STATUS_LABELS: Record<PersonCoverageStatus, string> = {
 };
 
 function freshnessLabel(freshness: string): string {
-  return ({ fresh: 'Completa · vigente', stale: 'Desactualizada', incomplete: 'Última corrida incompleta', missing: 'Sin corrida completa vigente' } as Record<string, string>)[freshness]
-    ?? 'Sin estado de frescura';
+  return ({ fresh: 'Completa · vigente', stale: 'Desactualizada', incomplete: t('Última corrida incompleta'), missing: t('Sin corrida completa vigente') } as Record<string, string>)[freshness]
+    ?? t('Sin estado de frescura');
 }
 
 function CoverageSourceDetails({ sources, label }: {
@@ -43,9 +43,9 @@ function CoverageSourceDetails({ sources, label }: {
           <dd>{run.source_system} · {run.source_file}</dd>
           <dd>Estado: {run.status ?? 'no informado'} · {freshnessLabel(run.freshness)}</dd>
           {run.age_hours !== undefined && run.age_hours !== null ? <dd>Antigüedad informada: {formatNumber(run.age_hours)} h</dd> : null}
-          <dd>Inicio: {run.started_at ? <DateTime value={run.started_at} /> : 'Sin fecha informada'}</dd>
-          <dd>Corrida completa: {run.completed_at ? <DateTime value={run.completed_at} /> : 'Sin fecha informada'}</dd>
-          <dd className="mono">ID de corrida: {run.run_id || 'No informado'}</dd>
+          <dd>Inicio: {run.started_at ? <DateTime value={run.started_at} /> : t('Sin fecha informada')}</dd>
+          <dd>Corrida completa: {run.completed_at ? <DateTime value={run.completed_at} /> : t('Sin fecha informada')}</dd>
+          <dd className="mono">{t('ID de corrida: {informado}', { informado: run.run_id || 'No informado' })}</dd>
         </div>;
       })}
     </dl>
@@ -76,7 +76,7 @@ export function PersonConnectionPanel({ identity, netskope, detail, selectedEmai
         <p><strong>{currentDetail.status === 'unknown' ? 'Por verificar' : STATUS_LABELS[currentDetail.status]}</strong></p>
         <p>{individualReason ?? currentDetail.explanation}</p>
         <p className="mono">{selectedEmail}</p>
-        <p>Dispositivos recientes {formatNumber(currentDetail.devices_recent)} · no recientes / sin fecha {formatNumber(currentDetail.devices_not_recent)} · ambiguos {formatNumber(currentDetail.devices_ambiguous)} · total atribuible {formatNumber(currentDetail.devices_total)}.</p>
+        <p>{t('Dispositivos recientes {devices_recent} · no recientes / sin fecha {devices_not_recent} · ambiguos {devices_ambiguous} · total atribuible {devices_total}.', { devices_recent: formatNumber(currentDetail.devices_recent), devices_not_recent: formatNumber(currentDetail.devices_not_recent), devices_ambiguous: formatNumber(currentDetail.devices_ambiguous), devices_total: formatNumber(currentDetail.devices_total) })}</p>
         <details className="person-client-coverage-disclosure">
           <summary>{t('Evidencia técnica de la persona')}</summary>
           <p>{currentDetail.explanation}</p>

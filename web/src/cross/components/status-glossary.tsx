@@ -94,15 +94,15 @@ const GROUPS: GlossaryGroup[] = [
 
 const SCOPE_TITLES: Record<Exclude<GlossaryScope, 'all'>, string> = {
   status: 'Estado operativo (Safe)',
-  next_action: 'Acción siguiente',
-  account_type: 'Tipo de cuenta',
-  business_unit: 'Unidad de negocio',
+  next_action: t('Acción siguiente'),
+  account_type: t('Tipo de cuenta'),
+  business_unit: t('Unidad de negocio'),
   responsible: 'Responsable',
-  inventory_scope: 'Alcance del inventario (KR1)',
-  data_quality: 'Calidad del dato',
-  member_access: 'Miembros del Safe',
+  inventory_scope: t('Alcance del inventario (KR1)'),
+  data_quality: t('Calidad del dato'),
+  member_access: t('Miembros del Safe'),
   safe_health: 'Safe Health',
-  sia_policy: 'Política SIA',
+  sia_policy: t('Política SIA'),
 };
 
 function groupsForScope(scope: GlossaryScope): GlossaryGroup[] {

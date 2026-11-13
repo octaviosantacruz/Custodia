@@ -6,6 +6,7 @@ import { describeSiaGranteeLink, filterSiaGranteeLinks, summarizeSiaGranteeLinks
 import { siaGranteeTarget } from '../lib/sia-grantee';
 import type { WorkspaceView } from '../../../cross/lib/workspaces';
 import type { SiaPolicyRow } from '../types/sia';
+import { t } from '../../../cross/i18n/index.ts';
 
 const PAGE_SIZE = 25;
 const EMPTY_FILTERS = { text: '', status: '', source: '' } as const;
@@ -62,7 +63,7 @@ export function SiaGranteeDetail({
   return <section className="sia-grantee-detail" aria-label="Destinatarios">
     <h3 className="sia-recipient-heading">Destinatarios</h3>
     {hasEmailLinks ? <div className="sia-recipient-subsection sia-email-links-section">
-      <h4>Vínculos por correo exacto</h4>
+      <h4>{t('Vínculos por correo exacto')}</h4>
       <div className="sia-link-summary">
         {summary.sources.map((item) => <p key={item.source}>
           <strong>{item.sourceLabel}:</strong> vinculados {item.matched} · ambiguos {item.ambiguous} · sin coincidencia {item.unmatched} de {summary.recipients} destinatarios
@@ -70,25 +71,25 @@ export function SiaGranteeDetail({
         <span>Conteos de esta política; no son un KPI de cobertura.</span>
       </div>
       <div className={`sia-grantee-filters${hasIdentity && hasPam ? ' has-source-filter' : ''}`}>
-        <label className="search-box"><Search size={16} aria-hidden="true" /><input placeholder="Valor del destinatario"
+        <label className="search-box"><Search size={16} aria-hidden="true" /><input placeholder={t('Valor del destinatario')}
           type="search"
-          aria-label="Filtrar destinatarios por valor"
+          aria-label={t('Filtrar destinatarios por valor')}
           value={text}
           onChange={(event) => updateText(event.target.value)}
         /></label>
-        <label>Estado<CompactSelect
-          ariaLabel="Filtrar destinatarios por estado"
+        <label>{t('Estado')}<CompactSelect
+          ariaLabel={t('Filtrar destinatarios por estado')}
           value={status}
           onChange={updateStatus}
           options={[
             { value: '', label: 'Todos' },
             { value: 'matched', label: 'Vinculados' },
             { value: 'ambiguous', label: 'Ambiguos' },
-            { value: 'unmatched', label: 'Sin coincidencia' },
+            { value: 'unmatched', label: t('Sin coincidencia') },
           ]}
         /></label>
-        {hasIdentity && hasPam ? <label>Fuente<CompactSelect
-          ariaLabel="Filtrar destinatarios por fuente"
+        {hasIdentity && hasPam ? <label>{t('Fuente')}<CompactSelect
+          ariaLabel={t('Filtrar destinatarios por fuente')}
           value={source}
           onChange={updateSource}
           options={[
@@ -98,8 +99,8 @@ export function SiaGranteeDetail({
           ]}
         /></label> : null}
       </div>
-      <p className="sia-grantee-count" aria-live="polite">{filteredLinks.length} de {links.length} destinatarios</p>
-      {filteredLinks.length ? <ul className="sia-email-link-list" aria-label="Destinatarios vinculados por correo exacto">
+      <p className="sia-grantee-count" aria-live="polite">{t('{filteredLinks} de {links} destinatarios', { filteredLinks: filteredLinks.length, links: links.length })}</p>
+      {filteredLinks.length ? <ul className="sia-email-link-list" aria-label={t('Destinatarios vinculados por correo exacto')}>
         {visibleLinks.map((link, index) => <li className="sia-email-link" key={`${link.value}-${index}`}>
           <strong>{link.value}</strong>
           <div className="sia-email-link-sides">
@@ -115,25 +116,25 @@ export function SiaGranteeDetail({
           </div>
         </li>)}
       </ul> : <div className="sia-grantee-empty">
-        <span>Ningún destinatario coincide con los filtros</span>
+        <span>{t('Ningún destinatario coincide con los filtros')}</span>
         <button type="button" className="button subtle" onClick={clearFilters}>Limpiar filtros</button>
       </div>}
       {remaining > 0 ? <button
         type="button"
         className="button subtle sia-grantee-more"
         onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-      >Mostrar {Math.min(PAGE_SIZE, remaining)} más</button> : null}
+      >{t('Mostrar {remaining} más', { remaining: Math.min(PAGE_SIZE, remaining) })}</button> : null}
     </div> : null}
     <div className="sia-recipient-subsection sia-name-references">
-      <h4>Referencia por nombre</h4>
+      <h4>{t('Referencia por nombre')}</h4>
       {grantedCount ? <div className="sia-grantee-list">
         {policy.attributes.granted_users.map((name) => <IdentityChip key={`u-${name}`} name={name} kind="user" subtitle="usuario · referencia por nombre" onSelect={() => onNavigate('identityUsers', name)} />)}
         {policy.attributes.granted_groups.map((name) => <IdentityChip key={`g-${name}`} name={name} kind="group" subtitle="grupo · referencia por nombre" onSelect={() => onNavigate('identityGroups', name)} />)}
         {policy.attributes.granted_roles.map((name) => {
           const target = siaGranteeTarget(name, 'role');
-          return <IdentityChip key={`r-${name}`} name={name} kind={target.kind} subtitle={target.kind === 'group' ? 'grupo Okta · referencia por nombre' : 'rol · referencia por nombre'} onSelect={() => onNavigate(target.view, name)} />;
+          return <IdentityChip key={`r-${name}`} name={name} kind={target.kind} subtitle={target.kind === 'group' ? t('grupo Okta · referencia por nombre') : t('rol · referencia por nombre')} onSelect={() => onNavigate(target.view, name)} />;
         })}
-      </div> : <span className="muted">Sin usuarios, roles o grupos otorgados</span>}
+      </div> : <span className="muted">{t('Sin usuarios, roles o grupos otorgados')}</span>}
     </div>
   </section>;
 }

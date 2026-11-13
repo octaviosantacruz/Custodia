@@ -4,6 +4,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { fetchDashboardFiltered, fetchDashboardStatic, type DashboardFilters, type DashboardRequestOptions } from '../lib/dashboard-api';
 import type { AuthStatus } from '../../../cross/types/auth';
 import type { Analytics, SafeClassificationCounts, SafeRow } from '../types/safe';
+import { t } from '../../../cross/i18n/index.ts';
 
 type UseDashboardOptions = DashboardFilters & {
   authChecked: boolean;
@@ -58,7 +59,7 @@ export function useDashboard({
   useEffect(() => {
     if (!staticQuery.error) return;
     if (staticQuery.error instanceof ApiError && staticQuery.error.status === 401) onUnauthorized();
-    else onError(staticQuery.error instanceof Error ? staticQuery.error.message : 'No se pudo cargar el inventario');
+    else onError(staticQuery.error instanceof Error ? staticQuery.error.message : t('No se pudo cargar el inventario'));
   }, [onError, onUnauthorized, staticQuery.error]);
 
   const loadDashboard = useCallback(async (options: DashboardRequestOptions = {}) => {
@@ -106,7 +107,7 @@ export function useDashboard({
         onUnauthorized();
         return;
       }
-      const message = failure instanceof Error ? failure.message : 'No se pudo cargar el inventario';
+      const message = failure instanceof Error ? failure.message : t('No se pudo cargar el inventario');
       setLoadError(message);
       // Rows loaded for another filter must not stay on screen as if they matched this one.
       if (page === 0) { setSafes([]); setSafeTotal(0); }

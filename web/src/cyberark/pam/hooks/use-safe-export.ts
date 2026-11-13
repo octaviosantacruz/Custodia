@@ -1,5 +1,6 @@
 import { download } from '../../../cross/lib/api';
 import type { AccountPlatformStatus, SafeHealthFilter, WorkflowStatus } from '../types/safe';
+import { t } from '../../../cross/i18n/index.ts';
 
 type UseSafeExportOptions = {
   search: string;
@@ -40,7 +41,7 @@ export function useSafeExport({
       await download('/safes/export.csv?' + params.toString(), 'custodia-safes.csv');
       onNotice('CSV descargado');
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo exportar el inventario');
+      onError(error instanceof Error ? error.message : t('No se pudo exportar el inventario'));
     }
   };
 
@@ -48,9 +49,9 @@ export function useSafeExport({
     onError('');
     try {
       await download('/accounts/export.csv?q=' + encodeURIComponent(search) + '&platform_status=' + encodeURIComponent(platformStatus), 'custodia-accounts.csv');
-      onNotice('CSV de cuentas descargado');
+      onNotice(t('CSV de cuentas descargado'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo exportar las cuentas');
+      onError(error instanceof Error ? error.message : t('No se pudo exportar las cuentas'));
     }
   };
 

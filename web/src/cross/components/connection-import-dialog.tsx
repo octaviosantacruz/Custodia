@@ -29,7 +29,7 @@ function SampleList({ title, samples, total, detail }: { title: string; samples:
   return <div className="connection-import-group">
     <strong>{title} <span className="muted">({formatNumber(total)})</span></strong>
     <ul>{samples.map((sample) => <li key={`${sample.private_ip}:${sample.port ?? ''}`}><span className="mono">{destination(sample)}</span> {sample.instance_name}{detail ? <span className="muted"> · {detail(sample)}</span> : null}</li>)}</ul>
-    {total > samples.length && <span className="muted">y {formatNumber(total - samples.length)} más</span>}
+    {total > samples.length && <span className="muted">{t('y {samples} más', { samples: formatNumber(total - samples.length) })}</span>}
   </div>;
 }
 
@@ -44,7 +44,7 @@ export function ConnectionImportDialog({ fileName, rows, busy, onConfirm, onClos
     setFailure('');
     previewConnectionImport({ file_name: fileName, rows, mode })
       .then((result) => { if (current) setPreview(result); })
-      .catch((error: unknown) => { if (current) setFailure(error instanceof Error ? error.message : 'No se pudo calcular la vista previa'); });
+      .catch((error: unknown) => { if (current) setFailure(error instanceof Error ? error.message : t('No se pudo calcular la vista previa')); });
     return () => { current = false; };
   }, [fileName, rows, mode]);
 
@@ -54,7 +54,7 @@ export function ConnectionImportDialog({ fileName, rows, busy, onConfirm, onClos
   return <ConfirmDialog
     icon={<FileUp size={18} aria-hidden />} titleId="connection-import-title" title={t('Importar destinos')}
     descriptionId="connection-import-description"
-    description={<>{fileName} · {formatNumber(rows.length)} filas. La clave es IP y puerto.</>}
+    description={<>{t('{fileName} · {rows} filas. La clave es IP y puerto.', { fileName: fileName, rows: formatNumber(rows.length) })}</>}
     confirmTone="primary" confirmLabel="Importar" confirmBusyLabel="Importando…"
     confirmBusy={busy} confirmDisabled={blocked} onConfirm={() => onConfirm(mode)} onClose={onClose} closeDisabled={busy}
     backdropClassName="connection-import-backdrop"
@@ -74,7 +74,7 @@ export function ConnectionImportDialog({ fileName, rows, busy, onConfirm, onClos
       {preview.errors.length > 0 && <div className="connection-import-group" role="alert"><strong>{t('Filas con error')}</strong>
         <ul>{preview.errors.slice(0, 20).map((error) => <li key={error.row}>Fila {error.row}: {error.message}</li>)}</ul></div>}
       <SampleList title={t('Nuevos')} samples={preview.samples.new} total={counts!.new} />
-      <SampleList title={t('Cambian')} samples={preview.samples.changed} total={counts!.changed} detail={(sample) => sample.reactivated && !sample.fields.length ? 'vuelve a Activo' : sample.fields.map((field) => FIELD_LABELS[field] ?? field).join(', ')} />
+      <SampleList title={t('Cambian')} samples={preview.samples.changed} total={counts!.changed} detail={(sample) => sample.reactivated && !sample.fields.length ? t('vuelve a Activo') : sample.fields.map((field) => FIELD_LABELS[field] ?? field).join(', ')} />
       <SampleList title={missingLabel} samples={preview.samples.missing} total={counts!.missing} />
     </>}
   </ConfirmDialog>;

@@ -9,6 +9,7 @@ import type {
   NetskopeMetricBucket,
   NetskopeSelectedMetrics,
 } from '../types/netskope.ts';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type NetskopeMetricGroupId = 'inventory' | 'alerts' | 'analytics';
 
@@ -22,18 +23,18 @@ export type NetskopeMetricPickerGroup = {
 const GROUPS: ReadonlyArray<Omit<NetskopeMetricPickerGroup, 'options'>> = [
   {
     id: 'inventory',
-    title: 'Inventario y cobertura',
-    description: 'Identidades, dispositivos y cobertura observada.',
+    title: t('Inventario y cobertura'),
+    description: t('Identidades, dispositivos y cobertura observada.'),
   },
   {
     id: 'alerts',
-    title: 'Alertas y protección',
-    description: 'Capturas agregadas de alertas Netskope y sus dimensiones.',
+    title: t('Alertas y protección'),
+    description: t('Capturas agregadas de alertas Netskope y sus dimensiones.'),
   },
   {
     id: 'analytics',
     title: 'Advanced Analytics',
-    description: 'Gráficos de Netskope declarados para este tenant; Custodia no guarda sus resultados.',
+    description: t('Gráficos de Netskope declarados para este tenant; Custodia no guarda sus resultados.'),
   },
 ];
 
@@ -75,29 +76,29 @@ const GROUP_BY_WIDGET_ID: Partial<Record<NetskopeWidgetDefinition['id'], Netskop
 
 const INVENTORY_PERIODS: Partial<Record<NetskopeWidgetDefinition['id'], string>> = {
   users_total: 'Inventario vigente',
-  users_recent_activity: 'Eventos de 7, 14 o 30 días (seleccionable en el widget)',
-  devices_total: 'Eventos de los últimos 7 días',
-  devices_stale_30d: 'Último evento de más de 30 días · inventario vigente',
-  devices_with_observed_user: 'Eventos de los últimos 7 días',
-  devices_observed_user_matched: 'Eventos de los últimos 7 días',
-  devices_observed_user_unmatched: 'Eventos de los últimos 7 días',
+  users_recent_activity: t('Eventos de 7, 14 o 30 días (seleccionable en el widget)'),
+  devices_total: t('Eventos de los últimos 7 días'),
+  devices_stale_30d: t('Último evento de más de 30 días · inventario vigente'),
+  devices_with_observed_user: t('Eventos de los últimos 7 días'),
+  devices_observed_user_matched: t('Eventos de los últimos 7 días'),
+  devices_observed_user_unmatched: t('Eventos de los últimos 7 días'),
   users_without_observed_devices: 'Inventario vigente',
-  fleet_signal_24h: 'Eventos de los últimos 7 días',
-  fleet_client_current: 'Eventos de los últimos 7 días · línea base de versiones',
-  fleet_os_supported: 'Eventos de los últimos 7 días · mínimos de SO',
-  fleet_on_prem: 'Eventos de los últimos 7 días · detección on-premises',
-  devices_duplicate_hostnames: 'Eventos de los últimos 7 días',
-  devices_by_os: 'Eventos de los últimos 7 días',
-  devices_by_client: 'Eventos de los últimos 7 días',
-  devices_by_make: 'Eventos de los últimos 7 días',
-  devices_by_classification: 'Eventos de los últimos 7 días',
-  devices_by_user_status: 'Eventos de los últimos 7 días',
-  devices_by_company: 'Eventos de los últimos 7 días',
+  fleet_signal_24h: t('Eventos de los últimos 7 días'),
+  fleet_client_current: t('Eventos de los últimos 7 días · línea base de versiones'),
+  fleet_os_supported: t('Eventos de los últimos 7 días · mínimos de SO'),
+  fleet_on_prem: t('Eventos de los últimos 7 días · detección on-premises'),
+  devices_duplicate_hostnames: t('Eventos de los últimos 7 días'),
+  devices_by_os: t('Eventos de los últimos 7 días'),
+  devices_by_client: t('Eventos de los últimos 7 días'),
+  devices_by_make: t('Eventos de los últimos 7 días'),
+  devices_by_classification: t('Eventos de los últimos 7 días'),
+  devices_by_user_status: t('Eventos de los últimos 7 días'),
+  devices_by_company: t('Eventos de los últimos 7 días'),
   users_by_company: 'Inventario vigente',
-  devices_by_observed_user_status: 'Eventos de los últimos 7 días',
+  devices_by_observed_user_status: t('Eventos de los últimos 7 días'),
   users_by_device_count: 'Inventario vigente',
-  users_by_recent_device_age: 'Edad del último evento en dispositivos resueltos',
-  coverage_risk_devices_by_user: 'Último evento de desinstalación o deshabilitación · inventario vigente',
+  users_by_recent_device_age: t('Edad del último evento en dispositivos resueltos'),
+  coverage_risk_devices_by_user: t('Último evento de desinstalación o deshabilitación · inventario vigente'),
 };
 
 const CHART_BUCKET_FIELDS: Partial<Record<NetskopeWidgetDefinition['id'], keyof NetskopeSelectedMetrics>> = {
@@ -127,13 +128,13 @@ function formattedDate(value: string | null | undefined): string | undefined {
 }
 
 function alertWindowLabel(window: NetskopeAlertWindow | undefined): string {
-  if (!window) return 'Sin snapshot disponible';
+  if (!window) return t('Sin snapshot disponible');
   const availability = netskopeAlertAvailabilityLabel(window.availability)
     ?? (window.availability === 'complete' ? 'Captura completa' : 'Disponibilidad no informada');
   const start = formattedDate(window.window_start);
   const end = formattedDate(window.window_end);
   const captured = formattedDate(window.captured_at);
-  const period = start && end ? ` · período ${start} – ${end}` : '';
+  const period = start && end ? t(' · período {start} – {end}', { start: start, end: end }) : '';
   const capture = captured ? ` · capturada ${captured}` : '';
   return `${availability}${period}${capture}`;
 }
@@ -170,22 +171,22 @@ export function netskopeWidgetPickerDetails(
 ): NetskopeWidgetPickerDetails {
   if (definition.dataStatus === 'pending') {
     return {
-      sourceLabel: 'Fuente: Advanced Analytics · Período: sin binding aprobado · Disponibilidad: requiere definición validada',
+      sourceLabel: t('Fuente: Advanced Analytics · Período: sin binding aprobado · Disponibilidad: requiere definición validada'),
       unavailable: true,
     };
   }
 
   if (definition.aa) {
-    return { sourceLabel: `Fuente: Advanced Analytics · Período: ${definition.aa.period || 'no informado'} · Unidad: ${definition.aa.unit || 'no informada'}` };
+    return { sourceLabel: t('Fuente: Advanced Analytics · Período: {informado} · Unidad: {informada}', { informado: definition.aa.period || 'no informado', informada: definition.aa.unit || 'no informada' }) };
   }
 
   const alertDataDays = ALERT_DATA_DAYS[definition.id];
   if (alertDataDays) {
     const days = alertDataDays;
     const window = alertWindows.find((item) => item.days === days);
-    const period = `Captura de ${days} días`;
-    const source = definition.source === 'netskope' ? 'Captura de alertas Netskope' : definition.source;
-    const sourceLabel = `Fuente: ${source} · Período: ${period} · Disponibilidad: ${alertWindowLabel(window)}`;
+    const period = t('Captura de {days} días', { days: days });
+    const source = definition.source === 'netskope' ? t('Captura de alertas Netskope') : definition.source;
+    const sourceLabel = t('Fuente: {source} · Período: {period} · Disponibilidad: {window}', { source: source, period: period, window: alertWindowLabel(window) });
     return {
       sourceLabel,
       previewLabel: window
@@ -194,13 +195,13 @@ export function netskopeWidgetPickerDetails(
     };
   }
 
-  const period = INVENTORY_PERIODS[definition.id] ?? 'Período no informado';
+  const period = INVENTORY_PERIODS[definition.id] ?? t('Período no informado');
   const observation = formattedDate(metrics?.last_observed_at);
   const availability = metrics === null
-    ? 'Sin dato'
-    : observation ? `Inventario observado ${observation}` : 'Fecha de observación no informada';
+    ? t('Sin dato')
+    : observation ? `Inventario observado ${observation}` : t('Fecha de observación no informada');
   const source = definition.source === 'netskope' ? 'Inventario Netskope' : definition.source;
-  const sourceLabel = `Fuente: ${source} · Período: ${period} · Disponibilidad: ${availability}`;
+  const sourceLabel = t('Fuente: {source} · Período: {period} · Disponibilidad: {availability}', { source: source, period: period, availability: availability });
 
   if (definition.id === 'users_recent_activity') {
     const value = metrics?.users_with_device_activity_7d;

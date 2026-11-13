@@ -1,4 +1,5 @@
 import { formatNumber } from '../../../cross/lib/format';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type TrendSeries = { key: string; label: string; tone: 'primary' | 'secondary'; values: Array<number | null> };
 
@@ -38,13 +39,13 @@ export function CyberarkRiskTrend({ dates, series, ariaLabel }: { dates: string[
   const labelEvery = Math.max(1, Math.ceil(dates.length / 8));
   const summary = series.map((item) => {
     const last = [...item.values].reverse().find((value) => value !== null);
-    return `${item.label}: ${last === undefined || last === null ? 'sin dato' : formatNumber(last)}`;
+    return `${item.label}: ${last === undefined || last === null ? t('sin dato') : formatNumber(last)}`;
   }).join('; ');
   return <figure className="risk-trend">
     <div className="risk-trend-plot">
       <div className="risk-trend-y" aria-hidden="true">{[...ticks].reverse().map((tick) => <span key={tick}>{formatNumber(tick)}</span>)}</div>
       <div className="risk-trend-canvas">
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" role="img" aria-label={`${ariaLabel}. Último punto: ${summary}`}>
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} preserveAspectRatio="none" role="img" aria-label={t('{ariaLabel}. Último punto: {value}', { ariaLabel: ariaLabel, value: summary })}>
           {ticks.map((tick) => <line key={tick} className="risk-trend-grid" x1={0} x2={WIDTH} y1={y(tick)} y2={y(tick)} vectorEffect="non-scaling-stroke" />)}
           {series.map((item) => segments(item.values).map((run, runIndex) => {
             const line = run.map(([index, value]) => `${x(index)},${y(value)}`).join(' ');

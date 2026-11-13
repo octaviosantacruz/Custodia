@@ -57,7 +57,7 @@ function RecentActivity({ userId, deviceObjectId, onOpenUser }: { userId: number
         : anomalyData.total === 0 ? <p>{t('Sin comportamientos inusuales')}</p>
         : <>
           <p className="netskope-device-detail-anomalies">{ANOMALY_SEVERITIES.filter((key) => anomalyData.by_severity[key] > 0).map((key) => <StatusBadge key={key} tone={ANOMALY_SEVERITY_TONES[key]}>{ANOMALY_SEVERITY_LABELS[key]} {formatNumber(anomalyData.by_severity[key])}</StatusBadge>)}</p>
-          {topScenario ? <p>Más frecuente: {scenarioLabel(topScenario.scenario, topScenario.sub_scenario)}</p> : null}
+          {topScenario ? <p>{t('Más frecuente: {sub_scenario}', { sub_scenario: scenarioLabel(topScenario.scenario, topScenario.sub_scenario) })}</p> : null}
           {anomalyData.recent[0]?.time ? <p className="muted">{t('Última')} <DateTime value={anomalyData.recent[0].time} /> {t('· en cualquiera de sus equipos')}</p> : null}
         </>}
       {onOpenUser ? <button type="button" className="netskope-device-detail-link" onClick={onOpenUser}>{t('Ver anomalías en la ficha del usuario')}</button> : null}
@@ -75,20 +75,20 @@ export function NetskopeDeviceDetail({ row, onOpenUser }: { row: NetskopeRow; on
   return <div className="netskope-device-detail">
     <section aria-label={t('Equipo')}>
       <span className="netskope-device-detail-label">{t('Equipo')}</span>
-      <p><strong>{model || 'Modelo sin dato'}</strong></p>
-      <p>{os || 'SO sin dato'} · cliente {value(row, 'client_version') || 'sin dato'}</p>
+      <p><strong>{model || t('Modelo sin dato')}</strong></p>
+      <p>{os || t('SO sin dato')} · cliente {value(row, 'client_version') || t('sin dato')}</p>
       {classification ? <p className="muted" title={t('Clasificación de postura informada por Netskope; no dice si el cliente está conectado.')}>Netskope: {classification}</p> : null}
     </section>
     <section aria-label={t('Usuario')}>
       <span className="netskope-device-detail-label">{t('Usuario')}</span>
-      <p><strong>{user?.display_name || value(row, 'username') || 'Sin usuario informado'}</strong></p>
+      <p><strong>{user?.display_name || value(row, 'username') || t('Sin usuario informado')}</strong></p>
       <p>{[companyFromIdentity(email), email].filter((item) => item && item !== 'Sin dato').join(' · ')}</p>
       {row.observed_user_status === 'ambiguous' ? <StatusBadge tone="warning">{t('Coincidencia ambigua')}</StatusBadge>
         : row.observed_user_status !== 'matched' ? <p className="muted">{t('No correlacionado con el inventario de usuarios')}</p> : null}
     </section>
     <section aria-label={t('Señal')}>
       <span className="netskope-device-detail-label">{t('Señal')}</span>
-      <p><strong>{evidence?.last_signal_at ? `Reportó ${relativeTime(evidence.last_signal_at)}` : 'Sin señal registrada'}</strong>{evidence?.last_seen_event ? ` · ${evidence.last_seen_event}` : ''}</p>
+      <p><strong>{evidence?.last_signal_at ? t('Reportó {last_signal_at}', { last_signal_at: relativeTime(evidence.last_signal_at) }) : t('Sin señal registrada')}</strong>{evidence?.last_seen_event ? ` · ${evidence.last_seen_event}` : ''}</p>
       <p>{DEVICE_EVIDENCE_LABELS[evidence?.state ?? 'unknown']}{evidence?.last_signal_at ? <> · <DateTime value={evidence.last_signal_at} /></> : null}</p>
       <p className="muted">{t('En Custodia desde')} <DateTime value={row.first_seen_at} /></p>
     </section>

@@ -56,7 +56,7 @@ export function NetskopeOfficeAverages({ series }: { series: NetskopeOfficeWeek[
           <th scope="row">{weekRange(week.week_start)}</th>
           <td>{week.office_avg === null ? <span className="nsk-attention-empty">{t('Sin medición')}</span> : formatNumber(week.office_avg)}</td>
           <td>{week.remote_avg === null ? <span className="nsk-attention-empty">{t('Sin dato')}</span> : formatNumber(week.remote_avg)}</td>
-          <td>{week.days_measured} de 7</td>
+          <td>{t('{days_measured} de 7', { days_measured: week.days_measured })}</td>
         </tr>)}</tbody>
       </table></div>
       : <div className="nsk-office-trend-plot" onMouseLeave={() => setActive(null)}>
@@ -91,12 +91,12 @@ export function NetskopeOfficeAverages({ series }: { series: NetskopeOfficeWeek[
           </g>)}
         </svg>
         {activeWeek ? <div className={`nsk-office-tooltip${(active ?? 0) >= series.length / 2 ? ' is-left' : ''}`} role="tooltip" style={{ left: `${(x(active ?? 0) / WIDTH) * 100}%` }}>
-          <strong>Semana del {weekRange(activeWeek.week_start)}</strong>
+          <strong>{t('Semana del {week_start}', { week_start: weekRange(activeWeek.week_start) })}</strong>
           {activeWeek.office_avg === null ? <span>{t('Sin medición')}</span> : <>
-            <span><i className="nsk-office-line-swatch is-office" aria-hidden />En la oficina {formatNumber(activeWeek.office_avg)}</span>
-            <span><i className="nsk-office-line-swatch is-remote" aria-hidden />En remoto {activeWeek.remote_avg === null ? 'sin dato' : formatNumber(activeWeek.remote_avg)}</span>
+            <span><i className="nsk-office-line-swatch is-office" aria-hidden />{t('En la oficina {office_avg}', { office_avg: formatNumber(activeWeek.office_avg) })}</span>
+            <span><i className="nsk-office-line-swatch is-remote" aria-hidden />En remoto {activeWeek.remote_avg === null ? t('sin dato') : formatNumber(activeWeek.remote_avg)}</span>
           </>}
-          <span>{activeWeek.days_measured} de 7 días medidos</span>
+          <span>{t('{days_measured} de 7 días medidos', { days_measured: activeWeek.days_measured })}</span>
         </div> : null}
       </div>}
   </figure>;

@@ -17,14 +17,14 @@ export const DASHBOARD_SIZE_SPANS: Record<DashboardWidgetSize, { cols: number; r
 };
 
 export const DASHBOARD_SIZE_LABELS: Record<DashboardWidgetSize, string> = {
-  sm: 'Pequeño',
+  sm: t('Pequeño'),
   md: 'Ancho',
   lg: 'Grande',
 };
 
 export const DASHBOARD_SIZE_HINTS: Record<DashboardWidgetSize, string> = {
   sm: '1 zona',
-  md: '2 zonas en fila',
+  md: t('2 zonas en fila'),
   lg: '4 zonas (2×2)',
 };
 
@@ -180,3 +180,5 @@ export function moveDashboardWidget<T extends { widget_id: string }>(
   [next[from], next[to]] = [next[to], next[from]];
   return next;
 }
+
+import { t } from '../i18n/index.ts';

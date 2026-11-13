@@ -28,6 +28,7 @@ import { PamRefreshContext } from './refresh-context';
 import { lazyWithRetry } from '../../cross/lib/lazy-with-retry';
 import { PamServiceSubnav } from '../pam/components/pam-service-subnav';
 import { PamPostureSubnav } from '../pam/components/pam-posture-subnav';
+import { t } from '../../cross/i18n/index.ts';
 
 const ConnectionInventoryWorkspace = lazyWithRetry(() => import('../../cross/components/connection-inventory-workspace').then((module) => ({ default: module.ConnectionInventoryWorkspace })), 'connection-inventory-workspace');
 const SiaHubWorkspace = lazyWithRetry(() => import('./components/sia-hub-workspace').then((module) => ({ default: module.SiaHubWorkspace })), 'sia-hub-workspace');
@@ -191,7 +192,7 @@ export function CyberarkRouter({
     {(workspaceView === 'connectors' || workspaceView === 'pamHealth') && <PamServiceSubnav activeView={workspaceView} permissions={permissions} onNavigate={navigate} />}
     {(workspaceView === 'safes' || workspaceView === 'platforms') && <PamInfraSubnav activeView={workspaceView} permissions={permissions} onNavigate={navigate} />}
     {workspaceView === 'general' && <GeneralWorkspace onWidgetNavigate={handleWidgetNavigation} onUnauthorized={onUnauthorized} onError={onError} onNotice={onNotice} includeInternal={includeInternal} permissions={permissions} />}
-    <Suspense fallback={<StateBlock variant="loading" title="Cargando workspace…" />}>
+    <Suspense fallback={<StateBlock variant="loading" title={t('Cargando workspace…')} />}>
       {workspaceView === 'posture' && <PostureWorkspace authChecked={authChecked} authenticated={authenticated} includeInternal={includeInternal} canManage={permissions.includes('findings:manage')} canReadCyberarkRisk={permissions.includes('pam:risk_read')} onUnauthorized={onUnauthorized} onError={onError} onNotice={onNotice} onNavigate={navigate} />}
       {workspaceView === 'graph' && canReadPamCatalogs && <PamChainWorkspace canReadIdentity={canReadIdentityCatalogs} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} onError={onError} onNavigate={navigate} includeInternal={includeInternal} initialQuery={pamGraphSeed} initialStandardSeat={pamGraphStandardSeat} />}
       {workspaceView === 'person' && hasAccess('person') && <PersonChainsWorkspace authChecked={authChecked} authenticated={authenticated} permissions={permissions} onUnauthorized={onUnauthorized} onError={onError} onNavigate={navigate} />}
@@ -201,7 +202,7 @@ export function CyberarkRouter({
       {workspaceView === 'pamCleanup' && hasAccess('pamCleanup') && <PamCleanupWorkspace authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} />}
     </Suspense>
     {workspaceView === 'safes' && <SafesWorkspace catalogs={catalogs} catalogManagerOpen={catalogManagerOpen} onOpenCatalogManager={() => setCatalogManagerOpen(true)} onCloseCatalogManager={() => setCatalogManagerOpen(false)} onCatalogChanged={() => loadDashboard({ refreshStatic: true })} onNotice={onNotice} onError={onError} tableProps={tableProps} canManageCatalogs={permissions.includes('catalogs:manage')} summary={summary} healthFilter={healthFilter} onHealthChange={(value) => { setHealthFilter(value); setPage(0); }} accountPlatformCoverage={accountPlatformCoverage} accountManagementSummary={accountManagementSummary} accountManagementSummaryLoading={accountManagementSummaryLoading} accountManagementSummaryError={accountManagementSummaryError} onScopeChange={(scope) => { if (scope === 'retired') setDetail(null); }} />}
-    <Suspense fallback={<StateBlock variant="loading" title="Cargando workspace…" />}>
+    <Suspense fallback={<StateBlock variant="loading" title={t('Cargando workspace…')} />}>
       {isSiaView(workspaceView) && <SiaHubWorkspace authChecked={authChecked} authenticated={authenticated} permissions={permissions} onUnauthorized={onUnauthorized} onError={onError} onNavigate={navigate} initialSection={workspaceView === 'sia' ? 'policies' : 'resources'} initialResourceKind={workspaceView === 'siaDatabaseAccounts' ? 'databaseAccounts' : 'resources'} initialQuery={siaSeed} />}
       {workspaceView === 'assets' && <ConnectionInventoryWorkspace key={`${assetsSeed.search}:${assetsSeed.environment}:${assetsSeed.coverage}`} refreshKey={refreshKey} authChecked={authChecked} authenticated={authenticated} includeInternal={includeInternal} canManage={permissions.includes('coverage:manage')} initialSearch={assetsSeed.search} initialEnvironment={assetsSeed.environment} initialCoverage={assetsSeed.coverage} onUnauthorized={onUnauthorized} onError={onError} onNotice={onNotice} />}
       {workspaceView === 'roles' && <PamRolesWorkspace key={pamRoleSeed} authChecked={authChecked} authenticated={authenticated} onUnauthorized={onUnauthorized} onError={onError} onNavigate={navigate} initialQuery={pamRoleSeed} includeInternal={includeInternal} />}

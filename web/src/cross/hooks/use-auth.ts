@@ -3,6 +3,7 @@ import { api, logout } from '../lib/api';
 import { errorDetailsFrom, type ErrorDetails } from '../lib/error-details';
 import { passwordRequirements } from '../lib/password-policy';
 import type { AuthStatus } from '../types/auth';
+import { t } from '../i18n/index.ts';
 
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
 const IDLE_ACTIVITY_EVENTS = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'wheel'] as const;
@@ -47,8 +48,8 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
     } catch (error) {
       if (signal?.aborted || (error instanceof DOMException && error.name === 'AbortError')) return;
       setAuthStatus(null);
-      setAuthError(error instanceof Error ? error.message : 'No se pudo comprobar la sesión');
-      setAuthErrorDetails(errorDetailsFrom(error, 'No se pudo comprobar la sesión'));
+      setAuthError(error instanceof Error ? error.message : t('No se pudo comprobar la sesión'));
+      setAuthErrorDetails(errorDetailsFrom(error, t('No se pudo comprobar la sesión')));
       setAuthChecked(true);
     }
   }, []);
@@ -66,8 +67,8 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
       const loggedOut = await logout();
       setAuthStatus((current) => current ? { ...current, authenticated: false, user: null } : current);
       setAuthMessage(loggedOut
-        ? 'Tu sesión venció por inactividad. Volvé a entrar.'
-        : 'La sesión local se cerró, pero no se pudo confirmar el cierre en el servidor.');
+        ? t('Tu sesión venció por inactividad. Volvé a entrar.')
+        : t('La sesión local se cerró, pero no se pudo confirmar el cierre en el servidor.'));
       onSessionExpired();
     };
     const resetTimer = () => {
@@ -85,15 +86,15 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
   const submitRegistration = async (event: FormEvent) => {
     event.preventDefault();
     if (!registerName.trim() || !loginEmail.trim()) {
-      onError('Completá tu nombre y tu email.');
+      onError(t('Completá tu nombre y tu email.'));
       return;
     }
     if (!loginPassword) {
-      onError('Elegí una contraseña.');
+      onError(t('Elegí una contraseña.'));
       return;
     }
     if (loginPassword !== registerPasswordConfirm) {
-      onError('Las contraseñas no coinciden');
+      onError(t('Las contraseñas no coinciden'));
       return;
     }
     setRegisterBusy(true);
@@ -104,10 +105,10 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
       setRegisterPasswordConfirm('');
       setShowRegistration(false);
       setSetupStep(1);
-      setAuthMessage('Cuenta creada. Ahora iniciá sesión para continuar.');
+      setAuthMessage(t('Cuenta creada. Ahora iniciá sesión para continuar.'));
       setAuthStatus(await api<AuthStatus>('/auth/status'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo crear la cuenta');
+      onError(error instanceof Error ? error.message : t('No se pudo crear la cuenta'));
     } finally {
       setRegisterBusy(false);
     }
@@ -116,7 +117,7 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
   const submitLogin = async (event: FormEvent) => {
     event.preventDefault();
     if (!loginEmail.trim() || !loginPassword) {
-      onError('Completá email y contraseña.');
+      onError(t('Completá email y contraseña.'));
       return;
     }
     setLoginBusy(true);
@@ -130,7 +131,7 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
       }
       setAuthStatus(await api<AuthStatus>('/auth/status'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo iniciar sesión');
+      onError(error instanceof Error ? error.message : t('No se pudo iniciar sesión'));
     } finally {
       setLoginBusy(false);
     }
@@ -139,16 +140,16 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
   const submitPasswordChange = async (event: FormEvent) => {
     event.preventDefault();
     if (!currentPassword || !newPassword) {
-      onError('Completá tu contraseña actual y la nueva.');
+      onError(t('Completá tu contraseña actual y la nueva.'));
       return;
     }
     const checks = passwordChecks(newPassword);
     if (!checks.every((check) => check.valid)) {
-      onError('La nueva contraseña no cumple todas las condiciones.');
+      onError(t('La nueva contraseña no cumple todas las condiciones.'));
       return;
     }
     if (newPassword !== newPasswordConfirm) {
-      onError('Las contraseñas nuevas no coinciden.');
+      onError(t('Las contraseñas nuevas no coinciden.'));
       return;
     }
     setPasswordChangeBusy(true);
@@ -159,9 +160,9 @@ export function useAuth({ onError, onNotice, onSessionExpired }: UseAuthOptions)
       setNewPassword('');
       setNewPasswordConfirm('');
       setAuthStatus(await api<AuthStatus>('/auth/status'));
-      onNotice('Contraseña actualizada. Ya podés ingresar al inventario.');
+      onNotice(t('Contraseña actualizada. Ya podés ingresar al inventario.'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo actualizar la contraseña');
+      onError(error instanceof Error ? error.message : t('No se pudo actualizar la contraseña'));
     } finally {
       setPasswordChangeBusy(false);
     }

@@ -39,8 +39,8 @@ const PICKER_GROUP_ICONS: Record<string, React.ReactNode> = {
 };
 
 function shortcutSourceLabel(measure: DashboardMeasure): string {
-  if (measure === 'connections' || measure === 'kr2_connection_coverage') return 'Fuente: CSV de conexiones · última carga';
-  if (measure === 'cyberark_compliance') return 'Fuente: script de compliance · último cálculo publicado';
+  if (measure === 'connections' || measure === 'kr2_connection_coverage') return t('Fuente: CSV de conexiones · última carga');
+  if (measure === 'cyberark_compliance') return t('Fuente: script de compliance · último cálculo publicado');
   return 'Fuente: CyberArk · inventario confirmado';
 }
 
@@ -71,10 +71,10 @@ function shortcutVisualization(shortcut: DashboardShortcut): string {
   if (shortcut.kind !== 'chart') return 'Indicador';
   switch (shortcut.chart?.style) {
     case 'pie': return 'Dona';
-    case 'line': return 'Línea';
-    case 'heatmap': return 'Mapa de calor';
-    case 'scatter': return 'Dispersión';
-    case 'combo': return 'Barras + línea';
+    case 'line': return t('Línea');
+    case 'heatmap': return t('Mapa de calor');
+    case 'scatter': return t('Dispersión');
+    case 'combo': return t('Barras + línea');
     default: return 'Barras';
   }
 }
@@ -86,7 +86,7 @@ function shortcutVisualization(shortcut: DashboardShortcut): string {
 function shortcutPreviewFields(shortcut: DashboardShortcut, preview?: ShortcutPreview): { previewLabel?: string; previewBuckets?: AnalyticsBucket[]; previewChartData?: DashboardWidget['chart_data'] } {
   if (!preview) return {};
   if (shortcut.kind !== 'chart') {
-    if (preview.data_status === 'unavailable') return { previewLabel: 'Sin datos' };
+    if (preview.data_status === 'unavailable') return { previewLabel: t('Sin datos') };
     const value = preview.value.toLocaleString(localeTag());
     return { previewLabel: DASHBOARD_PERCENTAGE_MEASURES.has(shortcut.measure) ? `${value}%` : value };
   }
@@ -126,7 +126,7 @@ function shortcutPickerGroups(kind: 'data' | 'chart', selectedWidgets: Dashboard
       id: chart.id,
       title: chart.title,
       description: chart.detail,
-      sourceLabel: 'Requiere una fuente verificable',
+      sourceLabel: t('Requiere una fuente verificable'),
       previewIcon: <LayoutGrid size={23} aria-hidden="true" />,
       previewKind: 'heatmap' as const,
       visualization: 'No disponible',
@@ -143,7 +143,7 @@ function PamEmptyDashboard({ saving, onAddData, onAddChart, onUseRecommended }: 
 }) {
   return <section className="dashboard-empty-state" aria-labelledby="pam-empty-title">
     <div className="dashboard-empty-copy">
-      <div className="workspace-intro-heading"><h2 id="pam-empty-title">{t('Todavía no elegiste qué seguir')}</h2><HelpHint label={t('Vista recomendada')}><p>Armá tu tablero con indicadores del inventario CyberArk (Safes, cuentas, cobertura) y comparaciones por empresa, tipo o estado operativo. Podés empezar con la vista sugerida y ajustarla después.</p><p>La vista sugerida incluye Safes sin cuentas, pendientes de clasificar, usuarios PAM y tres distribuciones. Se guarda sólo si la aceptás; también podés elegir bloque por bloque.</p></HelpHint></div>
+      <div className="workspace-intro-heading"><h2 id="pam-empty-title">{t('Todavía no elegiste qué seguir')}</h2><HelpHint label={t('Vista recomendada')}><p>{t('Armá tu tablero con indicadores del inventario CyberArk (Safes, cuentas, cobertura) y comparaciones por empresa, tipo o estado operativo. Podés empezar con la vista sugerida y ajustarla después.')}</p><p>La vista sugerida incluye Safes sin cuentas, pendientes de clasificar, usuarios PAM y tres distribuciones. Se guarda sólo si la aceptás; también podés elegir bloque por bloque.</p></HelpHint></div>
       <p>{t('Elegí datos o gráficos para armar tu tablero.')}</p>
     </div>
     <div className="dashboard-empty-actions">
@@ -165,10 +165,10 @@ function DashboardWidgetFilterControls({ widget, disabled, onChange }: {
   onChange: (key: keyof DashboardWidgetFilters, value: string) => void;
 }) {
   return <>
-    <CompactSelect className="dashboard-widget-filter" ariaLabel={`Estado de ${widget.title}`} value={widget.filters.workflow_status} disabled={disabled} onChange={(value) => onChange('workflow_status', value)} options={FILTER_OPTIONS.workflow_status} />
-    <CompactSelect className="dashboard-widget-filter" ariaLabel={`Clasificación de ${widget.title}`} value={widget.filters.classification_status} disabled={disabled} onChange={(value) => onChange('classification_status', value)} options={FILTER_OPTIONS.classification_status} />
-    <CompactSelect className="dashboard-widget-filter" ariaLabel={`Alcance de ${widget.title}`} value={widget.filters.inventory_scope} disabled={disabled} onChange={(value) => onChange('inventory_scope', value)} options={FILTER_OPTIONS.inventory_scope} />
-    <CompactSelect className="dashboard-widget-filter" ariaLabel={`Señal técnica de ${widget.title}`} value={widget.filters.health_filter} disabled={disabled} onChange={(value) => onChange('health_filter', value)} options={FILTER_OPTIONS.health_filter} />
+    <CompactSelect className="dashboard-widget-filter" ariaLabel={t('Estado de {title}', { title: widget.title })} value={widget.filters.workflow_status} disabled={disabled} onChange={(value) => onChange('workflow_status', value)} options={FILTER_OPTIONS.workflow_status} />
+    <CompactSelect className="dashboard-widget-filter" ariaLabel={t('Clasificación de {title}', { title: widget.title })} value={widget.filters.classification_status} disabled={disabled} onChange={(value) => onChange('classification_status', value)} options={FILTER_OPTIONS.classification_status} />
+    <CompactSelect className="dashboard-widget-filter" ariaLabel={t('Alcance de {title}', { title: widget.title })} value={widget.filters.inventory_scope} disabled={disabled} onChange={(value) => onChange('inventory_scope', value)} options={FILTER_OPTIONS.inventory_scope} />
+    <CompactSelect className="dashboard-widget-filter" ariaLabel={t('Señal técnica de {title}', { title: widget.title })} value={widget.filters.health_filter} disabled={disabled} onChange={(value) => onChange('health_filter', value)} options={FILTER_OPTIONS.health_filter} />
   </>;
 }
 
@@ -210,7 +210,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
     setDraft(preferences.widgets.map((widget) => ({ ...widget, filters: { ...widget.filters } })));
     setEditing(true);
     setConfigWidgetId(null);
-    setAnnouncement('Edición del tablero activada');
+    setAnnouncement(t('Edición del tablero activada'));
   };
   const requestPicker = (kind: 'data' | 'chart') => {
     if (!editing) startEditing();
@@ -232,22 +232,22 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
   // saved view changes when the operator confirms the dialog.
   const applyPreset = (preset: DashboardPreset) => setPendingView({
     title: `Aplicar vista "${preset.label}"`,
-    description: `${preset.description} Reemplaza tu vista guardada de CyberArk (${preset.shortcutIds.length} bloques). Hasta que confirmes, tu vista actual no cambia.`,
+    description: t('{description} Reemplaza tu vista guardada de CyberArk ({shortcutIds} bloques). Hasta que confirmes, tu vista actual no cambia.', { description: preset.description, shortcutIds: preset.shortcutIds.length }),
     confirmLabel: 'Aplicar vista',
     notice: `Vista "${preset.label}" aplicada`,
     icon: <LayoutTemplate size={18} aria-hidden="true" />,
     widgets: preset.shortcutIds.map((id, index) => createDashboardShortcut(id, index)),
   });
   const applyTeamTemplate = (template: (typeof teamTemplates.templates)[number]) => setPendingView({
-    title: `Restaurar vista de ${template.role_name}`,
-    description: `Aplica la versión ${template.version} como una copia personalizable (${template.widgets.length} bloques). No modifica la plantilla del equipo.`,
-    confirmLabel: 'Usar esta vista', notice: `Vista de ${template.role_name} aplicada`,
+    title: t('Restaurar vista de {role_name}', { role_name: template.role_name }),
+    description: t('Aplica la versión {version} como una copia personalizable ({widgets} bloques). No modifica la plantilla del equipo.', { version: template.version, widgets: template.widgets.length }),
+    confirmLabel: 'Usar esta vista', notice: t('Vista de {role_name} aplicada', { role_name: template.role_name }),
     icon: <LayoutTemplate size={18} aria-hidden="true" />,
     widgets: template.widgets.map((widget) => ({ ...widget, filters: { ...widget.filters } })),
   });
   const resetView = () => setPendingView({
     title: t('Restablecer a predeterminada'),
-    description: `Vuelve a los ${DEFAULT_PAM_SHORTCUT_IDS.length} bloques por defecto de CyberArk y reemplaza tu vista guardada.`,
+    description: t('Vuelve a los {DEFAULT_PAM_SHORTCUT_IDS} bloques por defecto de CyberArk y reemplaza tu vista guardada.', { DEFAULT_PAM_SHORTCUT_IDS: DEFAULT_PAM_SHORTCUT_IDS.length }),
     confirmLabel: 'Restablecer',
     notice: 'Vista predeterminada restablecida',
     icon: <RotateCcw size={18} aria-hidden="true" />,
@@ -276,7 +276,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
       : base;
     setDraft((current) => [...current, widget]);
     setConfigWidgetId(widget.widget_id);
-    setAnnouncement('Métrica nueva agregada. Configurala y guardá la vista.');
+    setAnnouncement(t('Métrica nueva agregada. Configurala y guardá la vista.'));
   };
   const duplicateWidget = (id: string) => setDraft((current) => {
     const source = current.find((widget) => widget.widget_id === id);
@@ -312,7 +312,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
   const removeWidget = (id: string) => {
     setDraft((current) => current.filter((widget) => widget.widget_id !== id));
     setConfigWidgetId((current) => current === id ? null : current);
-    setAnnouncement('Widget quitado de la vista. El cambio queda pendiente de guardar.');
+    setAnnouncement(t('Widget quitado de la vista. El cambio queda pendiente de guardar.'));
     focusFirstEditItem();
   };
   const focusFirstEditItem = () => {
@@ -365,7 +365,7 @@ export function GeneralWorkspace({ onWidgetNavigate, onUnauthorized, onError, on
             ? <PieChart buckets={widget.buckets ?? []} onBucketSelect={(bucket) => onWidgetNavigate(widget, bucket)} />
             : widget.chart ? <AdvancedChart title={widget.title} style={widget.chart.style} data={widget.chart_data} onSelect={(filterValue) => onWidgetNavigate(widget, { key: filterValue, filter_value: filterValue, count: 0 })} /> : null}
       </article>
-    : <button type="button" className="metric-button personal-metric-button" data-status={widget.data_status ?? 'available'} style={style} onClick={() => onWidgetNavigate(widget)} aria-label={`${widget.title}: ${dashboardValueLabel(widget)}. Abrir resultados`}><div className="metric dashboard-goal"><span className="metric-label">{widget.title}</span><strong>{dashboardValueLabel(widget)}<small> / {widget.target_value}</small></strong><span className="dashboard-goal-meta">{widget.period_label || 'Sin período'} · {dashboardGoalProgress(widget)}%</span><span className="dashboard-goal-track" aria-hidden="true"><span style={{ width: `${dashboardGoalProgress(widget)}%` }} /></span><small>{dashboardWidgetDetail(widget)}</small></div><ArrowRight size={15} /></button>;
+    : <button type="button" className="metric-button personal-metric-button" data-status={widget.data_status ?? 'available'} style={style} onClick={() => onWidgetNavigate(widget)} aria-label={t('{title}: {dashboardValueLabel}. Abrir resultados', { title: widget.title, dashboardValueLabel: dashboardValueLabel(widget) })}><div className="metric dashboard-goal"><span className="metric-label">{widget.title}</span><strong>{dashboardValueLabel(widget)}<small> / {widget.target_value}</small></strong><span className="dashboard-goal-meta">{widget.period_label || t('Sin período')} · {dashboardGoalProgress(widget)}%</span><span className="dashboard-goal-track" aria-hidden="true"><span style={{ width: `${dashboardGoalProgress(widget)}%` }} /></span><small>{dashboardWidgetDetail(widget)}</small></div><ArrowRight size={15} /></button>;
 
   return <>
     <section ref={dashboardRef} className={`personal-dashboard pam-personal-dashboard${editing ? ' is-editing' : ''}`} aria-label={t('Mi panel de métricas')}>

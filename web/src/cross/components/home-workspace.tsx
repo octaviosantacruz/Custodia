@@ -12,7 +12,7 @@ type HomeWorkspaceProps = {
 };
 
 function firstName(name: string | null | undefined): string {
-  return name?.trim().split(/\s+/)[0] || 'ahí';
+  return name?.trim().split(/\s+/)[0] || t('ahí');
 }
 
 /* La marca de Custodia: dos registros que se cruzan; lo que comparten es lo

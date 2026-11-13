@@ -11,13 +11,13 @@ export function SyncRunsTimeline({ rows }: { rows: TimelineRow[] }) {
   return <section className="sync-timeline" aria-label={t('Últimos ciclos por herramienta')}>
     {rows.map((row) => <div className="sync-timeline-row" key={row.tool}>
       <strong className="sync-timeline-label">{row.label}</strong>
-      <ol className="sync-timeline-cells" aria-label={`Últimos ${formatNumber(row.cells.length)} ciclos de ${row.label}, del más antiguo al más reciente`}>
+      <ol className="sync-timeline-cells" aria-label={t('Últimos {cells} ciclos de {value}, del más antiguo al más reciente', { cells: formatNumber(row.cells.length), value: row.label })}>
         {row.cells.map((cell, index) => <li key={`${cell.at}-${index}`} className={`sync-timeline-cell is-${cell.status}`} title={`${syncStatusLabel(cell.status)} · ${formatDate(cell.at)} · ${dateTimeHint(cell.at)}`}>
           <span className="sr-only">{syncStatusLabel(cell.status)}, {formatDate(cell.at)}</span>
         </li>)}
       </ol>
       <span className={row.problems ? 'sync-timeline-summary has-problems' : 'sync-timeline-summary'}>
-        {row.problems ? `${formatNumber(row.problems)} con aviso o fallo` : 'Sin avisos'}
+        {row.problems ? t('{problems} con aviso o fallo', { problems: formatNumber(row.problems) }) : t('Sin avisos')}
       </span>
     </div>)}
     <p className="sync-timeline-legend" aria-hidden="true">

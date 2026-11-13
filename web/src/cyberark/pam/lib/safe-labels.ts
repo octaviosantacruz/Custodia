@@ -39,7 +39,7 @@ export function retentionLabel(days?: number | null, versions?: number | null): 
     days != null ? `${days} ${days === 1 ? t('día') : t('días')}` : '',
     versions != null ? `${versions} ${versions === 1 ? t('versión') : 'versiones'}` : '',
   ].filter(Boolean);
-  return parts.length ? `Retención: ${parts.join(' / ')}` : 'Retención no informada';
+  return parts.length ? t('Retención: {parts}', { parts: parts.join(' / ') }) : t('Retención no informada');
 }
 
 /** A decommission is blocked by CyberArk's retention when accounts were deleted but the Safe is still there. */

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SyncPresentation, SyncPresentationRegistration } from '../../source-contract';
+import { t } from '../i18n/index.ts';
 
 /** Tool owners provide the resource and wording; shell and views share its cache. */
 export function useToolSyncPresentation(registration: SyncPresentationRegistration | undefined, enabled: boolean, refreshKey?: number): SyncPresentation | null {
@@ -20,6 +21,6 @@ export function useToolSyncPresentation(registration: SyncPresentationRegistrati
     refetchInterval: 60_000,
   });
   if (!registration || !enabled) return null;
-  if (query.isError) return { text: 'Sin información de sincronización', running: false };
-  return query.data ?? { text: 'Consultando sincronización…', running: false };
+  if (query.isError) return { text: t('Sin información de sincronización'), running: false };
+  return query.data ?? { text: t('Consultando sincronización…'), running: false };
 }

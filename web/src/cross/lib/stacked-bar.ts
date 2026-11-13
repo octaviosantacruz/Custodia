@@ -18,5 +18,7 @@ export function stackedSummary(segments: readonly StackedSegment[], total: numbe
     const share = total > 0 ? ` (${Math.round((segment.count / total) * 100)}%)` : '';
     return `${segment.label}: ${format(segment.count)}${share}`;
   });
-  return parts.length ? parts.join(', ') : 'Sin datos';
+  return parts.length ? parts.join(', ') : t('Sin datos');
 }
+
+import { t } from '../i18n/index.ts';

@@ -27,11 +27,11 @@ export function RankingBars({ title, buckets, population, populationLabel, limit
   const maxCount = Math.max(1, ...summary.buckets.map((bucket) => bucket.count), rest ?? 0);
   // The reading in the "?" has the full population; the card only says so when the bars cannot be trusted as a share of it.
   const populationNote = sample ? sampleLabel : summary.population === null
-    ? unavailablePopulationLabel ?? 'Población no informada'
+    ? unavailablePopulationLabel ?? t('Población no informada')
     : summary.population === 0
-      ? 'Sin población: porcentaje no calculable'
+      ? t('Sin población: porcentaje no calculable')
       : summary.inconsistent
-        ? `Población inconsistente: ${formatNumber(summary.population)} ${populationLabel}`
+        ? t('Población inconsistente: {population} {populationLabel}', { population: formatNumber(summary.population), populationLabel: populationLabel })
         : null;
 
   return <div className={`ranking-bars${sample ? ' is-sample' : ''}`} role="group" aria-label={`Ranking: ${title}`}>
@@ -47,11 +47,11 @@ export function RankingBars({ title, buckets, population, populationLabel, limit
         </>;
         return <li key={bucket.key}>
           {onBucketSelect
-            ? <button type="button" className="ranking-row is-selectable" title={`Filtrar por ${bucket.key}`} onClick={() => onBucketSelect(bucket)}>{content}</button>
+            ? <button type="button" className="ranking-row is-selectable" title={t('Filtrar por {key}', { key: bucket.key })} onClick={() => onBucketSelect(bucket)}>{content}</button>
             : <div className="ranking-row">{content}</div>}
         </li>;
       })}
-      {rest !== null ? <li className="ranking-rest" aria-label={`Otras categorías (resto): ${formatNumber(rest)} · ${percentLabel(summary.restPercentage)}`}>
+      {rest !== null ? <li className="ranking-rest" aria-label={t('Otras categorías (resto): {rest} · {restPercentage}', { rest: formatNumber(rest), restPercentage: percentLabel(summary.restPercentage) })}>
         <span className="ranking-label">Otras categorías (resto)</span>
         <span className="ranking-track" aria-hidden="true"><span style={{ width: `${(rest / maxCount) * 100}%` }} /></span>
         <strong>{formatNumber(rest)}</strong>

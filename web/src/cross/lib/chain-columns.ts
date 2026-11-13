@@ -1,4 +1,5 @@
 import type { ChainDirection, ChainHop, ChainNode, ChainNodeType, ChainRelation } from './chains-api';
+import { t } from '../i18n/index.ts';
 
 /* Cadenas as fixed columns: every node type lands in its own column, so the
    same map works whether the walk starts at a user, a Safe or a PSM. The path
@@ -13,7 +14,7 @@ export type ChainColumnSpec = {
 };
 
 export const PAM_CHAIN_COLUMNS: ChainColumnSpec[] = [
-  { key: 'user', label: 'Usuario PAM', types: ['user'] },
+  { key: 'user', label: t('Usuario PAM'), types: ['user'] },
   { key: 'role', label: 'Rol', types: ['role'] },
   { key: 'safe', label: 'Safe', types: ['safe'] },
   { key: 'platform', label: 'Plataforma', types: ['platform'] },
@@ -200,5 +201,5 @@ export function parsePathQuery(
 /** Human copy for an unreachable column, e.g. "Se habilita al elegir en Rol." */
 export function unreachableHint(columns: ChainColumnSpec[], path: ChainPath, columnIndex: number): string {
   const neighbor = columnIndex > path.rootIndex ? columnIndex - 1 : columnIndex + 1;
-  return `Se habilita al elegir en ${columns[neighbor].label}.`;
+  return t('Se habilita al elegir en {neighbor}.', { neighbor: columns[neighbor].label });
 }

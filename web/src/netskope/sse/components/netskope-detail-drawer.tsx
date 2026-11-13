@@ -15,7 +15,7 @@ type Props = {
 
 function text(row: NetskopeRow, key: string): string {
   const current = row.attributes[key];
-  return current === null || current === undefined || current === '' ? 'Sin dato' : String(current);
+  return current === null || current === undefined || current === '' ? t('Sin dato') : String(current);
 }
 
 function CopyIdButton({ value }: { value: string }) {
@@ -38,9 +38,9 @@ function accountStatusText(row: NetskopeRow): string {
   const status = row.attributes.account_status;
   const active = row.attributes.accounts_active;
   const inactive = row.attributes.accounts_inactive;
-  if ((status !== 'enabled' && status !== 'disabled') || typeof active !== 'number' || typeof inactive !== 'number') return 'Sin dato';
+  if ((status !== 'enabled' && status !== 'disabled') || typeof active !== 'number' || typeof inactive !== 'number') return t('Sin dato');
   const provisioners = Array.isArray(row.attributes.provisioners) ? ` · origen ${row.attributes.provisioners.join(', ')}` : '';
-  return `${status === 'enabled' ? t('Habilitado') : t('Deshabilitado')} · ${active} cuenta${active === 1 ? '' : 's'} activa${active === 1 ? '' : 's'}, ${inactive} inactiva${inactive === 1 ? '' : 's'}${provisioners}`;
+  return t('{Deshabilitado} · {active} cuenta{s} activa{s2}, {inactive} inactiva{s3}{provisioners}', { Deshabilitado: status === 'enabled' ? t('Habilitado') : t('Deshabilitado'), active: active, s: active === 1 ? '' : 's', s2: active === 1 ? '' : 's', inactive: inactive, s3: inactive === 1 ? '' : 's', provisioners: provisioners });
 }
 
 /** Netskope user detail. Devices open inline in the inventory instead (NSK-INV-002). */

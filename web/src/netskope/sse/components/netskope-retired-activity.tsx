@@ -19,8 +19,8 @@ export function NetskopeRetiredActivity({ days, enabled, refreshKey, onUnauthori
     {open ? <div className="netskope-retired-activity-list" role="region" aria-label={t('Usuarios dados de baja con equipos activos')}>
       <p>Todas sus cuentas están borradas en Netskope, pero sus equipos siguen reportando. La consola los cuenta como activos; el inventario no. Vínculo exacto por usuario o correo.</p>
       <ul>{panel.data?.rows.map((row) => <li key={row.object_id}>
-        <strong>{row.display_name || row.source_id || `Usuario ${row.object_id}`}</strong>
-        <span>{row.email && row.email !== row.display_name ? `${row.email} · ` : ''}{row.device_count} {row.device_count === 1 ? 'equipo' : 'equipos'}{row.latest_device ? ` · ${row.latest_device}` : ''}{row.latest_event ? ` · ${relativeTime(row.latest_event).toLowerCase()}` : ''}</span>
+        <strong>{row.display_name || row.source_id || t('Usuario {object_id}', { object_id: row.object_id })}</strong>
+        <span>{row.email && row.email !== row.display_name ? `${row.email} · ` : ''}{row.device_count} {row.device_count === 1 ? 'equipo' : t('equipos')}{row.latest_device ? ` · ${row.latest_device}` : ''}{row.latest_event ? ` · ${relativeTime(row.latest_event).toLowerCase()}` : ''}</span>
       </li>)}</ul>
     </div> : null}
   </div>;

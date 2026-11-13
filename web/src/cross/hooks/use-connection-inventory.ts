@@ -4,6 +4,7 @@ import { ApiError } from '../lib/api';
 import { fetchConnectionDeviations, fetchConnectionInventory } from '../lib/connection-inventory-api';
 import { useDebouncedValue } from './use-debounced-value';
 import type { ConnectionCoverageFilter, ConnectionDeviationFilter, ConnectionStatusFilter, WorkStatus } from '../types/connection';
+import { t } from '../i18n/index.ts';
 
 export function useConnectionInventory({ refreshKey, authChecked, authenticated, includeInternal, initialSearch = '', initialEnvironment = '', initialCoverage = '', onUnauthorized, onError }: { refreshKey: number; authChecked: boolean; authenticated: boolean; includeInternal: boolean; initialSearch?: string; initialEnvironment?: string; initialCoverage?: ConnectionCoverageFilter | ''; onUnauthorized: () => void; onError: (message: string) => void }) {
   const [search, setSearchState] = useState(initialSearch);
@@ -25,7 +26,7 @@ export function useConnectionInventory({ refreshKey, authChecked, authenticated,
 
   useEffect(() => {
     if (query.error instanceof ApiError && query.error.status === 401) { onUnauthorized(); return; }
-    onError(query.error ? (query.error instanceof Error ? query.error.message : 'No se pudieron cargar los activos y conexiones') : '');
+    onError(query.error ? (query.error instanceof Error ? query.error.message : t('No se pudieron cargar los activos y conexiones')) : '');
   }, [query.error, onError, onUnauthorized]);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export function useConnectionInventory({ refreshKey, authChecked, authenticated,
     rows: query.data?.rows ?? [],
     total: query.data?.total ?? 0,
     importInfo: query.data?.import ?? null,
-    loadError: query.error instanceof Error ? query.error.message : query.error ? 'No se pudieron cargar los activos y conexiones' : '',
+    loadError: query.error instanceof Error ? query.error.message : query.error ? t('No se pudieron cargar los activos y conexiones') : '',
     reload: async () => { await query.refetch(); },
   };
 }

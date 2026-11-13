@@ -41,7 +41,7 @@ function PanelState({ loading, error, errorInfo, onRetry, title }: { loading: bo
 
 export function NetskopeDiagnosisPanel({ panel, onDrill }: { panel: NetskopePanelState<NetskopeDeviceReviewSummary>; onDrill: (query: NetskopeDeviceQuery) => void }) {
   const data = panel.data;
-  const title = 'Equipos sin señal: por qué';
+  const title = t('Equipos sin señal: por qué');
   const sync = netskopeSyncStatement(data?.source_evidence);
   const base: NetskopeDeviceQuery = { ...EMPTY_NETSKOPE_DEVICE_QUERY, freshness: 'all', eventAge: 'gt_30d' };
   const suggestions = data?.suggestions ? NETSKOPE_SUGGESTION_ORDER.map((key) => ({ key, count: data.suggestions!.find((item) => item.key === key)?.count ?? 0 })) : null;
@@ -52,21 +52,21 @@ export function NetskopeDiagnosisPanel({ panel, onDrill }: { panel: NetskopePane
   const rows: Array<{ key: NetskopeReviewSuggestion | 'none'; count: number }> = suggestions && unexplained !== null ? [...suggestions, { key: 'none', count: unexplained }] : [];
   return <article className="netskope-ops-panel" aria-labelledby="netskope-diagnosis-title">
     <header className="netskope-ops-heading">
-      <div className="netskope-ops-title"><h3 id="netskope-diagnosis-title"><BadgeCheck size={15} aria-hidden="true" /> {title}</h3><HelpHint label={t('Equipos sin señal')}><p>Equipos activos cuyo último evento tiene más de 30 días, agrupados por lo que explica Netskope. Saber si un equipo se sigue usando necesita una fuente corporativa (JumpCloud o Cortex), todavía no integrada.</p></HelpHint></div>
+      <div className="netskope-ops-title"><h3 id="netskope-diagnosis-title"><BadgeCheck size={15} aria-hidden="true" /> {title}</h3><HelpHint label={t('Equipos sin señal')}><p>{t('Equipos activos cuyo último evento tiene más de 30 días, agrupados por lo que explica Netskope. Saber si un equipo se sigue usando necesita una fuente corporativa (JumpCloud o Cortex), todavía no integrada.')}</p></HelpHint></div>
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} /> : <>
-      <p className="database-caption" role="status">{formatNumber(data.candidates)} equipos sin señal hace más de 30 días · {sync.text}</p>
+      <p className="database-caption" role="status">{t('{candidates} equipos sin señal hace más de 30 días · {text}', { candidates: formatNumber(data.candidates), text: sync.text })}</p>
       {!rows.length
         ? <div className="netskope-review-callout is-unavailable" role="status"><strong>{t('Agrupación no disponible: sin sync vigente')}</strong><span>{t('Se calcula sólo con un sync completo de las últimas 24 h.')}</span></div>
         : <ul className="netskope-event-list">
           {rows.map((item) => <li key={item.key}>
-            <button type="button" className="netskope-event-row is-pair" disabled={!item.count} onClick={() => onDrill({ ...base, reviewSuggestion: item.key })} aria-label={`${STALE_EXPLANATION_LABELS[item.key]}: ${formatNumber(item.count)} equipos. Ver en la tabla`}>
+            <button type="button" className="netskope-event-row is-pair" disabled={!item.count} onClick={() => onDrill({ ...base, reviewSuggestion: item.key })} aria-label={t('{key}: {count} equipos. Ver en la tabla', { key: STALE_EXPLANATION_LABELS[item.key], count: formatNumber(item.count) })}>
               <span>{STALE_EXPLANATION_LABELS[item.key]}</span><strong>{formatNumber(item.count)}</strong>
             </button>
           </li>)}
         </ul>}
-      {decided > 0 ? <p className="database-caption">{formatNumber(decided)} {decided === 1 ? t('equipo tiene') : t('equipos tienen')} una decisión guardada antes y no se agrupan.</p> : null}
-      <MetricReading title={title} meaning="Por qué dejaron de reportar los equipos con más de 30 días sin señal, según los datos de Netskope" population={`${formatNumber(data.candidates)} dispositivos activos con último evento de más de 30 días`} capture={sync.text} formula="Cada equipo cae en un solo grupo: desinstalación informada, reemplazo (mismo hostname y usuario en un registro de los últimos 7 días), registro histórico (más de 180 días) o sin explicación." source="Inventario de dispositivos Netskope sincronizado en Custodia." limits="Ningún grupo prueba que el equipo se siga usando ni que se haya dado de baja; eso necesita una fuente corporativa." unknowns="Sin fecha de evento válida: el equipo no entra en esta población." />
+      {decided > 0 ? <p className="database-caption">{t('{decided} {tienen} una decisión guardada antes y no se agrupan.', { decided: formatNumber(decided), tienen: decided === 1 ? t('equipo tiene') : t('equipos tienen') })}</p> : null}
+      <MetricReading title={title} meaning="Por qué dejaron de reportar los equipos con más de 30 días sin señal, según los datos de Netskope" population={t('{candidates} dispositivos activos con último evento de más de 30 días', { candidates: formatNumber(data.candidates) })} capture={sync.text} formula="Cada equipo cae en un solo grupo: desinstalación informada, reemplazo (mismo hostname y usuario en un registro de los últimos 7 días), registro histórico (más de 180 días) o sin explicación." source="Inventario de dispositivos Netskope sincronizado en Custodia." limits="Ningún grupo prueba que el equipo se siga usando ni que se haya dado de baja; eso necesita una fuente corporativa." unknowns="Sin fecha de evento válida: el equipo no entra en esta población." />
     </>}
   </article>;
 }
@@ -85,7 +85,7 @@ function NetskopeEventName({ literal }: { literal: string }) {
    client, not a live session or current device state. */
 export function NetskopeClientEventsPanel({ panel, onDrill }: { panel: NetskopePanelState<NetskopeClientEvents>; onDrill: (query: NetskopeDeviceQuery) => void }) {
   const data = panel.data;
-  const title = 'Último evento del cliente';
+  const title = t('Último evento del cliente');
   const drill = (event: string) => onDrill({ ...EMPTY_NETSKOPE_DEVICE_QUERY, filters: { ...EMPTY_NETSKOPE_DEVICE_QUERY.filters, last_seen_event: event } });
   const riskEvents = data?.events.filter((event) => event.coverage_risk) || [];
   const otherEvents = data?.events.filter((event) => !event.coverage_risk) || [];
@@ -96,7 +96,7 @@ export function NetskopeClientEventsPanel({ panel, onDrill }: { panel: NetskopeP
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} /> : <>
       <section className="netskope-event-signal-block" aria-labelledby="netskope-risk-title">
-        <div className="section-title"><h4 id="netskope-risk-title">Último evento: desinstalación o deshabilitación · {formatNumber(data.coverage_risk_total)}</h4><HelpHint label={t('Último evento')}><p>Señal histórica del último evento informado por Netskope; no confirma pérdida actual de cobertura.</p></HelpHint></div>
+        <div className="section-title"><h4 id="netskope-risk-title">{t('Último evento: desinstalación o deshabilitación · {coverage_risk_total}', { coverage_risk_total: formatNumber(data.coverage_risk_total) })}</h4><HelpHint label={t('Último evento')}><p>Señal histórica del último evento informado por Netskope; no confirma pérdida actual de cobertura.</p></HelpHint></div>
         {riskEvents.length
           ? <ul className="netskope-event-list">{riskEvents.map((event) => <li key={event.key}><button type="button" className="netskope-event-row is-pair" onClick={() => drill(event.key)}><NetskopeEventName literal={event.key} /><strong>{formatNumber(event.count)}</strong></button></li>)}</ul>
           : <p className="database-caption">{t('No hay valores de desinstalación o deshabilitación entre los eventos informados.')}</p>}
@@ -110,7 +110,7 @@ export function NetskopeClientEventsPanel({ panel, onDrill }: { panel: NetskopeP
           </button>
         </li>)}
       </ul>
-      <p className="database-caption">Mostrando {visibleEvents.length} de {otherEvents.length} valores informados. {formatNumber(data.total)} dispositivos con evento entre los valores informados · {data.events.length} valores distintos informados.</p>
+      <p className="database-caption">{t('Mostrando {visibleEvents} de {otherEvents} valores informados. {total} dispositivos con evento entre los valores informados · {events} valores distintos informados.', { visibleEvents: visibleEvents.length, otherEvents: otherEvents.length, total: formatNumber(data.total), events: data.events.length })}</p>
     </>}
   </article>;
 }
@@ -130,20 +130,20 @@ const CHANGE_ROWS: Array<{ kind: NetskopeDeviceChangeKind; label: string }> = [
    longer in the active table, so they are listed inline instead. */
 export function NetskopeChangesPanel({ panel, onDrill }: { panel: NetskopePanelState<NetskopeDeviceChanges>; onDrill: (query: NetskopeDeviceQuery) => void }) {
   const data = panel.data;
-  const title = 'Qué cambió desde la última sync';
+  const title = t('Qué cambió desde la última sync');
   return <article className="netskope-ops-panel" aria-labelledby="netskope-changes-title">
     <header className="netskope-ops-heading">
-      <div><h3 id="netskope-changes-title"><GitCompareArrows size={15} aria-hidden="true" /> {title}</h3><p>{data?.available && data.previous_run && data.latest_run ? <>{t('Corrida anterior:')} <DateTime value={data.previous_run.captured_at} /> {t('· última:')} <DateTime value={data.latest_run.captured_at} /></> : 'Compara las dos últimas corridas Netskope completas.'}</p></div>
+      <div><h3 id="netskope-changes-title"><GitCompareArrows size={15} aria-hidden="true" /> {title}</h3><p>{data?.available && data.previous_run && data.latest_run ? <>{t('Corrida anterior:')} <DateTime value={data.previous_run.captured_at} /> {t('· última:')} <DateTime value={data.latest_run.captured_at} /></> : t('Compara las dos últimas corridas Netskope completas.')}</p></div>
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} />
-      : !data.available ? <StateBlock variant="empty" title={t('Todavía no hay dos corridas para comparar')} hint={`El historial por corrida empezó con la migración 058; hay ${data.completed_runs} ${data.completed_runs === 1 ? t('corrida completa') : t('corridas completas')} con historial. La comparación aparece después de la próxima sincronización completa.`} />
+      : !data.available ? <StateBlock variant="empty" title={t('Todavía no hay dos corridas para comparar')} hint={t('El historial por corrida empezó con la migración 058; hay {completed_runs} {completas} con historial. La comparación aparece después de la próxima sincronización completa.', { completed_runs: data.completed_runs, completas: data.completed_runs === 1 ? t('corrida completa') : t('corridas completas') })} />
       : <ul className="netskope-event-list">{CHANGE_ROWS.map(({ kind, label }) => {
         const count = data.counts[kind];
         if (kind === 'removed') return <li key={kind}>
           <details className="netskope-change-details">
             <summary className="netskope-event-row is-pair"><span>{label}</span><strong>{formatNumber(count)}</strong></summary>
             {data.samples.removed.length ? <ul className="netskope-change-samples">{data.samples.removed.map((sample) => <li key={sample.device_id}>{sample.hostname || sample.device_id}{sample.before_value ? ` · ${sample.before_value}` : ''}</li>)}</ul> : <p className="database-caption">{t('Ninguno.')}</p>}
-            {count > data.samples.removed.length ? <p className="database-caption">Mostrando {data.samples.removed.length} de {formatNumber(count)}.</p> : null}
+            {count > data.samples.removed.length ? <p className="database-caption">{t('Mostrando {removed} de {count}.', { removed: data.samples.removed.length, count: formatNumber(count) })}</p> : null}
           </details>
         </li>;
         return <li key={kind}><button type="button" className="netskope-event-row is-pair" disabled={!count} onClick={() => onDrill({ ...EMPTY_NETSKOPE_DEVICE_QUERY, change: kind })}><span>{label}</span><strong>{formatNumber(count)}</strong></button></li>;
@@ -173,7 +173,7 @@ export function NetskopeDuplicatesPanel({ enabled, refreshKey, onUnauthorized, o
           <span>{item.key}</span><strong>{formatNumber(item.devices)}</strong>
         </button>
       </li>)}</ul>
-      <p className="database-caption">Mostrando {visibleGroups.length} de {group.groups} grupos{group.groups > visibleGroups.length ? ` · ${formatNumber(omittedDevices)} dispositivos en los grupos no mostrados` : ''}.</p>
+      <p className="database-caption">{t('Mostrando {visibleGroups} de {groups} grupos{omittedDevices}.', { visibleGroups: visibleGroups.length, groups: group.groups, omittedDevices: group.groups > visibleGroups.length ? t(' · {omittedDevices} dispositivos en los grupos no mostrados', { omittedDevices: formatNumber(omittedDevices) }) : '' })}</p>
     </section>;
   };
   return <article className="netskope-ops-panel" aria-labelledby="netskope-duplicates-title">
@@ -182,7 +182,7 @@ export function NetskopeDuplicatesPanel({ enabled, refreshKey, onUnauthorized, o
     </header>
     {!data ? <PanelState loading={panel.loading} error={panel.error} errorInfo={panel.errorInfo} onRetry={() => void panel.reload()} title={title} /> : <div className="netskope-duplicates-grid">
       {section('hostname', 'Mismo hostname, varios device_id', 'usuarios')}
-      {section('username', 'Mismo usuario en varios dispositivos', 'hostnames')}
+      {section('username', t('Mismo usuario en varios dispositivos'), 'hostnames')}
     </div>}
   </article>;
 }

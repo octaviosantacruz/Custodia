@@ -4,6 +4,7 @@ import { SiaWorkspace } from '../../sia/components/sia-workspace';
 import { RESOURCE_META, RESOURCE_VIEWS, SiaResourcesTab, type ResourceKind } from './sia-resources-tab';
 import { handleTablistKeyDown } from '../../../cross/lib/tablist-keyboard';
 import { hasWorkspaceAccess, type WorkspaceView } from '../../../cross/lib/workspaces';
+import { t } from '../../../cross/i18n/index.ts';
 
 type SiaSection = 'policies' | 'resources';
 
@@ -20,7 +21,7 @@ type SiaHubWorkspaceProps = {
 };
 
 const SECTION_META = [
-  { view: 'sia', label: 'Políticas', detail: 'Accesos definidos, usuarios y destinos', icon: ShieldCheck },
+  { view: 'sia', label: t('Políticas'), detail: t('Accesos definidos, usuarios y destinos'), icon: ShieldCheck },
   ...RESOURCE_META.map((item) => ({ view: RESOURCE_VIEWS[item.id], label: item.label, detail: item.detail, icon: Boxes })),
 ] satisfies Array<{ view: WorkspaceView; label: string; detail: string; icon: typeof ShieldCheck }>;
 
@@ -40,7 +41,7 @@ export function SiaHubWorkspace({
   }, [sectionAllowed, activeView, onNavigate, visibleSections.length]);
 
   return <section className="sia-hub-workspace" aria-label="Secure Infrastructure Access">
-    <nav className="workspace-subnav" aria-label="Secciones de SIA" role="tablist" onKeyDown={handleTablistKeyDown}>
+    <nav className="workspace-subnav" aria-label={t('Secciones de SIA')} role="tablist" onKeyDown={handleTablistKeyDown}>
       {visibleSections.map((item) => {
         const Icon = item.icon;
         return <button
@@ -52,7 +53,7 @@ export function SiaHubWorkspace({
           aria-selected={activeView === item.view}
           tabIndex={activeView === item.view ? 0 : -1}
           aria-label={`${item.label} ${item.detail}`}
-          title={`Mostrar ${item.label}: ${item.detail}`}
+          title={t('Mostrar {value}: {detail}', { value: item.label, detail: item.detail })}
           className={activeView === item.view ? 'active' : ''}
           onClick={() => onNavigate(item.view)}
         >

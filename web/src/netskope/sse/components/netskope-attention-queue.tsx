@@ -34,11 +34,11 @@ export function NetskopeAttentionQueue({ company, onClearCompany, enabled, refre
   return <section className="list-panel database-surface nsk-attention" aria-label={t('Personas para revisar')}>
     <div className="nsk-attention-head">
       <h2>{t('Personas para revisar')}</h2>
-      <HelpHint label={t('Personas para revisar')}><p>Confianza baja primero, luego moderada; dentro de cada una, el menor índice primero. Una señal de riesgo no confirma un incidente.</p><p>El índice de confianza (UCI, User Confidence Index) resume señales de riesgo. {UCI_CHANGE_EXPLANATION}</p><p>{t('El rendimiento de equipos, red y aplicaciones está en la vista «Rendimiento».')}</p></HelpHint>
-      {company ? <button type="button" className="button subtle nsk-attention-company" onClick={onClearCompany} aria-label={`Quitar filtro de empresa ${company}`}>Empresa: {company} <X size={12} aria-hidden /></button> : null}
+      <HelpHint label={t('Personas para revisar')}><p>Confianza baja primero, luego moderada; dentro de cada una, el menor índice primero. Una señal de riesgo no confirma un incidente.</p><p>{t('El índice de confianza (UCI, User Confidence Index) resume señales de riesgo. {UCI_CHANGE_EXPLANATION}', { UCI_CHANGE_EXPLANATION: UCI_CHANGE_EXPLANATION })}</p><p>{t('El rendimiento de equipos, red y aplicaciones está en la vista «Rendimiento».')}</p></HelpHint>
+      {company ? <button type="button" className="button subtle nsk-attention-company" onClick={onClearCompany} aria-label={t('Quitar filtro de empresa {company}', { company: company })}>Empresa: {company} <X size={12} aria-hidden /></button> : null}
     </div>
     <p className="nsk-attention-explanation">{t('Hasta 50 personas. Última consulta:')} <DateTime value={new Date(query.dataUpdatedAt).toISOString()} />.</p>
-    {!rows.length ? <StateBlock compact variant="empty" title={company ? `Sin personas para revisar en ${company}` : 'Sin personas en la lista de revisión'} hint="Netskope no listó personas con confianza baja o moderada; esto no confirma la ausencia de riesgo." /> : <div className="compact-table-wrap"><table className="compact-table">
+    {!rows.length ? <StateBlock compact variant="empty" title={company ? t('Sin personas para revisar en {company}', { company: company }) : t('Sin personas en la lista de revisión')} hint="Netskope no listó personas con confianza baja o moderada; esto no confirma la ausencia de riesgo." /> : <div className="compact-table-wrap"><table className="compact-table">
       <caption className="sr-only">{t('Personas para revisar, menor confianza primero')}</caption>
       <thead><tr><th scope="col">{t('Usuario')}</th><th scope="col">{t('Índice de confianza')} <HelpHint label={t('Índice de confianza')}><p>{UCI_EXPLANATION}</p><p>{UCI_SCALE}</p></HelpHint></th><th scope="col">{t('Cambio de confianza')}</th></tr></thead>
       <tbody>{rows.map((row) => {

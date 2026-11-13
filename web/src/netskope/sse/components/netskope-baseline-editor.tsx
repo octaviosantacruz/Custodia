@@ -33,7 +33,7 @@ export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Pr
       setReleases(client ? client.value.releases.join(', ') : '');
       setMinimums(os ? Object.entries(os.value.minimums).map(([name, version]) => ({ os: name, version })) : osOptions.slice(0, 2).map((name) => ({ os: name, version: '' })));
       setNote((isClient ? client?.note : os?.note) || '');
-    }).catch((loadError) => { if (!cancelled) setError(loadError instanceof Error ? loadError.message : 'No se pudo leer la línea base'); })
+    }).catch((loadError) => { if (!cancelled) setError(loadError instanceof Error ? loadError.message : t('No se pudo leer la línea base')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [isClient, osOptions]);
@@ -69,7 +69,7 @@ export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Pr
       else await saveNetskopeOsMinimums(Object.fromEntries(minimums.filter((row) => row.os.trim() || row.version.trim()).map((row) => [row.os.trim(), row.version.trim()])), note.trim());
       onSaved();
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'No se pudo guardar la línea base');
+      setError(saveError instanceof Error ? saveError.message : t('No se pudo guardar la línea base'));
       setSaving(false);
     }
   };
@@ -84,16 +84,16 @@ export function NetskopeBaselineEditor({ kind, osOptions, onClose, onSaved }: Pr
       <div className="catalog-modal-fields">
         {loading ? <p className="muted">{t('Cargando línea base…')}</p> : isClient
           ? <><label>{t('Releases golden')}<input value={releases} onChange={(event) => setReleases(event.target.value)} placeholder="141.0.0, 138.1.0, 135.0.0" required /><small className="muted">{t('Al menos dos, separadas por coma. Se ordenan de la más nueva a la más vieja al guardar.')}</small></label>
-            {suggestion && suggestedText && suggestedText !== releases ? <p className="muted netskope-golden-suggestion">{t('Sugerida por la documentación pública de Netskope:')} <strong>{suggestedText}</strong> (leída el {suggestion.fetched_at.slice(0, 10)}). No se aplica sola. <button className="button subtle" type="button" onClick={useSuggestion}>{t('Usar sugerida')}</button></p> : null}</>
+            {suggestion && suggestedText && suggestedText !== releases ? <p className="muted netskope-golden-suggestion">{t('Sugerida por la documentación pública de Netskope:')} <strong>{suggestedText}</strong> {t('(leída el {slice}). No se aplica sola.', { slice: suggestion.fetched_at.slice(0, 10) })} <button className="button subtle" type="button" onClick={useSuggestion}>{t('Usar sugerida')}</button></p> : null}</>
           : <div className="netskope-os-minimums">
             {minimums.map((row, index) => <div className="netskope-os-minimum-row" key={index}>
               <label>{t('Sistema operativo')}<input list="netskope-os-options" value={row.os} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, os: event.target.value } : item))} placeholder={t('Windows')} /></label>
               <label>{t('Versión mínima')}<input value={row.version} onChange={(event) => setMinimums((current) => current.map((item, i) => i === index ? { ...item, version: event.target.value } : item))} placeholder="10.0.19045" /></label>
-              <button className="icon-button" type="button" aria-label={`Quitar ${row.os || 'fila'}`} onClick={() => setMinimums((current) => current.filter((_, i) => i !== index))}><Trash2 size={14} /></button>
+              <button className="icon-button" type="button" aria-label={t('Quitar {fila}', { fila: row.os || 'fila' })} onClick={() => setMinimums((current) => current.filter((_, i) => i !== index))}><Trash2 size={14} /></button>
             </div>)}
             {observed.length ? <div className="netskope-os-observed" aria-label={t('Versiones de SO informadas hoy')}>
-              <small className="muted">Versiones informadas hoy (referencia, no un mínimo):</small>
-              <ul>{observed.map((row) => <li key={`${row.os}-${row.os_version}`}><strong>{row.os}</strong> {row.os_version} <span className="muted">· {row.count} equipos</span></li>)}</ul>
+              <small className="muted">{t('Versiones informadas hoy (referencia, no un mínimo):')}</small>
+              <ul>{observed.map((row) => <li key={`${row.os}-${row.os_version}`}><strong>{row.os}</strong> {row.os_version} <span className="muted">{t('· {count} equipos', { count: row.count })}</span></li>)}</ul>
             </div> : null}
             <datalist id="netskope-os-options">{osOptions.map((name) => <option key={name} value={name} />)}</datalist>
             <button className="button subtle" type="button" onClick={() => setMinimums((current) => [...current, { os: '', version: '' }])} disabled={minimums.length >= 10}><Plus size={13} aria-hidden="true" /> {t('Agregar sistema operativo')}</button>

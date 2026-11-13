@@ -21,7 +21,7 @@ export function navigateInApp(event: MouseEvent<HTMLAnchorElement>, navigate: ()
 export function SectionNav({ workspaceView, permissions, onNavigate }: Props) {
   const area = areaOf(workspaceView);
   const active = canonicalRecentWorkspace(workspaceView);
-  return <nav className="section-nav" aria-label={`Secciones de ${domainMeta(area).product.label}`}>
+  return <nav className="section-nav" aria-label={t('Secciones de {product}', { product: domainMeta(area).product.label })}>
     {domainWorkspaces(area).filter((view) => hasWorkspaceAccess(view, permissions)).map((view) => {
       const meta = WORKSPACE_META[view];
       const selected = view === active;
@@ -35,3 +35,5 @@ export function SectionNav({ workspaceView, permissions, onNavigate }: Props) {
     })}
   </nav>;
 }
+
+import { t } from '../i18n/index.ts';

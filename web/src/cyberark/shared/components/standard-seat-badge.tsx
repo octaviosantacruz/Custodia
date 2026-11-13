@@ -1,8 +1,8 @@
 import { BadgeCheck } from 'lucide-react';
 import './standard-seat-badge.css';
 
-const PAM_TITLE = 'Asiento Standard conciliado: evidencia PAM de EPVUser y rol Privilege Cloud; no es facturación.';
-const IDENTITY_TITLE = 'Asiento Standard conciliado: el UUID de Identity coincide con un usuario PAM EPVUser en un rol Privilege Cloud. No es facturación ni un dato SCIM.';
+const PAM_TITLE = t('Asiento Standard conciliado: evidencia PAM de EPVUser y rol Privilege Cloud; no es facturación.');
+const IDENTITY_TITLE = t('Asiento Standard conciliado: el UUID de Identity coincide con un usuario PAM EPVUser en un rol Privilege Cloud. No es facturación ni un dato SCIM.');
 
 type StandardSeatBadgeProps = {
   reconciled?: boolean;
@@ -23,3 +23,5 @@ export function StandardSeatBadge({ reconciled = false, context = 'pam' }: Stand
     </span>
   );
 }
+
+import { t } from '../../../cross/i18n/index.ts';

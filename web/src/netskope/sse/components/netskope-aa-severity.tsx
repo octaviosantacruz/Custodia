@@ -17,7 +17,7 @@ export function NetskopeAaSeverity({ compact = false, enabled, refreshKey, onUna
   const unit = metric?.unit === 'incidents' ? t('Incidentes') : t('Eventos');
   const hint = metric?.window_days
     ? `Ventana guardada: últimos ${metric.window_days} días · ${metric.timezone} · ${unit}`
-    : 'Métrica agregada desde Netskope';
+    : t('Métrica agregada desde Netskope');
   return <>
     <div className={compact ? undefined : 'personal-chart-heading'}><strong>{title}</strong><small>{hint}</small></div>
     {panel.error ? <StateBlock variant="error" title={t('No se pudo consultar Advanced Analytics')} hint={panel.error} action={<button className="button subtle" type="button" onClick={() => void panel.reload()}>{t('Reintentar')}</button>} />

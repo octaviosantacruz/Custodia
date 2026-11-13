@@ -227,19 +227,19 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
           An unavailable option keeps them inline, because they are the reason it cannot be added. */}
       {option.unavailable
         ? <small>{option.sourceLabel}</small>
-        : kind === 'data' ? <small className="dashboard-widget-picker-source">{t('Fuente y período')}<HelpHint label={`Fuente y período de ${option.title}`}><p>{option.sourceLabel}</p></HelpHint></small> : null}
+        : kind === 'data' ? <small className="dashboard-widget-picker-source">{t('Fuente y período')}<HelpHint label={t('Fuente y período de {title}', { title: option.title })}><p>{option.sourceLabel}</p></HelpHint></small> : null}
     </div>
     </div>
     {option.unavailable
       ? <span className="dashboard-widget-picker-unavailable">{t('Requiere más datos')}</span>
       : option.added
         ? <span className="dashboard-widget-picker-added"><Check size={13} aria-hidden="true" /> {t('Ya está en la vista')}</span>
-        : <button type="button" className="button subtle dashboard-widget-picker-add" aria-label={`Agregar ${option.title}`} disabled={disabled || limitReached} onClick={() => { onAdd(option.id); closePicker(); }}><Plus size={13} /> {t('Agregar')}</button>}
+        : <button type="button" className="button subtle dashboard-widget-picker-add" aria-label={t('Agregar {title}', { title: option.title })} disabled={disabled || limitReached} onClick={() => { onAdd(option.id); closePicker(); }}><Plus size={13} /> {t('Agregar')}</button>}
   </div>;
   };
 
   return <div className="dashboard-add-widget">
-    <button type="button" className="button subtle dashboard-add-toggle" aria-expanded={open} aria-haspopup="dialog" title={limitReached ? 'Máximo 6 por sección' : undefined} onClick={() => { setQuery(''); setCategory(null); setOpen(true); }} disabled={disabled || limitReached}><Plus size={14} /> {`Agregar ${label}`}</button>
+    <button type="button" className="button subtle dashboard-add-toggle" aria-expanded={open} aria-haspopup="dialog" title={limitReached ? t('Máximo 6 por sección') : undefined} onClick={() => { setQuery(''); setCategory(null); setOpen(true); }} disabled={disabled || limitReached}><Plus size={14} /> {t('Agregar {value}', { value: label })}</button>
     {limitReached ? <small className="dashboard-add-limit" role="status">{t('Máximo 6 por sección')}</small> : null}
     {shown ? createPortal(<div
       className={'dashboard-widget-picker-backdrop' + (leaving ? ' is-leaving' : '')}
@@ -257,9 +257,9 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
           </div>
           <button type="button" className="icon-button" aria-label={t('Cerrar selector')} onClick={closePicker}><X size={17} /></button>
         </header>
-        <div className="dashboard-widget-picker-meta"><span>{matches.length === allOptions.length ? `${allOptions.length} ${label}s` : `${matches.length} de ${allOptions.length} ${label}s`}</span><small>{t('Se agrega al final de esta sección')}</small></div>
-        <label className="dashboard-widget-picker-search-wrap"><Search size={15} aria-hidden="true" /><input type="search" className="dashboard-widget-picker-search" aria-label={`Buscar ${label}`} placeholder={`Buscar ${label} por nombre o descripción`} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-        {availableGroups.length > 1 ? <div className="dashboard-widget-picker-chips" role="group" aria-label={`Filtrar ${label}s por categoría`}>
+        <div className="dashboard-widget-picker-meta"><span>{matches.length === allOptions.length ? `${allOptions.length} ${label}s` : t('{matches} de {allOptions} {value}s', { matches: matches.length, allOptions: allOptions.length, value: label })}</span><small>{t('Se agrega al final de esta sección')}</small></div>
+        <label className="dashboard-widget-picker-search-wrap"><Search size={15} aria-hidden="true" /><input type="search" className="dashboard-widget-picker-search" aria-label={t('Buscar {value}', { value: label })} placeholder={t('Buscar {value} por nombre o descripción', { value: label })} value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+        {availableGroups.length > 1 ? <div className="dashboard-widget-picker-chips" role="group" aria-label={t('Filtrar {value}s por categoría', { value: label })}>
           <button type="button" className={`dashboard-widget-picker-chip${category === null ? ' selected' : ''}`} aria-pressed={category === null} onClick={() => setCategory(null)}>{t('Todos')}</button>
           {availableGroups.map((group) => <button key={group.id} type="button" className={`dashboard-widget-picker-chip${category === group.id ? ' selected' : ''}`} aria-pressed={category === group.id} title={group.description} onClick={() => setCategory((current) => current === group.id ? null : group.id)}>{group.title}</button>)}
         </div> : null}
@@ -270,7 +270,7 @@ export function DashboardWidgetPicker({ kind, eyebrow, heading, helper, groups, 
         </button> : null}
         {matches.length
           ? <div className="dashboard-widget-picker-grid" role="list" aria-label={kind === 'data' ? t('Datos disponibles') : t('Gráficos disponibles')}>{matches.map(renderCard)}</div>
-          : <p className="dashboard-widget-picker-empty">Sin coincidencias para “{query.trim()}”.</p>}
+          : <p className="dashboard-widget-picker-empty">{t('Sin coincidencias para “{trim}”.', { trim: query.trim() })}</p>}
       </section>
     </div>, document.body) : null}
   </div>;

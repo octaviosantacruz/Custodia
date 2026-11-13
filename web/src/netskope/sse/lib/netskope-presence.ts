@@ -7,8 +7,8 @@ export type PresenceStatusKey = 'on-prem' | 'off-prem' | 'unconfig' | 'Unknown' 
 
 const STATUS_LABELS: Record<string, string> = {
   'on-prem': 'En oficina',
-  'off-prem': 'Fuera de oficina',
-  'unconfig': 'Detección sin configurar',
+  'off-prem': t('Fuera de oficina'),
+  'unconfig': t('Detección sin configurar'),
   'Unknown': 'Desconocido',
   'Sin dato': 'Sin dato',
 };
@@ -16,3 +16,5 @@ const STATUS_LABELS: Record<string, string> = {
 export function presenceStatusLabel(key: string): string {
   return STATUS_LABELS[key] ?? key;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

@@ -95,19 +95,19 @@ function netskopeDataCardMeta(id: NetskopeDataWidgetId | NetskopeChartWidgetId, 
 
 /* NSK-XMET-001: the cross KPIs must state denominator, applied filters and
    freshness on the card, and their charts drill with the raw bucket value. */
-const OBSERVED_USER_STATUS_LABELS: Record<string, string> = { matched: 'Con usuario resuelto', ambiguous: 'Ambiguo', unmatched: 'Sin resolver' };
-const ACCOUNT_STATUS_LABELS: Record<string, string> = { enabled: 'Habilitado', disabled: 'Deshabilitado', unknown: 'Sin dato de cuentas' };
+const OBSERVED_USER_STATUS_LABELS: Record<string, string> = { matched: 'Con usuario resuelto', ambiguous: 'Ambiguo', unmatched: t('Sin resolver') };
+const ACCOUNT_STATUS_LABELS: Record<string, string> = { enabled: 'Habilitado', disabled: 'Deshabilitado', unknown: t('Sin dato de cuentas') };
 const DEVICE_COUNT_LABELS: Record<string, string> = { '0': t('Sin dispositivos'), '1': t('1 dispositivo'), '2plus': t('2 o más') };
-const DEVICE_AGE_LABELS: Record<string, string> = { lt_24h: 'Menos de 24 h', d1_7: '1 a 7 días', d7_30: '7 a 30 días', gt_30d: 'Más de 30 días', unknown: 'Sin dato' };
+const DEVICE_AGE_LABELS: Record<string, string> = { lt_24h: t('Menos de 24 h'), d1_7: t('1 a 7 días'), d7_30: t('7 a 30 días'), gt_30d: t('Más de 30 días'), unknown: t('Sin dato') };
 /** One-line reading of the fleet-health cards (their share line carries the denominator). */
 const FLEET_CARD_DETAIL: Record<string, string> = {
-  fleet_signal_24h: 'Reportaron en las últimas 24 horas',
-  fleet_client_current: 'Versión del cliente al día',
-  fleet_os_supported: 'SO en el mínimo exigido',
-  fleet_on_prem: 'Detectados en la oficina por Netskope',
-  devices_duplicate_hostnames: 'Comparten hostname con otro equipo',
+  fleet_signal_24h: t('Reportaron en las últimas 24 horas'),
+  fleet_client_current: t('Versión del cliente al día'),
+  fleet_os_supported: t('SO en el mínimo exigido'),
+  fleet_on_prem: t('Detectados en la oficina por Netskope'),
+  devices_duplicate_hostnames: t('Comparten hostname con otro equipo'),
 };
-const WIDGET_FILTER_LABELS: Record<string, string> = { os: 'SO', company: 'Empresa', classification_status: 'Clasificación' };
+const WIDGET_FILTER_LABELS: Record<string, string> = { os: 'SO', company: 'Empresa', classification_status: t('Clasificación') };
 
 function widgetFilterSuffix(filters?: NetskopeWidgetFilters): string {
   const entries = Object.entries(filters ?? {}).filter(([, value]) => value);
@@ -118,7 +118,7 @@ function widgetFilterSuffix(filters?: NetskopeWidgetFilters): string {
 function heartbeatSuffix(metrics: NetskopeMetrics): string {
   const heartbeat = metrics.devices_last_event_dem;
   return typeof heartbeat === 'number' && typeof metrics.devices_total === 'number'
-    ? ` · ${formatNumber(heartbeat)} con un latido de DEM como último evento y ${formatNumber(metrics.devices_total - heartbeat)} con eventos de túnel o sistema`
+    ? t(' · {heartbeat} con un latido de DEM como último evento y {heartbeat2} con eventos de túnel o sistema', { heartbeat: formatNumber(heartbeat), heartbeat2: formatNumber(metrics.devices_total - heartbeat) })
     : '';
 }
 
@@ -142,7 +142,7 @@ function NetskopeEmptyDashboard({ saving, onAddData, onAddChart, onUseRecommende
 }) {
   return <section className="dashboard-empty-state" aria-labelledby="netskope-empty-title">
     <div className="dashboard-empty-copy">
-      <div className="workspace-intro-heading"><h2 id="netskope-empty-title">{t('Todavía no elegiste qué seguir')}</h2><HelpHint label={t('Vista recomendada')}><p>Armá tu tablero con indicadores del inventario (dispositivos, equipos sin señal, alertas DLP agregadas) y comparaciones por sistema operativo, empresa o estado de usuario. Podés empezar con la vista sugerida y ajustarla después.</p><p>La vista sugerida incluye dispositivos totales, equipos sin señal hace más de 30 días, alertas DLP agregadas de 7 días y dos distribuciones. Se guarda sólo si la aceptás; también podés elegir bloque por bloque.</p></HelpHint></div>
+      <div className="workspace-intro-heading"><h2 id="netskope-empty-title">{t('Todavía no elegiste qué seguir')}</h2><HelpHint label={t('Vista recomendada')}><p>{t('Armá tu tablero con indicadores del inventario (dispositivos, equipos sin señal, alertas DLP agregadas) y comparaciones por sistema operativo, empresa o estado de usuario. Podés empezar con la vista sugerida y ajustarla después.')}</p><p>La vista sugerida incluye dispositivos totales, equipos sin señal hace más de 30 días, alertas DLP agregadas de 7 días y dos distribuciones. Se guarda sólo si la aceptás; también podés elegir bloque por bloque.</p></HelpHint></div>
       <p>{t('Elegí datos o gráficos para armar tu tablero.')}</p>
     </div>
     <div className="dashboard-empty-actions">
@@ -208,7 +208,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
   const alertChartInstances = chartInstances.filter((widget) => NETSKOPE_ALERT_CHART_IDS.has(widget.id as NetskopeChartWidgetId));
   const inventoryDataInstances = dataInstances.filter((widget) => !NETSKOPE_ALERT_DATA_IDS.has(widget.id as NetskopeDataWidgetId));
   const inventoryChartInstances = chartInstances.filter((widget) => !NETSKOPE_ALERT_CHART_IDS.has(widget.id as NetskopeChartWidgetId));
-  const startEditing = () => { setDraft(preferences.widgets); setEditing(true); setAnnouncement('Edición del tablero activada'); };
+  const startEditing = () => { setDraft(preferences.widgets); setEditing(true); setAnnouncement(t('Edición del tablero activada')); };
   const requestPicker = (kind: 'data' | 'chart') => { setPickerRequest({ kind, token: Date.now() }); startEditing(); };
   const cancelEditing = () => { setDraft([]); setEditing(false); setAnnouncement('Cambios descartados'); };
   const requestCancel = () => { if (dirty) setPendingCancel(true); else cancelEditing(); };
@@ -217,22 +217,22 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
   // saved view changes when the operator confirms the dialog.
   const applyPreset = (preset: NetskopeDashboardPreset) => setPendingView({
     title: `Aplicar vista "${preset.label}"`,
-    description: `${preset.description} Reemplaza tu vista guardada de Netskope (${preset.widgets.length} bloques). Hasta que confirmes, tu vista actual no cambia.`,
+    description: t('{description} Reemplaza tu vista guardada de Netskope ({widgets} bloques). Hasta que confirmes, tu vista actual no cambia.', { description: preset.description, widgets: preset.widgets.length }),
     confirmLabel: 'Aplicar vista',
     notice: `Vista "${preset.label}" aplicada`,
     icon: <LayoutTemplate size={18} aria-hidden="true" />,
     widgets: preset.widgets.map((widget) => ({ ...widget, filters: { ...(widget.filters ?? {}) } })),
   });
   const applyTeamTemplate = (template: (typeof teamTemplates.templates)[number]) => setPendingView({
-    title: `Restaurar vista de ${template.role_name}`,
-    description: `Aplica la versión ${template.version} como una copia personalizable (${template.widgets.length} bloques). No modifica la plantilla del equipo.`,
-    confirmLabel: 'Usar esta vista', notice: `Vista de ${template.role_name} aplicada`,
+    title: t('Restaurar vista de {role_name}', { role_name: template.role_name }),
+    description: t('Aplica la versión {version} como una copia personalizable ({widgets} bloques). No modifica la plantilla del equipo.', { version: template.version, widgets: template.widgets.length }),
+    confirmLabel: 'Usar esta vista', notice: t('Vista de {role_name} aplicada', { role_name: template.role_name }),
     icon: <LayoutTemplate size={18} aria-hidden="true" />,
     widgets: template.widgets.map((widget) => ({ ...widget, filters: { ...(widget.filters ?? {}) } })),
   });
   const resetView = () => setPendingView({
     title: t('Restablecer a predeterminada'),
-    description: `Vuelve a los ${DEFAULT_NETSKOPE_WIDGETS.length} bloques por defecto de Netskope y reemplaza tu vista guardada.`,
+    description: t('Vuelve a los {DEFAULT_NETSKOPE_WIDGETS} bloques por defecto de Netskope y reemplaza tu vista guardada.', { DEFAULT_NETSKOPE_WIDGETS: DEFAULT_NETSKOPE_WIDGETS.length }),
     confirmLabel: 'Restablecer',
     notice: 'Vista predeterminada restablecida',
     icon: <RotateCcw size={18} aria-hidden="true" />,
@@ -294,35 +294,35 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
       : alertDays ? alertMetric?.total : (widgetMetrics as unknown as Record<string, unknown> | null)?.[widgetId];
     const numericValue = typeof rawValue === 'number' ? rawValue : 0;
     const detail = alertDays
-        ? alertAvailable ? `Conteo agregado hasta ${alertMetric?.captured_at ? formatDate(alertMetric.captured_at) : 'la última sincronización'}${alertAvailability ? ` · ${alertAvailability}` : ''}` : alerts.error ? 'No se pudo cargar el agregado' : alerts.data?.configured === false ? t('Fuente count-only no configurada') : t('Sin snapshot agregado disponible')
+        ? alertAvailable ? `Conteo agregado hasta ${alertMetric?.captured_at ? formatDate(alertMetric.captured_at) : t('la última sincronización')}${alertAvailability ? ` · ${alertAvailability}` : ''}` : alerts.error ? t('No se pudo cargar el agregado') : alerts.data?.configured === false ? t('Fuente count-only no configurada') : t('Sin snapshot agregado disponible')
         : !widgetMetrics
-          ? filtered.loading ? 'Cargando métricas…' : filtered.error ? t('No se pudieron cargar las métricas') : t('Sin datos para este filtro')
+          ? filtered.loading ? t('Cargando métricas…') : filtered.error ? t('No se pudieron cargar las métricas') : t('Sin datos para este filtro')
         : widgetId === 'devices_observed_user_matched' || widgetId === 'devices_observed_user_unmatched'
-          ? `${formatNumber(widgetMetrics.devices_total)} dispositivos con evento en 7 días · resueltos ${metricCount(widgetMetrics.devices_observed_user_matched)} · ambiguos ${metricCount(widgetMetrics.devices_observed_user_ambiguous)} · sin resolver ${metricCount(widgetMetrics.devices_observed_user_unmatched)}${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
+          ? t('{devices_total} dispositivos con evento en 7 días · resueltos {devices_observed_user_matched} · ambiguos {devices_observed_user_ambiguous} · sin resolver {devices_observed_user_unmatched}{id}{filters}', { devices_total: formatNumber(widgetMetrics.devices_total), devices_observed_user_matched: metricCount(widgetMetrics.devices_observed_user_matched), devices_observed_user_ambiguous: metricCount(widgetMetrics.devices_observed_user_ambiguous), devices_observed_user_unmatched: metricCount(widgetMetrics.devices_observed_user_unmatched), id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)), filters: widgetFilterSuffix(instance.filters) })
         : widgetId === 'users_without_observed_devices'
-          ? `${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'} en inventario · con 1 dispositivo ${formatNumber(bucketCount(widgetMetrics.users_by_device_count, '1'))} · con 2+ ${formatNumber(bucketCount(widgetMetrics.users_by_device_count, '2plus'))}${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
-        : widgetId === 'devices_stale_30d' ? `Último evento de más de 30 días${widgetFilterSuffix(instance.filters)}`
-        : widgetId === 'fleet_client_current' && rawValue === null ? 'Sin línea base de versiones del cliente: no se evalúa'
-        : widgetId === 'fleet_os_supported' && rawValue === null ? 'Sin mínimos de SO definidos: no se evalúa'
+          ? t('{users_total} {identidades} en inventario · con 1 dispositivo {users_by_device_count} · con 2+ {plus}{id}{filters}', { users_total: formatNumber(widgetMetrics.users_total), identidades: widgetMetrics.users_total === 1 ? 'identidad' : 'identidades', users_by_device_count: formatNumber(bucketCount(widgetMetrics.users_by_device_count, '1')), plus: formatNumber(bucketCount(widgetMetrics.users_by_device_count, '2plus')), id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)), filters: widgetFilterSuffix(instance.filters) })
+        : widgetId === 'devices_stale_30d' ? t('Último evento de más de 30 días{filters}', { filters: widgetFilterSuffix(instance.filters) })
+        : widgetId === 'fleet_client_current' && rawValue === null ? t('Sin línea base de versiones del cliente: no se evalúa')
+        : widgetId === 'fleet_os_supported' && rawValue === null ? t('Sin mínimos de SO definidos: no se evalúa')
         : widgetId in FLEET_CARD_DETAIL ? FLEET_CARD_DETAIL[widgetId]
         : widgetId === 'users_total' ? [netskopeUsersSplit(widgetMetrics), typeof widgetMetrics.users_with_device_activity_7d === 'number'
-          ? `${formatNumber(widgetMetrics.users_with_device_activity_7d)} con actividad de dispositivo en 7 días`
-          : 'Total del último inventario; no implica actividad reciente'].filter(Boolean).join(' · ')
+          ? t('{users_with_device_activity_7d} con actividad de dispositivo en 7 días', { users_with_device_activity_7d: formatNumber(widgetMetrics.users_with_device_activity_7d) })
+          : t('Total del último inventario; no implica actividad reciente')].filter(Boolean).join(' · ')
         : widgetId === 'users_recent_activity' ? activityAvailable
-          ? `${percent(numericValue, widgetMetrics.users_total)} de ${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'} en inventario · al menos un dispositivo con evento`
-          : 'Métrica no disponible en esta versión de Custodia'
-        : widgetId === 'devices_total' ? `Endpoints con evento en los últimos 7 días${heartbeatSuffix(widgetMetrics)}${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}`
+          ? t('{users_total} de {users_total2} {identidades} en inventario · al menos un dispositivo con evento', { users_total: percent(numericValue, widgetMetrics.users_total), users_total2: formatNumber(widgetMetrics.users_total), identidades: widgetMetrics.users_total === 1 ? 'identidad' : 'identidades' })
+          : t('Métrica no disponible en esta versión de Custodia')
+        : widgetId === 'devices_total' ? t('Endpoints con evento en los últimos 7 días{widgetMetrics}{id}', { widgetMetrics: heartbeatSuffix(widgetMetrics), id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)) })
         : 'Referencia textual informada';
     // Keep the scan line short; the existing help retains the complete
     // population, filters and capture instead of clipping that evidence.
     const summary = !widgetMetrics ? detail
       : alertDays ? (alertAvailability ?? (alertAvailable ? 'Agregado disponible' : detail))
-      : widgetId === 'users_recent_activity' ? activityAvailable ? `${percent(numericValue, widgetMetrics.users_total)} de ${formatNumber(widgetMetrics.users_total)} · ${userActivityWindow} días` : 'Métrica no disponible'
-      : widgetId === 'users_total' ? (netskopeUsersSplit(widgetMetrics)?.replace('deshabilitados', 'deshab.').replace('sin dato de cuentas', 'sin dato') ?? 'Identidades en inventario')
-      : widgetId === 'devices_total' ? 'Eventos en los últimos 7 días'
-      : widgetId === 'devices_stale_30d' ? 'Último evento > 30 días'
+      : widgetId === 'users_recent_activity' ? activityAvailable ? t('{users_total} de {users_total2} · {userActivityWindow} días', { users_total: percent(numericValue, widgetMetrics.users_total), users_total2: formatNumber(widgetMetrics.users_total), userActivityWindow: userActivityWindow }) : t('Métrica no disponible')
+      : widgetId === 'users_total' ? (netskopeUsersSplit(widgetMetrics)?.replace('deshabilitados', 'deshab.').replace('sin dato de cuentas', t('sin dato')) ?? t('Identidades en inventario'))
+      : widgetId === 'devices_total' ? t('Eventos en los últimos 7 días')
+      : widgetId === 'devices_stale_30d' ? t('Último evento > 30 días')
       : widgetId in FLEET_CARD_DETAIL && typeof rawValue === 'number' ? FLEET_CARD_DETAIL[widgetId]
-      : widgetId === 'devices_observed_user_matched' || widgetId === 'devices_observed_user_unmatched' ? `De ${formatNumber(widgetMetrics.devices_total)} con evento en 7 días`
+      : widgetId === 'devices_observed_user_matched' || widgetId === 'devices_observed_user_unmatched' ? t('De {devices_total} con evento en 7 días', { devices_total: formatNumber(widgetMetrics.devices_total) })
       : widgetId === 'users_without_observed_devices' ? `De ${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'}`
       : detail;
     const hasFilters = Object.values(instance.filters ?? {}).some(Boolean);
@@ -334,7 +334,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
           <strong>{widgetMetrics && activityAvailable ? formatNumber(numericValue) : '—'}</strong>
           <small>{summary}</small>{hasFilters ? <span className="netskope-data-filter-status">{t('Con filtros')}</span> : null}
           <div className="netskope-activity-window" role="group" aria-label={t('Ventana de actividad de usuarios')}>
-            {([7, 14, 30] as const).map((days) => <button key={days} type="button" aria-pressed={userActivityWindow === days} disabled={editing || !activityAvailable} onClick={() => setUserActivityWindow(days)}>{days} días</button>)}
+            {([7, 14, 30] as const).map((days) => <button key={days} type="button" aria-pressed={userActivityWindow === days} disabled={editing || !activityAvailable} onClick={() => setUserActivityWindow(days)}>{t('{days} días', { days: days })}</button>)}
             <button type="button" className="netskope-activity-open" disabled={editing || !activityAvailable} onClick={() => onDrill(netskopeUserActivityDrill(userActivityWindow))}>{t('Ver usuarios')} <span aria-hidden="true">→</span></button>
           </div>
           {editing ? null : <NetskopeRetiredActivity days={userActivityWindow} enabled={authChecked && authenticated && activityAvailable} refreshKey={refreshKey} onUnauthorized={onUnauthorized} />}
@@ -378,10 +378,10 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
       : rawBuckets;
     const isCompanyChart = widgetId === 'devices_by_company' || widgetId === 'users_by_company';
     const hint = !widgetMetrics ? (filtered.loading ? t('Cargando métricas…') : t('Sin datos para este filtro'))
-      : widgetId === 'devices_by_observed_user_status' ? `${formatNumber(widgetMetrics.devices_total)} dispositivos con evento en 7 días · resueltos, ambiguos y sin resolver${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
-      : widgetId === 'users_by_device_count' ? `${formatNumber(widgetMetrics.users_total)} ${widgetMetrics.users_total === 1 ? 'identidad' : 'identidades'} en inventario${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
-      : widgetId === 'users_by_recent_device_age' ? `Identidades con al menos un dispositivo resuelto · ${formatNumber(widgetMetrics.users_total)} en inventario${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
-      : widgetId === 'coverage_risk_devices_by_user' ? `${metricCount(widgetMetrics.devices_active_total)} dispositivos activos, todo el inventario · Uninstalled/Disconnected/Admin Disabled${freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id))}${widgetFilterSuffix(instance.filters)}`
+      : widgetId === 'devices_by_observed_user_status' ? t('{devices_total} dispositivos con evento en 7 días · resueltos, ambiguos y sin resolver{id}{filters}', { devices_total: formatNumber(widgetMetrics.devices_total), id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)), filters: widgetFilterSuffix(instance.filters) })
+      : widgetId === 'users_by_device_count' ? t('{users_total} {identidades} en inventario{id}{filters}', { users_total: formatNumber(widgetMetrics.users_total), identidades: widgetMetrics.users_total === 1 ? 'identidad' : 'identidades', id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)), filters: widgetFilterSuffix(instance.filters) })
+      : widgetId === 'users_by_recent_device_age' ? t('Identidades con al menos un dispositivo resuelto · {users_total} en inventario{id}{filters}', { users_total: formatNumber(widgetMetrics.users_total), id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)), filters: widgetFilterSuffix(instance.filters) })
+      : widgetId === 'coverage_risk_devices_by_user' ? t('{devices_active_total} dispositivos activos, todo el inventario · Uninstalled/Disconnected/Admin Disabled{id}{filters}', { devices_active_total: metricCount(widgetMetrics.devices_active_total), id: freshnessSuffix(widgetMetrics, !hasNetskopeMetricReading(instance.id)), filters: widgetFilterSuffix(instance.filters) })
       : '';
     const limit = NETSKOPE_RANKING_LIMITS[widgetId as NetskopeChartWidgetId] ?? 10;
     const isUserRanking = widgetId === 'users_by_company';
@@ -393,7 +393,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
     const populationLabel = isUserRanking || widgetId === 'users_by_device_count' ? t('identidades en inventario') : t('dispositivos con evento en 7 días');
     return <article className={`metric-button personal-metric-button personal-chart-card${editing ? '' : ` size-${instance.size}`}${isCompanyChart ? ' company-chart-card' : ''}`} key={instance.id}>
       <div className="personal-chart-heading"><span className="metric-label">{definition?.title}</span>{hint ? <small title={widgetMetrics?.last_observed_at ? dateTimeHint(widgetMetrics.last_observed_at) : undefined}>{hint}</small> : null}</div>
-      <CategoryChart title={definition?.title ?? widgetId} mode={netskopeChartMode(instance)} buckets={!widgetMetrics ? [] : buckets} population={population} populationLabel={populationLabel} limit={limit} sampleLabel={widgetId === 'coverage_risk_devices_by_user' ? `Los ${formatNumber(limit)} usuarios con más equipos sin cobertura · sin porcentaje` : undefined} onBucketSelect={editing ? undefined : (bucket) => {
+      <CategoryChart title={definition?.title ?? widgetId} mode={netskopeChartMode(instance)} buckets={!widgetMetrics ? [] : buckets} population={population} populationLabel={populationLabel} limit={limit} sampleLabel={widgetId === 'coverage_risk_devices_by_user' ? t('Los {limit} usuarios con más equipos sin cobertura · sin porcentaje', { limit: formatNumber(limit) }) : undefined} onBucketSelect={editing ? undefined : (bucket) => {
         const drill = netskopeChartBucketDrill(widgetId as NetskopeChartWidgetId, bucket.filter_value || bucket.key);
         if (drill) onDrill(drill);
       }} />
@@ -413,7 +413,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
         const updated = window?.captured_at ? <>{t('Actualizado')} <DateTime value={window.captured_at} /></> : alerts.error ? t('Agregado no disponible') : t('Sin snapshot agregado');
         const availability = netskopeAlertAvailabilityLabel(window?.availability);
         return <div className="netskope-alert-kpi" key={instance.id}>
-          <span>Últimos {days} días</span><strong>{window ? netskopeAlertTotalLabel(window.total) : '—'}</strong><small>{updated}{availability ? ` · ${availability}` : ''}{typeof dlp === 'number' ? ` · DLP: ${formatNumber(dlp)}` : ''}</small>
+          <span>{t('Últimos {days} días', { days: days })}</span><strong>{window ? netskopeAlertTotalLabel(window.total) : '—'}</strong><small>{updated}{availability ? ` · ${availability}` : ''}{typeof dlp === 'number' ? ` · DLP: ${formatNumber(dlp)}` : ''}</small>
         </div>;
       })}
     </div> : null}
@@ -484,7 +484,7 @@ function NetskopeMetricsView({ onDrill, permissions, authChecked, authenticated,
   </>;
 }
 
-const MATCH_BASIS_LABELS = { source_id: 'ID de usuario', email: 'correo' } as const;
+const MATCH_BASIS_LABELS = { source_id: t('ID de usuario'), email: 'correo' } as const;
 
 /* NSK-XMET-003: "actividad observada" is the newest event a resolved device
    reported, never a login or a live connection. */
@@ -503,9 +503,9 @@ function UserActivityCells({ activity }: { activity?: NetskopeRow['device_activi
 function SignalCell({ evidence }: { evidence?: NetskopeRow['device_evidence'] }) {
   const state = evidence?.state ?? 'unknown';
   const tone = state === 'review' ? 'review' : state === 'recent' ? 'recent' : 'quiet';
-  const age = evidence?.age_days == null ? undefined : `Antigüedad en la evaluación: ${Math.floor(evidence.age_days)} días`;
+  const age = evidence?.age_days == null ? undefined : t('Antigüedad en la evaluación: {age_days} días', { age_days: Math.floor(evidence.age_days) });
   return <span className="cell-stack netskope-signal" title={evidence?.reason}>
-    <strong className="cell-lead netskope-signal-date"><i className={`netskope-signal-dot ${tone}`} aria-hidden="true" />{evidence?.last_signal_at ? <time dateTime={evidence.last_signal_at} title={`${formatDate(evidence.last_signal_at)}${age ? ` · ${age}` : ''}`}>{relativeTime(evidence.last_signal_at)}</time> : 'Sin señal'}</strong>
+    <strong className="cell-lead netskope-signal-date"><i className={`netskope-signal-dot ${tone}`} aria-hidden="true" />{evidence?.last_signal_at ? <time dateTime={evidence.last_signal_at} title={`${formatDate(evidence.last_signal_at)}${age ? ` · ${age}` : ''}`}>{relativeTime(evidence.last_signal_at)}</time> : t('Sin señal')}</strong>
     <small className="cell-sub">{DEVICE_EVIDENCE_LABELS[state]}</small>
   </span>;
 }
@@ -513,8 +513,8 @@ function SignalCell({ evidence }: { evidence?: NetskopeRow['device_evidence'] })
 // Keep both timestamps when they differ; equal formatted minutes do not prove
 // equal observations. The raw timestamps remain in the time elements.
 function ObservationCell({ first, last }: { first: string; last: string }) {
-  if (first === last) return <time dateTime={first} title={`Primera y última observación · ${dateTimeHint(first)}`}>{formatDate(first)}</time>;
-  return <span className="cell-stack"><time dateTime={first} title={`Primera observación · ${dateTimeHint(first)}`}>Desde {formatDate(first)}</time><time dateTime={last} title={`Última observación · ${dateTimeHint(last)}`}>Hasta {formatDate(last)}</time></span>;
+  if (first === last) return <time dateTime={first} title={t('Primera y última observación · {first}', { first: dateTimeHint(first) })}>{formatDate(first)}</time>;
+  return <span className="cell-stack"><time dateTime={first} title={t('Primera observación · {first}', { first: dateTimeHint(first) })}>{t('Desde {date}', { date: formatDate(first) })}</time><time dateTime={last} title={t('Última observación · {last}', { last: dateTimeHint(last) })}>Hasta {formatDate(last)}</time></span>;
 }
 
 function NetskopeInventoryTable({ view, rows, total, search, deviceQuery, usersFilters, facets, syncText, syncObservedAt, loading, error, errorInfo, onSearch, onQueryChange, onDeviceFilterChange, onUsersFilterChange, onClearFilters, onClearUsersFilters, onRetry, onLoadMore, onSelectRow, onOpenUser }: {
@@ -531,9 +531,9 @@ function NetskopeInventoryTable({ view, rows, total, search, deviceQuery, usersF
   const usersFiltered = isUsers && isNetskopeUsersFiltersActive(usersFilters);
   const userChips = !isUsers ? [] : [
     ...(usersFilters.deviceCount ? [{ id: 'device-count', label: `${t('Dispositivos')}: ${DEVICE_COUNT_LABELS[usersFilters.deviceCount] ?? usersFilters.deviceCount}`, patch: { deviceCount: '' as const } }] : []),
-    ...(usersFilters.activityDays ? [{ id: 'activity-days', label: `Actividad observada: últimos ${usersFilters.activityDays} días`, patch: { activityDays: 0 as const } }] : []),
-    ...(usersFilters.accountStatus ? [{ id: 'account-status', label: `Estado: ${ACCOUNT_STATUS_LABELS[usersFilters.accountStatus] ?? usersFilters.accountStatus}`, patch: { accountStatus: '' as const } }] : []),
-    ...(usersFilters.recentDeviceAge ? [{ id: 'device-age', label: `Antigüedad del más reciente: ${DEVICE_AGE_LABELS[usersFilters.recentDeviceAge] ?? usersFilters.recentDeviceAge}`, patch: { recentDeviceAge: '' as const } }] : []),
+    ...(usersFilters.activityDays ? [{ id: 'activity-days', label: t('Actividad observada: últimos {activityDays} días', { activityDays: usersFilters.activityDays }), patch: { activityDays: 0 as const } }] : []),
+    ...(usersFilters.accountStatus ? [{ id: 'account-status', label: t('Estado: {accountStatus}', { accountStatus: ACCOUNT_STATUS_LABELS[usersFilters.accountStatus] ?? usersFilters.accountStatus }), patch: { accountStatus: '' as const } }] : []),
+    ...(usersFilters.recentDeviceAge ? [{ id: 'device-age', label: t('Antigüedad del más reciente: {recentDeviceAge}', { recentDeviceAge: DEVICE_AGE_LABELS[usersFilters.recentDeviceAge] ?? usersFilters.recentDeviceAge }), patch: { recentDeviceAge: '' as const } }] : []),
   ];
   return <>
     <section className="list-panel database-surface">
@@ -550,7 +550,7 @@ function NetskopeInventoryTable({ view, rows, total, search, deviceQuery, usersF
       {isUsers && usersFiltered ? <div className="netskope-filter-row" role="group" aria-label={t('Filtros de usuarios')}>
         <div className="netskope-filter-active">
           <span className="netskope-filter-count">Filtros activos ({userChips.length})</span>
-          {userChips.map((chip) => <span key={chip.id} className="netskope-filter-chip">{chip.label}<button type="button" aria-label={`Quitar filtro ${chip.label}`} onClick={() => onUsersFilterChange(chip.patch)}><X size={12} aria-hidden="true" /></button></span>)}
+          {userChips.map((chip) => <span key={chip.id} className="netskope-filter-chip">{chip.label}<button type="button" aria-label={t('Quitar filtro {chip}', { chip: chip.label })} onClick={() => onUsersFilterChange(chip.patch)}><X size={12} aria-hidden="true" /></button></span>)}
           <button type="button" className="button subtle netskope-clear-filters" onClick={onClearUsersFilters}><X size={13} aria-hidden="true" /> {t('Limpiar todos')}</button>
         </div>
       </div> : null}
@@ -559,10 +559,10 @@ function NetskopeInventoryTable({ view, rows, total, search, deviceQuery, usersF
       </tr></thead><tbody>
         {loading && !rows.length && Array.from({ length: 4 }).map((_, index) => <tr key={`netskope-skeleton-${index}`} className="netskope-skeleton-row" aria-hidden="true"><td colSpan={columns}><span className="skeleton-line" /></td></tr>)}
         {!loading && error && <tr><td colSpan={columns}><StateBlock variant="error" title={t('No se pudo cargar Netskope')} hint={error} action={<><button type="button" className="button subtle" onClick={onRetry}>{t('Reintentar')}</button>{errorInfo ? <ErrorDetailsButton details={errorInfo} /> : null}</>} /></td></tr>}
-        {!loading && !error && !rows.length && <tr><td colSpan={columns}><StateBlock variant={search || filtered || usersFiltered ? 'no-results' : 'empty'} title={search ? 'Sin resultados para esta búsqueda' : usersFiltered ? 'Ningún usuario coincide con estos filtros' : filtered ? t('Ningún dispositivo coincide con estos filtros') : t('Todavía no hay datos Netskope')} /></td></tr>}
+        {!loading && !error && !rows.length && <tr><td colSpan={columns}><StateBlock variant={search || filtered || usersFiltered ? 'no-results' : 'empty'} title={search ? t('Sin resultados para esta búsqueda') : usersFiltered ? t('Ningún usuario coincide con estos filtros') : filtered ? t('Ningún dispositivo coincide con estos filtros') : t('Todavía no hay datos Netskope')} /></td></tr>}
         {!error && rows.map((row) => isUsers
           ? <tr key={row.object_id} onClick={() => onSelectRow(row)} onKeyDown={(event) => { if ((event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget) { event.preventDefault(); onSelectRow(row); } }} tabIndex={0}><td title={row.display_name}><span className="cell-stack"><strong className="cell-lead">{row.display_name}</strong><small className="cell-sub">{value(row.attributes, 'email')}</small></span></td><td title={companyFromIdentity(value(row.attributes, 'email'))}><strong>{companyFromIdentity(value(row.attributes, 'email'))}</strong></td><td>{ACCOUNT_STATUS_LABELS[String(row.attributes.account_status ?? '')] ?? '—'}</td><td><ObservationCell first={row.first_seen_at} last={row.last_seen_at} /></td>{activityView ? <UserActivityCells activity={row.device_activity} /> : null}</tr>
-          : [<tr key={row.object_id} className={expandedId === row.object_id ? 'is-expanded' : undefined} onClick={() => setExpandedId(expandedId === row.object_id ? null : row.object_id)} onKeyDown={(event) => { if ((event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget) { event.preventDefault(); setExpandedId(expandedId === row.object_id ? null : row.object_id); } }} tabIndex={0}><td title={value(row.attributes, 'hostname')}><span className="cell-stack netskope-device-cell"><strong className="cell-lead"><button type="button" className="netskope-row-toggle" aria-expanded={expandedId === row.object_id} aria-label={`Ver detalle de ${value(row.attributes, 'hostname')}`} tabIndex={-1} onClick={(event) => { event.stopPropagation(); setExpandedId(expandedId === row.object_id ? null : row.object_id); }}><ChevronRight size={13} aria-hidden="true" /></button>{value(row.attributes, 'hostname')}</strong><small className="cell-sub">{deviceMakeModelLabel(value(row.attributes, 'device_make'), value(row.attributes, 'device_model'))}</small></span></td><td title={row.observed_user?.display_name || value(row.attributes, 'username')}><span className="cell-stack"><strong className="cell-lead">{row.observed_user?.display_name || value(row.attributes, 'username')}</strong><small className="cell-sub">{row.observed_user?.email || value(row.attributes, 'username')}</small>{row.observed_user_status === 'ambiguous' ? <StatusBadge tone="warning">{t('Usuario ambiguo')}</StatusBadge> : row.observed_user_status === 'unmatched' ? <span className="muted">{t('Usuario no correlacionado')}</span> : null}</span></td><td title={companyFromIdentity(row.observed_user?.email || value(row.attributes, 'username'))}>{companyFromIdentity(row.observed_user?.email || value(row.attributes, 'username'))}</td><td><SignalCell evidence={row.device_evidence} /></td><td className="netskope-version" title={`${value(row.attributes, 'os')} ${value(row.attributes, 'os_version')}`}>{value(row.attributes, 'os')} {value(row.attributes, 'os_version')}</td><td className="netskope-version" title={value(row.attributes, 'client_version')}>{value(row.attributes, 'client_version')}</td></tr>,
+          : [<tr key={row.object_id} className={expandedId === row.object_id ? 'is-expanded' : undefined} onClick={() => setExpandedId(expandedId === row.object_id ? null : row.object_id)} onKeyDown={(event) => { if ((event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget) { event.preventDefault(); setExpandedId(expandedId === row.object_id ? null : row.object_id); } }} tabIndex={0}><td title={value(row.attributes, 'hostname')}><span className="cell-stack netskope-device-cell"><strong className="cell-lead"><button type="button" className="netskope-row-toggle" aria-expanded={expandedId === row.object_id} aria-label={t('Ver detalle de {hostname}', { hostname: value(row.attributes, 'hostname') })} tabIndex={-1} onClick={(event) => { event.stopPropagation(); setExpandedId(expandedId === row.object_id ? null : row.object_id); }}><ChevronRight size={13} aria-hidden="true" /></button>{value(row.attributes, 'hostname')}</strong><small className="cell-sub">{deviceMakeModelLabel(value(row.attributes, 'device_make'), value(row.attributes, 'device_model'))}</small></span></td><td title={row.observed_user?.display_name || value(row.attributes, 'username')}><span className="cell-stack"><strong className="cell-lead">{row.observed_user?.display_name || value(row.attributes, 'username')}</strong><small className="cell-sub">{row.observed_user?.email || value(row.attributes, 'username')}</small>{row.observed_user_status === 'ambiguous' ? <StatusBadge tone="warning">{t('Usuario ambiguo')}</StatusBadge> : row.observed_user_status === 'unmatched' ? <span className="muted">{t('Usuario no correlacionado')}</span> : null}</span></td><td title={companyFromIdentity(row.observed_user?.email || value(row.attributes, 'username'))}>{companyFromIdentity(row.observed_user?.email || value(row.attributes, 'username'))}</td><td><SignalCell evidence={row.device_evidence} /></td><td className="netskope-version" title={`${value(row.attributes, 'os')} ${value(row.attributes, 'os_version')}`}>{value(row.attributes, 'os')} {value(row.attributes, 'os_version')}</td><td className="netskope-version" title={value(row.attributes, 'client_version')}>{value(row.attributes, 'client_version')}</td></tr>,
             expandedId === row.object_id ? <tr key={`${row.object_id}-detail`} className="netskope-device-detail-row"><td colSpan={columns}><NetskopeDeviceDetail row={row} onOpenUser={onOpenUser} /></td></tr> : null])}
       </tbody></table></div>
       {!error && <LoadMore loaded={rows.length} total={total} pageSize={NETSKOPE_PAGE_SIZE} loading={loading && rows.length > 0} onLoadMore={onLoadMore} />}

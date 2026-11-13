@@ -2,13 +2,14 @@
    ("Sin línea base" / "Sin dato"), never 0 %. */
 import { EMPTY_NETSKOPE_DEVICE_FILTERS, EMPTY_NETSKOPE_DEVICE_QUERY } from './netskope-device-filters.ts';
 import type { NetskopeDeviceQuery, NetskopeFleetCounts, NetskopeFleetGroupBy } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 export const FLEET_GROUP_OPTIONS: ReadonlyArray<{ value: NetskopeFleetGroupBy; label: string }> = [
   { value: 'company', label: 'Empresa' },
   { value: 'os', label: 'Sistema operativo' },
   { value: 'client_config', label: 'Client config' },
   { value: 'device_make', label: 'Fabricante' },
-  { value: 'onprem_status', label: 'Dónde trabaja' },
+  { value: 'onprem_status', label: t('Dónde trabaja') },
   { value: 'uci_rating', label: 'Confianza (UCI)' },
 ];
 
@@ -38,7 +39,7 @@ export function fleetShare(count: number, total: number): number | null {
 }
 
 export function fleetPercent(share: number | null): string {
-  if (share === null) return 'Sin dato';
+  if (share === null) return t('Sin dato');
   return `${Math.round(share * 100)} %`;
 }
 

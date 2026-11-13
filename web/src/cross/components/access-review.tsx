@@ -12,11 +12,11 @@ import './access-review.css';
 import { t } from '../i18n/index.ts';
 
 const PAGE_SIZE = 25;
-const DAY_OPTIONS = [30, 60, 90, 180, 365].map((days) => ({ value: String(days), label: `${days} días` }));
+const DAY_OPTIONS = [30, 60, 90, 180, 365].map((days) => ({ value: String(days), label: t('{days} días', { days: days }) }));
 const FLAG_LABELS: Record<AccessReviewFlag, string> = {
-  inactive_account: 'Cuenta inactiva con roles',
-  manual_old: 'Asignación manual antigua',
-  stale_login: 'Okta sin ingreso',
+  inactive_account: t('Cuenta inactiva con roles'),
+  manual_old: t('Asignación manual antigua'),
+  stale_login: t('Okta sin ingreso'),
 };
 
 function Filters({ summary, flag, onChange }: { summary: AccessReviewSummary; flag: AccessReviewFilter; onChange: (flag: AccessReviewFilter) => void }) {
@@ -58,19 +58,19 @@ export function AccessReview() {
     {query.error && !data && <StateBlock variant="error" title={t('No se pudo cargar la revisión de accesos')} hint={query.error instanceof Error ? query.error.message : undefined} action={<button className="button subtle" type="button" onClick={() => void query.refetch()}>{t('Reintentar')}</button>} />}
     {data && <>
       <Filters summary={data.summary} flag={flag} onChange={(next) => { setFlag(next); setPage(0); }} />
-      <p className="muted access-review-note">Se marca la asignación manual con {data.days} días o más y la identidad Okta sin ingreso en ese plazo. Las cuentas locales no registran ingreso y los roles de Okta se reescriben en cada login, por eso esos datos figuran «Sin dato» y no se estiman.</p>
+      <p className="muted access-review-note">{t('Se marca la asignación manual con {days} días o más y la identidad Okta sin ingreso en ese plazo. Las cuentas locales no registran ingreso y los roles de Okta se reescriben en cada login, por eso esos datos figuran «Sin dato» y no se estiman.', { days: data.days })}</p>
       {data.rows.length === 0
-        ? <StateBlock variant={flag || deferredSearch ? 'no-results' : 'empty'} title={flag === 'attention' && !deferredSearch ? t('Ninguna asignación requiere atención') : t('Sin asignaciones para estos filtros')} hint={flag === 'attention' ? `Con el plazo de ${data.days} días no hay señales. Probá «Todas» o un plazo menor.` : 'Ajustá la búsqueda o el filtro.'} />
+        ? <StateBlock variant={flag || deferredSearch ? 'no-results' : 'empty'} title={flag === 'attention' && !deferredSearch ? t('Ninguna asignación requiere atención') : t('Sin asignaciones para estos filtros')} hint={flag === 'attention' ? t('Con el plazo de {days} días no hay señales. Probá «Todas» o un plazo menor.', { days: data.days }) : t('Ajustá la búsqueda o el filtro.')} />
         : <>
           <div className="user-directory-scroll"><table className="user-directory-table">
             <caption className="sr-only">{t('Asignaciones de rol para revisar')}</caption>
             <thead><tr><th scope="col">{t('Persona')}</th><th scope="col">{t('Rol')}</th><th scope="col">{t('Origen')}</th><th scope="col">{t('Asignado')}</th><th scope="col">{t('Último ingreso')}</th><th scope="col">{t('Señales')}</th></tr></thead>
             <tbody>
               {data.rows.map((row) => <tr key={`${row.actor_id}:${row.role_code}`}>
-                <td><div className="user-row-identity"><strong>{row.display_name}</strong><span>{row.email || 'Sin email'}</span></div></td>
+                <td><div className="user-row-identity"><strong>{row.display_name}</strong><span>{row.email || t('Sin email')}</span></div></td>
                 <td>{row.role_name}</td>
                 <td>{row.source === 'oidc' ? <span className="user-status-chip oidc">{t('Okta')}</span> : <span className="user-status-chip">{t('Custodia')}</span>}</td>
-                <td>{row.source === 'manual' ? <div className="user-row-identity"><DateTime value={row.granted_at} /><span>{row.granted_by ? `por ${row.granted_by}` : 'Autor sin dato'}</span></div> : <span className="muted">{t('Según grupos de Okta')}</span>}</td>
+                <td>{row.source === 'manual' ? <div className="user-row-identity"><DateTime value={row.granted_at} /><span>{row.granted_by ? t('por {granted_by}', { granted_by: row.granted_by }) : t('Autor sin dato')}</span></div> : <span className="muted">{t('Según grupos de Okta')}</span>}</td>
                 <td><DateTime value={row.last_login_at} /></td>
                 <td>{row.flags.length ? <div className="access-review-flags">{row.flags.map((item) => <StatusBadge key={item} tone="warning">{FLAG_LABELS[item]}</StatusBadge>)}</div> : <span className="muted">{t('Sin señales')}</span>}</td>
               </tr>)}

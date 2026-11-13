@@ -26,9 +26,9 @@ export function NetskopeUciCompanies({ refreshKey, enabled, onUnauthorized, onRe
   }
   if (!data.companies?.length) return <StateBlock compact variant="empty" title={t('Sin empresas para comparar')} hint="No hay usuarios activos con correo en la consulta." />;
   return <section className="netskope-uci-companies" aria-label={t('Riesgo por empresa')}>
-    <div className="section-title"><h2>{t('Usuarios con señales de riesgo por empresa')}</h2><HelpHint label={t('Por empresa')}><p>Proporción de usuarios activos con correo y confianza baja o moderada según Netskope. Es el porcentaje de usuarios a revisar, no un promedio de puntaje. La variación compara con el conteo semanal guardado (solo cantidades por empresa). Se expresa en puntos porcentuales (pp): si aumenta, hay una mayor proporción de cuentas a revisar.</p><p>{UCI_EXPLANATION} {UCI_SCALE}</p></HelpHint></div>
+    <div className="section-title"><h2>{t('Usuarios con señales de riesgo por empresa')}</h2><HelpHint label={t('Por empresa')}><p>{t('Proporción de usuarios activos con correo y confianza baja o moderada según Netskope. Es el porcentaje de usuarios a revisar, no un promedio de puntaje. La variación compara con el conteo semanal guardado (solo cantidades por empresa). Se expresa en puntos porcentuales (pp): si aumenta, hay una mayor proporción de cuentas a revisar.')}</p><p>{UCI_EXPLANATION} {UCI_SCALE}</p></HelpHint></div>
     <p className="netskope-uci-note">{t('Usuarios con confianza baja o moderada sobre el total de usuarios activos con correo. No es un promedio de puntaje.')}</p>
-    <p className="netskope-uci-note">{t('Consulta actual:')} <DateTime value={new Date(panel.dataUpdatedAt).toISOString()} /> · Comparación: {data.previous_week ? <>{t('semana del')} <time dateTime={data.previous_week}>{new Intl.DateTimeFormat(localeTag(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${data.previous_week}T00:00:00Z`))}</time></> : 'Sin semana previa disponible'}.</p>
+    <p className="netskope-uci-note">{t('Consulta actual:')} <DateTime value={new Date(panel.dataUpdatedAt).toISOString()} /> · Comparación: {data.previous_week ? <>{t('semana del')} <time dateTime={data.previous_week}>{new Intl.DateTimeFormat(localeTag(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${data.previous_week}T00:00:00Z`))}</time></> : t('Sin semana previa disponible')}.</p>
     <table className="compact-table">
       <thead><tr><th scope="col">{t('Empresa')}</th><th scope="col">{t('Usuarios')}</th><th scope="col">{t('Confianza baja')}</th><th scope="col">{t('Confianza moderada')}</th><th scope="col">{t('A revisar')}</th><th scope="col">{t('Cambio de la proporción a revisar')}</th></tr></thead>
       <tbody>{data.companies.map((company) => {
@@ -39,10 +39,10 @@ export function NetskopeUciCompanies({ refreshKey, enabled, onUnauthorized, onRe
         <td>{formatNumber(company.poor)}</td>
         <td>{formatNumber(company.moderate)}</td>
         <td>{company.poor + company.moderate > 0
-          ? <button type="button" className="netskope-uci-review" aria-label={`Revisar a las ${formatNumber(company.poor + company.moderate)} personas de ${company.company}`} onClick={() => onReview(company.company)}>
-            <BarCell label={`${formatNumber(company.poor + company.moderate)} de ${formatNumber(company.users)} · ${uciRiskLabel(company)}`} share={uciRiskShare(company)} />
+          ? <button type="button" className="netskope-uci-review" aria-label={t('Revisar a las {moderate} personas de {company}', { moderate: formatNumber(company.poor + company.moderate), company: company.company })} onClick={() => onReview(company.company)}>
+            <BarCell label={t('{moderate} de {users} · {company}', { moderate: formatNumber(company.poor + company.moderate), users: formatNumber(company.users), company: uciRiskLabel(company) })} share={uciRiskShare(company)} />
           </button>
-          : <BarCell label={`0 de ${formatNumber(company.users)} · ${uciRiskLabel(company)}`} share={uciRiskShare(company)} />}</td>
+          : <BarCell label={t('0 de {users} · {company}', { users: formatNumber(company.users), company: uciRiskLabel(company) })} share={uciRiskShare(company)} />}</td>
         <td className={change === null ? 'netskope-uci-empty' : undefined}>{change === null || change === 0 ? uciRiskChangeLabel(change) : `${change > 0 ? t('Aumenta') : t('Disminuye')} ${uciRiskChangeLabel(change)}`}</td>
       </tr>;
       })}</tbody>

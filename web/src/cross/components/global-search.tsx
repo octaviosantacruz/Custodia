@@ -17,7 +17,7 @@ import { t } from '../i18n/index.ts';
 
 const KIND_LABELS: Record<CommandKind, string> = {
   view: 'Vista',
-  action: 'Acción',
+  action: t('Acción'),
   widget: 'Widget',
   inventory: 'Inventario',
 };
@@ -171,7 +171,7 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
         .catch(() => {
           if (cancelled) return;
           setResults([]);
-          setSearchError('No se pudo completar la búsqueda. Probá de nuevo.');
+          setSearchError(t('No se pudo completar la búsqueda. Probá de nuevo.'));
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -271,7 +271,7 @@ export function GlobalSearch({ includeInternal = true, permissions, commands, pr
       onMouseEnter={() => void ensureWidgetSources().catch(() => {})}
       onFocus={() => void ensureWidgetSources().catch(() => {})}
       aria-label={t('Abrir command center')}
-      title={`Buscar inventario, herramientas y acciones (${shortcutLabel})`}
+      title={t('Buscar inventario, herramientas y acciones ({shortcutLabel})', { shortcutLabel: shortcutLabel })}
     >
       <Search size={16} aria-hidden />
       <span>{t('Buscar')}</span>

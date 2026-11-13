@@ -50,16 +50,16 @@ const RELATION_LABELS: Record<string, string> = {
 };
 
 const RELATION_BASIS: Record<string, string> = {
-  user_has_role: 'Membresía usuario → rol verificada en CyberArk.',
-  role_grants_access: 'Concesión rol → Safe verificada en CyberArk.',
-  safe_uses_platform: 'Uso Safe → plataforma verificado en CyberArk.',
-  platform_uses_psm: 'Asignación plataforma → PSM verificada en CyberArk.',
-  platform_id: 'Mismo platformId exacto entre Access y PAM.',
-  ip_literal: 'La política SIA apunta a la misma IP literal que una cuenta del Safe.',
-  display_name_reference_only: 'La política SIA nombra a este usuario o rol; es una referencia por nombre, no una relación confirmada.',
+  user_has_role: t('Membresía usuario → rol verificada en CyberArk.'),
+  role_grants_access: t('Concesión rol → Safe verificada en CyberArk.'),
+  safe_uses_platform: t('Uso Safe → plataforma verificado en CyberArk.'),
+  platform_uses_psm: t('Asignación plataforma → PSM verificada en CyberArk.'),
+  platform_id: t('Mismo platformId exacto entre Access y PAM.'),
+  ip_literal: t('La política SIA apunta a la misma IP literal que una cuenta del Safe.'),
+  display_name_reference_only: t('La política SIA nombra a este usuario o rol; es una referencia por nombre, no una relación confirmada.'),
   // Sanctioned Identity -> PAM link: worded for people, never as an identifier.
-  uuid_exact: 'Misma persona en Identity y PAM: la cuenta coincide exactamente, no por nombre.',
-  email_exact: 'Misma persona en Identity y PAM: el correo coincide exactamente 1 a 1, nunca por nombre ni similitud.',
+  uuid_exact: t('Misma persona en Identity y PAM: la cuenta coincide exactamente, no por nombre.'),
+  email_exact: t('Misma persona en Identity y PAM: el correo coincide exactamente 1 a 1, nunca por nombre ni similitud.'),
 };
 
 function relationText(relation: ChainRelation): string {
@@ -77,7 +77,7 @@ function ChainLink({ relation }: { relation: ChainRelation }) {
   const text = relationText(relation);
   return <span className={`chain-link is-${relation.kind}`}>
     <span className="chain-link-line" aria-hidden />
-    <button type="button" className="chain-relation-help chain-link-help" aria-label={`Por qué se conecta: ${text}`}>
+    <button type="button" className="chain-relation-help chain-link-help" aria-label={t('Por qué se conecta: {text}', { text: text })}>
       <span className={`chain-link-dot is-${relation.kind}`} aria-hidden />
       <span className="chain-relation-popover" aria-hidden>{text}</span>
     </button>
@@ -102,7 +102,7 @@ function ChainNodeDrawer({ target, path, compareA, onCompare, onClose, onNavigat
     id: `${cell.node.type}-${cell.node.id}`,
     label: `${CHAIN_NODE_LABELS[cell.node.type]}: ${cell.node.label}`,
     count: null,
-    description: cell.relation ? (RELATION_BASIS[cell.relation.basis] ?? cell.relation.basis) : 'Nodo de inicio',
+    description: cell.relation ? (RELATION_BASIS[cell.relation.basis] ?? cell.relation.basis) : t('Nodo de inicio'),
   }));
   const comparable = node.type !== 'access_policy';
   const isCompareA = compareA?.type === node.type && compareA.id === node.id;
@@ -115,7 +115,7 @@ function ChainNodeDrawer({ target, path, compareA, onCompare, onClose, onNavigat
         <div className="detail-heading">
           <p className="eyebrow">{CHAIN_NODE_LABELS[node.type].toUpperCase()}</p>
           <h2 id="chain-node-title">{node.label}</h2>
-          <p>{relation ? relationText(relation) : 'Inicio del recorrido'}</p>
+          <p>{relation ? relationText(relation) : t('Inicio del recorrido')}</p>
         </div>
         <button ref={closeRef} className="icon-button drawer-close" type="button" title={t('Cerrar el detalle')} aria-label={t('Cerrar el detalle')} onClick={onClose}><X size={16} aria-hidden /></button>
       </div>
@@ -127,12 +127,12 @@ function ChainNodeDrawer({ target, path, compareA, onCompare, onClose, onNavigat
             <div><dt>{t('Id de la cuenta PAM')}</dt><dd className="mono">{node.account.sublabel}</dd></div>
             {node.identity ? <div><dt>{t('Vínculo')}</dt><dd>{RELATION_BASIS[node.identity.basis]}</dd></div> : null}
           </> : <div><dt>{t('Identificador')}</dt><dd className="mono">{node.sublabel}</dd></div>}
-          <div><dt>{t('Relaciones')}</dt><dd>{formatNumber(node.counts.back)} hacia atrás · {formatNumber(node.counts.forward)} hacia adelante</dd></div>
+          <div><dt>{t('Relaciones')}</dt><dd>{t('{back} hacia atrás · {forward} hacia adelante', { back: formatNumber(node.counts.back), forward: formatNumber(node.counts.forward) })}</dd></div>
           {node.catalog_missing ? <div><dt>{t('Catálogo')}</dt><dd>{t('Referenciado por una plataforma, no presente en el catálogo PSM.')}</dd></div> : null}
         </dl>
         {graphNodes.length > 1 ? <ChainGraph title={t('Recorrido actual')} description={t('Camino elegido en el mapa, de izquierda a derecha.')} nodes={graphNodes} compact /> : null}
         <div className="chain-node-actions">
-          {view ? <button type="button" className="button secondary" title={`Abrir el inventario de ${node.account?.label ?? node.label}`} onClick={() => onNavigate(view, node.account?.label ?? node.label)}><ArrowUpRight size={14} aria-hidden /> {t('Abrir inventario')}</button> : null}
+          {view ? <button type="button" className="button secondary" title={t('Abrir el inventario de {node}', { node: node.account?.label ?? node.label })} onClick={() => onNavigate(view, node.account?.label ?? node.label)}><ArrowUpRight size={14} aria-hidden /> {t('Abrir inventario')}</button> : null}
           {comparable ? <button type="button" className="button subtle" onClick={() => onCompare(isCompareA ? null : node)}>{isCompareA ? t('Dejar de comparar') : t('Comparar con otro del mismo tipo')}</button> : null}
         </div>
       </section>
@@ -146,9 +146,9 @@ function ColumnPager({ state, pageSize, label, onPage }: { state: ChainColumnSta
   const from = state.page * pageSize + 1;
   const to = Math.min(total, (state.page + 1) * pageSize);
   return <div className="chain-column-pager">
-    <button type="button" className="icon-button" aria-label={`Página anterior de ${label}`} disabled={state.page === 0} onClick={() => onPage(state.page - 1)}><ChevronLeft size={14} aria-hidden /></button>
-    <span>{formatNumber(from)}–{formatNumber(to)} de {formatNumber(total)}</span>
-    <button type="button" className="icon-button" aria-label={`Página siguiente de ${label}`} disabled={to >= total} onClick={() => onPage(state.page + 1)}><ChevronRight size={14} aria-hidden /></button>
+    <button type="button" className="icon-button" aria-label={t('Página anterior de {value}', { value: label })} disabled={state.page === 0} onClick={() => onPage(state.page - 1)}><ChevronLeft size={14} aria-hidden /></button>
+    <span>{t('{from}–{to} de {total}', { from: formatNumber(from), to: formatNumber(to), total: formatNumber(total) })}</span>
+    <button type="button" className="icon-button" aria-label={t('Página siguiente de {value}', { value: label })} disabled={to >= total} onClick={() => onPage(state.page + 1)}><ChevronRight size={14} aria-hidden /></button>
   </div>;
 }
 
@@ -166,7 +166,7 @@ function OptionButton({ hop, selected, onClick }: { hop: ChainHop; selected: boo
     </span>
     {hop.relation.kind !== 'persisted' ? <span className={`chain-relation-badge is-${hop.relation.kind}`}>{RELATION_LABELS[hop.relation.kind]}</span> : null}
     <span className="chain-option-counts" aria-hidden title={t('Quién llega ← · → a qué llega')}>{formatNumber(hop.counts.back)} ← · → {formatNumber(hop.counts.forward)}</span>
-    <span className="sr-only">{`${hop.counts.back} hacia atrás, ${hop.counts.forward} hacia adelante`}</span>
+    <span className="sr-only">{t('{back} hacia atrás, {forward} hacia adelante', { back: hop.counts.back, forward: hop.counts.forward })}</span>
   </button>;
 }
 
@@ -219,7 +219,7 @@ function ChainColumn({ spec, index, columns, path, cell, state, pageSize, filter
 
     <div className="chain-rail-slot">
       {link ? <ChainLink relation={link} /> : null}
-      {cell ? <article className="chain-card" aria-label={`Elegido en ${spec.label}: ${cell.node.label}`}>
+      {cell ? <article className="chain-card" aria-label={t('Elegido en {spec}: {node}', { spec: spec.label, node: cell.node.label })}>
         <span className="chain-card-icon"><NodeIcon type={cell.node.type} size={17} /></span>
         <span className="chain-card-main">
           <small>{isRoot ? 'Inicio' : CHAIN_NODE_LABELS[cell.node.type]}</small>
@@ -228,11 +228,11 @@ function ChainColumn({ spec, index, columns, path, cell, state, pageSize, filter
           {cell.node.catalog_missing ? <span className="chain-catalog-missing">{t('Referenciado, no presente en el catálogo PSM.')}</span> : null}
         </span>
         <span className="chain-card-actions">
-          <button type="button" className="icon-button" aria-label={`Ver detalle de ${cell.node.label}`} title={t('Ver detalle')} onClick={() => onDetail({ node: cell.node, relation: cell.relation })}><Info size={14} aria-hidden /></button>
-          {!isRoot ? <button type="button" className="icon-button" aria-label={`Quitar ${cell.node.label} del recorrido`} title={t('Quitar del recorrido')} onClick={onClear}><X size={14} aria-hidden /></button> : null}
+          <button type="button" className="icon-button" aria-label={t('Ver detalle de {node}', { node: cell.node.label })} title={t('Ver detalle')} onClick={() => onDetail({ node: cell.node, relation: cell.relation })}><Info size={14} aria-hidden /></button>
+          {!isRoot ? <button type="button" className="icon-button" aria-label={t('Quitar {node} del recorrido', { node: cell.node.label })} title={t('Quitar del recorrido')} onClick={onClear}><X size={14} aria-hidden /></button> : null}
         </span>
       </article> : path ? <div className={`chain-card-placeholder${state.source ? ' is-frontier' : ''}`}>
-        {state.source ? 'Elegí uno de la lista para seguir.' : unreachableHint(columns, path, index)}
+        {state.source ? t('Elegí uno de la lista para seguir.') : unreachableHint(columns, path, index)}
       </div> : null}
     </div>
 
@@ -241,13 +241,13 @@ function ChainColumn({ spec, index, columns, path, cell, state, pageSize, filter
         type="search"
         value={filterInput}
         onChange={(event) => setFilterInput(event.target.value)}
-        placeholder={`Filtrar en ${spec.label}`}
-        aria-label={`Filtrar en ${spec.label}`}
+        placeholder={t('Filtrar en {spec}', { spec: spec.label })}
+        aria-label={t('Filtrar en {spec}', { spec: spec.label })}
       /></label>
       {result?.loading ? <StateBlock variant="loading" title={t('Cargando…')} /> : null}
       {result?.error ? <StateBlock variant="error" title={t('No se pudo cargar')} hint={result.error} action={<button type="button" className="button subtle" onClick={onRetry}>{t('Reintentar')}</button>} /> : null}
       {result && !result.loading && !result.error && !split.inColumn.length ? <p className="chain-column-empty">{filter ? t('Sin coincidencias con el filtro.') : t('Sin relaciones en esta dirección.')}</p> : null}
-      {split.inColumn.length ? <div className="chain-option-list" role="group" aria-label={`${heading} en ${spec.label}`}>
+      {split.inColumn.length ? <div className="chain-option-list" role="group" aria-label={t('{heading} en {spec}', { heading: heading, spec: spec.label })}>
         {split.inColumn.map((hop) => <OptionButton
           key={`${hop.type}-${hop.id}`}
           hop={hop}
@@ -258,7 +258,7 @@ function ChainColumn({ spec, index, columns, path, cell, state, pageSize, filter
       <ColumnPager state={state} pageSize={pageSize} label={spec.label} onPage={onPage} />
     </div> : null}
 
-    {split.lateral.length ? <div className="chain-lateral" role="group" aria-label={`Referencias SIA en ${spec.label}`}>
+    {split.lateral.length ? <div className="chain-lateral" role="group" aria-label={t('Referencias SIA en {spec}', { spec: spec.label })}>
       <p>{t('Referencias SIA')}</p>
       {split.lateral.map((hop) => <button
         key={`${hop.type}-${hop.id}`}
@@ -350,7 +350,7 @@ export function PamChainWorkspace({ authChecked, authenticated, onUnauthorized, 
   return <>
     <div className="pam-chain-explorer-intro">
       <div><p className="eyebrow">{t('CADENAS PAM')}</p><div className="section-title"><h2>{t('Buscá cualquier nodo y seguí el recorrido')}</h2><HelpHint label={t('Cómo leer el recorrido')}><p>Cada tipo tiene su columna. A la izquierda del camino ves quién llega y a la derecha a qué llega; elegí un nodo para seguir.</p></HelpHint></div><div className="chain-relation-legend" aria-label={t('Leyenda de relaciones')}><span className="is-persisted">{t('Verificada')}</span><span className="is-derived">{t('Derivada')}</span><span className="is-reference">{t('Referencia')}</span></div></div>
-      <span className="database-toolbar-count">{pathLength ? `${formatNumber(pathLength)} ${pathLength === 1 ? 'nodo' : 'nodos'} en el recorrido` : 'Sin recorrido'}</span>
+      <span className="database-toolbar-count">{pathLength ? t('{pathLength} {nodos} en el recorrido', { pathLength: formatNumber(pathLength), nodos: pathLength === 1 ? t('nodo') : t('nodos') }) : t('Sin recorrido')}</span>
     </div>
 
     <section className="chain-explorer" aria-label={t('Explorador de cadenas PAM')}>
@@ -371,7 +371,7 @@ export function PamChainWorkspace({ authChecked, authenticated, onUnauthorized, 
               checked={controller.standardSeat === 'reconciled'}
               onChange={(event) => controller.setStandardSeat(event.target.checked ? 'reconciled' : '')}
             />
-            Sólo usuarios con evidencia Standard
+            {t('Sólo usuarios con evidencia Standard')}
           </label>
           {searchVisible ? <div className="chain-search-results" role="listbox" aria-label={t('Resultados de la búsqueda')}>
             {controller.searchLoading ? <StateBlock variant="loading" title={t('Buscando nodos…')} /> : null}
@@ -427,8 +427,8 @@ export function PamChainWorkspace({ authChecked, authenticated, onUnauthorized, 
       </section>
 
       {compareA ? <section className="chain-compare" aria-label={t('Comparación de nodos')}>
-        <header><h3>Comparar {compareA.label}{compareB ? ` con ${compareB.label}` : ''}</h3><button type="button" className="button subtle" onClick={() => setCompareA(null)}>{t('Cerrar comparación')}</button></header>
-        {!compareDiff || !compareB ? <p className="chain-compare-hint">Elegí en el mapa otro nodo de tipo {CHAIN_NODE_LABELS[compareA.type]} para ver a qué llega uno y no el otro.</p> : <div className="chain-compare-columns">
+        <header><h3>Comparar {compareA.label}{compareB ? t(' con {compareB}', { compareB: compareB.label }) : ''}</h3><button type="button" className="button subtle" onClick={() => setCompareA(null)}>{t('Cerrar comparación')}</button></header>
+        {!compareDiff || !compareB ? <p className="chain-compare-hint">{t('Elegí en el mapa otro nodo de tipo {type} para ver a qué llega uno y no el otro.', { type: CHAIN_NODE_LABELS[compareA.type] })}</p> : <div className="chain-compare-columns">
           <div><p>Solo {compareA.label}</p>{compareDiff.onlyA.length ? compareDiff.onlyA.map((hop) => <span key={`a-${hop.type}-${hop.id}`}>{hop.label}</span>) : <em>{t('Nada')}</em>}</div>
           <div><p>Solo {compareB.label}</p>{compareDiff.onlyB.length ? compareDiff.onlyB.map((hop) => <span key={`b-${hop.type}-${hop.id}`}>{hop.label}</span>) : <em>{t('Nada')}</em>}</div>
           <div><p>{t('En ambos')}</p>{compareDiff.both.length ? compareDiff.both.map((hop) => <span key={`both-${hop.type}-${hop.id}`}>{hop.label}</span>) : <em>{t('Nada')}</em>}</div>

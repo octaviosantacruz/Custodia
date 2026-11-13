@@ -17,7 +17,7 @@ export function NetskopeAaChart({ widgetId, mode, enabled, refreshKey, onUnautho
   const chart = panel.data;
   return <>
     <div className="personal-chart-heading">
-      <span className="metric-label">{chart?.title ?? 'Gráfico Advanced Analytics'}</span>
+      <span className="metric-label">{chart?.title ?? t('Gráfico Advanced Analytics')}</span>
       {chart ? <small>{chart.period} · {chart.unit}</small> : null}
     </div>
     {panel.error ? <StateBlock variant="error" title={t('No se pudo consultar Advanced Analytics')} hint={panel.error} action={<button className="button subtle" type="button" onClick={() => void panel.reload()}>{t('Reintentar')}</button>} />

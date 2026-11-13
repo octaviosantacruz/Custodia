@@ -3,6 +3,7 @@ import { ShieldCheck, Users } from 'lucide-react';
 import { IdentityAdminWorkspace } from '../../identity_administration/components/identity-admin-workspace';
 import { handleTablistKeyDown } from '../../../cross/lib/tablist-keyboard';
 import { hasWorkspaceAccess, type WorkspaceView } from '../../../cross/lib/workspaces';
+import { t } from '../../../cross/i18n/index.ts';
 
 type IdentitySection = 'users' | 'groups' | 'federations' | 'cyberarkRoles' | 'identityRoles';
 
@@ -18,8 +19,8 @@ type IdentityWorkspaceProps = {
 };
 
 const SECTION_META: Array<{ id: IdentitySection; label: string; detail: string; icon: ReactNode }> = [
-  { id: 'users', label: 'Usuarios', detail: 'Personas y cuentas registradas', icon: <Users size={16} /> },
-  { id: 'identityRoles', label: 'Roles y grupos', detail: 'Miembros directos y grupos anidados', icon: <ShieldCheck size={16} /> },
+  { id: 'users', label: t('Usuarios'), detail: t('Personas y cuentas registradas'), icon: <Users size={16} /> },
+  { id: 'identityRoles', label: t('Roles y grupos'), detail: t('Miembros directos y grupos anidados'), icon: <ShieldCheck size={16} /> },
 ];
 
 const SECTION_VIEWS: Record<IdentitySection, WorkspaceView> = {
@@ -44,7 +45,7 @@ export function IdentityWorkspace({ authChecked, authenticated, permissions, onU
   }, [sectionAllowed, activeSection, requestedSection, initialSection, initialQuery, onNavigate, visibleSections.length]);
 
   return <section className="identity-workspace" aria-label="Identidades">
-    <nav className="workspace-subnav" aria-label="Secciones de identidad" role="tablist" onKeyDown={handleTablistKeyDown}>
+    <nav className="workspace-subnav" aria-label={t('Secciones de identidad')} role="tablist" onKeyDown={handleTablistKeyDown}>
       {visibleSections.map((item) => <button
         key={item.id}
         id={`identity-section-${item.id}`}
@@ -53,7 +54,7 @@ export function IdentityWorkspace({ authChecked, authenticated, permissions, onU
         role="tab"
         aria-selected={activeSection === item.id}
         tabIndex={activeSection === item.id ? 0 : -1}
-        title={`Mostrar ${item.label}: ${item.detail}`}
+        title={t('Mostrar {value}: {detail}', { value: item.label, detail: item.detail })}
         className={activeSection === item.id ? 'active' : ''}
         onClick={() => onNavigate(SECTION_VIEWS[item.id])}
       >

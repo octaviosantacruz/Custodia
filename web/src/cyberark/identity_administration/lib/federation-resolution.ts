@@ -6,24 +6,25 @@
    delivered -- so no label here should imply the federation "contains"
    the user. */
 import type { FederationResolution } from '../types/identity';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type FederationBadgeTone = 'success' | 'warning' | 'neutral';
 
 export function federationBadgeLabel(resolution: FederationResolution | null | undefined): string {
-  if (!resolution) return 'Sin regla de federación';
+  if (!resolution) return t('Sin regla de federación');
   switch (resolution.status) {
     case 'matched':
-      return resolution.expected_name || resolution.display_name || 'Federación esperada';
+      return resolution.expected_name || resolution.display_name || t('Federación esperada');
     case 'missing_federation':
       return 'Esperada, no sincronizada';
     case 'unsupported_domain':
-      return 'Sin regla';
+      return t('Sin regla');
     case 'missing_email':
       return '—';
     case 'ambiguous':
-      return 'Más de una federación coincide';
+      return t('Más de una federación coincide');
     default:
-      return 'Sin regla de federación';
+      return t('Sin regla de federación');
   }
 }
 
@@ -45,25 +46,25 @@ export function federationBadgeTone(resolution: FederationResolution | null | un
 /** Chain tooltip copy for the derived federation hop (basis
  * `email_domain_rule`); same criterion as the drawer's "Derivada por
  * dominio" chip, never phrased as evidence delivered by the API. */
-export const FEDERATION_DERIVED_DESCRIPTION = 'Derivada por regla de dominio de correo; no es una relación entregada por la API de Identity Administration.';
+export const FEDERATION_DERIVED_DESCRIPTION = t('Derivada por regla de dominio de correo; no es una relación entregada por la API de Identity Administration.');
 
 /* Longer, unambiguous copy for the identity drawer -- the row badge stays
    compact, but the drawer must never let a user read this as "the
    federation contains me". */
 export function federationDrawerSummary(resolution: FederationResolution | null | undefined): string {
-  if (!resolution) return 'Sin regla de federación esperada por dominio de correo.';
+  if (!resolution) return t('Sin regla de federación esperada por dominio de correo.');
   switch (resolution.status) {
     case 'matched':
       return `Federación esperada por dominio de correo: ${resolution.expected_name || resolution.display_name}.`;
     case 'missing_federation':
       return `Se espera ${resolution.expected_name} por dominio de correo, pero no está sincronizada todavía.`;
     case 'unsupported_domain':
-      return 'El dominio de este correo no tiene una regla de federación definida.';
+      return t('El dominio de este correo no tiene una regla de federación definida.');
     case 'missing_email':
-      return 'No hay un email utilizable para derivar la federación esperada.';
+      return t('No hay un email utilizable para derivar la federación esperada.');
     case 'ambiguous':
-      return `Más de una federación activa coincide con ${resolution.expected_name}; no se elige una automáticamente.`;
+      return t('Más de una federación activa coincide con {expected_name}; no se elige una automáticamente.', { expected_name: resolution.expected_name });
     default:
-      return 'Sin regla de federación esperada por dominio de correo.';
+      return t('Sin regla de federación esperada por dominio de correo.');
   }
 }

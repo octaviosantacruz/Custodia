@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError } from '../lib/api';
 import { fetchDashboardTeamTemplates, publishDashboardTeamTemplate } from '../lib/dashboard-team-templates-api';
+import { t } from '../i18n/index.ts';
 
 export function useDashboardTeamTemplates<T>({ source, enabled, onUnauthorized, onError, onNotice }: {
   source: 'cyberark' | 'netskope'; enabled: boolean; onUnauthorized: () => void; onError: (message: string) => void; onNotice: (message: string) => void;
@@ -13,11 +14,11 @@ export function useDashboardTeamTemplates<T>({ source, enabled, onUnauthorized, 
     try {
       const result = await mutation.mutateAsync({ roleCode, widgets });
       await client.invalidateQueries({ queryKey: key });
-      onNotice(`Vista publicada para ${result.role_name} · versión ${result.version}`);
+      onNotice(t('Vista publicada para {role_name} · versión {version}', { role_name: result.role_name, version: result.version }));
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudo publicar la vista de equipo');
+      else onError(error instanceof Error ? error.message : t('No se pudo publicar la vista de equipo'));
       return false;
     }
   };

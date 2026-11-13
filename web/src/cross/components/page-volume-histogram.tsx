@@ -16,7 +16,7 @@ export function PageVolumeHistogram({
   const max = Math.max(0, ...buckets.map((bucket) => bucket.count));
   const total = buckets.reduce((sum, bucket) => sum + bucket.count, 0);
   return <section className="page-volume" aria-label={title}>
-    <div className="page-volume-heading"><strong>{title}</strong>{state === 'ready' ? <span>{formatNumber(total)} registros en esta página</span> : null}<HelpHint label={title}><p>{help}</p></HelpHint></div>
+    <div className="page-volume-heading"><strong>{title}</strong>{state === 'ready' ? <span>{t('{count} registros en esta página', { count: formatNumber(total) })}</span> : null}<HelpHint label={title}><p>{help}</p></HelpHint></div>
     {state === 'loading' ? <span className="page-volume-state" role="status">{t('Actualizando volumen de esta página…')}</span>
       : state === 'error' ? <span className="page-volume-state" role="status">Volumen no disponible; falló la carga de la tabla.</span>
         : buckets.length ? <div className="page-volume-bars" role="img" aria-label={`${title}: ${buckets.map((bucket) => `${bucket.day}, ${bucket.count}`).join('; ')}`}>

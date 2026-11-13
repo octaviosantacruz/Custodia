@@ -3,7 +3,7 @@ import { formatNumber, bucketLabel } from '../lib/format';
 import type { AnalyticsBucket } from '../types/analytics';
 import './dashboard.css';
 
-export function BarList({ buckets, emptyHint = 'Sin datos disponibles para este corte.', onBucketSelect }: {
+export function BarList({ buckets, emptyHint = t('Sin datos disponibles para este corte.'), onBucketSelect }: {
   buckets: AnalyticsBucket[];
   emptyHint?: string;
   onBucketSelect?: (bucket: AnalyticsBucket) => void;
@@ -14,7 +14,7 @@ export function BarList({ buckets, emptyHint = 'Sin datos disponibles para este 
     const content = <><div className="bar-label"><span>{bucket.label || bucketLabel(bucket.key)}</span><strong>{formatNumber(bucket.count)}</strong></div><div className="bar-track" aria-hidden="true"><span style={{ width: ((bucket.count / max) * 100) + '%' }} /></div></>;
     if (!onBucketSelect) return <div className="bar-row" key={bucket.key}>{content}</div>;
     const canSelect = bucket.key !== 'Otros' || Boolean(bucket.filter_value);
-    return <button className="bar-row interactive" key={bucket.key} type="button" disabled={!canSelect} onClick={() => onBucketSelect(bucket)} title={canSelect ? `Filtrar por ${bucket.label || bucketLabel(bucket.key)}` : 'Esta categoría agrupa varios valores'}>{content}</button>;
+    return <button className="bar-row interactive" key={bucket.key} type="button" disabled={!canSelect} onClick={() => onBucketSelect(bucket)} title={canSelect ? t('Filtrar por {key}', { key: bucket.label || bucketLabel(bucket.key) }) : t('Esta categoría agrupa varios valores')}>{content}</button>;
   }) : <p className="empty chart-empty-hint">{emptyHint}</p>}</div>;
 }
 
@@ -35,3 +35,5 @@ export function Field({ label, children, full = false }: {
 }) {
   return <div className={`field ${full ? 'full' : ''}`}><label>{label}</label>{children}</div>;
 }
+
+import { t } from '../i18n/index.ts';

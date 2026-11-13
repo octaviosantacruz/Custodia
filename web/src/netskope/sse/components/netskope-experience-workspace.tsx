@@ -33,7 +33,7 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
   const [tab, setTab] = useState<'attention' | 'companies'>('attention');
   const searchRef = useRef<HTMLInputElement>(null);
   const enabled = authChecked && authenticated;
-  const tabs = canReadUba ? [['attention', 'Para revisar'], ['companies', 'Por empresa']] as const : [['attention', 'Para revisar']] as const;
+  const tabs = canReadUba ? [['attention', t('Para revisar')], ['companies', t('Por empresa')]] as const : [['attention', t('Para revisar')]] as const;
   const debouncedSearch = useDebouncedValue(search.trim());
   const users = useQuery({
     queryKey: ['netskope', 'experience', 'users', debouncedSearch, refreshKey],
@@ -44,7 +44,7 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
 
   useEffect(() => {
     if (users.error instanceof ApiError && users.error.status === 401) onUnauthorized();
-    else if (users.error) onError(users.error instanceof Error ? users.error.message : 'No se pudieron buscar usuarios Netskope');
+    else if (users.error) onError(users.error instanceof Error ? users.error.message : t('No se pudieron buscar usuarios Netskope'));
   }, [users.error, onError, onUnauthorized]);
 
   function openSearchUser(row: NetskopeRow) {
@@ -74,7 +74,7 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
             <span className="netskope-experience-result-action">{t('Abrir ficha')}</span>
           </button>)}
         </div>
-        {users.data.total > users.data.rows.length ? <p>Se muestran los primeros {users.data.rows.length} resultados. Refiná la búsqueda para encontrar otro usuario.</p> : null}
+        {users.data.total > users.data.rows.length ? <p>{t('Se muestran los primeros {rows} resultados. Refiná la búsqueda para encontrar otro usuario.', { rows: users.data.rows.length })}</p> : null}
       </div> : null}
     </section>
     <nav className="workspace-subnav workspace-subnav-nested" role="tablist" aria-label={t('Secciones de Riesgo')} onKeyDown={handleTablistKeyDown}>
@@ -85,7 +85,7 @@ export function NetskopeExperienceWorkspace({ refreshKey, authChecked, authentic
     </nav>
     {tabs.map(([id]) => <div key={id} role="tabpanel" id={`nsk-users-panel-${id}`} aria-labelledby={`nsk-users-tab-${id}`} hidden={tab !== id}>
       {tab === id ? <>
-      {!canReadUba ? <StateBlock variant="empty" title={t('Revisión de riesgo no disponible para tu rol')} hint="Podés buscar una persona para consultar sus equipos." />
+      {!canReadUba ? <StateBlock variant="empty" title={t('Revisión de riesgo no disponible para tu rol')} hint={t('Podés buscar una persona para consultar sus equipos.')} />
         : tab === 'attention' ? <NetskopeAttentionQueue company={company} onClearCompany={() => setCompany('')} enabled={enabled} refreshKey={refreshKey} onUnauthorized={onUnauthorized} onPick={openQueueUser} />
         : <section className="list-panel database-surface nsk-users-companies" aria-label={t('Resumen de riesgo por empresa')}>
           <NetskopeUciCompanies refreshKey={refreshKey} enabled={enabled} onUnauthorized={onUnauthorized} onReview={(name) => { setCompany(name); setTab('attention'); }} />

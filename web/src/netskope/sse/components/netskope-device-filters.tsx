@@ -8,14 +8,14 @@ import { CompactSelect } from '../../../cross/components/compact-select';
 import { t } from '../../../cross/i18n/index.ts';
 
 const DEVICE_FILTERS: Array<{ key: NetskopeDeviceFilterKey; allLabel: string; ariaLabel: string }> = [
-  { key: 'user_status', allLabel: 'Todos los estados de usuario', ariaLabel: t('Filtrar por estado de usuario') },
-  { key: 'company', allLabel: 'Todas las empresas', ariaLabel: t('Filtrar por empresa') },
-  { key: 'classification_status', allLabel: 'Todas las clasificaciones', ariaLabel: t('Filtrar por clasificación') },
-  { key: 'os', allLabel: 'Todos los SO', ariaLabel: t('Filtrar por sistema operativo') },
-  { key: 'client_version', allLabel: 'Todas las versiones', ariaLabel: t('Filtrar por versión de cliente') },
-  { key: 'onprem_status', allLabel: 'Dónde trabaja: todos', ariaLabel: t('Filtrar por dónde trabaja') },
+  { key: 'user_status', allLabel: t('Todos los estados de usuario'), ariaLabel: t('Filtrar por estado de usuario') },
+  { key: 'company', allLabel: t('Todas las empresas'), ariaLabel: t('Filtrar por empresa') },
+  { key: 'classification_status', allLabel: t('Todas las clasificaciones'), ariaLabel: t('Filtrar por clasificación') },
+  { key: 'os', allLabel: t('Todos los SO'), ariaLabel: t('Filtrar por sistema operativo') },
+  { key: 'client_version', allLabel: t('Todas las versiones'), ariaLabel: t('Filtrar por versión de cliente') },
+  { key: 'onprem_status', allLabel: t('Dónde trabaja: todos'), ariaLabel: t('Filtrar por dónde trabaja') },
   { key: 'uci_rating', allLabel: 'Cualquier confianza (UCI)', ariaLabel: t('Filtrar por índice de confianza (UCI)') },
-  { key: 'last_seen_event', allLabel: 'Cualquier último evento', ariaLabel: t('Filtrar por último evento del cliente') },
+  { key: 'last_seen_event', allLabel: t('Cualquier último evento'), ariaLabel: t('Filtrar por último evento del cliente') },
 ];
 
 type Props = {
@@ -72,13 +72,13 @@ export function NetskopeDeviceFilters({ query, facets, filtered, onQueryChange, 
         <summary><span>{t('Actividad observada')}</span><span className="netskope-filter-group-count">({groups.activity})</span></summary>
         <div className="netskope-filter-group-controls">
           <CompactSelect className="netskope-attribute-filter" ariaLabel={t('Filtrar por antigüedad del último evento')} value={query.eventAge} onChange={(next) => onQueryChange({ eventAge: next as NetskopeDeviceQuery['eventAge'] })} options={NETSKOPE_EVENT_AGE_OPTIONS} />
-          <CompactSelect className="netskope-attribute-filter" ariaLabel={t('Filtrar por último evento del cliente')} value={query.filters.last_seen_event} onChange={(next) => onDeviceFilterChange('last_seen_event', next)} options={deviceFilterOptions('last_seen_event', 'Cualquier último evento', facets, query.filters.last_seen_event)} />
+          <CompactSelect className="netskope-attribute-filter" ariaLabel={t('Filtrar por último evento del cliente')} value={query.filters.last_seen_event} onChange={(next) => onDeviceFilterChange('last_seen_event', next)} options={deviceFilterOptions('last_seen_event', t('Cualquier último evento'), facets, query.filters.last_seen_event)} />
         </div>
       </details>
     </div>
     {filtered ? <div className="netskope-filter-active">
       <span className="netskope-filter-count">Filtros activos ({chips.length})</span>
-      {chips.map((chip) => <span key={chip.id} className="netskope-filter-chip">{chip.label}<button type="button" aria-label={`Quitar filtro ${chip.label}`} onClick={() => removeChip(chip)}><X size={12} aria-hidden="true" /></button></span>)}
+      {chips.map((chip) => <span key={chip.id} className="netskope-filter-chip">{chip.label}<button type="button" aria-label={t('Quitar filtro {chip}', { chip: chip.label })} onClick={() => removeChip(chip)}><X size={12} aria-hidden="true" /></button></span>)}
       {filtered ? <button type="button" className="button subtle netskope-clear-filters" onClick={onClearFilters}><X size={13} aria-hidden="true" /> {t('Limpiar todos')}</button> : null}
     </div> : null}
   </div>;

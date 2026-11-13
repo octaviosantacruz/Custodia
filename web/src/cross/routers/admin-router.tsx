@@ -6,6 +6,7 @@
 import { lazy, Suspense } from 'react';
 import { StateBlock } from '../components/state-block';
 import type { WorkspaceView } from '../lib/workspaces';
+import { t } from '../i18n/index.ts';
 
 const UsersWorkspace = lazy(() => import('../components/users-workspace').then((module) => ({ default: module.UsersWorkspace })));
 const ActivityWorkspace = lazy(() => import('../components/activity-workspace').then((module) => ({ default: module.ActivityWorkspace })));
@@ -30,7 +31,7 @@ type AdminDomainRouterProps = {
 export function AdminDomainRouter({
   workspaceView, authMode, currentActorId, currentUserEmail, permissions, apiDocsEnabled, guideSection, onNavigate, onUnauthorized, onError, onNotice,
 }: AdminDomainRouterProps) {
-  return <Suspense fallback={<StateBlock variant="loading" title="Cargando workspace…" />}>
+  return <Suspense fallback={<StateBlock variant="loading" title={t('Cargando workspace…')} />}>
     {workspaceView === 'users' && <UsersWorkspace
       authMode={authMode}
       currentActorId={currentActorId}

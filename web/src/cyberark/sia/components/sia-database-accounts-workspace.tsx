@@ -22,7 +22,7 @@ type SiaDatabaseAccountsWorkspaceProps = {
 
 function ModifiedCell({ value }: { value: string | undefined }) {
   const days = daysSince(value);
-  if (!value || days === null) return <span className="muted">Sin registro</span>;
+  if (!value || days === null) return <span className="muted">{t('Sin registro')}</span>;
   return <span className="cell-stack">
     <time className="cell-lead" dateTime={value} title={dateTimeHint(value)}>{formatDate(value)}</time>
     <span className="cell-sub">{ageLabel(days)}</span>
@@ -34,21 +34,21 @@ export function SiaDatabaseAccountsWorkspace({ authChecked, authenticated, onUna
   const { search, setSearch, rows, total, loading, error, loadMore, retry, pageSize } = useSimpleCatalogList<SiaDatabaseAccountRow>({
     refreshKey, authChecked, authenticated, onUnauthorized, onError, initialQuery,
     resourceKey: 'sia-database-accounts', fetcher: fetchSiaDatabaseAccounts,
-    errorFallback: 'No se pudieron cargar las cuentas de base de datos SIA',
+    errorFallback: t('No se pudieron cargar las cuentas de base de datos SIA'),
   });
 
   return <CatalogListPanel<SiaDatabaseAccountRow>
     embedded
-    ariaLabel="Cuentas de base de datos SIA"
+    ariaLabel={t('Cuentas de base de datos SIA')}
     icon={Database}
-    title="Cuentas de base de datos SIA"
+    title={t('Cuentas de base de datos SIA')}
     description="Inventario de Strong Accounts administradas por Secure Infrastructure Access. Se muestran la plataforma, base de datos, puerto y fechas operativas; nunca nombres de usuario ni credenciales."
     countLabel={(count) => catalogCount(count, 'cuenta')}
     searchLabel="Buscar cuentas de base de datos SIA"
     searchPlaceholder="Buscar por nombre, plataforma o base de datos"
     search={search}
     onSearchChange={setSearch}
-    columns={['Cuenta', 'Motor', 'Base de datos · puerto', 'Almacén', 'Última modificación']}
+    columns={['Cuenta', 'Motor', t('Base de datos · puerto'), t('Almacén'), t('Última modificación')]}
     tableClassName="sia-catalog-table"
     headerActions={headerActions}
     loading={loading}
@@ -72,7 +72,7 @@ export function SiaDatabaseAccountsWorkspace({ authChecked, authenticated, onUna
         </span></td>
         <td>{platform ? <TagChip label={platform} /> : <span className="muted">—</span>}</td>
         <td>{database || port != null
-          ? <span className="sia-db-target">{database ? <strong>{database}</strong> : <span className="muted">Sin base</span>}{port != null ? <span className="mono">:{port}</span> : null}</span>
+          ? <span className="sia-db-target">{database ? <strong>{database}</strong> : <span className="muted">{t('Sin base')}</span>}{port != null ? <span className="mono">:{port}</span> : null}</span>
           : <span className="muted">—</span>}</td>
         <td>{storeType || <span className="muted">—</span>}</td>
         <td><ModifiedCell value={modifiedAt} /></td>
@@ -80,3 +80,5 @@ export function SiaDatabaseAccountsWorkspace({ authChecked, authenticated, onUna
     }}
   />;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

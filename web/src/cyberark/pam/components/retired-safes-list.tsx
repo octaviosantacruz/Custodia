@@ -40,7 +40,7 @@ export function RetiredSafesList() {
         ? <StateBlock
             variant="error"
             title={t('No se pudieron cargar las Safes retiradas')}
-            hint={query.error instanceof Error ? query.error.message : 'Reintentá la consulta.'}
+            hint={query.error instanceof Error ? query.error.message : t('Reintentá la consulta.')}
             action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>{t('Reintentar')}</button>}
           />
         : rows.length === 0
@@ -62,7 +62,7 @@ export function RetiredSafesList() {
                         <small>#{row.safe_number}{row.safe_url_id ? ` / ${row.safe_url_id}` : ''}</small>
                       </span>
                     </td>
-                    <td>{row.retired_at ? <DateTime value={row.retired_at} /> : 'Sin dato'}</td>
+                    <td>{row.retired_at ? <DateTime value={row.retired_at} /> : t('Sin dato')}</td>
                     <td>{formatNumber(row.retired_member_count)}</td>
                   </tr>)}
                 </tbody>
@@ -77,7 +77,7 @@ export function RetiredSafesList() {
                   onLoadMore={() => setLimit(nextRetiredLimit(rows.length, total))}
                 />
               : <div className="load-more-footer" aria-live="polite">
-                  <span>Mostrando {formatNumber(Math.min(rows.length, total))} de {formatNumber(total)}</span>
+                  <span>{t('Mostrando {total} de {total2}', { total: formatNumber(Math.min(rows.length, total)), total2: formatNumber(total) })}</span>
                 </div>) : null}
             {capNote ? <p className="retired-safes-cap-note">{capNote}</p> : null}
           </>}

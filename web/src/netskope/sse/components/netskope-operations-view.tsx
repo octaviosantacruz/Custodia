@@ -65,7 +65,7 @@ export function NetskopeOperationsView({ refreshKey, canAdminBaselines, authChec
     <section className="netskope-operations" aria-label={t('Equipos Netskope')}>
       {!sync.fresh && (!diagnosis.loading || diagnosis.data) ? <p className="nsk-fleet-sync-warning" role="status">
         <TriangleAlert size={14} aria-hidden="true" />
-        <span>{sync.text} · Cifras del último inventario disponible.</span>
+        <span>{t('{text} · Cifras del último inventario disponible.', { text: sync.text })}</span>
       </p> : null}
       <NetskopeFleetBand fleet={fleet.data} changes={changes.data} clientEvents={clientEvents.data} diagnosis={diagnosis.data} onDrill={onDrill} onOpenPosture={onOpenPosture} onOpenChanges={() => setTab('changes')} />
       <nav className="workspace-subnav workspace-subnav-nested" aria-label={t('Secciones de Equipos')} role="tablist" onKeyDown={handleTablistKeyDown}>

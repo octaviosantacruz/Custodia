@@ -117,7 +117,7 @@ export function SafeTableFilters({
       <div className="safe-filter-chip-list" role="list" aria-label={t('Filtros activos')}>
         {chips.map((chip) => <span className="safe-filter-chip" role="listitem" key={chip.key}>
           <span>{chip.label}: {chip.displayValue}</span>
-          <button type="button" aria-label={`Quitar filtro ${chip.label}`} onClick={() => removeFilter(chip.key)}><X size={13} aria-hidden="true" /></button>
+          <button type="button" aria-label={t('Quitar filtro {chip}', { chip: chip.label })} onClick={() => removeFilter(chip.key)}><X size={13} aria-hidden="true" /></button>
         </span>)}
       </div>
       <button className="button subtle safe-filter-clear" type="button" onClick={onClearFilters}>{t('Limpiar filtros')}</button>

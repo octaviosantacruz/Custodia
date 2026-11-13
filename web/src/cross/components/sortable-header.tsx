@@ -15,8 +15,10 @@ export function SortableHeader<K extends string>({ label, sortKey, activeKey, di
   const active = sortKey === activeKey;
   const Icon = !active ? ChevronsUpDown : direction === 'asc' ? ArrowUp : ArrowDown;
   return <th className={className} aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-    <button type="button" className={'sortable-header' + (active ? ' active' : '')} onClick={() => onSort(sortKey)} title={`Ordenar por ${label.toLowerCase()}`}>
+    <button type="button" className={'sortable-header' + (active ? ' active' : '')} onClick={() => onSort(sortKey)} title={t('Ordenar por {value}', { value: label.toLowerCase() })}>
       <span>{label}</span><Icon size={12} aria-hidden />
     </button>
   </th>;
 }
+
+import { t } from '../i18n/index.ts';

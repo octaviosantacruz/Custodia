@@ -46,22 +46,22 @@ function normalized(value: string | number | null | undefined): string {
 
 function changesFor(safe: SafeDetail, form: MetadataForm, catalogs: Catalogs): DraftChange[] {
   const unitName = (value: string | number | null | undefined) => {
-    if (!value) return 'Sin asignar';
+    if (!value) return t('Sin asignar');
     const unit = catalogs.business_units.find((item) => item.business_unit_id === Number(value));
     return unit ? businessUnitLabel(unit) : String(value);
   };
-  const responsibleName = (value: string | number | null | undefined) => value ? catalogs.responsibles.find((person) => person.responsible_id === Number(value))?.display_name || String(value) : 'Sin asignar';
+  const responsibleName = (value: string | number | null | undefined) => value ? catalogs.responsibles.find((person) => person.responsible_id === Number(value))?.display_name || String(value) : t('Sin asignar');
   const candidates: Array<[string, string | number | null | undefined, string | number | null | undefined, (value: string | number | null | undefined) => string]> = [
-    ['Nombre interno', safe.internal_name, form.internal_name, (value) => normalized(value) || 'Sin definir'],
-    ['Unidad de negocio', safe.business_unit_id, form.business_unit_id, unitName],
+    ['Nombre interno', safe.internal_name, form.internal_name, (value) => normalized(value) || t('Sin definir')],
+    [t('Unidad de negocio'), safe.business_unit_id, form.business_unit_id, unitName],
     ['Responsable', safe.responsible_id, form.responsible_id, responsibleName],
     ['Alcance', safe.inventory_scope, form.inventory_scope, (value) => inventoryScopeLabel(normalized(value))],
-    ['Calidad del dato', safe.data_quality_status, form.data_quality_status, (value) => qualityStatusLabel(normalized(value))],
-    ['Clasificación', safe.classification_status, form.classification_status, (value) => ({ pending: 'Pendiente', assigned: 'Asignada', review: 'Revisión' }[normalized(value)] || normalized(value))],
-    ['Estado operativo', safe.workflow_status, form.workflow_status, (value) => workflowLabel(normalized(value) as MetadataForm['workflow_status']) || normalized(value)],
-    ['Acción siguiente', actionLabel(safe.next_action), actionLabel(form.next_action), (value) => normalized(value) || 'Sin definir'],
-    ['Asignado por', safe.assigned_by, form.assigned_by, (value) => normalized(value) || 'Sin definir'],
-    ['Notas', safe.notes, form.notes, (value) => normalized(value) || 'Sin notas'],
+    [t('Calidad del dato'), safe.data_quality_status, form.data_quality_status, (value) => qualityStatusLabel(normalized(value))],
+    [t('Clasificación'), safe.classification_status, form.classification_status, (value) => ({ pending: t('Pendiente'), assigned: 'Asignada', review: t('Revisión') }[normalized(value)] || normalized(value))],
+    [t('Estado operativo'), safe.workflow_status, form.workflow_status, (value) => workflowLabel(normalized(value) as MetadataForm['workflow_status']) || normalized(value)],
+    [t('Acción siguiente'), actionLabel(safe.next_action), actionLabel(form.next_action), (value) => normalized(value) || t('Sin definir')],
+    [t('Asignado por'), safe.assigned_by, form.assigned_by, (value) => normalized(value) || t('Sin definir')],
+    ['Notas', safe.notes, form.notes, (value) => normalized(value) || t('Sin notas')],
   ];
   return candidates
     .filter(([, before, after]) => normalized(before) !== normalized(after))
@@ -103,7 +103,7 @@ export function SafeDetailDrawer({
       setSaveState('saved');
     } catch (error) {
       setSaveState('error');
-      setSaveError(error instanceof Error ? error.message : 'No se pudo guardar la clasificación');
+      setSaveError(error instanceof Error ? error.message : t('No se pudo guardar la clasificación'));
     }
   };
   const dialogRef = useDialogFocusTrap<HTMLDivElement>({ onClose, initialFocusRef: closeRef });
@@ -123,8 +123,8 @@ export function SafeDetailDrawer({
   return <div ref={dialogRef} className="drawer-layer" role="dialog" aria-modal="true" aria-labelledby="safe-drawer-title" tabIndex={-1}>
     <button className="drawer-backdrop" type="button" aria-label={t('Cerrar detalle del Safe')} onClick={onClose} />
     <aside className="detail-drawer">
-      <div className="detail-title"><div className="detail-icon"><Shield size={18} /></div><div className="detail-heading"><p className="eyebrow">SAFE #{detail.safe.safe_number}</p><h2 id="safe-drawer-title">{detail.safe.safe_name}</h2><p>{detail.safe.safe_url_id} · {formatNumber(detail.safe.account_count)} cuentas · {formatNumber(detail.members.length)} miembros</p></div><button ref={closeRef} className="icon-button drawer-close" type="button" title={t('Cerrar detalle')} aria-label={t('Cerrar')} onClick={onClose}><X size={16} /></button></div>
-      <nav className="detail-tabs" aria-label={t('Secciones del detalle')} ref={tabsRef}>{([['summary', 'Resumen'], ['accounts', `Cuentas ${detail.safe.account_count ? `(${formatNumber(detail.safe.account_count)})` : ''}`], ['members', `Miembros ${detail.members.length ? `(${formatNumber(detail.members.length)})` : ''}`], ['classify', 'Clasificar'], ['history', `Historial ${audit.length ? `(${formatNumber(audit.length)})` : ''}`]] as const).map(([key, label]) => <button key={key} className={activeTab === key ? 'active' : ''} type="button" title={`Mostrar ${label.toLowerCase()} del Safe`} onClick={() => setActiveTab(key)}>{label}</button>)}</nav>
+      <div className="detail-title"><div className="detail-icon"><Shield size={18} /></div><div className="detail-heading"><p className="eyebrow">SAFE #{detail.safe.safe_number}</p><h2 id="safe-drawer-title">{detail.safe.safe_name}</h2><p>{t('{safe_url_id} · {account_count} cuentas · {members} miembros', { safe_url_id: detail.safe.safe_url_id, account_count: formatNumber(detail.safe.account_count), members: formatNumber(detail.members.length) })}</p></div><button ref={closeRef} className="icon-button drawer-close" type="button" title={t('Cerrar detalle')} aria-label={t('Cerrar')} onClick={onClose}><X size={16} /></button></div>
+      <nav className="detail-tabs" aria-label={t('Secciones del detalle')} ref={tabsRef}>{([['summary', 'Resumen'], ['accounts', `Cuentas ${detail.safe.account_count ? `(${formatNumber(detail.safe.account_count)})` : ''}`], ['members', `Miembros ${detail.members.length ? `(${formatNumber(detail.members.length)})` : ''}`], ['classify', 'Clasificar'], ['history', `Historial ${audit.length ? `(${formatNumber(audit.length)})` : ''}`]] as const).map(([key, label]) => <button key={key} className={activeTab === key ? 'active' : ''} type="button" title={t('Mostrar {value} del Safe', { value: label.toLowerCase() })} onClick={() => setActiveTab(key)}>{label}</button>)}</nav>
 
       {activeTab === 'summary' && <SafeSummary safe={detail.safe} />}
 
@@ -132,7 +132,7 @@ export function SafeDetailDrawer({
         <div className="detail-section-heading"><div><h3>{t('Saltos a otros módulos')}</h3><p className="detail-summary-copy">{t('Saltos rápidos para investigar esta Safe en otros módulos.')}</p></div></div>
         <div className="safe-cross-link-grid">
           <button type="button" className="identity-conn-link" onClick={() => onNavigate('sia', detail.safe.safe_name)}><span className="identity-conn-text"><strong>{t('Buscar en SIA')}</strong><small>{t('Coincidencias por nombre de Safe')}</small></span></button>
-          {detail.members[0] && <button type="button" className="identity-conn-link" onClick={() => onNavigate(detail.members[0].member_type.toLowerCase() === 'group' ? 'identityGroups' : 'identityUsers', detail.members[0].member_name)}><span className="identity-conn-text"><strong>{t('Buscar miembro en Identidades')}</strong><small>{detail.members[0].member_name} · coincidencia por nombre</small></span></button>}
+          {detail.members[0] && <button type="button" className="identity-conn-link" onClick={() => onNavigate(detail.members[0].member_type.toLowerCase() === 'group' ? 'identityGroups' : 'identityUsers', detail.members[0].member_name)}><span className="identity-conn-text"><strong>{t('Buscar miembro en Identidades')}</strong><small>{t('{member_name} · coincidencia por nombre', { member_name: detail.members[0].member_name })}</small></span></button>}
         </div>
       </section>}
 
@@ -145,7 +145,7 @@ export function SafeDetailDrawer({
         </div>
         <div className="form-grid">
           <Field label={t('Estado operativo')}><CompactSelect ariaLabel={t('Estado operativo')} value={form.workflow_status} options={workflowStatusesFor(form.workflow_status).map((status) => ({ value: status, label: workflowLabel(status) }))} onChange={(value) => updateForm({ workflow_status: value as MetadataForm['workflow_status'] })} /></Field>
-          <Field label={t('Acción siguiente')}><CompactSelect className={`action-select ${actionTone(selectedAction)}`} value={selectedAction === 'Sin definir' ? '' : selectedAction} ariaLabel={t('Acción siguiente')} options={detailActions.map((action) => ({ value: action, label: action || 'Sin definir' }))} onChange={(value) => updateForm({ next_action: value || '' })} /></Field>
+          <Field label={t('Acción siguiente')}><CompactSelect className={`action-select ${actionTone(selectedAction)}`} value={selectedAction === 'Sin definir' ? '' : selectedAction} ariaLabel={t('Acción siguiente')} options={detailActions.map((action) => ({ value: action, label: action || t('Sin definir') }))} onChange={(value) => updateForm({ next_action: value || '' })} /></Field>
           <Field label={t('Unidad de negocio')}><CompactSelect className={`drawer-assignment-select unit-select${form.business_unit_id ? '' : ' is-unassigned'}`} value={form.business_unit_id ? String(form.business_unit_id) : ''} ariaLabel={t('Unidad de negocio')} onAdd={onAddBusinessUnit} addLabel="Agregar unidad" options={[{ value: '', label: t('Sin asignar') }, ...catalogs.business_units.filter((unit) => unit.is_active !== false).map((unit) => ({ value: String(unit.business_unit_id), label: businessUnitLabel(unit) }))]} onChange={(value) => updateForm({ business_unit_id: value ? Number(value) : '' })} /></Field>
           <Field label={t('Responsable')}><CompactSelect className="drawer-assignment-select responsible-select" value={form.responsible_id ? String(form.responsible_id) : ''} ariaLabel={t('Responsable')} onAdd={onAddResponsible} addLabel="Agregar responsable" options={[{ value: '', label: t('Sin asignar') }, ...catalogs.responsibles.filter((person) => person.is_active !== false).map((person) => ({ value: String(person.responsible_id), label: person.display_name }))]} onChange={(value) => updateForm({ responsible_id: value ? Number(value) : '' })} /></Field>
           <Field label={t('Notas')} full><textarea value={form.notes} onChange={(event) => updateForm({ notes: event.target.value })} placeholder={t('Observaciones de clasificación')} /></Field>

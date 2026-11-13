@@ -87,7 +87,7 @@ function AdminsTab({ refreshKey, authChecked, authenticated, onUnauthorized, onO
   }
   return <>
     <SummaryStats ariaLabel={t('Resumen de administradores de Netskope')} stats={[
-      { key: 'active', label: t('Administradores activos'), value: formatNumber(data.active), detail: `de ${formatNumber(data.total)}` },
+      { key: 'active', label: t('Administradores activos'), value: formatNumber(data.active), detail: t('de {total}', { total: formatNumber(data.total) }) },
       { key: 'no-role', label: t('Activos sin rol'), value: formatNumber(data.active_without_role), active: query.role === 'none', onSelect: () => update({ role: query.role === 'none' ? '' : 'none', state: query.role === 'none' ? '' : 'active' }) },
       { key: 'service', label: t('Cuentas de servicio'), value: formatNumber(data.service_accounts), active: query.recordType === 'SERVICE_ACCOUNT', onSelect: () => update({ recordType: query.recordType === 'SERVICE_ACCOUNT' ? '' : 'SERVICE_ACCOUNT' }) },
       { key: 'mfa', label: t('Personas activas sin MFA'), value: formatNumber(data.active_people_without_mfa) },
@@ -119,7 +119,7 @@ function AdminsTab({ refreshKey, authChecked, authenticated, onUnauthorized, onO
                 <td>{row.role_id && row.role_name
                   ? <button type="button" className="netskope-admins-link" onClick={() => onOpenRole(row.role_id!)}>{row.role_name}</button>
                   : <span className="netskope-admins-none">{t('Sin rol')}</span>}</td>
-                <td>{row.last_login ? <AgeCell value={row.last_login} thresholds={LAST_LOGIN_AGE} /> : 'Sin dato'}</td>
+                <td>{row.last_login ? <AgeCell value={row.last_login} thresholds={LAST_LOGIN_AGE} /> : t('Sin dato')}</td>
                 <td>{adminMfaLabel(row)}</td>
               </tr>;
             })}
@@ -159,7 +159,7 @@ function RolesTab({ refreshKey, authChecked, authenticated, onUnauthorized, onOp
           <td>{formatNumber(row.read_groups)}</td>
           <td>{formatNumber(row.write_groups)}</td>
           <td>{formatNumber(row.admin_groups)}</td>
-          <td>{row.last_edited ? <DateTime value={row.last_edited} /> : 'Sin dato'}</td>
+          <td>{row.last_edited ? <DateTime value={row.last_edited} /> : t('Sin dato')}</td>
         </tr>)}
       </tbody>
     </table>
@@ -183,7 +183,7 @@ function RoleDetail({ roleId, refreshKey, authChecked, authenticated, onUnauthor
     <div className="netskope-admins-role-head">
       {back}
       <h3>{data.name}</h3>
-      <span className="netskope-admins-note">{formatNumber(data.permissions.length)} de {formatNumber(data.api_groups_total ?? data.permissions.length)} grupos de API con acceso · {formatNumber(data.admins.length)} {data.admins.length === 1 ? 'administrador' : 'administradores'}</span>
+      <span className="netskope-admins-note">{t('{permissions} de {permissions2} grupos de API con acceso · {admins} {administradores}', { permissions: formatNumber(data.permissions.length), permissions2: formatNumber(data.api_groups_total ?? data.permissions.length), admins: formatNumber(data.admins.length), administradores: data.admins.length === 1 ? 'administrador' : 'administradores' })}</span>
     </div>
     {data.admins.length
       ? <ul className="netskope-admins-holders" aria-label={t('Administradores con este rol')}>
@@ -193,7 +193,7 @@ function RoleDetail({ roleId, refreshKey, authChecked, authenticated, onUnauthor
     {!data.permissions.length
       ? <StateBlock variant="empty" title={t('Este rol no abre ningún grupo de API')} />
       : <table className="netskope-admins-table netskope-admins-permissions">
-        <caption className="sr-only">Permisos del rol {data.name}</caption>
+        <caption className="sr-only">{t('Permisos del rol {name}', { name: data.name })}</caption>
         <thead><tr><th scope="col">{t('Nivel')}</th><th scope="col">{t('Grupo de API')}</th><th scope="col">{t('Páginas de la consola')}</th></tr></thead>
         <tbody>
           {data.permissions.map((item) => <tr key={item.group_id}>

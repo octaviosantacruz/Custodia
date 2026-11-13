@@ -1,4 +1,5 @@
 import type { SiaPolicyGranteeLink, SiaPolicyPersonResolution } from '../types/sia';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type SiaGranteeLinkView = {
   value: string;
@@ -31,9 +32,9 @@ export type SiaGranteeLinkSummary = {
 };
 
 const STATUS_LABELS: Record<SiaPolicyPersonResolution['status'], string> = {
-  matched: 'Vinculado por correo',
-  ambiguous: 'Ambiguo: más de un candidato',
-  unmatched: 'Sin coincidencia',
+  matched: t('Vinculado por correo'),
+  ambiguous: t('Ambiguo: más de un candidato'),
+  unmatched: t('Sin coincidencia'),
 };
 
 /** Human-readable exact-email results; an absent source stays absent. */

@@ -8,6 +8,7 @@ import { REGISTERED_RUNTIMES, runtimeForWorkspace } from '../../sources.ts';
 import type { SourceRouterProps } from '../../source-contract.ts';
 import { hasWorkspaceAccess } from '../lib/workspaces.ts';
 import { StateBlock } from '../components/state-block';
+import { t } from '../i18n/index.ts';
 
 // Stable component identities preserve the shared CyberArk runtime across its tools.
 const ROUTERS = Object.fromEntries(REGISTERED_RUNTIMES.map((runtime) => [runtime.id, lazy(runtime.load)]));
@@ -20,6 +21,6 @@ export function RegisteredWorkspaceRouter(props: SourceRouterProps) {
     ? (message) => { props.onError(''); props.onNotice(message); }
     : props.onNotice} />;
   return runtime.suspense
-    ? <Suspense fallback={<StateBlock variant="loading" title="Cargando workspace…" />}>{content}</Suspense>
+    ? <Suspense fallback={<StateBlock variant="loading" title={t('Cargando workspace…')} />}>{content}</Suspense>
     : content;
 }

@@ -8,7 +8,7 @@ import { fetchNetskopeOfficePerson } from '../lib/netskope-api';
 import { dayLabel, weekdayShort } from '../lib/netskope-office';
 import { t } from '../../../cross/i18n/index.ts';
 
-const PLACE_LABELS = { office: 'Oficina', remote: 'Remoto', no_signal: 'Sin señal' } as const;
+const PLACE_LABELS = { office: t('Oficina'), remote: t('Remoto'), no_signal: t('Sin señal') } as const;
 const minutes = (value: number) => value >= 60 ? `${Math.floor(value / 60)} h ${value % 60 ? `${value % 60} min` : ''}`.trim() : `${value} min`;
 
 /** The score of the place where the person worked that day; a day not yet measured says so instead of a score. */

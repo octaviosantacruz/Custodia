@@ -29,14 +29,14 @@ function fetchRows(search: string, limit: number, offset: number, options: { sig
 }
 
 function resourceTypeLabel(value: string | undefined): string {
-  if (!value) return 'Sin tipo';
-  if (value === 'virtual_machine') return 'Máquina virtual';
+  if (!value) return t('Sin tipo');
+  if (value === 'virtual_machine') return t('Máquina virtual');
   return value.replace(/_/g, ' ');
 }
 
 function ScanCell({ value }: { value: string | undefined }) {
   const days = daysSince(value);
-  if (!value || days === null) return <span className="muted">Sin escaneo</span>;
+  if (!value || days === null) return <span className="muted">{t('Sin escaneo')}</span>;
   return <span className="cell-stack">
     <time className="cell-lead" dateTime={value} title={dateTimeHint(value)}>{formatDate(value)}</time>
     <span className={`cell-sub ${days > STALE_SCAN_DAYS ? 'sia-age-stale' : ''}`.trim()}>{ageLabel(days)}</span>
@@ -48,21 +48,21 @@ export function SiaResourcesWorkspace({ authChecked, authenticated, onUnauthoriz
   const { search, setSearch, rows, total, loading, error, loadMore, retry, pageSize } = useSimpleCatalogList<SiaResourceRow>({
     refreshKey, authChecked, authenticated, onUnauthorized, onError, initialQuery,
     resourceKey: 'sia-resources', fetcher: fetchRows,
-    errorFallback: 'No se pudieron cargar los recursos SIA',
+    errorFallback: t('No se pudieron cargar los recursos SIA'),
   });
 
   return <CatalogListPanel<SiaResourceRow>
     embedded
-    ariaLabel="Máquinas virtuales SIA"
+    ariaLabel={t('Máquinas virtuales SIA')}
     icon={Boxes}
-    title="Máquinas virtuales SIA"
+    title={t('Máquinas virtuales SIA')}
     description="Consultá las máquinas virtuales registradas en Secure Infrastructure Access. No se muestran direcciones IP, FQDN ni nombres de red."
-    countLabel={(count) => catalogCount(count, 'máquina virtual', 'máquinas virtuales')}
+    countLabel={(count) => catalogCount(count, t('máquina virtual'), t('máquinas virtuales'))}
     searchLabel="Buscar máquinas virtuales SIA"
     searchPlaceholder="Buscar por nombre"
     search={search}
     onSearchChange={setSearch}
-    columns={['Máquina virtual', 'Sistema operativo', 'Descubierta por', 'Último escaneo']}
+    columns={[t('Máquina virtual'), 'Sistema operativo', t('Descubierta por'), t('Último escaneo')]}
     tableClassName="sia-catalog-table"
     headerActions={headerActions}
     loading={loading}
@@ -97,3 +97,5 @@ export function SiaResourcesWorkspace({ authChecked, authenticated, onUnauthoriz
     }}
   />;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

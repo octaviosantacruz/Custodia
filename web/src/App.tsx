@@ -162,7 +162,7 @@ export function App() {
       }
     } else {
       const isScheduler = latest.actor_id === 'system:scheduler';
-      setNotice(isScheduler ? 'Nueva actividad automática registrada' : `Nueva actividad registrada por ${latest.actor_name}`);
+      setNotice(isScheduler ? t('Nueva actividad automática registrada') : t('Nueva actividad registrada por {actor_name}', { actor_name: latest.actor_name }));
       // Non-sync events (classification, catalog changes) carry no source to
       // scope by, so the visible PAM dashboard still reloads its static data.
       if (domainOf(workspaceViewRef.current) === 'pam') await dashboardLoadRef.current({ refreshStatic: true });

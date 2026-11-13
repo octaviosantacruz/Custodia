@@ -53,13 +53,13 @@ export function NetskopeUserExperience({ userId, user, refreshKey = 0, onUnautho
     {devices.isPending && <StateBlock variant="loading" title={t('Consultando dispositivos ADEM')} />}
     {devices.isError && <StateBlock variant="error" title={t('No se pudieron consultar los dispositivos ADEM')} hint="Verificá disponibilidad y permisos del token. La consulta puede reintentarse con Actualizar." />}
     {window && !devices.isError && <>
-      <p className="netskope-experience-window" title={`Ventana de ${hours} h · observación histórica de ADEM`}><DateTime value={epochSecondsToIso(window.window_start)} /> – <DateTime value={epochSecondsToIso(window.window_end)} /></p>
+      <p className="netskope-experience-window" title={t('Ventana de {hours} h · observación histórica de ADEM', { hours: hours })}><DateTime value={epochSecondsToIso(window.window_start)} /> – <DateTime value={epochSecondsToIso(window.window_end)} /></p>
       {window.devices.length === 0 ? <StateBlock variant="empty" title={t('Sin dispositivos observados en esta ventana')} /> : <div className="netskope-experience-observations" role="region" aria-label={`Observaciones de ${user?.label || `usuario Netskope ${userId}`}`}>
         <div className="netskope-experience-device-column">
           <span className="netskope-experience-column-label">{window.devices.length === 1 ? 'Dispositivo observado' : `${window.devices.length} dispositivos observados`}</span>
           {window.devices.map((device) => {
             const label = device.device_name || device.device_id;
-            const os = device.device_os || 'SO sin dato';
+            const os = device.device_os || t('SO sin dato');
             return <button key={device.device_id} type="button" className="netskope-experience-device" aria-pressed={selected?.device_id === device.device_id} aria-label={`Consultar ${label}, ${os}`} onClick={() => setDeviceId(device.device_id)}>
               <span className="netskope-experience-icon"><Laptop2 size={17} aria-hidden /></span>
               <span><strong>{label}</strong><small>{os}</small><em>{device.device_id}</em></span>
@@ -72,7 +72,7 @@ export function NetskopeUserExperience({ userId, user, refreshKey = 0, onUnautho
             {!selected ? <strong>{t('Elegí un dispositivo')}</strong> : null}
             {selected && detail.isPending ? <strong>{t('Consultando…')}</strong> : null}
             {selected && detail.isError ? <><strong>{t('No disponible')}</strong><button className="button subtle" type="button" onClick={() => void detail.refetch()}>{t('Reintentar')}</button></> : null}
-            {detail.data && !detail.isError ? <><strong className="mono">{detail.data.pop || 'Sin dato'}</strong><em>{detail.data.last_activity === null ? 'Última actividad: Sin dato' : <>{t('Última actividad:')} <DateTime value={epochSecondsToIso(detail.data.last_activity)} /></>}</em></> : null}
+            {detail.data && !detail.isError ? <><strong className="mono">{detail.data.pop || t('Sin dato')}</strong><em>{detail.data.last_activity === null ? t('Última actividad: Sin dato') : <>{t('Última actividad:')} <DateTime value={epochSecondsToIso(detail.data.last_activity)} /></>}</em></> : null}
           </span>
         </article>
       </div>}

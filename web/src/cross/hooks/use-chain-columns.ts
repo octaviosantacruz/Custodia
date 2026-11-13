@@ -25,6 +25,7 @@ import {
   type ChainPath,
 } from '../lib/chain-columns';
 import { useChainSearch } from './use-chain-search';
+import { t } from '../i18n/index.ts';
 
 type UseChainColumnsOptions = {
   authChecked: boolean;
@@ -82,9 +83,9 @@ export function useChainColumns({
   const handleError = useCallback((error: unknown) => {
     if (error instanceof ApiError && error.status === 401) {
       onUnauthorized();
-      return 'Sesión vencida. Volvé a iniciar sesión.';
+      return t('Sesión vencida. Volvé a iniciar sesión.');
     }
-    const message = error instanceof Error ? error.message : 'No se pudo completar la solicitud';
+    const message = error instanceof Error ? error.message : t('No se pudo completar la solicitud');
     onError(message);
     return message;
   }, [onError, onUnauthorized]);

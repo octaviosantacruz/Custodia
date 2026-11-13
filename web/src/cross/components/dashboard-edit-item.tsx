@@ -61,9 +61,9 @@ function DashboardSettingsPanel({ id, title, size, showSize, saving, mode, onMod
       <button ref={closeRef} type="button" className="icon-button" aria-label={t('Cerrar configuración')} onClick={onClose}><X size={16} /></button>
     </div>
     <div className="dashboard-settings-body">
-      {mode && onMode ? <section><h4>{t('Presentación')}</h4><ChartModeSwitch value={mode} onChange={onMode} label={`Presentación de ${title}`} disabled={saving} /></section> : null}
+      {mode && onMode ? <section><h4>{t('Presentación')}</h4><ChartModeSwitch value={mode} onChange={onMode} label={t('Presentación de {title}', { title: title })} disabled={saving} /></section> : null}
       {showSize && size ? <section><h4>{t('Tamaño')}</h4>
-        <div className="dashboard-widget-size" role="group" aria-label={`Tamaño de ${title}`}>
+        <div className="dashboard-widget-size" role="group" aria-label={t('Tamaño de {title}', { title: title })}>
           {SIZE_OPTIONS.map((option) => <button key={option} type="button" className={`dashboard-size-chip ${size === option ? 'selected' : ''}`.trim()} aria-pressed={size === option} disabled={saving} onClick={() => onSize(id, option)}><strong>{DASHBOARD_SIZE_LABELS[option]}</strong></button>)}
         </div>
       </section> : null}
@@ -123,11 +123,11 @@ export function DashboardEditItem({ id, title, index, count, size, saving, showS
     onDrop={(event) => { event.preventDefault(); setDragging(false); const dragged = event.dataTransfer.getData('text/plain'); if (dragged) onMoveBefore(dragged, id); }}
     tabIndex={0}
     role="listitem"
-    aria-label={`${title}, posición ${index + 1} de ${count}`}
+    aria-label={t('{title}, posición {index} de {count}', { title: title, index: index + 1, count: count })}
     onKeyDown={(event) => {
       if (event.target !== event.currentTarget) return;
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); onMove(id, -1); onAnnounce(`${title} movido a la posición ${Math.max(1, index)}`); }
-      else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); onMove(id, 1); onAnnounce(`${title} movido a la posición ${Math.min(count, index + 2)}`); }
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); onMove(id, -1); onAnnounce(t('{title} movido a la posición {index}', { title: title, index: Math.max(1, index) })); }
+      else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); onMove(id, 1); onAnnounce(t('{title} movido a la posición {index}', { title: title, index: Math.min(count, index + 2) })); }
     }}
   >
     <div className="dashboard-edit-controls">
@@ -135,12 +135,12 @@ export function DashboardEditItem({ id, title, index, count, size, saving, showS
       <strong className="dashboard-edit-title">{title}</strong>
       <button ref={configureRef} type="button" className="button subtle dashboard-edit-configure" aria-label={`Configurar ${title}`} aria-haspopup="dialog" aria-expanded={configuring} disabled={saving} onClick={() => (configuring ? closeSettings() : openSettings())}><SlidersHorizontal size={13} aria-hidden="true" /> {t('Configurar')}</button>
       <div className="dashboard-edit-menu" ref={menu.ref}>
-        <button type="button" className="icon-button" aria-label={`Más acciones de ${title}`} aria-haspopup="menu" aria-expanded={menu.open} aria-controls={menu.open ? menuId : undefined} disabled={saving} onClick={() => menu.setOpen((current) => !current)}><EllipsisVertical size={15} aria-hidden="true" /></button>
-        {menu.open ? <div className="dashboard-edit-menu-list" id={menuId} role="menu" aria-label={`Acciones de ${title}`}>
+        <button type="button" className="icon-button" aria-label={t('Más acciones de {title}', { title: title })} aria-haspopup="menu" aria-expanded={menu.open} aria-controls={menu.open ? menuId : undefined} disabled={saving} onClick={() => menu.setOpen((current) => !current)}><EllipsisVertical size={15} aria-hidden="true" /></button>
+        {menu.open ? <div className="dashboard-edit-menu-list" id={menuId} role="menu" aria-label={t('Acciones de {title}', { title: title })}>
           {onDuplicate ? <button type="button" role="menuitem" aria-label={`Duplicar ${title}`} onClick={choose(() => onDuplicate(id))}><Copy size={14} aria-hidden="true" /> {t('Duplicar')}</button> : null}
           <button type="button" role="menuitem" aria-label={`Mover ${title} arriba`} disabled={index === 0} onClick={choose(() => onMove(id, -1))}><ChevronUp size={14} aria-hidden="true" /> {t('Mover arriba')}</button>
           <button type="button" role="menuitem" aria-label={`Mover ${title} abajo`} disabled={index === count - 1} onClick={choose(() => onMove(id, 1))}><ChevronDown size={14} aria-hidden="true" /> {t('Mover abajo')}</button>
-          <button type="button" role="menuitem" className="danger" aria-label={`Quitar ${title}`} onClick={choose(() => onRemove(id))}><Trash2 size={14} aria-hidden="true" /> {t('Quitar')}</button>
+          <button type="button" role="menuitem" className="danger" aria-label={t('Quitar {title}', { title: title })} onClick={choose(() => onRemove(id))}><Trash2 size={14} aria-hidden="true" /> {t('Quitar')}</button>
         </div> : null}
       </div>
     </div>

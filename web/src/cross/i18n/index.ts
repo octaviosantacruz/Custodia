@@ -47,13 +47,13 @@ export const localeTag = () => (current === 'en' ? 'en-US' : 'es-AR');
 
 const DICTIONARIES: Record<Locale, Record<string, string>> = { es: {}, en: EN };
 
-export function t(source: string, vars?: Record<string, string | number>): string {
+export function t(source: string, vars?: Record<string, string | number | null | undefined>): string {
   const text = DICTIONARIES[current][source] ?? source;
   return vars ? text.replace(/\{(\w+)\}/g, (match, key: string) => (key in vars ? String(vars[key]) : match)) : text;
 }
 
 /** Plural simple: `tn(n, '{n} Safe', '{n} Safes')`. */
-export function tn(count: number, one: string, other: string, vars?: Record<string, string | number>): string {
+export function tn(count: number, one: string, other: string, vars?: Record<string, string | number | null | undefined>): string {
   return t(count === 1 ? one : other, { n: count, ...vars });
 }
 

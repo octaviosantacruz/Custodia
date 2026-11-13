@@ -3,6 +3,7 @@ import type { SearchResult } from './search-api';
 import { GUIDE_SECTIONS } from '../content/guide-sections.ts';
 import { CATALOG_ENTRIES, type WorkspaceView } from './workspace-catalog.ts';
 import { hasWorkspaceAccess } from './workspaces.ts';
+import { t } from '../i18n/index.ts';
 
 /* The root source registry supplies actual tool widget definitions lazily;
    this module stays a pure adapter over neutral structural contracts. */
@@ -128,11 +129,11 @@ export type InventoryResultMeta = { kind: 'inventory'; platform: CommandPlatform
 export const SEARCH_RESULT_META: Record<SearchResult['type'], InventoryResultMeta> = {
   safe: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Safes' },
   account: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Cuentas' },
-  pam_user: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Usuarios PAM' },
+  pam_user: { kind: 'inventory', platform: 'cyberark', groupLabel: t('Usuarios PAM') },
   pam_role: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Roles PAM' },
-  sia_policy: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Políticas SIA' },
-  identity_user: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Usuarios de Identity Administration' },
-  identity_role: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Roles de Identity Administration' },
+  sia_policy: { kind: 'inventory', platform: 'cyberark', groupLabel: t('Políticas SIA') },
+  identity_user: { kind: 'inventory', platform: 'cyberark', groupLabel: t('Usuarios de Identity Administration') },
+  identity_role: { kind: 'inventory', platform: 'cyberark', groupLabel: t('Roles de Identity Administration') },
   connection: { kind: 'inventory', platform: 'cyberark', groupLabel: 'Conexiones migradas' },
 };
 
@@ -261,9 +262,9 @@ export function emptyStateSections(
   const recentIds = new Set(recent.map((command) => command.id));
   const more = available.filter((command) => !quickIds.has(command.id) && !recentIds.has(command.id));
   return [
-    { id: 'quick' as const, label: 'Accesos rápidos', groups: platformGroups(quick) },
+    { id: 'quick' as const, label: t('Accesos rápidos'), groups: platformGroups(quick) },
     { id: 'recent' as const, label: 'Recientes', groups: platformGroups(recent) },
-    { id: 'more' as const, label: 'Más vistas y acciones', groups: platformGroups(more) },
+    { id: 'more' as const, label: t('Más vistas y acciones'), groups: platformGroups(more) },
   ].filter((section) => section.groups.length > 0);
 }
 

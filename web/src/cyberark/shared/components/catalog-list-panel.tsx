@@ -63,7 +63,7 @@ export function CatalogListPanel<T>({
             : <tr><td colSpan={colSpan}><StateBlock
                 variant={search ? 'no-results' : 'empty'}
                 title={search ? noResultsTitle : emptyTitle}
-                action={search ? <button type="button" className="button subtle" onClick={() => onSearchChange('')}>Limpiar búsqueda</button> : undefined}
+                action={search ? <button type="button" className="button subtle" onClick={() => onSearchChange('')}>{t('Limpiar búsqueda')}</button> : undefined}
               /></td></tr>}
     </tbody></table></div>
     {!error && <LoadMore loaded={rows.length} total={total} pageSize={pageSize} loading={loading} onLoadMore={onLoadMore} />}
@@ -74,3 +74,5 @@ export function CatalogListPanel<T>({
 export function catalogCount(total: number, noun: string, pluralNoun: string = `${noun}s`): string {
   return `${formatNumber(total)} ${total === 1 ? noun : pluralNoun}`;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

@@ -25,16 +25,17 @@
 :root {
   color-scheme: dark;
 
-  /* ---- Tinta: superficies y texto (matiz 255, croma casi nulo) ---- */
-  --ink-50: oklch(0.13 0.008 255);   /* fondo de la aplicación */
-  --ink-100: oklch(0.16 0.009 255);  /* panel */
-  --ink-150: oklch(0.19 0.010 255);  /* panel elevado, filas activas */
-  --ink-200: oklch(0.23 0.011 255);  /* hover, campos */
-  --ink-300: oklch(0.28 0.012 255);  /* filo */
-  --ink-400: oklch(0.36 0.014 255);  /* filo fuerte, iconos apagados */
-  --ink-600: oklch(0.68 0.014 255);  /* texto terciario */
-  --ink-700: oklch(0.79 0.012 255);  /* texto secundario */
-  --ink-900: oklch(0.96 0.005 255);  /* texto primario */
+  /* ---- Tinta: azul tinta, superficies y texto (matiz 258). Es el par tranquilo
+     del sitio y de la demo: un color que se nota, no un gris neutro. ---- */
+  --ink-50: oklch(0.155 0.034 258);   /* fondo de la aplicación */
+  --ink-100: oklch(0.185 0.037 258);  /* panel */
+  --ink-150: oklch(0.215 0.039 258);  /* panel elevado, filas activas */
+  --ink-200: oklch(0.25 0.04 258);  /* hover, campos */
+  --ink-300: oklch(0.3 0.041 258);  /* filo */
+  --ink-400: oklch(0.38 0.038 258);  /* filo fuerte, iconos apagados */
+  --ink-600: oklch(0.7 0.03 258);  /* texto terciario */
+  --ink-700: oklch(0.81 0.022 258);  /* texto secundario */
+  --ink-900: oklch(0.965 0.008 258);  /* texto primario */
 
   /* ---- 1 · Marca ---- */
   --brand: oklch(0.91 0.19 124);

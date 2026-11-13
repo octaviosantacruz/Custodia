@@ -4,6 +4,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { errorDetailsFrom, type ErrorDetails } from '../../../cross/lib/error-details';
 import { fetchNetskopeDlpAlerts, fetchNetskopeDlpPolicies } from '../lib/netskope-api';
 import { NETSKOPE_DLP_DRILL_SIZE } from '../lib/netskope-dlp';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Options = {
   authChecked: boolean;
@@ -32,10 +33,10 @@ export function useNetskopeDlp({ authChecked, authenticated, refreshKey = 0, onU
       onUnauthorized();
       return;
     }
-    if (policies.error) onError(queryError(policies.error, 'No se pudieron cargar las políticas DLP').message);
+    if (policies.error) onError(queryError(policies.error, t('No se pudieron cargar las políticas DLP')).message);
   }, [onError, onUnauthorized, policies.error]);
 
-  const error = queryError(policies.error, 'No se pudieron cargar las políticas DLP');
+  const error = queryError(policies.error, t('No se pudieron cargar las políticas DLP'));
   return {
     policies: policies.data ?? null,
     loading: policies.isLoading,
@@ -52,7 +53,7 @@ export function useNetskopeDlpPolicyIncidents(policy: string, refreshKey = 0) {
     queryKey: ['netskope', 'dlp', 'policy-incidents', policy, refreshKey],
     queryFn: ({ signal }) => fetchNetskopeDlpAlerts({ policy }, 0, NETSKOPE_DLP_DRILL_SIZE, signal),
   });
-  const error = queryError(incidents.error, 'No se pudieron cargar los incidentes');
+  const error = queryError(incidents.error, t('No se pudieron cargar los incidentes'));
   return {
     rows: Array.isArray(incidents.data?.rows) ? incidents.data.rows : [],
     total: incidents.data?.total ?? 0,

@@ -1,9 +1,10 @@
 import type { NetskopeAnomalySeverity } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 export const ANOMALY_SEVERITIES: NetskopeAnomalySeverity[] = ['high', 'medium', 'low', 'informational', 'unknown'];
 
 export const ANOMALY_SEVERITY_LABELS: Record<NetskopeAnomalySeverity, string> = {
-  high: 'Alta', medium: 'Media', low: 'Baja', informational: 'Informativa', unknown: 'Sin dato',
+  high: t('Alta'), medium: t('Media'), low: t('Baja'), informational: 'Informativa', unknown: t('Sin dato'),
 };
 
 export const ANOMALY_SEVERITY_TONES: Record<NetskopeAnomalySeverity, 'danger' | 'warning' | 'info' | 'neutral'> = {
@@ -12,5 +13,5 @@ export const ANOMALY_SEVERITY_TONES: Record<NetskopeAnomalySeverity, 'danger' | 
 
 export function scenarioLabel(scenario: string | null, subScenario: string | null): string {
   if (scenario && subScenario) return `${scenario} · ${subScenario}`;
-  return scenario || subScenario || 'Sin dato';
+  return scenario || subScenario || t('Sin dato');
 }

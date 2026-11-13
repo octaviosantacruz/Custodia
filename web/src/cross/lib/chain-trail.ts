@@ -1,17 +1,18 @@
 import type { ChainHop, ChainNodeType } from './chains-api';
 import type { WorkspaceView } from './workspaces';
+import { t } from '../i18n/index.ts';
 
 export const CHAIN_NODE_LABELS: Record<ChainNodeType, string> = {
-  user: 'Usuario PAM',
+  user: t('Usuario PAM'),
   role: 'Rol',
   safe: 'Safe',
   platform: 'Plataforma',
   psm: 'PSM',
   access_asset: 'Asset',
-  access_policy: 'Política SIA',
-  netskope_user: 'Usuario Netskope',
+  access_policy: t('Política SIA'),
+  netskope_user: t('Usuario Netskope'),
   netskope_device: 'Dispositivo',
-  netskope_client_version: 'Versión de cliente',
+  netskope_client_version: t('Versión de cliente'),
   netskope_os: 'SO',
 };
 

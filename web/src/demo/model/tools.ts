@@ -3,13 +3,14 @@
 // una persona y por qué. Todo sale del mismo escenario de Acme Corp.
 import { accounts, company, people, safes, type Person, type SourceMode } from './company.ts';
 import { allDevices, sourceRun } from './view.ts';
+import { t } from '../../cross/i18n/index.ts';
 
 export type Raw = Record<string, string | number | boolean | null>;
 export type Bond = { person: Person; basis: 'correo exacto' | 'ambiguo, sin unir' | 'miembro del Safe' | 'responsable' };
 
 const roleName = (safeId: number) => {
   const safe = safes.find(s => s.id === safeId)!;
-  return `${safe.area} · ${safe.name.includes('PROD') ? 'Producción' : 'Desarrollo'}`;
+  return `${safe.area} · ${safe.name.includes('PROD') ? t('Producción') : 'Desarrollo'}`;
 };
 const members = (safeId: number) => people.filter(p => p.safeIds.includes(safeId));
 
@@ -22,7 +23,7 @@ export function cyberarkIdentities() {
     email: person.email,
     state: 'activa',
     roles: person.safeIds.map(roleName),
-    bonds: [{ person, basis: person.identityIds.length > 1 ? 'ambiguo, sin unir' : 'correo exacto' }] as Bond[],
+    bonds: [{ person, basis: person.identityIds.length > 1 ? t('ambiguo, sin unir') : 'correo exacto' }] as Bond[],
     raw: { object_id: id, source_id: `acme-identity-${id}`, display_name: person.name, email: person.email, active: true,
       area: person.area, site: person.site, observed_at: company.capturedAt } satisfies Raw,
   })));
@@ -33,7 +34,7 @@ export function cyberarkRoles() {
     id: `acme-role-${safe.id}`,
     name: roleName(safe.id),
     safes: [safe.name],
-    bonds: members(safe.id).map(person => ({ person, basis: 'miembro del Safe' })) as Bond[],
+    bonds: members(safe.id).map(person => ({ person, basis: t('miembro del Safe') })) as Bond[],
     raw: { object_id: 400 + safe.id, source_id: `acme-role-${safe.id}`, name: roleName(safe.id), grants_safe: safe.name,
       member_count: members(safe.id).length, observed_at: company.capturedAt } satisfies Raw,
   }));
@@ -51,10 +52,10 @@ export function cyberarkSafes() {
       accounts: list.length,
       members: members(safe.id).length,
       cpm: 'CPM-ACME',
-      retention: '30 días · 5 versiones',
-      review: safe.workflow === 'in_progress' ? 'En revisión' : 'Pendiente',
+      retention: t('30 días · 5 versiones'),
+      review: safe.workflow === 'in_progress' ? t('En revisión') : t('Pendiente'),
       note: safe.note,
-      bonds: [{ person: owner, basis: 'responsable' }, ...members(safe.id).filter(p => p.id !== owner.id).map(person => ({ person, basis: 'miembro del Safe' }))] as Bond[],
+      bonds: [{ person: owner, basis: 'responsable' }, ...members(safe.id).filter(p => p.id !== owner.id).map(person => ({ person, basis: t('miembro del Safe') }))] as Bond[],
       raw: { safe_number: safe.id, safe_name: safe.name, managing_cpm: 'CPM-ACME', number_of_days_retention: 30,
         number_of_versions_retention: 5, olac_enabled: true, account_count: list.length, observed_at: company.capturedAt } satisfies Raw,
     };
@@ -72,7 +73,7 @@ export function cyberarkAccounts() {
       platform: account.platform,
       safe: safe.name,
       managed: account.automaticManagement,
-      bonds: members(safe.id).map(person => ({ person, basis: 'miembro del Safe' })) as Bond[],
+      bonds: members(safe.id).map(person => ({ person, basis: t('miembro del Safe') })) as Bond[],
       raw: { account_id: account.id, account_name: account.name, user_name: account.userName, address: account.address,
         platform_id: account.platform, safe_name: safe.name, automatic_management_enabled: account.automaticManagement,
         management_status: account.automaticManagement ? 'success' : 'disabled', secret_modified_at: company.capturedAt } satisfies Raw,

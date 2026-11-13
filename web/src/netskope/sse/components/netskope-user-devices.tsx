@@ -48,12 +48,12 @@ export function NetskopeUserDevices({ userId, refreshKey = 0, onUnauthorized }: 
     <div className="nsk-user-devices-head">
       <h3>{t('Equipos')}</h3>
       <StatusBadge tone={userPresenceTone(verdict)}>{USER_PRESENCE_LABELS[verdict]}</StatusBadge>
-      {adem ? <span className="nsk-user-devices-score" aria-label={`Rendimiento digital ${formatScore(adem.score)} de 100`}>{t('Rendimiento digital')} <strong>{formatScore(adem.score)} / 100</strong></span> : null}
-      {weak ? <StatusBadge tone="warning">Componente con menor puntaje: {weak}</StatusBadge> : null}
+      {adem ? <span className="nsk-user-devices-score" aria-label={t('Rendimiento digital {score} de 100', { score: formatScore(adem.score) })}>{t('Rendimiento digital')} <strong>{formatScore(adem.score)} / 100</strong></span> : null}
+      {weak ? <StatusBadge tone="warning">{t('Componente con menor puntaje: {weak}', { weak: weak })}</StatusBadge> : null}
       {score.isError ? <StatusBadge tone="neutral">{t('Rendimiento no disponible')}</StatusBadge> : null}
       <HelpHint label={t('Equipos')}><p>Ubicación y client config salen del inventario; los puntajes y el POP, de ADEM (últimas 24 h). Se unen solo cuando el nombre del equipo es exactamente el mismo y único. Si no, cada dato queda en su fila como Sin dato.</p></HelpHint>
     </div>
-    <p className="nsk-user-devices-note">{PERFORMANCE_EXPLANATION} {PERFORMANCE_SCALE} El componente con menor puntaje orienta la revisión; no confirma una causa.</p>
+    <p className="nsk-user-devices-note">{t('{PERFORMANCE_EXPLANATION} {PERFORMANCE_SCALE} El componente con menor puntaje orienta la revisión; no confirma una causa.', { PERFORMANCE_EXPLANATION: PERFORMANCE_EXPLANATION, PERFORMANCE_SCALE: PERFORMANCE_SCALE })}</p>
     {adem ? <p className="nsk-user-devices-note">{t('Período:')} <DateTime value={epochSecondsToIso(adem.window_start)} /> — <DateTime value={epochSecondsToIso(adem.window_end)} /> {t('· Consulta:')} <DateTime value={new Date(score.dataUpdatedAt).toISOString()} />.</p> : null}
     {rows.length ? <div className="compact-table-wrap"><table className="compact-table">
       <thead><tr>
@@ -62,8 +62,8 @@ export function NetskopeUserDevices({ userId, refreshKey = 0, onUnauthorized }: 
       </tr></thead>
       <tbody>{rows.map((row) => <DeviceRow key={row.key} row={row} userId={userId} score={adem} expanded={open === row.key} onToggle={() => setOpen(open === row.key ? null : row.key)} />)}</tbody>
     </table></div> : <p className="nsk-user-devices-empty">{t('Sin equipos para este usuario.')}</p>}
-    {inventory.data.total > inventory.data.rows.length ? <p className="nsk-user-devices-note">Inventario: {inventory.data.rows.length} de {inventory.data.total} equipos.</p> : null}
-    {adem && adem.devices_total > adem.devices.length ? <p className="nsk-user-devices-note">ADEM: {adem.devices.length} de {adem.devices_total} equipos.</p> : null}
+    {inventory.data.total > inventory.data.rows.length ? <p className="nsk-user-devices-note">{t('Inventario: {rows} de {total} equipos.', { rows: inventory.data.rows.length, total: inventory.data.total })}</p> : null}
+    {adem && adem.devices_total > adem.devices.length ? <p className="nsk-user-devices-note">{t('ADEM: {devices} de {devices_total} equipos.', { devices: adem.devices.length, devices_total: adem.devices_total })}</p> : null}
   </section>;
 }
 
@@ -72,7 +72,7 @@ function DeviceRow({ row, userId, score, expanded, onToggle }: { row: UserDevice
   const status = presence?.status ?? '';
   return <Fragment>
     <tr className={presence && !presence.recent ? 'is-stale' : undefined}>
-      <td>{adem ? <button type="button" className="nsk-user-devices-toggle" aria-expanded={expanded} aria-label={`Detalle de ${row.name}`} onClick={onToggle}><ChevronRight size={14} aria-hidden /></button> : null}</td>
+      <td>{adem ? <button type="button" className="nsk-user-devices-toggle" aria-expanded={expanded} aria-label={t('Detalle de {name}', { name: row.name })} onClick={onToggle}><ChevronRight size={14} aria-hidden /></button> : null}</td>
       <td><span className="cell-lead">{row.name}</span>{row.linked ? <small className="nsk-user-devices-link" title={t('Inventario y ADEM unidos por nombre exacto')}>{t('nombre exacto')}</small> : null}</td>
       <td>{row.os || empty}</td>
       <td>{status ? <StatusBadge tone={status === 'on-prem' ? 'success' : status === 'off-prem' ? 'info' : 'neutral'}>{presenceStatusLabel(status)}</StatusBadge> : empty}</td>
@@ -93,6 +93,6 @@ function DevicePop({ userId, deviceId, score }: { userId: number; deviceId: stri
   if (detail.isPending) return <span className="nsk-user-devices-empty">{t('Leyendo POP…')}</span>;
   if (detail.isError) return <span className="nsk-user-devices-empty">{t('No se pudo leer el POP')}</span>;
   const activity = epochSecondsToIso(detail.data.last_activity);
-  return <span className="nsk-user-devices-pop">{t('POP informado por ADEM:')} <strong>{detail.data.pop || 'Sin dato'}</strong>
+  return <span className="nsk-user-devices-pop">{t('POP informado por ADEM:')} <strong>{detail.data.pop || t('Sin dato')}</strong>
     {activity ? <> {t('· última actividad')} <DateTime value={activity} /></> : null}</span>;
 }

@@ -41,14 +41,14 @@ function apiErrorMessage(detail: unknown, fallback: string): string {
 /** Spanish explanation used when the response carries no usable `detail`
  *  (empty body, proxy HTML, network failure). Status 0 means no response. */
 export function messageForStatus(status: number): string {
-  if (status === 0) return 'No se pudo conectar con el servidor. Revisá tu conexión o si el servicio está en línea.';
-  if (status === 401) return 'La sesión venció o no está iniciada.';
-  if (status === 403) return 'Tu rol no tiene permiso para esta acción.';
-  if (status === 404) return 'No se encontró el recurso solicitado.';
-  if (status === 429) return 'Demasiadas solicitudes: esperá unos segundos y reintentá.';
-  if (status === 502 || status === 503 || status === 504) return 'El servicio no está disponible en este momento (puede estar reiniciándose o sin acceso a la base de datos).';
-  if (status >= 500) return 'El servidor tuvo un error al procesar la solicitud.';
-  return 'No se pudo completar la solicitud.';
+  if (status === 0) return t('No se pudo conectar con el servidor. Revisá tu conexión o si el servicio está en línea.');
+  if (status === 401) return t('La sesión venció o no está iniciada.');
+  if (status === 403) return t('Tu rol no tiene permiso para esta acción.');
+  if (status === 404) return t('No se encontró el recurso solicitado.');
+  if (status === 429) return t('Demasiadas solicitudes: esperá unos segundos y reintentá.');
+  if (status === 502 || status === 503 || status === 504) return t('El servicio no está disponible en este momento (puede estar reiniciándose o sin acceso a la base de datos).');
+  if (status >= 500) return t('El servidor tuvo un error al procesar la solicitud.');
+  return t('No se pudo completar la solicitud.');
 }
 
 /** Plain-text bodies are only trusted when short and not markup (proxy error pages). */
@@ -100,10 +100,10 @@ export async function download(path: string, filename: string): Promise<void> {
     const raw = await response.text();
     try {
       const data = JSON.parse(raw) as { detail?: unknown };
-      throw new ApiError(apiErrorMessage(data.detail, 'No se pudo exportar el inventario'), response.status, path, response.headers.get('x-request-id'));
+      throw new ApiError(apiErrorMessage(data.detail, t('No se pudo exportar el inventario')), response.status, path, response.headers.get('x-request-id'));
     } catch (error) {
       if (error instanceof ApiError) throw error;
-      throw new ApiError(raw || 'No se pudo exportar el inventario', response.status, path, response.headers.get('x-request-id'));
+      throw new ApiError(raw || t('No se pudo exportar el inventario'), response.status, path, response.headers.get('x-request-id'));
     }
   }
   const url = URL.createObjectURL(await response.blob());
@@ -115,3 +115,5 @@ export async function download(path: string, filename: string): Promise<void> {
   anchor.remove();
   URL.revokeObjectURL(url);
 }
+
+import { t } from '../i18n/index.ts';

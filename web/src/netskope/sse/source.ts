@@ -32,7 +32,7 @@ export const registration = {
       runtime: 'netskope',
       category: { id: 'netskope_inventory', order: 0.5 },
       refreshSources: ['netskope'],
-      command: { tool: 'netskope', platform: 'netskope', aliases: ['postura', 'posture', 'hallazgos', 'cumplimiento', 'chequeos', 'politicas', 'políticas', 'policies'], priority: 11 },
+      command: { tool: 'netskope', platform: 'netskope', aliases: ['postura', 'posture', 'hallazgos', 'cumplimiento', 'chequeos', 'politicas', t('políticas'), 'policies'], priority: 11 },
     },
     {
       id: 'netskopeOperations', path: '/netskope/operations', legacyPaths: ['/netskope/steering'], domain: 'dlp',
@@ -43,7 +43,7 @@ export const registration = {
       runtime: 'netskope',
       category: { id: 'netskope_inventory', order: 1 },
       refreshSources: ['netskope'],
-      command: { tool: 'netskope', platform: 'netskope', aliases: ['postura', 'endpoints', 'cumplimiento', 'equipos', 'duplicados'], priority: 18 },
+      command: { tool: 'netskope', platform: 'netskope', aliases: ['postura', 'endpoints', 'cumplimiento', t('equipos'), 'duplicados'], priority: 18 },
     },
     {
       id: 'netskopeDlp', path: '/netskope/dlp', domain: 'dlp',
@@ -88,7 +88,7 @@ export const registration = {
       runtime: 'netskope',
       category: { id: 'netskope_inventory', order: 4 },
       refreshSources: ['netskope'],
-      command: { tool: 'netskope', platform: 'netskope', aliases: ['inventario', 'equipos', 'usuarios', 'dispositivos'], priority: 19 },
+      command: { tool: 'netskope', platform: 'netskope', aliases: ['inventario', t('equipos'), 'usuarios', 'dispositivos'], priority: 19 },
     },
     {
       id: 'netskopeDemSites', path: '/netskope/experience', legacyPaths: ['/netskope/dem/sites'], domain: 'dlp',
@@ -146,7 +146,7 @@ export const registration = {
       runtime: 'netskope',
       recentWorkspace: 'netskopeInventory',
       refreshSources: ['netskope'],
-      command: { tool: 'netskope', platform: 'netskope', aliases: ['dispositivos netskope', 'equipos'], priority: 40 },
+      command: { tool: 'netskope', platform: 'netskope', aliases: ['dispositivos netskope', t('equipos')], priority: 40 },
     },
   ],
   domains: [

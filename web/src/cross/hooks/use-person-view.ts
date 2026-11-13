@@ -4,6 +4,7 @@ import { ApiError } from '../lib/api';
 import { fetchPersonSearch, fetchPersonSummary, type PersonSummaryResponse } from '../lib/chains-api';
 import { CHAIN_SEARCH_MIN_LENGTH } from '../lib/chains-api';
 import { useDebouncedValue } from './use-debounced-value';
+import { t } from '../i18n/index.ts';
 
 type UsePersonViewOptions = {
   authChecked: boolean;
@@ -29,9 +30,9 @@ export function usePersonView({
   const handleError = useCallback((error: unknown) => {
     if (error instanceof ApiError && error.status === 401) {
       onUnauthorized();
-      return 'Sesión vencida. Volvé a iniciar sesión.';
+      return t('Sesión vencida. Volvé a iniciar sesión.');
     }
-    const message = error instanceof Error ? error.message : 'No se pudo completar la solicitud';
+    const message = error instanceof Error ? error.message : t('No se pudo completar la solicitud');
     onError(message);
     return message;
   }, [onError, onUnauthorized]);

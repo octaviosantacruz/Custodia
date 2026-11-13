@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ApiError } from '../../../cross/lib/api';
 import { fetchPamCleanupSignals } from '../lib/pam-technical-catalogs-api';
 import { usePamRefreshKey } from '../../shared/refresh-context';
+import { t } from '../../../cross/i18n/index.ts';
 
 type UsePamCleanupSignalsOptions = {
   authChecked: boolean;
@@ -28,6 +29,6 @@ export function usePamCleanupSignals({ authChecked, authenticated, onUnauthorize
     loading: query.isLoading || query.isFetching,
     error: query.error instanceof Error
       ? query.error.message
-      : query.error ? 'No se pudieron cargar las señales de limpieza PAM' : '',
+      : query.error ? t('No se pudieron cargar las señales de limpieza PAM') : '',
   };
 }

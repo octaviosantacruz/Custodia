@@ -10,23 +10,23 @@
   /* Surfaces */
   /* Palette shared with the product site (site/src/design/tokens.css):
      cool ink surfaces, lime brand, verdict colours for states. */
-  --bg-app: #06070a;        /* ink-50 */
-  --bg-elevated: #0b0d11;   /* ink-100 */
-  --bg-panel: #0b0d11;      /* alias for --bg-elevated (was undefined) */
-  --bg-muted: #0e1115;
-  --bg-subtle: #111418;     /* ink-150 */
-  --bg-hover: #111418;
-  --bg-surface: #191d22;    /* ink-200 */
+  --bg-app: #040c1a;        /* ink-50 */
+  --bg-elevated: #081323;   /* ink-100 */
+  --bg-panel: #081323;      /* alias for --bg-elevated (was undefined) */
+  --bg-muted: #0b1627;
+  --bg-subtle: #0e1a2b;     /* ink-150 */
+  --bg-hover: #0e1a2b;
+  --bg-surface: #152235;    /* ink-200 */
 
   /* Text */
-  --text-primary: #eff2f5;  /* ink-900 */
-  --text-secondary: #b5bbc2; /* ink-700 */
-  --text-muted: #9399a1;    /* ink-600 */
+  --text-primary: #f0f4f9;  /* ink-900 */
+  --text-secondary: #b8c2cf; /* ink-700 */
+  --text-muted: #939fb1;    /* ink-600 */
 
   /* Borders */
-  --border-strong: #25292f; /* ink-300 */
-  --border-soft: #191d22;   /* ink-200 */
-  --border: #25292f;        /* alias for --border-strong (was undefined) */
+  --border-strong: #212e42; /* ink-300 */
+  --border-soft: #152235;   /* ink-200 */
+  --border: #212e42;        /* alias for --border-strong (was undefined) */
 
   /* Accent — the Custodia lime: brand, primary action, focus, selection */
   --accent: #c7f655;

@@ -44,7 +44,7 @@ export function CatalogAdmin({ catalogs, onChanged, onNotice, onError, onClose }
       await onChanged();
       onNotice(kind === 'unit' ? t('Unidad creada') : t('Responsable creado'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo crear el registro');
+      onError(error instanceof Error ? error.message : t('No se pudo crear el registro'));
     } finally { setBusy(null); }
   };
 
@@ -59,7 +59,7 @@ export function CatalogAdmin({ catalogs, onChanged, onNotice, onError, onClose }
       await onChanged();
       onNotice(t('Cambios guardados'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo guardar el registro');
+      onError(error instanceof Error ? error.message : t('No se pudo guardar el registro'));
     } finally { setBusy(null); }
   };
 
@@ -90,7 +90,7 @@ export function CatalogAdmin({ catalogs, onChanged, onNotice, onError, onClose }
           {directoryOpen && directoryMatches.length > 0 && <div className="catalog-directory-suggestions" role="listbox">
             {directoryMatches.map((person) => (
               <button type="button" key={person.object_id} className="catalog-directory-suggestion" onMouseDown={() => pickFromDirectory(person)}>
-                <strong>{person.display_name}</strong><span>{person.attributes.email || 'Sin email'}</span>
+                <strong>{person.display_name}</strong><span>{person.attributes.email || t('Sin email')}</span>
               </button>
             ))}
           </div>}

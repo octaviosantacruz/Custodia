@@ -2,6 +2,7 @@
 // No decide nada nuevo: agrupa por fuente, aplica el escenario de captura
 // y deriva hallazgos cruzados con la regla y las fuentes que los sostienen.
 import { accounts, company, coverage, people, personDevices, personSummary, safes, sourceEvidence, type CoverageStatus, type Person, type SourceMode } from './company.ts';
+import { t } from '../../cross/i18n/index.ts';
 
 export type SourceKey = 'pam' | 'sse';
 export type PlannedKey = 'edr' | 'vuln' | 'firewall';
@@ -14,21 +15,21 @@ export type SourceInfo = { key: SourceKey | PlannedKey; mono: string; kind: stri
  * y PAM (Safes y cuentas).
  */
 export const SOURCES: Record<SourceKey, SourceInfo> = {
-  pam: { key: 'pam', mono: 'PA', kind: 'Identidad y privilegios', product: 'CyberArk', detail: 'Identidades y roles (Identity); Safes, cuentas y miembros (PAM).' },
-  sse: { key: 'sse', mono: 'SE', kind: 'Red y navegación', product: 'Netskope', detail: 'Usuarios, equipos y señal del cliente.' },
+  pam: { key: 'pam', mono: 'PA', kind: 'Identidad y privilegios', product: 'CyberArk', detail: t('Identidades y roles (Identity); Safes, cuentas y miembros (PAM).') },
+  sse: { key: 'sse', mono: 'SE', kind: 'Red y navegación', product: 'Netskope', detail: t('Usuarios, equipos y señal del cliente.') },
 };
 export const SOURCE_ORDER: SourceKey[] = ['pam', 'sse'];
 
 /** Fuentes del plan: tienen color reservado, pero ningún adaptador ni dato. */
 export const PLANNED: SourceInfo[] = [
-  { key: 'edr', mono: 'ED', kind: 'Endpoint', product: 'CrowdStrike · Cortex XDR', detail: 'Sensor instalado y activo por equipo.' },
-  { key: 'vuln', mono: 'VU', kind: 'Vulnerabilidades', product: 'Tenable', detail: 'Exposición por activo.' },
-  { key: 'firewall', mono: 'FW', kind: 'Firewalls', product: 'Por definir', detail: 'Reglas y tráfico por segmento.' },
+  { key: 'edr', mono: 'ED', kind: 'Endpoint', product: 'CrowdStrike · Cortex XDR', detail: t('Sensor instalado y activo por equipo.') },
+  { key: 'vuln', mono: 'VU', kind: 'Vulnerabilidades', product: 'Tenable', detail: t('Exposición por activo.') },
+  { key: 'firewall', mono: 'FW', kind: 'Firewalls', product: 'Por definir', detail: t('Reglas y tráfico por segmento.') },
 ];
 
 export const VERDICT_LABEL: Record<CoverageStatus, string> = { covered: 'Cubierto', partial: 'Parcial', gap: 'Brecha', unknown: 'Desconocido' };
 
-export const MODE_LABEL: Record<SourceMode, string> = { complete: 'Completa y vigente', stale: 'Desactualizada (73 h)', partial: 'Parcial' };
+export const MODE_LABEL: Record<SourceMode, string> = { complete: t('Completa y vigente'), stale: 'Desactualizada (73 h)', partial: 'Parcial' };
 
 const HOUR = 3_600_000;
 const asOf = Date.parse(company.asOf);
@@ -89,23 +90,23 @@ export function insights(mode: SourceMode): Insight[] {
     const view = personView(person, mode);
     if (view.identity.status === 'ambiguous') {
       list.push({ id: `dup-${person.id}`, tone: 'unknown', person, sources: ['pam'],
-        title: 'Dos identidades activas comparten un correo',
-        rule: 'Unión sólo por correo exacto y único', detail: 'No se elige una automáticamente. La cobertura queda desconocida hasta que una persona decida.' });
+        title: t('Dos identidades activas comparten un correo'),
+        rule: t('Unión sólo por correo exacto y único'), detail: t('No se elige una automáticamente. La cobertura queda desconocida hasta que una persona decida.') });
     }
     if (!person.pamId) continue;
     const status = view.coverage.status;
     if (status === 'gap') {
       list.push({ id: `gap-${person.id}`, tone: 'gap', person, sources: ['pam', 'sse'],
-        title: 'Acceso privilegiado sin ningún equipo observado',
-        rule: 'CONN-001 v1 · señal del cliente en 7 días', detail: `${view.safes.map(s => s.name).join(', ')} · ninguna señal de Netskope en una captura completa.` });
+        title: t('Acceso privilegiado sin ningún equipo observado'),
+        rule: t('CONN-001 v1 · señal del cliente en 7 días'), detail: t('{name} · ninguna señal de Netskope en una captura completa.', { name: view.safes.map(s => s.name).join(', ') }) });
     } else if (status === 'partial') {
       list.push({ id: `partial-${person.id}`, tone: 'partial', person, sources: ['pam', 'sse'],
-        title: 'Acceso privilegiado con un equipo sin señal reciente',
-        rule: 'CONN-001 v1 · señal del cliente en 7 días', detail: `${view.safes.map(s => s.name).join(', ')} · ${view.devices.filter(d => !d.recent).map(d => d.hostname).join(', ')} sin señal. No confirma abandono.` });
+        title: t('Acceso privilegiado con un equipo sin señal reciente'),
+        rule: t('CONN-001 v1 · señal del cliente en 7 días'), detail: t('{name} · {hostname} sin señal. No confirma abandono.', { name: view.safes.map(s => s.name).join(', '), hostname: view.devices.filter(d => !d.recent).map(d => d.hostname).join(', ') }) });
     } else if (status === 'unknown' && mode !== 'complete') {
       list.push({ id: `blind-${person.id}`, tone: 'unknown', person, sources: ['pam', 'sse'],
-        title: 'Acceso privilegiado con cobertura no evaluable',
-        rule: 'Captura de Netskope fuera de umbral', detail: 'Hay acceso privilegiado, pero la captura no permite afirmar ni negar cobertura.' });
+        title: t('Acceso privilegiado con cobertura no evaluable'),
+        rule: t('Captura de Netskope fuera de umbral'), detail: t('Hay acceso privilegiado, pero la captura no permite afirmar ni negar cobertura.') });
     }
   }
   return list.sort((a, b) => TONE_ORDER[a.tone] - TONE_ORDER[b.tone]);

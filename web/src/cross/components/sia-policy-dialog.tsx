@@ -24,7 +24,7 @@ export function SiaPolicyDialog({ onSaved, onClose }: Props) {
     const controller = new AbortController();
     fetchSiaPolicies(controller.signal)
       .then((rows) => { setPolicies(rows); setDraft(Object.fromEntries(rows.map((row) => [row.source_id, row.capability ?? UNSET]))); })
-      .catch((error: unknown) => { if (!controller.signal.aborted) setFailure(error instanceof Error ? error.message : 'No se pudieron cargar las políticas'); });
+      .catch((error: unknown) => { if (!controller.signal.aborted) setFailure(error instanceof Error ? error.message : t('No se pudieron cargar las políticas')); });
     return () => controller.abort();
   }, []);
 
@@ -37,7 +37,7 @@ export function SiaPolicyDialog({ onSaved, onClose }: Props) {
       const result = await saveSiaPolicyCapabilities(changes.map((row) => ({ policy_source_id: row.source_id, capability: (draft[row.source_id] || null) as PolicyCapability | null })));
       onSaved(result.changed);
     } catch (error) {
-      setFailure(error instanceof Error ? error.message : 'No se pudo guardar la clasificación');
+      setFailure(error instanceof Error ? error.message : t('No se pudo guardar la clasificación'));
     } finally { setSaving(false); }
   };
 
@@ -45,7 +45,7 @@ export function SiaPolicyDialog({ onSaved, onClose }: Props) {
     icon={<ListChecks size={18} aria-hidden />} titleId="sia-policy-title" title={t('Clasificar políticas SIA')}
     descriptionId="sia-policy-description"
     description={t('Decidí qué es cada política. Con eso se compara lo declarado en la planilla contra lo que SIA muestra.')}
-    confirmTone="primary" confirmLabel={changes.length ? `Guardar ${changes.length}` : 'Guardar'} confirmBusyLabel="Guardando…"
+    confirmTone="primary" confirmLabel={changes.length ? t('Guardar {changes}', { changes: changes.length }) : 'Guardar'} confirmBusyLabel="Guardando…"
     confirmBusy={saving} confirmDisabled={changes.length === 0} onConfirm={() => void save()} onClose={onClose} closeDisabled={saving}
     backdropClassName="connection-import-backdrop"
   >
@@ -53,12 +53,12 @@ export function SiaPolicyDialog({ onSaved, onClose }: Props) {
     {!policies && !failure && <p className="muted" role="status">{t('Cargando políticas…')}</p>}
     {policies && <>
       <div className="policy-dialog-tools">
-        <button type="button" className="button subtle" disabled={saving || suggestable.length === 0} onClick={() => setDraft((current) => ({ ...current, ...Object.fromEntries(suggestable.map((row) => [row.source_id, row.suggested as string])) }))}>Usar sugerencias por nombre ({suggestable.length})</button>
+        <button type="button" className="button subtle" disabled={saving || suggestable.length === 0} onClick={() => setDraft((current) => ({ ...current, ...Object.fromEntries(suggestable.map((row) => [row.source_id, row.suggested as string])) }))}>{t('Usar sugerencias por nombre ({suggestable})', { suggestable: suggestable.length })}</button>
       </div>
       <ul className="policy-dialog-list">
         {policies.map((row) => <li key={row.source_id}>
           <span className="policy-dialog-name"><strong>{row.display_name}</strong><span className="muted">{formatNumber(row.destinations)} {row.destinations === 1 ? 'destino' : 'destinos'}{row.suggested && (draft[row.source_id] ?? UNSET) !== row.suggested ? ` · sugerida: ${POLICY_CAPABILITY_LABELS[row.suggested]}` : ''}</span></span>
-          <CompactSelect value={draft[row.source_id] ?? UNSET} ariaLabel={`Clasificación de ${row.display_name}`} disabled={saving} options={OPTIONS} onChange={(value) => setDraft((current) => ({ ...current, [row.source_id]: value }))} />
+          <CompactSelect value={draft[row.source_id] ?? UNSET} ariaLabel={t('Clasificación de {display_name}', { display_name: row.display_name })} disabled={saving} options={OPTIONS} onChange={(value) => setDraft((current) => ({ ...current, [row.source_id]: value }))} />
         </li>)}
       </ul>
     </>}

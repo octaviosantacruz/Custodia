@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { api } from '../../../cross/lib/api';
 import type { Account, MetadataForm, Member, SafeDetail } from '../types/safe';
 import type { AuditEntry } from '../types/audit';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type SafeDetailState = {
   safe: SafeDetail;
@@ -46,7 +47,7 @@ export function useSafeDetail({ onError }: UseSafeDetailOptions) {
         notes: data.safe.notes || '',
       });
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo abrir la safe');
+      onError(error instanceof Error ? error.message : t('No se pudo abrir la safe'));
     }
   }, [onError]);
 

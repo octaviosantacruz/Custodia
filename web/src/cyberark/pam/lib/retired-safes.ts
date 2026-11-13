@@ -30,7 +30,9 @@ export function retiredLimitNote(loaded: number, total: number): string | null {
   const safeLoaded = positiveInteger(loaded);
   const safeTotal = positiveInteger(total);
   if (safeTotal > RETIRED_LIMIT_MAX && safeLoaded >= RETIRED_LIMIT_MAX) {
-    return `La API devuelve como máximo ${RETIRED_LIMIT_MAX} Safes retiradas por consulta; hay ${safeTotal - RETIRED_LIMIT_MAX} más sin mostrar.`;
+    return t('La API devuelve como máximo {RETIRED_LIMIT_MAX} Safes retiradas por consulta; hay {RETIRED_LIMIT_MAX2} más sin mostrar.', { RETIRED_LIMIT_MAX: RETIRED_LIMIT_MAX, RETIRED_LIMIT_MAX2: safeTotal - RETIRED_LIMIT_MAX });
   }
   return null;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

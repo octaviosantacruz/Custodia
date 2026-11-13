@@ -4,6 +4,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { fetchDashboardPreferences, saveDashboardPreferences } from '../lib/dashboard-preferences-api';
 import type { DashboardWidget } from '../lib/dashboard-metrics';
 import { usePamRefreshKey } from '../../shared/refresh-context';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Options = { onUnauthorized: () => void; onError: (message: string) => void; onNotice: (message: string) => void; includeInternal: boolean };
 
@@ -21,7 +22,7 @@ export function useDashboardPreferences({ onUnauthorized, onError, onNotice, inc
   useEffect(() => {
     if (!query.error) return;
     if (query.error instanceof ApiError && query.error.status === 401) onUnauthorized();
-    else onError(query.error instanceof Error ? query.error.message : 'No se pudo cargar tu panel');
+    else onError(query.error instanceof Error ? query.error.message : t('No se pudo cargar tu panel'));
   }, [onError, onUnauthorized, query.error]);
   const saveMutation = useMutation({
     mutationFn: (widgets: DashboardWidget[]) => saveDashboardPreferences(widgets, includeInternal),
@@ -32,11 +33,11 @@ export function useDashboardPreferences({ onUnauthorized, onError, onNotice, inc
       const response = await saveMutation.mutateAsync(nextWidgets);
       queryClient.setQueryData(queryKey, response);
       if (previous) setUndoWidgets(previous);
-      onNotice(`Tu vista de CyberArk quedó actualizada (${nextWidgets.length} ${nextWidgets.length === 1 ? 'bloque' : 'bloques'})`);
+      onNotice(t('Tu vista de CyberArk quedó actualizada ({nextWidgets} {bloques})', { nextWidgets: nextWidgets.length, bloques: nextWidgets.length === 1 ? 'bloque' : 'bloques' }));
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudo guardar tu panel');
+      else onError(error instanceof Error ? error.message : t('No se pudo guardar tu panel'));
       return false;
     }
   };
@@ -50,7 +51,7 @@ export function useDashboardPreferences({ onUnauthorized, onError, onNotice, inc
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudo restaurar tu vista anterior');
+      else onError(error instanceof Error ? error.message : t('No se pudo restaurar tu vista anterior'));
       return false;
     }
   };

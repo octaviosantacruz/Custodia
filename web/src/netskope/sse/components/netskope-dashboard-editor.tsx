@@ -12,19 +12,19 @@ import '../../../cross/components/dashboard-widget.css';
 import { t } from '../../../cross/i18n/index.ts';
 
 const FILTER_ALL_LABELS: Record<NetskopeWidgetFilterKey, string> = {
-  os: 'Todos los SO',
-  company: 'Todas las empresas',
-  classification_status: 'Todas las clasificaciones',
+  os: t('Todos los SO'),
+  company: t('Todas las empresas'),
+  classification_status: t('Todas las clasificaciones'),
 };
 const FILTER_LABELS: Record<NetskopeWidgetFilterKey, string> = {
   os: 'Sistema operativo',
   company: 'Empresa',
-  classification_status: 'Clasificación',
+  classification_status: t('Clasificación'),
 };
 const FILTER_ARIA_LABELS: Record<NetskopeWidgetFilterKey, string> = {
-  os: 'Filtrar widget por sistema operativo',
-  company: 'Filtrar widget por empresa',
-  classification_status: 'Filtrar widget por clasificación',
+  os: t('Filtrar widget por sistema operativo'),
+  company: t('Filtrar widget por empresa'),
+  classification_status: t('Filtrar widget por clasificación'),
 };
 
 function filterOptions(key: NetskopeWidgetFilterKey, facets: NetskopeDeviceFacets | null, selected: string) {

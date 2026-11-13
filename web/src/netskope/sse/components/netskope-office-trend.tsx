@@ -20,8 +20,8 @@ function barPath(x: number, top: number, height: number, rounded: boolean) {
 
 const flagged = (week: NetskopeOfficeWeek) => (week.poor ?? 0) + (week.fair ?? 0);
 const weekSummary = (week: NetskopeOfficeWeek) => week.measured === null
-  ? `Semana del ${weekRange(week.week_start)}: sin medición`
-  : `Semana del ${weekRange(week.week_start)}: ${formatNumber(flagged(week))} de ${formatNumber(week.measured)} personas medidas con rendimiento malo o regular en la oficina (malo ${formatNumber(week.poor ?? 0)}, regular ${formatNumber(week.fair ?? 0)}); peor en oficina que en remoto ${formatNumber(week.worse_in_office ?? 0)}; ${week.days_measured} de 7 días medidos.`;
+  ? t('Semana del {week_start}: sin medición', { week_start: weekRange(week.week_start) })
+  : t('Semana del {week_start}: {week} de {measured} personas medidas con rendimiento malo o regular en la oficina (malo {poor}, regular {fair}); peor en oficina que en remoto {worse_in_office}; {days_measured} de 7 días medidos.', { week_start: weekRange(week.week_start), week: formatNumber(flagged(week)), measured: formatNumber(week.measured), poor: formatNumber(week.poor ?? 0), fair: formatNumber(week.fair ?? 0), worse_in_office: formatNumber(week.worse_in_office ?? 0), days_measured: week.days_measured });
 
 /** Weekly count of people with a poor or fair office experience, stacked by band, over the people measured. */
 export function NetskopeOfficeTrend({ series }: { series: NetskopeOfficeWeek[] }) {
@@ -47,7 +47,7 @@ export function NetskopeOfficeTrend({ series }: { series: NetskopeOfficeWeek[] }
         {week.measured === null
           ? <td colSpan={4} className="nsk-attention-empty">{t('Sin medición')}</td>
           : <><td>{formatNumber(week.poor ?? 0)}</td><td>{formatNumber(week.fair ?? 0)}</td><td>{formatNumber(week.measured)}</td><td>{formatNumber(week.worse_in_office ?? 0)}</td></>}
-        <td>{week.days_measured} de 7</td>
+        <td>{t('{days_measured} de 7', { days_measured: week.days_measured })}</td>
       </tr>)}</tbody>
     </table></div>
       : <div className="nsk-office-trend-plot" onMouseLeave={() => setActive(null)}>
@@ -70,22 +70,22 @@ export function NetskopeOfficeTrend({ series }: { series: NetskopeOfficeWeek[] }
                   {fair > 0 ? <path className="nsk-office-bar is-fair" d={barPath(x, base - poor - fair - (poor > 0 ? GAP : 0), fair, true)} /> : null}
                 </>}
               <text className="nsk-office-value" x={center} y={unmeasured ? TOP + PLOT - 30 : base - poor - fair - (poor > 0 && fair > 0 ? GAP : 0) - 6} textAnchor="middle">
-                {unmeasured ? 'Sin medición' : `${formatNumber(flagged(week))} de ${formatNumber(week.measured ?? 0)}`}
+                {unmeasured ? t('Sin medición') : t('{week} de {measured}', { week: formatNumber(flagged(week)), measured: formatNumber(week.measured ?? 0) })}
               </text>
               <text className="nsk-office-tick" x={center} y={HEIGHT - 22} textAnchor="middle">{weekRange(week.week_start)}</text>
-              {week.days_measured > 0 && week.days_measured < 7 ? <text className="nsk-office-tick is-partial" x={center} y={HEIGHT - 8} textAnchor="middle">{week.days_measured} de 7 días</text> : null}
+              {week.days_measured > 0 && week.days_measured < 7 ? <text className="nsk-office-tick is-partial" x={center} y={HEIGHT - 8} textAnchor="middle">{t('{days_measured} de 7 días', { days_measured: week.days_measured })}</text> : null}
             </g>;
           })}
         </svg>
         {activeWeek ? <div className={`nsk-office-tooltip${(active ?? 0) >= series.length / 2 ? ' is-left' : ''}`} role="tooltip" style={{ left: `${((step * (active ?? 0) + step / 2) / WIDTH) * 100}%` }}>
-          <strong>Semana del {weekRange(activeWeek.week_start)}</strong>
+          <strong>{t('Semana del {week_start}', { week_start: weekRange(activeWeek.week_start) })}</strong>
           {activeWeek.measured === null ? <span>{t('Sin medición')}</span> : <>
             <span><i className="nsk-office-swatch is-poor" aria-hidden />Malo {formatNumber(activeWeek.poor ?? 0)}</span>
             <span><i className="nsk-office-swatch is-fair" aria-hidden />Regular {formatNumber(activeWeek.fair ?? 0)}</span>
-            <span>De {formatNumber(activeWeek.measured)} personas medidas en la oficina</span>
-            <span>Peor en oficina que en remoto: {formatNumber(activeWeek.worse_in_office ?? 0)}</span>
+            <span>{t('De {measured} personas medidas en la oficina', { measured: formatNumber(activeWeek.measured) })}</span>
+            <span>{t('Peor en oficina que en remoto: {worse_in_office}', { worse_in_office: formatNumber(activeWeek.worse_in_office ?? 0) })}</span>
           </>}
-          <span>{activeWeek.days_measured} de 7 días medidos</span>
+          <span>{t('{days_measured} de 7 días medidos', { days_measured: activeWeek.days_measured })}</span>
         </div> : null}
       </div>}
   </figure>;

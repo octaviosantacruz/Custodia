@@ -51,9 +51,9 @@ export function NetskopeUciWorkspace({ refreshKey, authChecked, authenticated, o
     <section className="list-panel database-surface">
       <section className="netskope-uci" aria-labelledby="netskope-uci-title">
         <header className="netskope-uci-heading">
-          <div className="section-title"><ShieldHalf size={17} aria-hidden="true" /><h2 id="netskope-uci-title">{UCI_TITLE}</h2><HelpHint label={UCI_TITLE}><p>UCI significa User Confidence Index (índice de confianza del usuario). {UCI_EXPLANATION} Es una señal para investigar, no una confirmación de que la cuenta esté comprometida.</p><p>{UCI_CAPTION}</p><p>{UCI_CHANGE_EXPLANATION}</p></HelpHint></div>
+          <div className="section-title"><ShieldHalf size={17} aria-hidden="true" /><h2 id="netskope-uci-title">{UCI_TITLE}</h2><HelpHint label={UCI_TITLE}><p>{t('UCI significa User Confidence Index (índice de confianza del usuario). {UCI_EXPLANATION} Es una señal para investigar, no una confirmación de que la cuenta esté comprometida.', { UCI_EXPLANATION: UCI_EXPLANATION })}</p><p>{UCI_CAPTION}</p><p>{UCI_CHANGE_EXPLANATION}</p></HelpHint></div>
           <p>{UCI_EXPLANATION} <strong>{UCI_SCALE}</strong></p>
-          {data ? <p className="netskope-uci-status">{data.captured_at ? <>{t('Última captura:')} <DateTime value={data.captured_at} /></> : 'Sin captura todavía'}</p> : null}
+          {data ? <p className="netskope-uci-status">{data.captured_at ? <>{t('Última captura:')} <DateTime value={data.captured_at} /></> : t('Sin captura todavía')}</p> : null}
         </header>
         {panel.loading && !data
           ? <StateBlock variant="loading" title={t('Cargando el índice de confianza…')} />
@@ -71,7 +71,7 @@ export function NetskopeUciWorkspace({ refreshKey, authChecked, authenticated, o
               { key: 'moderate', label: t('Confianza moderada'), value: formatNumber(data.by_rating.Moderate) },
             ]} />
             {uciIsTruncated(data.total, rows.length)
-              ? <p className="netskope-uci-note" role="status">Se muestran {formatNumber(rows.length)} de {formatNumber(data.total)} usuarios, de menor a mayor índice de confianza.</p>
+              ? <p className="netskope-uci-note" role="status">{t('Se muestran {rows} de {total} usuarios, de menor a mayor índice de confianza.', { rows: formatNumber(rows.length), total: formatNumber(data.total) })}</p>
               : null}
             <div className="netskope-uci-toolbar">
               <label className="search-box netskope-uci-search"><Search size={16} aria-hidden="true" />
@@ -109,7 +109,7 @@ export function NetskopeUciWorkspace({ refreshKey, authChecked, authenticated, o
                         <th scope="row"><span className="cell-stack"><strong className="cell-lead">{uciUserLabel(row)}</strong>{row.name ? <small className="cell-sub">{row.email}</small> : null}</span></th>
                         <td><span className={`netskope-uci-chip is-${row.rating.toLowerCase()}`}>{UCI_RATING_LABELS[row.rating]}</span></td>
                         <td><BarCell label={formatNumber(row.score)} share={barShare(row.score, UCI_MAX_SCORE)} muted={row.rating === 'Moderate'} /></td>
-                        <td>{row.previous_score === null ? 'Sin dato' : formatNumber(row.previous_score)}</td>
+                        <td>{row.previous_score === null ? t('Sin dato') : formatNumber(row.previous_score)}</td>
                         <td className={`netskope-uci-delta is-${uciDeltaTone(delta)}`}>{uciDeltaLabel(delta)}</td>
                         <td><AgeCell value={row.scored_at} thresholds={UCI_AGE_THRESHOLDS} /></td>
                       </tr>;

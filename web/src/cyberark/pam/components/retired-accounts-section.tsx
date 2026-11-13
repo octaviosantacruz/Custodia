@@ -22,8 +22,8 @@ export function RetiredAccountsSection({ safeNumber }: { safeNumber: number }) {
       <div className="account-inline-row account-inline-header retired-accounts-row" aria-hidden="true"><span>{t('Nombre')}</span><span>{t('Cuenta')}</span><span>{t('Plataforma')}</span><span>{t('Detectada')}</span></div>
       {rows.map((account) => <div className="account-inline-row retired-accounts-row" key={account.account_id}>
         <strong>{account.account_name}</strong>
-        <span>{account.user_name || 'Sin usuario'}</span>
-        <span>{account.platform_name || account.platform_id || 'Sin plataforma'}</span>
+        <span>{account.user_name || t('Sin usuario')}</span>
+        <span>{account.platform_name || account.platform_id || t('Sin plataforma')}</span>
         <span><DateTime value={account.retired_detected_at ?? null} /></span>
       </div>)}
     </div>

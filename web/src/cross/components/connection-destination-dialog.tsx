@@ -45,7 +45,7 @@ export function ConnectionDestinationDialog({ row, initialIp, environments, resp
   return <ConfirmDialog
     icon={row ? <Pencil size={18} aria-hidden /> : <Plus size={18} aria-hidden />} titleId="destination-dialog-title"
     title={row ? t('Editar destino') : t('Agregar destino')} descriptionId="destination-dialog-description"
-    description={row ? <>{row.instance_name} · {row.private_ip}{row.port ? `:${row.port}` : ''}</> : 'La clave es IP y puerto.'}
+    description={row ? <>{row.instance_name} · {row.private_ip}{row.port ? `:${row.port}` : ''}</> : t('La clave es IP y puerto.')}
     confirmTone="primary" confirmLabel="Guardar" confirmBusyLabel="Guardando…" confirmBusy={busy} confirmDisabled={incomplete}
     onConfirm={() => onSave({
       instance_name: instance.trim(), environment: environment.trim(), private_ip: ip.trim(), port: portNumber,

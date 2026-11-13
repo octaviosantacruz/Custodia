@@ -3,6 +3,7 @@ import { RankingBars } from './ranking-bars';
 import { donutSlices } from '../lib/category-population';
 import type { ChartMode } from '../lib/chart-mode';
 import type { AnalyticsBucket } from '../types/analytics';
+import { t } from '../i18n/index.ts';
 
 type Props = {
   title: string;
@@ -31,7 +32,7 @@ export function CategoryChart({ title, buckets, population, populationLabel, lim
     return <RankingBars title={title} buckets={buckets} population={knownPopulation} populationLabel={populationLabel} limit={limit} onBucketSelect={onBucketSelect} unavailablePopulationLabel={unavailablePopulationLabel} sampleLabel={sampleLabel} />;
   }
   const slices = donutSlices(buckets, knownPopulation, limit);
-  return <div role="group" aria-label={`Distribución: ${title}`}>
+  return <div role="group" aria-label={t('Distribución: {title}', { title: title })}>
     <PieChart title={title} buckets={slices} population={population === undefined ? undefined : population} centerLabel={centerLabel} onBucketSelect={onBucketSelect} />
   </div>;
 }

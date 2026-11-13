@@ -26,10 +26,10 @@ export function daysSince(value: string | undefined, now: number = Date.now()): 
 
 export function ageLabel(days: number): string {
   if (days === 0) return 'hoy';
-  if (days === 1) return 'hace 1 día';
-  if (days < 60) return `hace ${days} días`;
+  if (days === 1) return t('hace 1 día');
+  if (days < 60) return t('hace {days} días', { days: days });
   const months = Math.floor(days / 30);
-  return months < 24 ? `hace ${months} meses` : `hace ${Math.floor(days / 365)} años`;
+  return months < 24 ? `hace ${months} meses` : t('hace {days} años', { days: Math.floor(days / 365) });
 }
 
 function recordValue(value: unknown): Record<string, unknown> | null {
@@ -66,3 +66,5 @@ export function policyTargetSummary(attributes: { ip_rules?: unknown[]; fqdn_rul
   const firstLogical = typeof firstLogicalRule === 'string' ? firstLogicalRule : String(recordValue(firstLogicalRule)?.logicalName ?? '');
   return { ips: [...new Set(ips)], fqdnCount: fqdnRules.length, firstFqdn, logicalCount: logicalNames.length, firstLogical };
 }
+
+import { t } from '../../../cross/i18n/index.ts';

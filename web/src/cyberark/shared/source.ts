@@ -19,7 +19,7 @@ export const registration = {
       runtime: 'cyberark',
       category: { id: 'inventory', order: 1 },
       refreshSources: ['cyberark', 'sia', 'access'],
-      command: { tool: 'pam', platform: 'cyberark', aliases: ['cobertura', 'inventario', 'inventario de infraestructura', 'infraestructura', 'activos por ip', 'cobertura pam sia'], priority: 34 },
+      command: { tool: 'pam', platform: 'cyberark', aliases: ['cobertura', 'inventario', t('inventario de infraestructura'), 'infraestructura', t('activos por ip'), 'cobertura pam sia'], priority: 34 },
     },
   ],
   domains: [

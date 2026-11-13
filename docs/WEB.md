@@ -60,7 +60,7 @@ empleador de origen; ver `AGENTS.md`.
 La marca son dos registros que se cruzan (`web/public/mark.svg`, lima sobre
 grafito); el favicon y el logo de la cabecera son el mismo dibujo. La app
 conserva la estructura de DS Hub (rueda, círculos, accesos), pero usa la paleta
-y las tipografías del sitio (`site/src/design/tokens.css`): tinta fría, lima
+y las tipografías del sitio (`site/src/design/tokens.css`): azul tinta, lima
 sólo para marca, acción, foco y selección, y los colores de veredicto para los
 estados. Los tokens viven en `web/src/styles/foundation.css`; el texto sobre
 lima usa `--accent-fill` y `--on-accent` en ambos temas.
@@ -84,9 +84,10 @@ describen nada; cada pedido de diseño nombra:
 Una referencia aporta principios, nunca material: no se copian logos, textos,
 ilustraciones ni maquetas de otro producto.
 
-**Dos colores tranquilos y uno fuerte.** La tinta fría es el fondo (cerca del
-60 % de una pantalla) y los paneles grafito llevan superficies, filos y texto
-secundario (cerca del 30 %). El lima es el único color fuerte (cerca del 10 %)
+**Dos colores tranquilos y uno fuerte.** El azul tinta es el fondo (cerca del
+60 % de una pantalla) y sus tonos más claros llevan paneles, filos y texto
+secundario (cerca del 30 %). El fondo es un color que se nota, no un gris casi
+negro: con un neutro sin color, el sitio se lee como un modo oscuro cualquiera. El lima es el único color fuerte (cerca del 10 %)
 y va sólo en el detalle que se tiene que ver primero: la marca, las palabras
 clave del titular, la acción siguiente, la selección y el foco. Todo lo demás
 queda tranquilo para que ese detalle resalte: etiquetas de sección, viñetas,
@@ -94,12 +95,12 @@ subrayados, filos y resplandores son decoración y nunca van en lima. Si dos
 cosas compiten por la primera mirada, una sobra. Los colores de estado (verde,
 ámbar, rojo) aparecen sólo donde la demo los usa.
 
-**Profundidad con luz, no con más color.** El sitio usa la tinta de la demo
-tal cual; la profundidad sale de una luz fría y suave desde arriba de la
+**Profundidad con luz, no con más color.** El sitio usa el azul tinta de la
+demo tal cual; la profundidad sale de una luz fría y suave desde arriba de la
 página, un filo fino bajo la cabecera y la captura del inicio que se funde
 con el fondo. Nada de resplandores en lima, degradados entre colores ni
-ilustraciones detrás del contenido. Si el fondo cambia de color (por ejemplo
-a azul tinta), cambia en la demo y en el sitio a la vez.
+ilustraciones detrás del contenido. Si el fondo cambia de color, cambia en
+`site/src/design/tokens.css` y en `web/src/styles/foundation.css` a la vez.
 
 | Elemento | Referencia | Se toma | Se deja |
 |---|---|---|---|

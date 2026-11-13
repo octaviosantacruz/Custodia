@@ -24,7 +24,7 @@ function Trend({ points }: { points: CoveragePoint[] }) {
   const last = points[points.length - 1];
   const summary = lines.map((line) => `${line.label}: ${line.values[line.values.length - 1]}`).join(', ');
   return <figure className="progress-trend">
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={`Evolución semanal hasta ${last.snapshot_date}. ${summary} de ${last.n} destinos.`}>
+    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={t('Evolución semanal hasta {snapshot_date}. {value} de {n} destinos.', { snapshot_date: last.snapshot_date, value: summary, n: last.n })}>
       <line className="progress-axis" x1="28" y1={y(0)} x2={WIDTH - 28} y2={y(0)} />
       <text className="progress-tick" x="2" y={y(top) + 4}>{top}</text>
       <text className="progress-tick" x="12" y={y(0) + 4}>0</text>
@@ -44,7 +44,7 @@ export function CoverageProgress({ refreshKey, canManage, onError, onNotice }: P
   const snapshot = async () => {
     setSaving(true); onError('');
     try { await takeCoverageSnapshot(); onNotice(t('Foto de hoy guardada')); await query.refetch(); }
-    catch (error) { onError(error instanceof Error ? error.message : 'No se pudo guardar la foto'); }
+    catch (error) { onError(error instanceof Error ? error.message : t('No se pudo guardar la foto')); }
     finally { setSaving(false); }
   };
 
@@ -114,7 +114,7 @@ export function CoverageProgress({ refreshKey, canManage, onError, onNotice }: P
         {canManage && <button type="button" className="button subtle" disabled={saving} onClick={() => void snapshot()}><Camera size={15} aria-hidden /> {saving ? t('Guardando…') : t('Guardar la foto de hoy')}</button>}
       </div>
       {series.length === 0
-        ? <p className="muted progress-empty" role="status">Todavía no hay fotos: la serie empieza con la próxima sincronización o import{canManage ? t(', o guardando la de hoy') : ''}.</p>
+        ? <p className="muted progress-empty" role="status">{t('Todavía no hay fotos: la serie empieza con la próxima sincronización o import{hoy}.', { hoy: canManage ? t(', o guardando la de hoy') : '' })}</p>
         : <>
           <Trend points={trend} />
           <p className="muted progress-since">{t('Desde')} <time dateTime={first.captured_at} title={dateTimeHint(first.captured_at)}>{formatDate(first.captured_at)}</time>: Platform {xOfN(first.platform.match, first.n)} → {xOfN(total.platform.match, total.n)}; DBA {xOfN(first.dba.match, first.n)} → {xOfN(total.dba.match, total.n)}; incorporados {xOfN(first.work.onboarded, first.n)} → {xOfN(total.work.onboarded, total.n)}.</p>

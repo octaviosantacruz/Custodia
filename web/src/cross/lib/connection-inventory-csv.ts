@@ -1,10 +1,11 @@
 import type { ConnectionInventoryImportRow } from '../types/connection';
 import { parseWorkStatus } from './connection-work.ts';
+import { t } from '../i18n/index.ts';
 
 type Field = keyof Omit<ConnectionInventoryImportRow, 'source_row_number'>;
 
 const HEADER_ALIASES: Record<Field, string[]> = {
-  instance_name: ['instance name', 'instance_name', 'nombre instancia', 'nombre de instancia'],
+  instance_name: ['instance name', 'instance_name', 'nombre instancia', t('nombre de instancia')],
   environment: ['ambiente', 'environment', 'entorno'],
   private_ip: ['private ip', 'private_ip', 'ip privada', 'ip'],
   port: ['puerto', 'port'],
@@ -12,8 +13,8 @@ const HEADER_ALIASES: Record<Field, string[]> = {
   ca_dba: ['dba', 'ca dba', 'acceso dba', 'ca_dba'],
   zsp_implemented: ['implementado zsp', 'implementado zsp?', 'zsp'],
   access_available: ['tengo acceso', 'tengo acceso?', 'tengo llegada', 'tengo llegada?', 'llegada', 'access', 'acceso'],
-  description: ['descripción', 'descripcion', 'description'],
-  work_status: ['estado de trabajo', 'estado trabajo', 'work status'],
+  description: [t('descripción'), 'descripcion', 'description'],
+  work_status: [t('estado de trabajo'), 'estado trabajo', 'work status'],
   responsible: ['responsable', 'responsible'],
   note: ['nota', 'notas', 'note'],
 };
@@ -46,7 +47,7 @@ function separatorFor(header: string): string {
 function booleanValue(value: string): boolean | null {
   const normalized = normalizeHeader(value);
   if (!normalized) return null;
-  if (['n/a', 'na', 'n.a', 'no aplica', 'sin dato', 's/d', '-', '--'].includes(normalized)) return null;
+  if (['n/a', 'na', 'n.a', 'no aplica', t('sin dato'), 's/d', '-', '--'].includes(normalized)) return null;
   if (['si', 's', 'yes', 'y', 'true', '1'].includes(normalized)) return true;
   if (['no', 'n', 'false', '0'].includes(normalized)) return false;
   throw new Error(`Valor booleano no reconocido: "${value}"`);
@@ -67,7 +68,7 @@ function optionalColumns(headers: string[], cells: string[], valueAt: (cells: st
   const extra: Pick<ConnectionInventoryImportRow, 'work_status' | 'responsible' | 'note'> = {};
   if (headerIndex(headers, 'work_status') >= 0) {
     try { const status = parseWorkStatus(valueAt(cells, 'work_status')); if (status) extra.work_status = status; }
-    catch (error) { throw new Error(`${error instanceof Error ? error.message : 'Estado de trabajo inválido'} (fila ${rowNumber}).`); }
+    catch (error) { throw new Error(`${error instanceof Error ? error.message : t('Estado de trabajo inválido')} (fila ${rowNumber}).`); }
   }
   const responsible = valueAt(cells, 'responsible');
   if (responsible) extra.responsible = responsible;

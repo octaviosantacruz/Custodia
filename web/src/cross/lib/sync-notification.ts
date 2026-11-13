@@ -1,4 +1,5 @@
 import { groupSyncRunsByToolCycle, syncStatusLabel, syncToolLabel, type SyncRunForGrouping } from './sync-source.ts';
+import { t } from '../i18n/index.ts';
 
 /* Notification summary: the latest sync cycle of each tool, as one short line
    (status and time). Object counts are left out on purpose: a cycle can include
@@ -33,7 +34,7 @@ export function latestCyclePerTool(runs: readonly SyncRunForGrouping[]): LatestT
       statusLabel: syncStatusLabel(group.status),
       tone: toneOf(group.status),
       at: group.latest_at,
-      detail: affected ? `${affected} ${affected === 1 ? 'componente con aviso o fallo' : 'componentes con aviso o fallo'}` : '',
+      detail: affected ? `${affected} ${affected === 1 ? t('componente con aviso o fallo') : t('componentes con aviso o fallo')}` : '',
     });
   }
   return cycles;

@@ -38,7 +38,7 @@ export function OperationalLogsView({ onUnauthorized }: { onUnauthorized?: () =>
     if (!cancelled) { setRows(result.rows); setTotal(result.total); setRequestReady(true); }
     }).catch((caught) => {
       if (caught instanceof ApiError && caught.status === 401) { if (!cancelled) onUnauthorized?.(); return; }
-      if (!cancelled) { setRows([]); setTotal(0); setError(caught instanceof Error ? caught.message : 'No se pudieron cargar los logs'); }
+      if (!cancelled) { setRows([]); setTotal(0); setError(caught instanceof Error ? caught.message : t('No se pudieron cargar los logs')); }
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- onUnauthorized is only called on a 401; its identity must not refetch the page

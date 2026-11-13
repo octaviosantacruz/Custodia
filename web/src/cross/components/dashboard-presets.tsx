@@ -31,7 +31,7 @@ export function DashboardPresetMenu<T extends DashboardPresetOption, W = unknown
         <span><strong>{preset.label}</strong><small>{preset.description}</small></span>
       </button>)}
       {teamTemplates.map((template) => <button key={`team-${template.role_code}`} type="button" role="menuitem" disabled={disabled} onClick={() => { setOpen(false); onTeamSelect?.(template); }}>
-        <span><strong>{template.role_name}</strong><small>Vista de equipo · versión {template.version}</small></span>
+        <span><strong>{template.role_name}</strong><small>{t('Vista de equipo · versión {version}', { version: template.version })}</small></span>
       </button>)}
       <button type="button" role="menuitem" className="dashboard-preset-reset" disabled={disabled} onClick={() => { setOpen(false); onReset(); }}>
         <RotateCcw size={14} aria-hidden="true" /><span><strong>{t('Restablecer a predeterminada')}</strong><small>{t('Vuelve a los bloques por defecto de esta fuente.')}</small></span>

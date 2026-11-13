@@ -46,12 +46,12 @@ export function NetskopeFleetBand({ fleet, changes, clientEvents, diagnosis, onD
       <span>{t('Equipos activos')}</span><strong>{summary ? formatNumber(summary.devices) : loading}</strong><small>{t('con evento en 7 días')}</small>
     </button>
     <button type="button" className="nsk-fleet-kpi" disabled={!summary?.devices} onClick={() => onDrill({ ...EMPTY_NETSKOPE_DEVICE_QUERY, eventAge: 'lt_24h' })}>
-      <span>{t('Señal en 24 h')}</span><strong>{summary ? fleetPercent(fleetShare(summary.signal_24h, summary.devices)) : loading}</strong><small>{summary ? `${formatNumber(summary.signal_24h)} equipos` : ''}</small>
+      <span>{t('Señal en 24 h')}</span><strong>{summary ? fleetPercent(fleetShare(summary.signal_24h, summary.devices)) : loading}</strong><small>{summary ? t('{signal_24h} equipos', { signal_24h: formatNumber(summary.signal_24h) }) : ''}</small>
     </button>
     <button type="button" className="nsk-fleet-kpi" disabled={!fleet?.client_baseline || !summary?.client_evaluated} onClick={() => onDrill({ ...EMPTY_NETSKOPE_DEVICE_QUERY, clientCompliance: 'current' })}>
       <span>{t('Cliente al día')}</span>
-      <strong>{!fleet ? loading : fleet.client_baseline ? fleetPercent(fleetShare(fleet.summary.client_current, fleet.summary.client_evaluated)) : 'Sin línea base'}</strong>
-      <small>{fleet?.client_baseline ? `${formatNumber(fleet.summary.client_current)} de ${formatNumber(fleet.summary.client_evaluated)} reconocidos` : fleet ? t('Configurala para evaluar') : ''}</small>
+      <strong>{!fleet ? loading : fleet.client_baseline ? fleetPercent(fleetShare(fleet.summary.client_current, fleet.summary.client_evaluated)) : t('Sin línea base')}</strong>
+      <small>{fleet?.client_baseline ? t('{client_current} de {client_evaluated} reconocidos', { client_current: formatNumber(fleet.summary.client_current), client_evaluated: formatNumber(fleet.summary.client_evaluated) }) : fleet ? t('Configurala para evaluar') : ''}</small>
     </button>
     <button type="button" className={`nsk-fleet-kpi${clientEvents?.coverage_risk_total ? ' is-attention' : ''}`} disabled={!clientEvents?.coverage_risk_total} onClick={() => onOpenPosture ? onOpenPosture(['client_protection_off']) : onDrill({ ...EMPTY_NETSKOPE_DEVICE_QUERY, coverageRisk: '1' })}>
       <span>{t('Desinstalación o deshabilitación')}</span><strong>{clientEvents ? formatNumber(clientEvents.coverage_risk_total) : loading}</strong><small>{t('último evento informado')}</small>
@@ -63,7 +63,7 @@ export function NetskopeFleetBand({ fleet, changes, clientEvents, diagnosis, onD
     </button>
     <button type="button" className="nsk-fleet-kpi" disabled={!changeCounts} onClick={onOpenChanges}>
       <span>{t('Desde la última sync')}</span>
-      <strong>{changeCounts ? <>+{formatNumber(changeCounts.added)} <em>−{formatNumber(changeCounts.removed)}</em></> : changes ? 'Sin dato' : loading}</strong>
+      <strong>{changeCounts ? <>+{formatNumber(changeCounts.added)} <em>−{formatNumber(changeCounts.removed)}</em></> : changes ? t('Sin dato') : loading}</strong>
       <small>{changes?.latest_run ? <DateTime value={changes.latest_run.captured_at} /> : changes ? t('Hacen falta dos corridas completas') : ''}</small>
     </button>
   </div>;
@@ -88,7 +88,7 @@ export function NetskopeFleetTable({ panel, groupBy, onGroupBy, canAdmin, onDril
     const share = fleetShare(count, total);
     const empty = COLUMNS.find((item) => item.id === column)!.empty;
     if (notEvaluated(column) || share === null) return <span className="nsk-fleet-empty">{notEvaluated(column) ? empty : t('Sin dato')}</span>;
-    return <button type="button" className="nsk-fleet-cell" data-tone={TONES[column]} onClick={() => onDrill(fleetDrillQuery(groupBy, group, column))} aria-label={`${label}: ${formatNumber(count)} de ${formatNumber(total)}. Ver en Inventario`}>
+    return <button type="button" className="nsk-fleet-cell" data-tone={TONES[column]} onClick={() => onDrill(fleetDrillQuery(groupBy, group, column))} aria-label={t('{value}: {count} de {total}. Ver en Inventario', { value: label, count: formatNumber(count), total: formatNumber(total) })}>
       <BarCell label={fleetPercent(share)} share={share} />
     </button>;
   };
@@ -99,7 +99,7 @@ export function NetskopeFleetTable({ panel, groupBy, onGroupBy, canAdmin, onDril
       <div className="nsk-fleet-toolbar">
         <span className="nsk-fleet-label">{t('Agrupar por')}</span>
         <CompactSelect ariaLabel={t('Agrupar la flota por')} value={groupBy} options={[...FLEET_GROUP_OPTIONS]} onChange={(value) => onGroupBy(value as NetskopeFleetGroupBy)} />
-        <button type="button" className="button subtle" disabled={!data?.summary.uci_evaluated} onClick={() => onDrill(OFFICE_LOW_UCI_DRILL)} title={data && !data.summary.uci_evaluated ? 'Sin captura de UCI' : undefined}>En oficina con UCI bajo{data?.summary.uci_evaluated ? ` (${formatNumber(data.summary.on_prem_uci_low)})` : ''}</button>
+        <button type="button" className="button subtle" disabled={!data?.summary.uci_evaluated} onClick={() => onDrill(OFFICE_LOW_UCI_DRILL)} title={data && !data.summary.uci_evaluated ? t('Sin captura de UCI') : undefined}>{t('En oficina con UCI bajo')}{data?.summary.uci_evaluated ? ` (${formatNumber(data.summary.on_prem_uci_low)})` : ''}</button>
         {canAdmin ? <>
           <button type="button" className="button subtle" onClick={() => onEditBaseline('client')}>{t('Línea base del cliente')}</button>
           <button type="button" className="button subtle" onClick={() => onEditBaseline('os')}>{t('SO mínimo')}</button>
@@ -114,7 +114,7 @@ export function NetskopeFleetTable({ panel, groupBy, onGroupBy, canAdmin, onDril
         ? <StateBlock compact variant="empty" title={t('Sin equipos activos con evento en 7 días')} />
         : <>
           <div className="compact-table-wrap"><table className="compact-table nsk-fleet-table">
-            <caption className="sr-only">Flota agrupada por {fleetGroupLabel(groupBy)}</caption>
+            <caption className="sr-only">{t('Flota agrupada por {group}', { group: fleetGroupLabel(groupBy) })}</caption>
             <thead><tr>
               <th scope="col">{fleetGroupLabel(groupBy)}</th>
               <th scope="col">{t('Equipos')}</th>
@@ -122,11 +122,11 @@ export function NetskopeFleetTable({ panel, groupBy, onGroupBy, canAdmin, onDril
             </tr></thead>
             <tbody>{data.groups.map((group) => <tr key={group.key}>
               <th scope="row"><span className="cell-lead">{fleetGroupKeyLabel(groupBy, group.key)}</span></th>
-              <td><button type="button" className="nsk-fleet-count" onClick={() => onDrill(fleetDrillQuery(groupBy, group.key))} aria-label={`${group.key}: ${formatNumber(group.devices)} equipos. Ver en Inventario`}>{formatNumber(group.devices)}</button></td>
+              <td><button type="button" className="nsk-fleet-count" onClick={() => onDrill(fleetDrillQuery(groupBy, group.key))} aria-label={t('{key}: {devices} equipos. Ver en Inventario', { key: group.key, devices: formatNumber(group.devices) })}>{formatNumber(group.devices)}</button></td>
               {COLUMNS.map((column) => <td key={column.id}>{cell(group, group.key, column.id, `${group.key}, ${column.label}`)}</td>)}
             </tr>)}</tbody>
           </table></div>
-          {data.omitted_groups > 0 ? <p className="nsk-fleet-note">Otros {formatNumber(data.omitted_groups)} grupos: {formatNumber(data.omitted_devices)} equipos.</p> : null}
+          {data.omitted_groups > 0 ? <p className="nsk-fleet-note">{t('Otros {omitted_groups} grupos: {omitted_devices} equipos.', { omitted_groups: formatNumber(data.omitted_groups), omitted_devices: formatNumber(data.omitted_devices) })}</p> : null}
         </>}
   </section>;
 }

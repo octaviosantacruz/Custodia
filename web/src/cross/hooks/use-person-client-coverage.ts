@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ApiError } from '../lib/api';
 import { fetchPersonClientCoverageDetail } from '../lib/chains-api';
+import { t } from '../i18n/index.ts';
 
 type UsePersonClientCoverageOptions = {
   enabled: boolean;
@@ -26,7 +27,7 @@ export function usePersonClientCoverage({
     const error = detailQuery.error;
     if (!error) return;
     if (error instanceof ApiError && error.status === 401) onUnauthorized();
-    else onError(error instanceof Error ? error.message : 'No se pudo consultar la cobertura');
+    else onError(error instanceof Error ? error.message : t('No se pudo consultar la cobertura'));
   }, [detailQuery.error, onError, onUnauthorized]);
 
   return {

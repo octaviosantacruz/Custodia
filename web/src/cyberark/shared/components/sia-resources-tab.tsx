@@ -3,6 +3,7 @@ import { Link2 } from 'lucide-react';
 import { SiaResourcesWorkspace } from '../../sia/components/sia-resources-workspace';
 import { SiaDatabaseAccountsWorkspace } from '../../sia/components/sia-database-accounts-workspace';
 import { hasWorkspaceAccess, type WorkspaceView } from '../../../cross/lib/workspaces';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type ResourceKind = 'resources' | 'databaseAccounts';
 
@@ -18,8 +19,8 @@ type SiaResourcesTabProps = {
 };
 
 export const RESOURCE_META: Array<{ id: ResourceKind; label: string; detail: string }> = [
-  { id: 'resources', label: 'Máquinas virtuales SIA', detail: 'Equipos disponibles en la infraestructura SIA' },
-  { id: 'databaseAccounts', label: 'Cuentas de base de datos', detail: 'Strong Accounts administradas por SIA' },
+  { id: 'resources', label: t('Máquinas virtuales SIA'), detail: t('Equipos disponibles en la infraestructura SIA') },
+  { id: 'databaseAccounts', label: t('Cuentas de base de datos'), detail: t('Strong Accounts administradas por SIA') },
 ];
 
 export const RESOURCE_VIEWS: Record<ResourceKind, WorkspaceView> = {

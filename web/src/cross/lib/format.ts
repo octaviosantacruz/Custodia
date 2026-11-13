@@ -89,10 +89,10 @@ export const formatChartTickLabels = (labels: readonly string[]): string[] => {
 };
 
 export const inventoryScopeLabel = (value: string) =>
-  ({ pending: 'Pendiente de definir', business: 'Safe de negocio', internal: 'Interno CyberArk' } as Record<string, string>)[value] || value;
+  ({ pending: t('Pendiente de definir'), business: t('Safe de negocio'), internal: 'Interno CyberArk' } as Record<string, string>)[value] || value;
 
 export const qualityStatusLabel = (value: string) =>
-  ({ pending: 'Pendiente', clean: 'Depurado', obsolete: 'Obsoleto', duplicate: 'Duplicado' } as Record<string, string>)[value] || value;
+  ({ pending: t('Pendiente'), clean: 'Depurado', obsolete: 'Obsoleto', duplicate: 'Duplicado' } as Record<string, string>)[value] || value;
 
 export function businessUnitLabel(unit: { unit_code: string; unit_name: string }): string {
   const code = unit.unit_code.trim();
@@ -103,7 +103,7 @@ export function businessUnitLabel(unit: { unit_code: string; unit_name: string }
 }
 
 export const siaPolicyStatusLabel = (value: string) =>
-  ({ Enabled: 'Habilitada', Disabled: 'Deshabilitada' } as Record<string, string>)[value] || value || 'Sin dato';
+  ({ Enabled: 'Habilitada', Disabled: 'Deshabilitada' } as Record<string, string>)[value] || value || t('Sin dato');
 
 export const nextActionOptions = ['Migrar a SIA', 'Consultar', 'Revisar', 'Dar de baja', 'Rotar credencial'];
 
@@ -126,7 +126,7 @@ export const actionLabel = (value: string | null | undefined) => {
 };
 
 export const bucketLabel = (value: string) => {
-  const workflow = ({ pending: 'Pendiente', in_progress: 'En curso', blocked: 'Bloqueada', resolved: 'Resuelto', retired: 'Retirada', retention_hold: 'Baja retenida' } as Record<string, string>)[value];
+  const workflow = ({ pending: t('Pendiente'), in_progress: 'En curso', blocked: 'Bloqueada', resolved: t('Resuelto'), retired: 'Retirada', retention_hold: t('Baja retenida') } as Record<string, string>)[value];
   return workflow || actionLabel(value.replace(/_/g, ' '));
 };
 
@@ -136,5 +136,5 @@ export const versionListLabel = (versions: Array<string | null | undefined> | nu
   const visible = (versions || [])
     .map((value) => (value || '').trim())
     .filter((value) => value && value !== '0.0.0.0');
-  return visible.length ? visible.join(', ') : 'Sin versión observada';
+  return visible.length ? visible.join(', ') : t('Sin versión observada');
 };

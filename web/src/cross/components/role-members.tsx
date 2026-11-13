@@ -38,7 +38,7 @@ function MembersPanel({ roleCode, roleName, canAssign, canGrant = canAssign, cur
     setError('');
     listPeople({ search: '', roleFilter: roleCode, statusFilter: '', page, pageSize: PAGE_SIZE })
       .then((result) => { if (cancelled) return; setRows(result.rows.flatMap((person) => person.identities.filter((identity) => identity.roles.includes(roleCode)))); setTotal(result.total); })
-      .catch((reason: unknown) => { if (!cancelled) setError(reason instanceof Error ? reason.message : 'No se pudieron cargar los miembros'); });
+      .catch((reason: unknown) => { if (!cancelled) setError(reason instanceof Error ? reason.message : t('No se pudieron cargar los miembros')); });
     return () => { cancelled = true; };
   }, [roleCode, page, attempt]);
 
@@ -62,29 +62,29 @@ function MembersPanel({ roleCode, roleName, canAssign, canGrant = canAssign, cur
       if (action === 'grant') { setQuery(''); setCandidates([]); }
       setAttempt((value) => value + 1);
       onChanged();
-    } catch (reason) { onError(reason instanceof Error ? reason.message : 'No se pudo cambiar el miembro'); } finally { setBusy(false); }
+    } catch (reason) { onError(reason instanceof Error ? reason.message : t('No se pudo cambiar el miembro')); } finally { setBusy(false); }
   };
 
   return <div className="role-members-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <div ref={panelRef} className="role-members-panel" role="dialog" aria-modal="true" aria-labelledby="role-members-title" tabIndex={-1}>
-      <header><h3 id="role-members-title">Miembros de {roleName}</h3><button type="button" className="icon-button" aria-label={t('Cerrar miembros')} onClick={onClose}><X size={16} /></button></header>
+      <header><h3 id="role-members-title">{t('Miembros de {roleName}', { roleName: roleName })}</h3><button type="button" className="icon-button" aria-label={t('Cerrar miembros')} onClick={onClose}><X size={16} /></button></header>
       {canGrant && <div className="role-members-add">
         <label className="sr-only" htmlFor="role-member-search">Agregar miembro a {roleName}</label>
         <input id="role-member-search" type="search" placeholder={t('Agregar por nombre o correo')} value={query} disabled={busy} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
         {candidates.length > 0 && <ul aria-label={t('Personas para agregar')}>{candidates.map((user) => <li key={user.actor_id}>
           <span>{user.display_name} <small>{user.email} · {accountLabel(user)}</small></span>
-          <button type="button" className="icon-button" disabled={busy} aria-label={`Agregar ${user.display_name} (${accountLabel(user)})`} onClick={() => void change(user, 'grant')}><Plus size={14} /></button>
+          <button type="button" className="icon-button" disabled={busy} aria-label={t('Agregar {display_name} ({user})', { display_name: user.display_name, user: accountLabel(user) })} onClick={() => void change(user, 'grant')}><Plus size={14} /></button>
         </li>)}</ul>}
       </div>}
       {error ? <StateBlock compact variant="error" title={t('No se pudieron cargar los miembros')} hint={error} action={<button className="button subtle" type="button" onClick={() => setAttempt((value) => value + 1)}>{t('Reintentar')}</button>} />
         : !rows ? <StateBlock compact variant="loading" title={t('Cargando miembros')} />
           : !rows.length ? <p className="role-members-empty">{t('Nadie tiene este rol.')}</p>
-            : <ul className="role-members-list" aria-label={`Miembros de ${roleName}`}>{rows.map((user) => {
+            : <ul className="role-members-list" aria-label={t('Miembros de {roleName}', { roleName: roleName })}>{rows.map((user) => {
               const source = roleAssignments(user).find((assignment) => assignment.role_code === roleCode)?.source;
               const removable = canAssign && source === 'manual' && user.actor_id !== currentActorId;
               return <li key={user.actor_id}>
-                <span>{user.display_name} <small>{user.email || 'Sin correo'} · {accountLabel(user)}{source === 'oidc' ? t(' · por Okta') : ''}</small></span>
-                {removable ? <button type="button" className="icon-button" disabled={busy} aria-label={`Quitar ${roleName} a ${user.display_name}`} onClick={() => void change(user, 'revoke')}><X size={14} /></button> : null}
+                <span>{user.display_name} <small>{user.email || t('Sin correo')} · {accountLabel(user)}{source === 'oidc' ? t(' · por Okta') : ''}</small></span>
+                {removable ? <button type="button" className="icon-button" disabled={busy} aria-label={t('Quitar {roleName} a {display_name}', { roleName: roleName, display_name: user.display_name })} onClick={() => void change(user, 'revoke')}><X size={14} /></button> : null}
               </li>;
             })}</ul>}
       {total > PAGE_SIZE && <TablePagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />}

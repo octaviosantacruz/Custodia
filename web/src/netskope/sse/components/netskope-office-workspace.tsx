@@ -7,7 +7,7 @@ import { t } from '../../../cross/i18n/index.ts';
 
 type Props = { refreshKey: number; authChecked: boolean; authenticated: boolean; onUnauthorized: () => void };
 type Tab = 'office' | 'timeline';
-const TABS = [['office', 'Oficina, por semana'], ['timeline', 'Evolución diaria']] as const;
+const TABS = [['office', t('Oficina, por semana')], ['timeline', t('Evolución diaria')]] as const;
 
 /* NSK-EXP-OFFICE-001/002: strict workspace (netskope:uba_read) for the performance (ADEM) measured by Custodia:
    the weekly office summary and the daily timeline by company and person. Riesgo answers only risk; each person

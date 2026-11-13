@@ -19,7 +19,7 @@ export const registration = {
       runtime: 'cyberark',
       routingDomain: 'pam',
       category: { id: 'connections', order: 0 },
-      command: { tool: 'dshub', platform: 'dshub', aliases: ['conexiones', 'persona', 'personas', 'people', 'correo', 'vinculado', 'transversal', 'cobertura por persona'], priority: 5 },
+      command: { tool: 'dshub', platform: 'dshub', aliases: ['conexiones', 'persona', 'personas', 'people', 'correo', 'vinculado', 'transversal', t('cobertura por persona')], priority: 5 },
     },
     {
       id: 'users', path: '/admin/access', legacyPaths: ['/admin', '/access', '/users'], domain: 'admin',

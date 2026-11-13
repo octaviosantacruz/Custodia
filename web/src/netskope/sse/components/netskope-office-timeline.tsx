@@ -20,7 +20,7 @@ import { t } from '../../../cross/i18n/index.ts';
 
 type Place = 'office' | 'remote' | 'both';
 type Person = { email: string; name: string };
-const RANGES = [['30', '30 días'], ['90', '90 días'], ['180', '180 días'], ['dates', 'Fechas']] as const;
+const RANGES = [['30', t('30 días')], ['90', t('90 días')], ['180', t('180 días')], ['dates', 'Fechas']] as const;
 const KEPT_DAYS = 180;
 /** YYYY-MM-DD of the UTC day `offset` days from today (the measurement works in complete UTC days). */
 const utcDay = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
@@ -62,34 +62,34 @@ export function NetskopeOfficeTimeline({ enabled, refreshKey, onUnauthorized, on
   const data = query.data;
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   useEffect(() => { setSelected(new Set()); }, [data]);
-  const scope = company || 'Todas las empresas';
+  const scope = company || t('Todas las empresas');
   const personCompany = data?.person?.company ?? null;
   return <section className="list-panel database-surface nsk-office nsk-timeline" aria-label={t('Evolución diaria')}>
     <div className="nsk-attention-head">
       <h2>{t('Evolución diaria')}</h2>
       <HelpHint label={t('Evolución diaria')}>
-        <p>Puntaje de rendimiento digital (ADEM) promedio de cada día, medido por separado en los horarios en la oficina y en remoto. Cada persona pesa lo mismo, sin importar cuántas horas estuvo conectada.</p>
-        <p>Remoto incluye solo a quienes también van a la oficina, que son las personas que se miden. Un punto hueco es un día con menos de {data?.min_people ?? 5} personas medidas: el promedio es poco representativo.</p>
-        <p>Al elegir una persona, su línea se superpone al promedio del filtro de empresa. {PERFORMANCE_EXPLANATION} {PERFORMANCE_SCALE}</p>
+        <p>{t('Puntaje de rendimiento digital (ADEM) promedio de cada día, medido por separado en los horarios en la oficina y en remoto. Cada persona pesa lo mismo, sin importar cuántas horas estuvo conectada.')}</p>
+        <p>{t('Remoto incluye solo a quienes también van a la oficina, que son las personas que se miden. Un punto hueco es un día con menos de {min_people} personas medidas: el promedio es poco representativo.', { min_people: data?.min_people ?? 5 })}</p>
+        <p>{t('Al elegir una persona, su línea se superpone al promedio del filtro de empresa. {PERFORMANCE_EXPLANATION} {PERFORMANCE_SCALE}', { PERFORMANCE_EXPLANATION: PERFORMANCE_EXPLANATION, PERFORMANCE_SCALE: PERFORMANCE_SCALE })}</p>
       </HelpHint>
     </div>
     <div className="nsk-timeline-controls">
       <CompactSelect ariaLabel={t('Empresa')} value={company} onChange={setCompany}
         options={[{ value: ALL, label: t('Todas las empresas') }, ...(data?.companies ?? []).map((row) => ({ value: row.company, label: `${row.company} · ${formatNumber(row.people)}` }))]} />
       <PersonPicker person={person} onChange={setPerson} enabled={enabled} />
-      <OfficeSwitch label={t('Lugar')} value={place} onChange={setPlace} options={[['both', 'Oficina y remoto'], ['office', 'Oficina'], ['remote', 'Remoto']]} />
+      <OfficeSwitch label={t('Lugar')} value={place} onChange={setPlace} options={[['both', t('Oficina y remoto')], ['office', t('Oficina')], ['remote', t('Remoto')]]} />
       <OfficeSwitch label={t('Período')} value={days} onChange={setDays} options={RANGES} />
       {dates ? <DateRangeField label={t('Fechas')} value={range} onChange={setRange} min={utcDay(-KEPT_DAYS)} max={utcDay(-1)}
         presets={[{ label: t('Ayer'), range: { start: utcDay(-1), end: utcDay(-1) } }, { label: t('Últimos 7 días'), range: { start: utcDay(-7), end: utcDay(-1) } }, { label: t('Últimos 30 días'), range: { start: utcDay(-30), end: utcDay(-1) } }]} /> : null}
     </div>
     {person && data?.person ? <p className="nsk-timeline-person-note">
-      <button type="button" className="button subtle" onClick={() => onPick({ email: person.email, name: data.person?.name ?? person.name })}>Abrir ficha de {data.person.name || person.name}</button>
-      {personCompany && personCompany !== company ? <button type="button" className="button subtle" onClick={() => setCompany(personCompany)}>Comparar con su empresa ({personCompany})</button> : null}
+      <button type="button" className="button subtle" onClick={() => onPick({ email: person.email, name: data.person?.name ?? person.name })}>{t('Abrir ficha de {name}', { name: data.person.name || person.name })}</button>
+      {personCompany && personCompany !== company ? <button type="button" className="button subtle" onClick={() => setCompany(personCompany)}>{t('Comparar con su empresa ({personCompany})', { personCompany: personCompany })}</button> : null}
     </p> : null}
     {!validRange ? <StateBlock compact variant="empty" title={t('Elegí un rango válido')} hint="«Desde» tiene que ser anterior o igual a «Hasta». Se guardan los últimos 180 días completos." />
       : query.isPending ? <StateBlock compact variant="loading" title={t('Leyendo la evolución diaria…')} />
       : query.isError || !data || !Array.isArray(data.points) ? <StateBlock compact variant="error" title={t('No se pudo leer la evolución diaria')} action={<button type="button" className="button subtle" onClick={() => void query.refetch()}>{t('Reintentar lectura')}</button>} />
-      : !data.points.length ? <StateBlock compact variant="empty" title={t('Todavía no hay días medidos en este período')} hint={company ? `Puede que ${company} no tenga personas medidas.` : undefined} />
+      : !data.points.length ? <StateBlock compact variant="empty" title={t('Todavía no hay días medidos en este período')} hint={company ? t('Puede que {company} no tenga personas medidas.', { company: company }) : undefined} />
       : <>
         <PeriodSummary data={data} place={place} scope={scope} personName={person ? data.person?.name || person.name : null} selected={selected} onClear={() => setSelected(new Set())} />
         <TimelineChart data={data} place={place} scope={scope} personName={person ? data.person?.name || person.name : null} selected={selected} onSelect={setSelected} />
@@ -109,7 +109,7 @@ function PersonPicker({ person, onChange, enabled }: { person: Person | null; on
   });
   if (person) {
     return <span className="nsk-timeline-chip">{person.name}
-      <button type="button" aria-label={`Quitar a ${person.name}`} onClick={() => onChange(null)}><X size={12} aria-hidden /></button>
+      <button type="button" aria-label={t('Quitar a {name}', { name: person.name })} onClick={() => onChange(null)}><X size={12} aria-hidden /></button>
     </span>;
   }
   const rows = (users.data?.rows ?? []).filter((row) => String(row.attributes.email || '').includes('@'));
@@ -127,7 +127,7 @@ function PersonPicker({ person, onChange, enabled }: { person: Person | null; on
 
 /** "12, 13 y 16 oct"-style list for a few days; a long selection reads as its first and last day and a count. */
 function daysLabel(days: string[]) {
-  if (days.length <= 4) return days.length === 1 ? dayLabel(days[0]) : `${days.slice(0, -1).map(dayLabel).join(', ')} y ${dayLabel(days[days.length - 1])}`;
+  if (days.length <= 4) return days.length === 1 ? dayLabel(days[0]) : t('{dayLabel} y {days}', { dayLabel: days.slice(0, -1).map(dayLabel).join(', '), days: dayLabel(days[days.length - 1]) });
   return `${dayLabel(days[0])} al ${dayLabel(days[days.length - 1])}`;
 }
 
@@ -142,7 +142,7 @@ function PeriodSummary({ data, place, scope, personName, selected, onClear }: {
     const present = values.filter((value): value is number => typeof value === 'number');
     return present.length ? Math.round((present.reduce((sum, value) => sum + value, 0) / present.length) * 10) / 10 : null;
   };
-  const show = (value: number | null) => (value === null ? 'sin dato' : formatNumber(value));
+  const show = (value: number | null) => (value === null ? t('sin dato') : formatNumber(value));
   const one = measured.length === 1 ? measured[0] : null;
   const places = place === 'both' ? (['office', 'remote'] as const) : ([place] as const);
   const days = shown.map((point) => point.day);
@@ -157,7 +157,7 @@ function PeriodSummary({ data, place, scope, personName, selected, onClear }: {
       return <span key={where}><i className={`nsk-office-line-swatch is-${where}${mutedWhen(personName)}`} aria-hidden />{name} · {scope} <strong>{show(value)}</strong>{people !== null ? <small> · {formatNumber(people ?? 0)} personas</small> : null}</span>;
     })}
     {selected.size ? <button type="button" className="button subtle" onClick={onClear}>{t('Quitar selección')}</button> : null}
-    {personName ? places.map((where) => <span key={`p-${where}`}><i className={`nsk-office-line-swatch is-${where} is-person`} aria-hidden />{personName} en {where === 'office' ? 'oficina' : 'remoto'} <strong>{show(mean(measured.map((point) => (where === 'office' ? point.person_office : point.person_remote))))}</strong></span>) : null}
+    {personName ? places.map((where) => <span key={`p-${where}`}><i className={`nsk-office-line-swatch is-${where} is-person`} aria-hidden />{t('{personName} en {remoto}', { personName: personName, remoto: where === 'office' ? 'oficina' : 'remoto' })} <strong>{show(mean(measured.map((point) => (where === 'office' ? point.person_office : point.person_remote))))}</strong></span>) : null}
   </p>;
 }
 
@@ -254,13 +254,13 @@ function TimelineChart({ data, place, scope, personName, selected, onSelect }: {
   };
   const tickEvery = Math.max(1, Math.ceil(points.length / 8));
   const few = (line: Line, point: NetskopeOfficeTimelinePoint) => !line.person && (line.people?.(point) ?? 0) < data.min_people;
-  const describe = (point: NetskopeOfficeTimelinePoint) => !point.measured ? `${dayLabel(point.day)}: sin medición`
+  const describe = (point: NetskopeOfficeTimelinePoint) => !point.measured ? t('{day}: sin medición', { day: dayLabel(point.day) })
     : `${dayLabel(point.day)}: ${lines.map((line) => { const value = line.value(point); return `${line.label} ${typeof value === 'number' ? formatNumber(value) : 'sin dato'}${line.people ? ` (${formatNumber(line.people(point) ?? 0)} personas)` : ''}`; }).join('; ')}`;
   const activePoint = active === null ? null : points[active];
   return <figure className="nsk-office-trend nsk-timeline-chart">
     {/* The period summary above names each line with its swatch, so it doubles as the legend. */}
     <figcaption className="nsk-timeline-caption">
-      <span className="nsk-attention-explanation">{table ? null : 'Clic en un día para verlo; arrastrá para elegir varios seguidos; Ctrl (⌘ en Mac) + clic suma o quita días sueltos.'}</span>
+      <span className="nsk-attention-explanation">{table ? null : t('Clic en un día para verlo; arrastrá para elegir varios seguidos; Ctrl (⌘ en Mac) + clic suma o quita días sueltos.')}</span>
       <button type="button" className="button subtle" aria-pressed={table} onClick={() => setTable((value) => !value)}>{table ? t('Ver gráfico') : t('Ver como tabla')}</button>
     </figcaption>
     {points.filter((point) => point.measured).length < 2 ? <p className="nsk-attention-explanation">{t('Un solo día medido: la línea aparece desde el segundo.')}</p> : null}
@@ -300,7 +300,7 @@ function TimelineChart({ data, place, scope, personName, selected, onSelect }: {
           {!activePoint.measured ? <span>{t('Sin medición')}</span> : lines.map((line) => {
             const value = line.value(activePoint);
             return <span key={line.key}><i className={`nsk-office-line-swatch is-${line.place}${line.person ? ' is-person' : ''}`} aria-hidden />
-              {line.label} {typeof value === 'number' ? formatNumber(value) : 'sin dato'}
+              {line.label} {typeof value === 'number' ? formatNumber(value) : t('sin dato')}
               {line.people ? ` · ${formatNumber(line.people(activePoint) ?? 0)} personas${few(line, activePoint) ? ' (pocas)' : ''}` : ''}</span>;
           })}
         </div> : null}

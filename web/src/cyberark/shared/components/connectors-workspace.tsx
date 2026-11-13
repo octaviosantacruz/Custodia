@@ -3,6 +3,7 @@ import { CompactSelect } from '../../../cross/components/compact-select';
 import { PamConnectorsWorkspace } from '../../pam/components/pam-platforms-workspace';
 import { ConnectorManagerCatalog } from '../../connector_manager/components/connector-manager-catalog';
 import { usePamRefreshKey } from '../refresh-context';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Props = {
   authChecked: boolean; authenticated: boolean; onUnauthorized: () => void; onError: (message: string) => void;
@@ -14,7 +15,7 @@ type Inventory = 'psm' | 'sia' | 'pools' | 'networks';
 export function ConnectorsWorkspace(props: Props) {
   const [inventory, setInventory] = useState<Inventory>('psm');
   const refreshKey = usePamRefreshKey();
-  const selector = <CompactSelect ariaLabel="Elegir inventario de conectores" value={inventory} options={[
+  const selector = <CompactSelect ariaLabel={t('Elegir inventario de conectores')} value={inventory} options={[
     { value: 'psm', label: 'PSM' }, { value: 'sia', label: 'SIA' },
     { value: 'pools', label: 'Pools · Connector Manager' }, { value: 'networks', label: 'Redes · Connector Manager' },
   ]} onChange={(value) => setInventory(value as Inventory)} />;

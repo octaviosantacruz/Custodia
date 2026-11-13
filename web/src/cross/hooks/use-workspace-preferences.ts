@@ -4,6 +4,7 @@ import { ApiError } from '../lib/api';
 import { fetchWorkspacePreferences, saveWorkspacePreferences, type WorkspacePreferences } from '../lib/workspace-preferences-api';
 import type { WorkspaceView } from '../lib/workspaces';
 import { recordRecentWorkspace } from '../lib/command-center';
+import { t } from '../i18n/index.ts';
 
 const defaults: WorkspacePreferences = {
   visible_workspaces: ['safes'],
@@ -30,7 +31,7 @@ export function useWorkspacePreferences({
 
   useEffect(() => {
     if (query.error instanceof ApiError && query.error.status === 401) { onUnauthorized(); return; }
-    if (query.error) onError(query.error instanceof Error ? query.error.message : 'No se pudieron cargar los accesos rápidos');
+    if (query.error) onError(query.error instanceof Error ? query.error.message : t('No se pudieron cargar los accesos rápidos'));
   }, [query.error, onError, onUnauthorized]);
 
   const preferences = authenticated && actorId ? (query.data ?? defaults) : defaults;
@@ -52,7 +53,7 @@ export function useWorkspacePreferences({
     queryClient.setQueryData(queryKey, { ...current, recent_workspaces });
     void save({ recent_workspaces }).catch((error) => {
       if (!(error instanceof ApiError && error.status === 401)) {
-        onError(error instanceof Error ? error.message : 'No se pudieron guardar los recientes');
+        onError(error instanceof Error ? error.message : t('No se pudieron guardar los recientes'));
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `queryKey` is derived from `actorId`, which is listed; the remaining inputs are stable

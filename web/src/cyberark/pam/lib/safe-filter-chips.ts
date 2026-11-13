@@ -58,10 +58,10 @@ const FILTER_ORDER: SafeFilterChipKeyWithAccountSearch[] = [
 export function buildSafeFilterChips(values: SafeFilterChipValues, labels: SafeFilterChipLabels = {}): SafeFilterChip[] {
   return FILTER_ORDER.flatMap<SafeFilterChip>((key): SafeFilterChip[] => {
     const value = values[key];
-    if (key === 'includeAccounts') return value ? [{ key, label: FILTER_LABELS[key], value: true, displayValue: 'Sí' }] : [];
+    if (key === 'includeAccounts') return value ? [{ key, label: FILTER_LABELS[key], value: true, displayValue: t('Sí') }] : [];
     if (typeof value !== 'string' || !value) return [];
     const displayValue = key === 'accountTypeFilter' && value === '__empty__'
-      ? 'Sin clasificar'
+      ? t('Sin clasificar')
       : labels[key]?.get(value) || KNOWN_VALUES[key]?.[value] || value.replaceAll('_', ' ');
     return [{ key, label: FILTER_LABELS[key], value, displayValue }];
   });

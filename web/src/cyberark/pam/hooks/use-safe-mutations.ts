@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateA
 import { api } from '../../../cross/lib/api';
 import type { Catalogs, MetadataForm, SafeRow, WorkflowStatus } from '../types/safe';
 import type { SafeDetailState } from './use-safe-detail';
+import { t } from '../../../cross/i18n/index.ts';
 
 type LoadDashboard = (options?: { refreshStatic?: boolean }) => Promise<void>;
 
@@ -50,7 +51,7 @@ export function useSafeMutations({
       onNotice('Cambio guardado');
       flashSaved(safe.safe_number);
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo guardar el cambio');
+      onError(error instanceof Error ? error.message : t('No se pudo guardar el cambio'));
     } finally {
       setSavingSafeNumber(null);
     }
@@ -68,10 +69,10 @@ export function useSafeMutations({
         responsible_name: responsible?.display_name || null,
         classification_status: assignment.business_unit_id && assignment.responsible_id ? 'assigned' : 'pending',
       } : row));
-      onNotice('Asignación guardada');
+      onNotice(t('Asignación guardada'));
       flashSaved(safe.safe_number);
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo guardar la asignación');
+      onError(error instanceof Error ? error.message : t('No se pudo guardar la asignación'));
       throw error;
     } finally {
       setSavingSafeNumber(null);
@@ -118,11 +119,11 @@ export function useSafeMutations({
           business_unit_id: changes.business_unit_id as number | null,
           responsible_id: changes.responsible_id as number | null,
         })));
-        if (!missing.size) onNotice(`Asignación aplicada a ${result.updated} ${result.updated === 1 ? 'Safe' : 'Safes'}.`);
-        else onError(`Se aplicó a ${result.updated} de ${rows.length}. ${missing.size} ya no existen en el inventario.`);
+        if (!missing.size) onNotice(t('Asignación aplicada a {updated} {Safes}.', { updated: result.updated, Safes: result.updated === 1 ? 'Safe' : 'Safes' }));
+        else onError(t('Se aplicó a {updated} de {rows}. {size} ya no existen en el inventario.', { updated: result.updated, rows: rows.length, size: missing.size }));
         return [...missing];
       } catch (error) {
-        onError(error instanceof Error ? error.message : 'No se pudo aplicar la reclasificación masiva');
+        onError(error instanceof Error ? error.message : t('No se pudo aplicar la reclasificación masiva'));
         return rows.map((row) => row.safe_number);
       }
     }
@@ -145,11 +146,11 @@ export function useSafeMutations({
     setSavingSafeNumber(null);
     applyBulkRowUpdate(succeeded);
     if (failed.length === 0) {
-      onNotice(`Asignación aplicada a ${succeeded.length} ${succeeded.length === 1 ? 'Safe' : 'Safes'}.`);
+      onNotice(t('Asignación aplicada a {succeeded} {Safes}.', { succeeded: succeeded.length, Safes: succeeded.length === 1 ? 'Safe' : 'Safes' }));
     } else if (succeeded.length === 0) {
-      onError(`No se pudo aplicar la asignación a ninguna de las ${failed.length} Safes seleccionadas.`);
+      onError(t('No se pudo aplicar la asignación a ninguna de las {failed} Safes seleccionadas.', { failed: failed.length }));
     } else {
-      onError(`Se aplicó a ${succeeded.length} de ${rows.length} Safes. ${failed.length} fallaron, podés reintentar con las que quedaron seleccionadas.`);
+      onError(t('Se aplicó a {succeeded} de {rows} Safes. {failed} fallaron, podés reintentar con las que quedaron seleccionadas.', { succeeded: succeeded.length, rows: rows.length, failed: failed.length }));
     }
     return failed;
   }, [applyBulkRowUpdate, onError, onNotice, setSavingSafeNumber]);
@@ -159,11 +160,11 @@ export function useSafeMutations({
     setSaving(true);
     try {
       await api(`/safes/${detail.safe.safe_number}/metadata`, { method: 'PATCH', body: JSON.stringify(form) });
-      onNotice('Clasificación guardada');
+      onNotice(t('Clasificación guardada'));
       flashSaved(detail.safe.safe_number);
       await Promise.all([loadDashboard({ refreshStatic: true }), selectSafe(detail.safe.safe_number)]);
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo guardar');
+      onError(error instanceof Error ? error.message : t('No se pudo guardar'));
       throw error;
     } finally {
       setSaving(false);

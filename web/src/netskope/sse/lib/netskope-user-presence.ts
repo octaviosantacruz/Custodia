@@ -3,6 +3,7 @@
    on each device. A user is "in office" when any device with a recent signal is, and
    "outside" only when every device Netskope could classify is off-prem. */
 import type { NetskopeRow } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type UserDevicePresence = {
   objectId: number;
@@ -42,10 +43,10 @@ export function userPresenceVerdict(devices: readonly UserDevicePresence[]): Use
 
 export const USER_PRESENCE_LABELS: Record<UserPresenceVerdict, string> = {
   office: 'En oficina',
-  remote: 'Fuera de oficina',
-  unknown: 'Sin dato de ubicación',
-  no_recent: 'Sin señal reciente',
-  no_devices: 'Sin equipos vinculados',
+  remote: t('Fuera de oficina'),
+  unknown: t('Sin dato de ubicación'),
+  no_recent: t('Sin señal reciente'),
+  no_devices: t('Sin equipos vinculados'),
 };
 
 export function userPresenceTone(verdict: UserPresenceVerdict): 'success' | 'info' | 'neutral' {

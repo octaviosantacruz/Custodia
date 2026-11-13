@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { createBusinessUnit, createResponsible } from '../lib/catalog-api';
+import { t } from '../../../cross/i18n/index.ts';
 
 type CatalogKind = 'unit' | 'responsible';
 type LoadDashboard = (options?: { refreshStatic?: boolean }) => Promise<void>;
@@ -32,9 +33,9 @@ export function useCatalogForm({ loadDashboard, onError, onNotice }: UseCatalogF
       }
       await loadDashboard({ refreshStatic: true });
       setCatalogModal(null);
-      onNotice(catalogModal === 'unit' ? 'Unidad agregada' : 'Responsable agregado');
+      onNotice(catalogModal === 'unit' ? t('Unidad agregada') : t('Responsable agregado'));
     } catch (error) {
-      onError(error instanceof Error ? error.message : 'No se pudo guardar');
+      onError(error instanceof Error ? error.message : t('No se pudo guardar'));
     } finally {
       setCatalogBusy(false);
     }

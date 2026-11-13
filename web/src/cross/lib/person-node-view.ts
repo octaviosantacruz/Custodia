@@ -24,30 +24,30 @@ export const PERSON_TOOL_LABELS: Record<PersonSource, string> = {
   netskope: 'Netskope',
 };
 
-const EMAIL_BASIS = 'Correo exacto 1 a 1 (misma dirección normalizada)';
-const SIA_BASIS = 'Referencia por nombre, no confirmada';
-const AMBIGUOUS_BASIS = 'La regla 1 a 1 exige un único candidato activo por lado';
-const NO_RECORD = 'No hay registro de esta persona en la herramienta.';
-const SIA_ONLY_BASIS = 'No tiene usuario propio en PAM: políticas de SIA lo nombran por su usuario de Identity o por uno de sus roles de Identity, siempre por nombre exacto (un rol repetido no cuenta). Es una referencia por nombre, no un identificador común.';
-const ROLE_BASIS = 'No tiene usuario propio en PAM: su rol de Identity coincide por nombre exacto y único con un rol de PAM que da acceso a Safes. Es una referencia por nombre, no un identificador común.';
+const EMAIL_BASIS = t('Correo exacto 1 a 1 (misma dirección normalizada)');
+const SIA_BASIS = t('Referencia por nombre, no confirmada');
+const AMBIGUOUS_BASIS = t('La regla 1 a 1 exige un único candidato activo por lado');
+const NO_RECORD = t('No hay registro de esta persona en la herramienta.');
+const SIA_ONLY_BASIS = t('No tiene usuario propio en PAM: políticas de SIA lo nombran por su usuario de Identity o por uno de sus roles de Identity, siempre por nombre exacto (un rol repetido no cuenta). Es una referencia por nombre, no un identificador común.');
+const ROLE_BASIS = t('No tiene usuario propio en PAM: su rol de Identity coincide por nombre exacto y único con un rol de PAM que da acceso a Safes. Es una referencia por nombre, no un identificador común.');
 
 function pamCopy(tool: PersonToolSummary): string {
   const totals = tool.totals;
-  if (!totals) return 'Usuario PAM resuelto.';
-  return `${formatNumber(totals.roles)} roles · ${formatNumber(totals.safes)} Safes · ${formatNumber(totals.accounts)} cuentas`;
+  if (!totals) return t('Usuario PAM resuelto.');
+  return t('{roles} roles · {safes} Safes · {accounts} cuentas', { roles: formatNumber(totals.roles), safes: formatNumber(totals.safes), accounts: formatNumber(totals.accounts) });
 }
 
 function identityCopy(tool: PersonToolSummary): string {
   const parts = [`${formatNumber(tool.role_count ?? 0)} roles`];
-  parts.push(tool.federation ? `federación ${tool.federation.display_name}` : 'sin federación esperada');
-  if (tool.user?.last_login_date) parts.push(`último acceso ${tool.user.last_login_date}`);
+  parts.push(tool.federation ? t('federación {display_name}', { display_name: tool.federation.display_name }) : t('sin federación esperada'));
+  if (tool.user?.last_login_date) parts.push(t('último acceso {last_login_date}', { last_login_date: tool.user.last_login_date }));
   return parts.join(' · ');
 }
 
 function netskopeCopy(tool: PersonToolSummary): string {
   const recent = tool.device_count ?? 0;
   const parts = [`${formatNumber(recent)} ${recent === 1 ? t('dispositivo reciente') : t('dispositivos recientes')}`];
-  if (tool.stale_device_count) parts.push(`${formatNumber(tool.stale_device_count)} sin actividad en 7 días`);
+  if (tool.stale_device_count) parts.push(t('{stale_device_count} sin actividad en 7 días', { stale_device_count: formatNumber(tool.stale_device_count) }));
   if (tool.company) parts.push(tool.company);
   const versions = tool.client_versions ?? [];
   if (versions.length) parts.push(`cliente ${versions.join(', ')}`);
@@ -74,19 +74,19 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
   if (source === 'pam' && tool?.status === 'unmatched' && siaPolicies > 0) {
     return {
       tone: 'info',
-      statusLabel: 'Acceso por SIA · nombre exacto',
+      statusLabel: t('Acceso por SIA · nombre exacto'),
       summary: `${formatNumber(siaPolicies)} ${siaPolicies === 1 ? t('política de SIA') : t('políticas de SIA')}`,
       why: SIA_ONLY_BASIS,
       openable: false,
     };
   }
   if (!tool || tool.status === 'unmatched') {
-    return { tone: 'neutral', statusLabel: 'Sin registro', summary: NO_RECORD, why: '', openable: false };
+    return { tone: 'neutral', statusLabel: t('Sin registro'), summary: NO_RECORD, why: '', openable: false };
   }
   if (tool.status === 'ambiguous') {
     return {
       tone: 'warning',
-      statusLabel: 'Vínculo ambiguo',
+      statusLabel: t('Vínculo ambiguo'),
       summary: t('Varios registros activos comparten el correo exacto; no se dibuja ningún vínculo.'),
       why: AMBIGUOUS_BASIS,
       openable: false,
@@ -95,7 +95,7 @@ export function personToolView(source: PersonSource, tool: PersonToolSummary | u
   if (tool.status === 'reference') {
     return {
       tone: 'info',
-      statusLabel: 'Referencia por nombre',
+      statusLabel: t('Referencia por nombre'),
       summary: t('{n} políticas de SIA nombran a la persona por usuario o por rol de Identity.', { n: formatNumber(tool.policy_count ?? 0) }),
       why: SIA_BASIS,
       openable: false,

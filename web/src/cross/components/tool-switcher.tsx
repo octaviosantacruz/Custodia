@@ -99,7 +99,7 @@ export function ToolSwitcher({ isHome = false, workspaceView, permissions, onWor
             type="button"
             aria-current={active ? 'page' : undefined}
             aria-disabled={soon ? true : undefined}
-            title={soon ? `${meta.label}: disponible próximamente` : `Abrir ${meta.label}`}
+            title={soon ? t('{meta}: disponible próximamente', { meta: meta.label }) : t('Abrir {meta}', { meta: meta.label })}
             onClick={() => { if (!soon) pickDomain(domain.id); }}
           >
             <span className="tool-menu-icon"><ToolMark meta={meta} size={18} /></span>

@@ -38,8 +38,8 @@ export function LoadMore({ loaded, total, pageSize, loading, onLoadMore }: LoadM
       <span className="table-footer-progress" aria-hidden="true"><span style={{ width: `${percent}%` }} /></span>
       <span className="table-footer-meta">{hasMore ? t('Faltan {n}', { n: formatNumber(remaining) }) : t('Todo cargado')}</span>
     </div>
-    {hasMore && <button className="button subtle" type="button" title={`Agregar las próximas ${formatNumber(nextBatch)} filas sin perder las actuales`} disabled={loading} onClick={onLoadMore}>
-      {loading ? 'Cargando…' : `Cargar ${formatNumber(nextBatch)} más`}
+    {hasMore && <button className="button subtle" type="button" title={t('Agregar las próximas {nextBatch} filas sin perder las actuales', { nextBatch: formatNumber(nextBatch) })} disabled={loading} onClick={onLoadMore}>
+      {loading ? 'Cargando…' : t('Cargar {nextBatch} más', { nextBatch: formatNumber(nextBatch) })}
     </button>}
   </div>;
 }

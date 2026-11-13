@@ -25,7 +25,7 @@ export function MetricReading({ title, code, meaning, population, capture, formu
     {expanded
       ? <div className="metric-reading-details">{details}</div>
       : <details className="metric-reading-details">
-        <summary role="button" aria-label={`Explicar ${title}`}>{t('Explicar')}</summary>
+        <summary role="button" aria-label={t('Explicar {title}', { title: title })}>{t('Explicar')}</summary>
         {details}
       </details>}
   </div>;

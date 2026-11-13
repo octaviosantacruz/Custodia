@@ -6,6 +6,7 @@ import { useDebouncedValue } from '../../../cross/hooks/use-debounced-value';
 import { usePamRefreshKey } from '../../shared/refresh-context';
 import { roleDetailEnabled, type PamIdentityKind } from '../lib/pam-identity-classification';
 import type { PamRoleDetail } from '../types/pam';
+import { t } from '../../../cross/i18n/index.ts';
 
 const PAGE_SIZE = 50;
 
@@ -38,7 +39,7 @@ export function usePamRoles({ authChecked, authenticated, onUnauthorized, onErro
 
   useEffect(() => {
     if (query.error instanceof ApiError && query.error.status === 401) { onUnauthorized(); return; }
-    onError(query.error ? (query.error instanceof Error ? query.error.message : 'No se pudieron cargar los roles PAM') : '');
+    onError(query.error ? (query.error instanceof Error ? query.error.message : t('No se pudieron cargar los roles PAM')) : '');
   }, [query.error, onError, onUnauthorized]);
 
   useEffect(() => { setExpanded(new Set()); }, [initialQuery]);
@@ -71,7 +72,7 @@ export function usePamRoles({ authChecked, authenticated, onUnauthorized, onErro
     expandedIds
       .map((objectId, index) => [objectId, detailQueries[index]?.error] as const)
       .filter((entry): entry is [number, Error] => Boolean(entry[1]))
-      .map(([objectId, error]) => [objectId, error instanceof Error ? error.message : 'No se pudo cargar el detalle del rol']),
+      .map(([objectId, error]) => [objectId, error instanceof Error ? error.message : t('No se pudo cargar el detalle del rol')]),
   );
 
   const toggleExpanded = (objectId: number) => {
@@ -92,7 +93,7 @@ export function usePamRoles({ authChecked, authenticated, onUnauthorized, onErro
     },
     loading: query.isLoading || query.isFetching,
     roles, total, hasMore: roles.length < total,
-    loadError: query.error instanceof Error ? query.error.message : query.error ? 'No se pudieron cargar los roles PAM' : '',
+    loadError: query.error instanceof Error ? query.error.message : query.error ? t('No se pudieron cargar los roles PAM') : '',
     expanded, details, detailLoading, detailErrors, toggleExpanded,
     loadDetail: toggleExpanded,
     reload: async () => { await query.refetch(); },

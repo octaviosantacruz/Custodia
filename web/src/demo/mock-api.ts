@@ -22,7 +22,7 @@ export const unauthenticated = {
 export type MockOptions = { onRequest?: (pathname: string) => void; permissions?: string[]; authMode?: 'local' | 'oidc' | 'hybrid'; sessionUser?: Record<string, unknown>; userRows?: Record<string, unknown>[]; includeSafe?: boolean; largeInventory?: boolean; decommissionCandidate?: boolean; accountManagementUnavailable?: boolean; initialVisibleWorkspaces?: string[]; initialRecentWorkspaces?: string[]; dashboardWidgets?: Record<string, unknown>[]; latestRun?: Record<string, unknown> | null; apiDocsEnabled?: boolean; netskopeMetrics?: Record<string, unknown> };
 
 export function createMockApi(options: MockOptions = {}): (request: MockRequest) => Promise<MockResponse> {
-  const { onRequest, permissions = ['inventory:read', 'inventory:write', 'catalogs:write', 'access:manage', 'safes:read', 'safes:manage', 'coverage:read', 'coverage:manage', 'ingestion:preview', 'ingestion:run', 'findings:manage', 'catalogs:manage'], authMode = 'local', sessionUser = { actor_id: 'operator-1', name: 'Operador', email: 'operator@example.com', roles: ['operator'], role_names: ['Operador de plataforma'] }, userRows = [{ actor_id: 'carlos@example.com', email: 'carlos@example.com', display_name: 'Carlos Ortiz', is_active: true, must_change_password: false, roles: ['admin'], auth_source: 'local', last_login_at: null }], includeSafe = false, largeInventory = false, decommissionCandidate = false, accountManagementUnavailable = false, initialVisibleWorkspaces = ['safes'], initialRecentWorkspaces = [], dashboardWidgets, latestRun = null, apiDocsEnabled = true, netskopeMetrics = {} } = options;
+  const { onRequest, permissions = ['inventory:read', 'inventory:write', 'catalogs:write', 'access:manage', 'safes:read', 'safes:manage', 'coverage:read', 'coverage:manage', 'ingestion:preview', 'ingestion:run', 'findings:manage', 'catalogs:manage'], authMode = 'local', sessionUser = { actor_id: 'operator-1', name: 'Operador', email: 'operator@example.com', roles: ['operator'], role_names: [t('Operador de plataforma')] }, userRows = [{ actor_id: 'carlos@example.com', email: 'carlos@example.com', display_name: 'Carlos Ortiz', is_active: true, must_change_password: false, roles: ['admin'], auth_source: 'local', last_login_at: null }], includeSafe = false, largeInventory = false, decommissionCandidate = false, accountManagementUnavailable = false, initialVisibleWorkspaces = ['safes'], initialRecentWorkspaces = [], dashboardWidgets, latestRun = null, apiDocsEnabled = true, netskopeMetrics = {} } = options;
   const peopleByEmail = new Map<string, { key: string; email: string; display_name: string; identities: Record<string, unknown>[] }>();
   for (const user of userRows) {
     const email = String(user.email || '');
@@ -45,7 +45,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
       await route.fulfill({
         status: 410,
         contentType: 'application/json',
-        body: JSON.stringify({ detail: 'La investigación de incidentes y eventos DLP individuales está retirada.' }),
+        body: JSON.stringify({ detail: t('La investigación de incidentes y eventos DLP individuales está retirada.') }),
       });
       return;
     }
@@ -61,10 +61,10 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
       '/api/auth/access-review': { rows: [], total: 0, limit: 25, offset: 0, days: 90, summary: { assignments: 0, attention: 0, inactive_account: 0, manual_old: 0, stale_login: 0 } },
       '/api/auth/people': { rows: [...peopleByEmail.values()], total: peopleByEmail.size, limit: 20, offset: 0 },
       '/api/access/roles': { rows: [
-        { role_code: 'reader', display_name: 'Lector de plataforma', description: 'Consulta básica', domain_code: 'platform', role_kind: 'direct', lifecycle_status: 'active', system_managed: true, permission_codes: ['inventory:read'], level_refs: [], user_count: 0 },
-        { role_code: 'admin', display_name: 'Administrador de plataforma', description: 'Administración completa', domain_code: 'platform', role_kind: 'direct', lifecycle_status: 'active', system_managed: true, permission_codes: ['inventory:read', 'inventory:write', 'inventory:export', 'catalogs:read', 'catalogs:write', 'access:manage', 'domain:pam', 'domain:admin'], level_refs: [], user_count: 1, oidc_groups: ['sg_ds-hub_admins'] },
-        { role_code: 'netskope_reader', display_name: 'Netskope · Lector', description: 'Lectura del espacio Netskope', domain_code: 'dlp', role_kind: 'direct', lifecycle_status: 'active', system_managed: true, permission_codes: ['domain:dlp', 'netskope:read'], level_refs: [], user_count: 0 },
-        { role_code: 'security_reader', display_name: 'Lectura de seguridad', description: 'Lectura transversal', domain_code: null, role_kind: 'composite', lifecycle_status: 'active', system_managed: false, permission_codes: ['inventory:read', 'domain:dlp', 'netskope:read'], level_refs: [{ domain_code: 'platform', level_code: 'reader' }, { domain_code: 'dlp', level_code: 'reader' }], user_count: 0 },
+        { role_code: 'reader', display_name: t('Lector de plataforma'), description: t('Consulta básica'), domain_code: 'platform', role_kind: 'direct', lifecycle_status: 'active', system_managed: true, permission_codes: ['inventory:read'], level_refs: [], user_count: 0 },
+        { role_code: 'admin', display_name: t('Administrador de plataforma'), description: t('Administración completa'), domain_code: 'platform', role_kind: 'direct', lifecycle_status: 'active', system_managed: true, permission_codes: ['inventory:read', 'inventory:write', 'inventory:export', 'catalogs:read', 'catalogs:write', 'access:manage', 'domain:pam', 'domain:admin'], level_refs: [], user_count: 1, oidc_groups: ['sg_ds-hub_admins'] },
+        { role_code: 'netskope_reader', display_name: 'Netskope · Lector', description: t('Lectura del espacio Netskope'), domain_code: 'dlp', role_kind: 'direct', lifecycle_status: 'active', system_managed: true, permission_codes: ['domain:dlp', 'netskope:read'], level_refs: [], user_count: 0 },
+        { role_code: 'security_reader', display_name: t('Lectura de seguridad'), description: 'Lectura transversal', domain_code: null, role_kind: 'composite', lifecycle_status: 'active', system_managed: false, permission_codes: ['inventory:read', 'domain:dlp', 'netskope:read'], level_refs: [{ domain_code: 'platform', level_code: 'reader' }, { domain_code: 'dlp', level_code: 'reader' }], user_count: 0 },
       ] },
       '/api/access/domains': { rows: [
         { domain_code: 'platform', display_name: 'Plataforma', lifecycle_status: 'active', sort_order: 10, levels: [{ level_code: 'reader', display_name: 'Lector', base_role_code: 'reader', lifecycle_status: 'active', permission_codes: ['inventory:read'] }, { level_code: 'admin', display_name: 'Administrador', base_role_code: 'admin', lifecycle_status: 'active', permission_codes: ['inventory:read', 'access:manage'] }] },
@@ -73,17 +73,17 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         { domain_code: 'dspm', display_name: 'BigID DSPM', lifecycle_status: 'planned', sort_order: 40, levels: [{ level_code: 'reader', display_name: 'Lector', base_role_code: 'bigid_reader', lifecycle_status: 'planned', permission_codes: ['domain:dspm', 'bigid:read'] }] },
       ] },
       '/api/auth/oidc-groups': { rows: [], observed_identities: 0, unobserved_identities: userRows.filter((user) => user.auth_source === 'oidc').length },
-      '/api/access/roles/composite': { created: true, role_code: 'security_lead', warning: { code: 'duplicate_combination', matching_role_code: 'security_reader', matching_role_name: 'Lectura de seguridad' } },
+      '/api/access/roles/composite': { created: true, role_code: 'security_lead', warning: { code: 'duplicate_combination', matching_role_code: 'security_reader', matching_role_name: t('Lectura de seguridad') } },
        '/api/access/permissions': { rows: [
          { permission_code: 'inventory:read', domain_code: 'pam', resource_code: 'inventory', action_code: 'read', description: 'Consultar inventario PAM', lifecycle_status: 'active', system_managed: true },
          ...[
-           ['inventory:write', 'pam', 'inventory', 'write', 'Editar inventario PAM'],
-           ['inventory:export', 'pam', 'inventory', 'export', 'Exportar inventario PAM'],
-           ['catalogs:read', 'pam', 'catalogs', 'read', 'Consultar catálogos PAM'],
-           ['catalogs:write', 'pam', 'catalogs', 'write', 'Editar catálogos PAM'],
-           ['access:manage', 'platform', 'access', 'manage', 'Administrar usuarios y permisos'],
+           ['inventory:write', 'pam', 'inventory', 'write', t('Editar inventario PAM')],
+           ['inventory:export', 'pam', 'inventory', 'export', t('Exportar inventario PAM')],
+           ['catalogs:read', 'pam', 'catalogs', 'read', t('Consultar catálogos PAM')],
+           ['catalogs:write', 'pam', 'catalogs', 'write', t('Editar catálogos PAM')],
+           ['access:manage', 'platform', 'access', 'manage', t('Administrar usuarios y permisos')],
            ['domain:pam', 'pam', 'domain', 'access', 'Ingresar a CyberArk PAM'],
-           ['domain:admin', 'platform', 'domain', 'access', 'Ingresar a Administración'],
+           ['domain:admin', 'platform', 'domain', 'access', t('Ingresar a Administración')],
          ].map(([permission_code, domain_code, resource_code, action_code, description]) => ({ permission_code, domain_code, resource_code, action_code, description, lifecycle_status: 'active', system_managed: true })),
          { permission_code: 'domain:dlp', domain_code: 'dlp', resource_code: 'domain', action_code: 'access', description: 'Ingresar a Netskope DLP', lifecycle_status: 'active', system_managed: true },
          { permission_code: 'netskope:read', domain_code: 'dlp', resource_code: 'workspace', action_code: 'read', description: 'Consultar Netskope DLP', lifecycle_status: 'active', system_managed: true },
@@ -96,12 +96,12 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         safe_health: { denominator: 1, missing_cpm: 0, no_accounts: 0, olac_disabled: 0, retention_unconfigured: 0, manage_safe_concentration: 0 },
       },
        '/api/dashboard/preferences': { widgets: dashboardWidgets || [
-        { widget_id: 'without-accounts', title: 'Safes sin cuentas', kind: 'count', measure: 'safes', chart: null, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: 'no_accounts' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, value_format: 'count', position: null, size: 'sm', value: 51 },
-        { widget_id: 'pending-classification', title: 'Pendientes de clasificar', kind: 'count', measure: 'safes', chart: null, filters: { workflow_status: '', classification_status: 'pending', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, value_format: 'count', position: null, size: 'sm', value: 104 },
-        { widget_id: 'pam-users', title: 'Usuarios PAM', kind: 'count', measure: 'pam_users', chart: null, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, value_format: 'count', position: null, size: 'sm', value: 98 },
-        { widget_id: 'safes-by-company', title: 'Safes por empresa', kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'business_unit' }, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, position: 0, size: 'sm', value: 0, buckets: [{ key: 'Globex', filter_value: '3', count: 1 }] },
-        { widget_id: 'accounts-by-company', title: 'Cuentas por empresa', kind: 'chart', measure: 'accounts', chart: { style: 'bars', group_by: 'business_unit' }, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, position: 1, size: 'sm', value: 0, buckets: [{ key: 'Globex', filter_value: '3', count: 1 }] },
-        { widget_id: 'safes-by-status', title: 'Safes por estado', kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'workflow_status' }, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, position: 2, size: 'sm', value: 0, buckets: [{ key: 'pending', filter_value: 'pending', count: 1 }, { key: 'retired', filter_value: 'retired', count: 1 }] },
+        { widget_id: 'without-accounts', title: t('Safes sin cuentas'), kind: 'count', measure: 'safes', chart: null, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: 'no_accounts' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, value_format: 'count', position: null, size: 'sm', value: 51 },
+        { widget_id: 'pending-classification', title: t('Pendientes de clasificar'), kind: 'count', measure: 'safes', chart: null, filters: { workflow_status: '', classification_status: 'pending', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, value_format: 'count', position: null, size: 'sm', value: 104 },
+        { widget_id: 'pam-users', title: t('Usuarios PAM'), kind: 'count', measure: 'pam_users', chart: null, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, value_format: 'count', position: null, size: 'sm', value: 98 },
+        { widget_id: 'safes-by-company', title: t('Safes por empresa'), kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'business_unit' }, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, position: 0, size: 'sm', value: 0, buckets: [{ key: 'Globex', filter_value: '3', count: 1 }] },
+        { widget_id: 'accounts-by-company', title: t('Cuentas por empresa'), kind: 'chart', measure: 'accounts', chart: { style: 'bars', group_by: 'business_unit' }, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, position: 1, size: 'sm', value: 0, buckets: [{ key: 'Globex', filter_value: '3', count: 1 }] },
+        { widget_id: 'safes-by-status', title: t('Safes por estado'), kind: 'chart', measure: 'safes', chart: { style: 'pie', group_by: 'workflow_status' }, filters: { workflow_status: '', classification_status: '', inventory_scope: '', data_quality_status: '', health_filter: '' }, target_value: null, target_direction: null, period_label: null, baseline_value: null, position: 2, size: 'sm', value: 0, buckets: [{ key: 'pending', filter_value: 'pending', count: 1 }, { key: 'retired', filter_value: 'retired', count: 1 }] },
       ], is_default: true },
       '/api/catalogs': includeSafe ? { business_units: [{ business_unit_id: 3, unit_code: 'FIN', unit_name: 'Finanzas', is_active: true }], responsibles: [{ responsible_id: 4, display_name: 'Ada Admin', email: 'ada@example.com', is_active: true }], account_types: [] } : { business_units: [], responsibles: [], account_types: [] },
       '/api/cmdb/coverage': { objects: [], relationships: [], chains: { pam: 'pending_sources', sia: 'pending_sources' } },
@@ -137,14 +137,14 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         ],
       },
       '/api/cmdb/netskope/experience/presence': {
-        total: 0, reported: 0, statuses: [], methods: [], by_client_config: [], by_company: [], company_omitted_devices: 0, missing_label: 'Sin dato',
+        total: 0, reported: 0, statuses: [], methods: [], by_client_config: [], by_company: [], company_omitted_devices: 0, missing_label: t('Sin dato'),
         source_evidence: { source_fresh: true, source_status: 'completed', source_completed_at: '2026-09-01T00:00:00Z', as_of: '2026-09-01T00:00:00Z' },
       },
       '/api/cmdb/netskope/posture': {
         checks: [
-          { id: 'client_protection_off', entity: 'device', severity: 'high', title: 'Cliente desinstalado o deshabilitado', description: 'El último evento del cliente es desinstalación o deshabilitación.', status: 'evaluated', count: 3, query: { coverage_risk: '1' }, findings: [] },
-          { id: 'stale_undiagnosed', entity: 'device', severity: 'medium', title: 'Sin señal hace más de 30 días', description: 'Más de 30 días sin eventos y sin diagnóstico.', status: 'evaluated', count: 3, query: { event_age: 'gt_30d', review_diagnosis: 'undetermined' }, findings: [] },
-          { id: 'duplicate_hostname', entity: 'device', severity: 'low', title: 'Hostname con varios equipos activos', description: 'Mismo hostname en varios device_id.', status: 'evaluated', count: 5, query: { duplicate: 'hostname' }, findings: [] },
+          { id: 'client_protection_off', entity: 'device', severity: 'high', title: t('Cliente desinstalado o deshabilitado'), description: t('El último evento del cliente es desinstalación o deshabilitación.'), status: 'evaluated', count: 3, query: { coverage_risk: '1' }, findings: [] },
+          { id: 'stale_undiagnosed', entity: 'device', severity: 'medium', title: t('Sin señal hace más de 30 días'), description: t('Más de 30 días sin eventos y sin diagnóstico.'), status: 'evaluated', count: 3, query: { event_age: 'gt_30d', review_diagnosis: 'undetermined' }, findings: [] },
+          { id: 'duplicate_hostname', entity: 'device', severity: 'low', title: t('Hostname con varios equipos activos'), description: t('Mismo hostname en varios device_id.'), status: 'evaluated', count: 5, query: { duplicate: 'hostname' }, findings: [] },
         ],
         source_evidence: { source_fresh: true, source_status: 'completed', source_completed_at: '2026-09-01T00:00:00Z', as_of: '2026-09-01T00:00:00Z' },
         uci_captured_at: null,
@@ -187,11 +187,11 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         thresholds: { recent_hours: 24, week_days: 7, stale_days: 30 }, total: 10, review_candidates: 4,
         source_evidence: { source_fresh: true, source_status: 'completed', source_completed_at: '2026-10-05T11:00:00Z', as_of: '2026-10-05T12:00:00Z' },
         buckets: [
-          { key: 'lt_24h', label: 'Menos de 24 h', count: 5, by_classification: [] },
-          { key: 'd1_7', label: '1 a 7 días', count: 1, by_classification: [] },
-          { key: 'd7_30', label: '7 a 30 días', count: 0, by_classification: [] },
-          { key: 'gt_30d', label: 'Más de 30 días', count: 4, by_classification: [] },
-          { key: 'unknown', label: 'Sin dato', count: 0, by_classification: [] },
+          { key: 'lt_24h', label: t('Menos de 24 h'), count: 5, by_classification: [] },
+          { key: 'd1_7', label: t('1 a 7 días'), count: 1, by_classification: [] },
+          { key: 'd7_30', label: t('7 a 30 días'), count: 0, by_classification: [] },
+          { key: 'gt_30d', label: t('Más de 30 días'), count: 4, by_classification: [] },
+          { key: 'unknown', label: t('Sin dato'), count: 0, by_classification: [] },
         ],
       },
       '/api/cmdb/netskope/device-reviews/summary': {
@@ -226,8 +226,8 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         configured: true, total: 10,
         baseline: { value: { releases: ['141.0.0', '138.1.0', '135.0.0'] }, note: 'Doc oficial', updated_by: 'ada@example.com', updated_at: '2026-09-20T00:00:00Z' },
         buckets: [
-          { key: 'current', label: 'Al día', count: 6 }, { key: 'one_behind', label: '1 golden atrás', count: 2 },
-          { key: 'two_plus_behind', label: '2 o más golden atrás', count: 1 }, { key: 'unrecognized', label: 'Versión no reconocida', count: 1 },
+          { key: 'current', label: t('Al día'), count: 6 }, { key: 'one_behind', label: t('1 golden atrás'), count: 2 },
+          { key: 'two_plus_behind', label: t('2 o más golden atrás'), count: 1 }, { key: 'unrecognized', label: t('Versión no reconocida'), count: 1 },
         ],
         by_os: [{ os: 'Windows', total: 7, current: 4, one_behind: 2, two_plus_behind: 1, unrecognized: 0 }, { os: 'Mac', total: 3, current: 2, one_behind: 0, two_plus_behind: 0, unrecognized: 1 }],
       },
@@ -264,7 +264,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
           last_seen_event: 'connect', last_event_timestamp: 1758000000,
         }, first_seen_at: '2026-01-01T00:00:00Z', last_seen_at: '2026-09-01T00:00:00Z',
         device_evidence: {
-          state: 'unknown', reason: 'Sin sincronización Netskope completa y vigente en las últimas 24 h; no se evalúa abandono.',
+          state: 'unknown', reason: t('Sin sincronización Netskope completa y vigente en las últimas 24 h; no se evalúa abandono.'),
           last_signal_at: '2025-09-16T05:20:00Z', age_days: 379,
           source_fresh: false, source_status: 'completed', source_completed_at: '2026-09-01T00:00:00Z', as_of: '2026-10-01T00:00:00Z',
           recent_days: 7, review_days: 30, source_freshness_hours: 24,
@@ -336,7 +336,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
       },
       '/api/operational-logs': { rows: [], total: 0 },
       '/api/operational-errors': { rows: [], total: 0 },
-      '/api/safes': includeSafe ? { rows: [{ safe_number: 1, safe_name: 'Finance', safe_url_id: 'Finance', location: null, member_count: 1, account_count: 2, cpm_configured: true, olac_enabled: true, retention_configured: true, manage_safe_principal_count: 1, account_type_counts: {}, internal_name: null, business_unit_id: null, responsible_id: null, classification_status: 'pending', inventory_scope: 'pending', data_quality_status: 'pending', scope_hint: null, business_unit_name: null, responsible_name: null, workflow_status: 'pending', next_action: decommissionCandidate ? 'Dar de baja' : null }], total: 1, classification_counts: { assigned: 0, review: 0, pending: 1 }, limit: 50, offset: 0 } : { rows: [], total: 0, classification_counts: { assigned: 0, review: 0, pending: 0 }, limit: 50, offset: 0 },
+      '/api/safes': includeSafe ? { rows: [{ safe_number: 1, safe_name: 'Finance', safe_url_id: 'Finance', location: null, member_count: 1, account_count: 2, cpm_configured: true, olac_enabled: true, retention_configured: true, manage_safe_principal_count: 1, account_type_counts: {}, internal_name: null, business_unit_id: null, responsible_id: null, classification_status: 'pending', inventory_scope: 'pending', data_quality_status: 'pending', scope_hint: null, business_unit_name: null, responsible_name: null, workflow_status: 'pending', next_action: decommissionCandidate ? t('Dar de baja') : null }], total: 1, classification_counts: { assigned: 0, review: 0, pending: 1 }, limit: 50, offset: 0 } : { rows: [], total: 0, classification_counts: { assigned: 0, review: 0, pending: 0 }, limit: 50, offset: 0 },
       '/api/safes/1': includeSafe ? { safe: { safe_number: 1, safe_name: 'Finance', safe_url_id: 'Finance', location: null, member_count: 1, account_count: 2, cpm_configured: true, olac_enabled: true, retention_configured: true, manage_safe_principal_count: 1, account_type_counts: {}, internal_name: null, business_unit_id: null, responsible_id: null, classification_status: 'pending', inventory_scope: 'pending', data_quality_status: 'pending', scope_hint: null, business_unit_name: null, responsible_name: null, workflow_status: 'pending', next_action: null, creator_name: 'System', description: null, managing_cpm: 'CPM', number_of_versions_retention: 5, number_of_days_retention: 30, auto_purge_enabled: true, creation_time: null, last_modification_time: null, notes: null, assigned_at: null, assigned_by: null }, members: [{ member_id: 'member-1', member_name: 'Ada Admin', member_type: 'User', membership_expiration_date: null, is_predefined_user: false, is_read_only: false, permissions: { read: true } }] } : {},
        '/api/safes/1/accounts': includeSafe ? { rows: [
          { safe_number: 1, safe_name: 'Finance', account_id: 'account-1', account_name: 'db-finance', user_name: 'dbadmin', address: '10.0.0.1', platform_id: 'platform-1', platform_name: 'PostgreSQL', lifecycle_status: 'active', last_seen_at: '2026-08-29T00:00:00Z', attributes: { automatic_management_enabled: true, management_status: 'success', secret_modified_at: '2026-09-29T00:00:00Z' } },
@@ -345,7 +345,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
        ], total: 3, limit: 200, offset: 0 } : {},
       '/api/safes/1/audit': includeSafe ? { rows: [] } : {},
       '/api/accounts': { rows: [], total: 0, limit: 50, offset: 0 },
-      '/api/analytics': { workflow_status: [{ key: 'pending', count: 1 }, { key: 'retired', count: 1 }], next_actions: [{ key: 'Sin definir', count: 1 }], account_types: [], business_units: [{ key: 'unassigned', label: 'Sin unidad', count: 1 }], responsibles: [{ key: 'unassigned', label: 'Sin responsable', count: 1 }] },
+      '/api/analytics': { workflow_status: [{ key: 'pending', count: 1 }, { key: 'retired', count: 1 }], next_actions: [{ key: 'Sin definir', count: 1 }], account_types: [], business_units: [{ key: 'unassigned', label: t('Sin unidad'), count: 1 }], responsibles: [{ key: 'unassigned', label: t('Sin responsable'), count: 1 }] },
       '/api/findings': {
         rows: [{
           finding_id: 1,
@@ -354,7 +354,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
           source_system: 'cyberark',
           subject_type: 'account',
           subject_id: 'account-24',
-          title: 'Cuenta sin plataforma informada',
+          title: t('Cuenta sin plataforma informada'),
           severity: 'medium',
           category: 'data_quality',
           status: 'open',
@@ -527,7 +527,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
           ],
           by_responsible: [
             { responsible: 'Ana', n: 21, platform: { match: 17, missing: 1, undeclared: 1, unclassified: 0, unknown: 2 }, dba: { match: 16, missing: 3, undeclared: 2, unclassified: 0, unknown: 0 }, work: { pending: 10, in_progress: 5, onboarded: 4, blocked: 1, not_applicable: 1 } },
-            { responsible: 'Sin responsable', n: 30, platform: { match: 28, missing: 1, undeclared: 0, unclassified: 0, unknown: 1 }, dba: { match: 22, missing: 5, undeclared: 3, unclassified: 0, unknown: 0 }, work: { pending: 20, in_progress: 5, onboarded: 4, blocked: 1, not_applicable: 0 } },
+            { responsible: t('Sin responsable'), n: 30, platform: { match: 28, missing: 1, undeclared: 0, unclassified: 0, unknown: 1 }, dba: { match: 22, missing: 5, undeclared: 3, unclassified: 0, unknown: 0 }, work: { pending: 20, in_progress: 5, onboarded: 4, blocked: 1, not_applicable: 0 } },
           ],
         },
         series: [
@@ -546,7 +546,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         days: 14, total: 3,
         rows: [
           { inventory_id: 101, instance_name: 'dev-compute-db-desa', environment: 'DEV', private_ip: '10.67.9.143', port: 22, work_status: 'blocked', responsible: 'Ana', last_change: '2026-08-20T12:00:00Z', idle_since: '2026-08-20T12:00:00Z', idle_days: 56 },
-          { inventory_id: 102, instance_name: 'prod-app-01', environment: 'PROD', private_ip: '10.67.1.10', port: null, work_status: 'pending', responsible: 'Sin responsable', last_change: null, idle_since: '2026-09-01T12:00:00Z', idle_days: 44 },
+          { inventory_id: 102, instance_name: 'prod-app-01', environment: 'PROD', private_ip: '10.67.1.10', port: null, work_status: 'pending', responsible: t('Sin responsable'), last_change: null, idle_since: '2026-09-01T12:00:00Z', idle_days: 44 },
         ],
       },
       '/api/connection-inventory/deviations': {
@@ -567,7 +567,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
         ],
       },
       '/api/connection-inventory': {
-        rows: [{ inventory_id: 101, lifecycle_status: 'active', retired_at: null, platform_result: 'match', dba_result: 'missing', work_status: 'pending', responsible: 'Ana', note: 'Ventana el viernes', source_row_number: 2, instance_name: 'dev-compute-db-desa', environment: 'DEV', private_ip: '10.67.9.143', port: 22, ca_sia: true, ca_dba: true, zsp_implemented: true, access_available: true, description: 'Migrada desde Priv Cloud', import_id: 'batch-1', file_name: 'conexiones.csv', row_count: 1, imported_at: '2026-08-29T00:00:00Z', safe_matches: [{ safe_number: 1, safe_name: 'Finance', account_id: 'account-1', account_name: 'dbadmin', address: '10.67.9.143', platform_name: 'Unix', platform_id: 'unix' }], sia_matches: [{ object_id: 20, display_name: 'Finance access', source_id: 'policy-20' }], safe_match_count: 1, sia_match_count: 1 }],
+        rows: [{ inventory_id: 101, lifecycle_status: 'active', retired_at: null, platform_result: 'match', dba_result: 'missing', work_status: 'pending', responsible: 'Ana', note: t('Ventana el viernes'), source_row_number: 2, instance_name: 'dev-compute-db-desa', environment: 'DEV', private_ip: '10.67.9.143', port: 22, ca_sia: true, ca_dba: true, zsp_implemented: true, access_available: true, description: 'Migrada desde Priv Cloud', import_id: 'batch-1', file_name: 'conexiones.csv', row_count: 1, imported_at: '2026-08-29T00:00:00Z', safe_matches: [{ safe_number: 1, safe_name: 'Finance', account_id: 'account-1', account_name: 'dbadmin', address: '10.67.9.143', platform_name: 'Unix', platform_id: 'unix' }], sia_matches: [{ object_id: 20, display_name: 'Finance access', source_id: 'policy-20' }], safe_match_count: 1, sia_match_count: 1 }],
         total: 1, limit: 50, offset: 0, search: '', import: { import_id: 'batch-1', file_name: 'conexiones.csv', row_count: 1, imported_at: '2026-08-29T00:00:00Z' },
       },
     };
@@ -725,7 +725,7 @@ export function createMockApi(options: MockOptions = {}): (request: MockRequest)
       },
     };
     await handler(route);
-    return result ?? { status: 404, contentType: 'application/json', body: JSON.stringify({ detail: 'No disponible en la demo' }) };
+    return result ?? { status: 404, contentType: 'application/json', body: JSON.stringify({ detail: t('No disponible en la demo') }) };
   };
 }
 
@@ -792,7 +792,7 @@ export const CHAIN_HOPS: Record<string, Record<string, unknown>[]> = {
 
 export const NETSKOPE_CHAIN_NODES: Record<string, Record<string, unknown>> = {
   'netskope_user:3': { type: 'netskope_user', id: 3, label: 'Ada Netskope', sublabel: 'u-3', counts: { forward: 51, back: 0 } },
-  'netskope_user:4': { type: 'netskope_user', id: 4, label: 'Usuario sin vínculo', sublabel: 'u-4', counts: { forward: 0, back: 0 } },
+  'netskope_user:4': { type: 'netskope_user', id: 4, label: t('Usuario sin vínculo'), sublabel: 'u-4', counts: { forward: 0, back: 0 } },
   ...Object.fromEntries(Array.from({ length: 51 }, (_, index): [string, Record<string, unknown>] => {
     const id = 9 + index;
     const label = `Laptop-${String(index + 1).padStart(2, '0')}`;
@@ -823,7 +823,7 @@ export const NETSKOPE_CHAIN_HOPS: Record<string, Record<string, unknown>[]> = {
 export const NETSKOPE_CHAIN_SEARCH_GROUPS = {
   netskope_user: [
     { type: 'netskope_user', id: 3, label: 'Ada Netskope', sublabel: 'u-3' },
-    { type: 'netskope_user', id: 4, label: 'Usuario sin vínculo', sublabel: 'u-4' },
+    { type: 'netskope_user', id: 4, label: t('Usuario sin vínculo'), sublabel: 'u-4' },
   ],
   netskope_device: [{ type: 'netskope_device', id: 9, label: 'Laptop-01', sublabel: 'dev-9' }],
 };
@@ -843,7 +843,7 @@ export const CHAIN_SEARCH_GROUPS = {
    the hub renders matched, reference and deep links without a real backend. */
 export const PERSON_SEARCH_RESULTS = [
   { email: 'ada@acme.example', name: 'Ada Lovelace', sources: ['pam', 'identity', 'netskope'] },
-  { email: 'riesgo@acme.example', name: 'Riesgo Parcial', sources: ['pam', 'identity'] },
+  { email: 'riesgo@acme.example', name: t('Riesgo Parcial'), sources: ['pam', 'identity'] },
   { email: 'solo-pam@acme.example', name: 'Solo PAM', sources: ['pam'] },
 ];
 
@@ -876,7 +876,7 @@ export const PERSON_SUMMARIES: Record<string, Record<string, unknown>> = {
      never draw an invented link. */
   'riesgo@acme.example': {
     email: 'riesgo@acme.example',
-    name: 'Riesgo Parcial',
+    name: t('Riesgo Parcial'),
     tools: {
       pam: {
         status: 'matched', basis: 'email_exact',
@@ -906,8 +906,8 @@ export const PERSON_SUMMARIES: Record<string, Record<string, unknown>> = {
 
 export const PERSON_CLIENT_COVERAGE_SUMMARY = {
   metric_code: 'CONN-001', metric_version: '1',
-  label: 'Cliente Netskope activo y observado recientemente',
-  population: 'Usuarios humanos activos de Identity Administration',
+  label: t('Cliente Netskope activo y observado recientemente'),
+  population: t('Usuarios humanos activos de Identity Administration'),
   person_freshness_hours: 24, device_freshness_days: 7,
   counts: {
     denominator: 3, covered: 1, partial: 1, gap: 0, unknown: 1,
@@ -934,13 +934,15 @@ export const PERSON_CLIENT_COVERAGE_DETAILS: Record<string, Record<string, unkno
     identity_records: 1, netskope_users: 1, devices_recent: 1, devices_not_recent: 1,
     devices_total: 2, devices_ambiguous: 0,
     sources: PERSON_CLIENT_COVERAGE_SUMMARY.sources,
-    explanation: 'Hay dispositivos recientes y otros no recientes o sin fecha; esto no confirma su antigüedad.',
+    explanation: t('Hay dispositivos recientes y otros no recientes o sin fecha; esto no confirma su antigüedad.'),
   },
   'riesgo@acme.example': {
     metric_code: 'CONN-001', metric_version: '1', email: 'riesgo@acme.example', status: 'unknown',
     identity_records: 1, netskope_users: 0, devices_recent: 0, devices_not_recent: 0,
     devices_total: 0, devices_ambiguous: 0,
     sources: PERSON_CLIENT_COVERAGE_SUMMARY.sources,
-    explanation: 'El vínculo o la evidencia de fuente es ambiguo, incompleto o no vigente.',
+    explanation: t('El vínculo o la evidencia de fuente es ambiguo, incompleto o no vigente.'),
   },
 };
+
+import { t } from '../cross/i18n/index.ts';

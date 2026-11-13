@@ -11,7 +11,7 @@ import './sync-schedule-view.css';
 import { t } from '../i18n/index.ts';
 
 function intervalSourceLabel(source: SyncTaskSchedule['interval_source']): string {
-  return ({ administrative: 'Ajuste administrativo', environment_task: 'Entorno · tarea', environment_source: 'Entorno · fuente', task_policy: 'Política de tarea', global_default: 'Valor global' })[source];
+  return ({ administrative: 'Ajuste administrativo', environment_task: 'Entorno · tarea', environment_source: 'Entorno · fuente', task_policy: t('Política de tarea'), global_default: 'Valor global' })[source];
 }
 
 function sourceLabel(source: string): string {
@@ -41,7 +41,7 @@ export function SyncScheduleView({ permissions, onUnauthorized }: { permissions:
     } catch (caught) {
       if (signal?.aborted) return;
       if (caught instanceof ApiError && caught.status === 401) { onUnauthorized?.(); return; }
-      setError(caught instanceof Error ? caught.message : 'No se pudo cargar la agenda');
+      setError(caught instanceof Error ? caught.message : t('No se pudo cargar la agenda'));
       setLoading(false);
     }
   }, [onUnauthorized]);
@@ -67,10 +67,10 @@ export function SyncScheduleView({ permissions, onUnauthorized }: { permissions:
     setError('');
     try {
       await updateSyncTaskSchedule(row.task_key, interval);
-      setNotice(`Agenda de ${row.task_key} actualizada.`);
+      setNotice(t('Agenda de {task_key} actualizada.', { task_key: row.task_key }));
       setReloadKey((key) => key + 1);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo guardar el intervalo');
+      setError(caught instanceof Error ? caught.message : t('No se pudo guardar el intervalo'));
     } finally {
       setBusyKey('');
     }
@@ -82,10 +82,10 @@ export function SyncScheduleView({ permissions, onUnauthorized }: { permissions:
     setNotice('');
     try {
       await runSyncTask(row.task_key);
-      setNotice(`Se encoló ${row.task_key}.`);
+      setNotice(t('Se encoló {task_key}.', { task_key: row.task_key }));
       setReloadKey((key) => key + 1);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'No se pudo encolar la tarea');
+      setError(caught instanceof Error ? caught.message : t('No se pudo encolar la tarea'));
     } finally {
       setBusyKey('');
     }
@@ -107,14 +107,14 @@ export function SyncScheduleView({ permissions, onUnauthorized }: { permissions:
             <th scope="row"><span className="sync-schedule-task">{row.task_key}</span><small>{row.source_file}</small></th>
             <td>{sourceLabel(row.source_system)}</td>
             <td><StatusBadge tone={!row.configured ? 'neutral' : row.active ? 'info' : row.interval_minutes === 0 ? 'neutral' : row.last_status === 'failed' ? 'danger' : row.last_status === 'partial' ? 'warning' : 'success'}>
-              {!row.configured ? 'Sin configurar' : row.active ? 'En cola o curso' : row.interval_minutes === 0 ? 'Deshabilitada' : row.last_status ? ({ completed: 'Completada', partial: 'Con avisos', failed: 'Fallida', queued: 'En cola', running: 'En curso' } as Record<string, string>)[row.last_status] || row.last_status : 'Sin corridas'}
+              {!row.configured ? t('Sin configurar') : row.active ? 'En cola o curso' : row.interval_minutes === 0 ? 'Deshabilitada' : row.last_status ? ({ completed: 'Completada', partial: 'Con avisos', failed: 'Fallida', queued: 'En cola', running: 'En curso' } as Record<string, string>)[row.last_status] || row.last_status : t('Sin corridas')}
             </StatusBadge>{row.consecutive_failures > 0 && <small>{row.consecutive_failures} fallos consecutivos</small>}</td>
             <td><strong>{row.interval_minutes === 0 ? 'Deshabilitada' : `${formatNumber(row.interval_minutes)} min`}</strong><small>{sourceText}</small></td>
-            <td>{row.last_success_at ? <DateTime value={row.last_success_at} /> : 'Sin éxito registrado'}</td>
-            <td>{row.last_attempt_at ? <DateTime value={row.last_attempt_at} /> : 'Sin intentos'}{row.consecutive_failures > 0 && <small>{t('Backoff según política de tarea')}</small>}</td>
+            <td>{row.last_success_at ? <DateTime value={row.last_success_at} /> : t('Sin éxito registrado')}</td>
+            <td>{row.last_attempt_at ? <DateTime value={row.last_attempt_at} /> : t('Sin intentos')}{row.consecutive_failures > 0 && <small>{t('Backoff según política de tarea')}</small>}</td>
             <td>{row.next_scheduled_at ? <DateTime value={row.next_scheduled_at} /> : row.configured && row.interval_minutes > 0 ? t('Al liberarse la tarea') : t('No programada')}</td>
             <td><div className="sync-schedule-actions">
-              {canManage && <><label className="sync-schedule-editor">{`Intervalo ${row.task_key}`}<input aria-label={`Intervalo de ${row.task_key} en minutos`} type="number" min="0" step="5" value={drafts[row.task_key] ?? ''} placeholder={t('Heredar')} onChange={(event) => setDrafts((current) => ({ ...current, [row.task_key]: event.target.value }))} disabled={busyKey === row.task_key} /><small>Vacío hereda; 0 deshabilita</small></label><button className="button subtle" type="button" onClick={() => void save(row)} disabled={!dirty || busyKey === row.task_key}><Save size={13} /> {t('Guardar')}</button></>}
+              {canManage && <><label className="sync-schedule-editor">{`Intervalo ${row.task_key}`}<input aria-label={t('Intervalo de {task_key} en minutos', { task_key: row.task_key })} type="number" min="0" step="5" value={drafts[row.task_key] ?? ''} placeholder={t('Heredar')} onChange={(event) => setDrafts((current) => ({ ...current, [row.task_key]: event.target.value }))} disabled={busyKey === row.task_key} /><small>Vacío hereda; 0 deshabilita</small></label><button className="button subtle" type="button" onClick={() => void save(row)} disabled={!dirty || busyKey === row.task_key}><Save size={13} /> {t('Guardar')}</button></>}
               {canRun && <button className="button subtle" type="button" onClick={() => void runNow(row)} disabled={!row.configured || busyKey === row.task_key}><Play size={13} /> {busyKey === row.task_key ? t('Procesando…') : t('Sincronizar ahora')}</button>}
             </div></td>
           </tr>;

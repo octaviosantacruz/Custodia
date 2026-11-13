@@ -5,6 +5,7 @@ import { errorDetailsFrom } from '../../../cross/lib/error-details';
 import { createNetskopeMetricsLoader } from '../lib/netskope-metrics-loader';
 import { netskopeFilterKey, netskopeFiltersFromKey } from '../lib/netskope-dashboard';
 import type { NetskopeSelectedMetrics, NetskopeWidgetFilters, NetskopeWidgetInstance } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Options = {
   widgets: readonly NetskopeWidgetInstance[];
@@ -55,8 +56,8 @@ export function useNetskopeFilteredMetrics({ widgets, enabled, refreshKey = 0, o
   return {
     metricsFor,
     loading: queries.some((query) => query.isLoading || query.isFetching),
-    error: failed instanceof Error ? failed.message : failed ? 'No se pudieron cargar las métricas' : '',
-    errorInfo: failed ? errorDetailsFrom(failed, 'No se pudieron cargar las métricas') : null,
+    error: failed instanceof Error ? failed.message : failed ? t('No se pudieron cargar las métricas') : '',
+    errorInfo: failed ? errorDetailsFrom(failed, t('No se pudieron cargar las métricas')) : null,
     reload,
   };
 }

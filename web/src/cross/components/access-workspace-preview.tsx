@@ -6,7 +6,7 @@ import './access-workspace-preview.css';
 import { t } from '../i18n/index.ts';
 
 /** The shell's own gates, evaluated against a draft rather than the viewer. */
-export function AccessWorkspacePreview({ codes, unavailable, label = 'Vistas del menú' }: { codes: string[]; unavailable?: string; label?: string }) {
+export function AccessWorkspacePreview({ codes, unavailable, label = t('Vistas del menú') }: { codes: string[]; unavailable?: string; label?: string }) {
   const groups = useMemo(() => {
     const visible = CATALOG_ENTRIES.filter((entry) => entry.catalog && entry.switcher && domainAccessible(entry.domain, codes) && hasWorkspaceAccess(entry.id, codes));
     return [...new Set(visible.map((entry) => entry.domain))].map((domain) => ({

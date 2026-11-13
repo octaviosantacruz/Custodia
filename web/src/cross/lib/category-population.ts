@@ -1,4 +1,5 @@
 import type { AnalyticsBucket } from '../types/analytics';
+import { t } from '../i18n/index.ts';
 
 export type PopulationBucket = AnalyticsBucket & {
   percentage: number | null;
@@ -65,5 +66,5 @@ export function summarizeCategoryPopulation(
 export function donutSlices<T extends AnalyticsBucket>(buckets: readonly T[], population: number | null, limit?: number): Array<T | (AnalyticsBucket & { color: string })> {
   const summary = summarizeCategoryPopulation(buckets, population, limit);
   const rest = summary.restValid && summary.rest !== null && summary.rest > 0 ? summary.rest : null;
-  return [...buckets, ...(rest !== null ? [{ key: 'Otros', label: 'Otras categorías', count: rest, color: 'var(--text-muted)' }] : [])];
+  return [...buckets, ...(rest !== null ? [{ key: 'Otros', label: t('Otras categorías'), count: rest, color: 'var(--text-muted)' }] : [])];
 }

@@ -70,7 +70,7 @@ function PlatformTargetsSection({ refreshKey, authChecked, authenticated, onUnau
   const { search, setSearch, rows, total, loading, error, loadMore, retry, pageSize } = useSimpleCatalogList<PlatformTargetRow>({
     refreshKey, authChecked, authenticated, onUnauthorized, onError,
     resourceKey: 'platform-targets', fetcher: fetchPlatformTargets,
-    errorFallback: 'No se pudo cargar la política de plataformas destino',
+    errorFallback: t('No se pudo cargar la política de plataformas destino'),
   });
 
   return <CatalogListPanel<PlatformTargetRow>
@@ -119,7 +119,7 @@ export function PamPlatformsWorkspace({
   const { search, setSearch, rows, total, loading, error, loadMore, retry, pageSize } = useSimpleCatalogList<PamPlatformRow>({
     refreshKey, authChecked, authenticated, onUnauthorized, onError, initialQuery,
     resourceKey: 'platforms', fetcher: fetchPamPlatforms,
-    errorFallback: 'No se pudieron cargar las plataformas PAM',
+    errorFallback: t('No se pudieron cargar las plataformas PAM'),
   });
 
   const maxSafes = Math.max(0, ...rows.map((platform) => platform.safe_count));
@@ -139,7 +139,7 @@ export function PamPlatformsWorkspace({
           {section === 'policy' && <h2>{t('Política CPM por plataforma')}</h2>}
         </div>
         <div className="pam-platforms-actions">
-          <span className="pam-platforms-count">{section === 'inventory' ? <><strong>{formatNumber(total)}</strong> activas</> : 'Catálogo CPM'}</span>
+          <span className="pam-platforms-count">{section === 'inventory' ? <><strong>{formatNumber(total)}</strong> activas</> : t('Catálogo CPM')}</span>
           <CompactSelect
             className="pam-platforms-section-select"
             value={section}
@@ -155,12 +155,12 @@ export function PamPlatformsWorkspace({
         {loading && rows.length === 0 ? <tr><td colSpan={6}><StateBlock variant="loading" title={t('Cargando plataformas PAM activas…')} /></td></tr>
           : error ? <tr><td colSpan={6}><StateBlock variant="error" title={t('No se pudieron cargar las plataformas PAM')} hint={error} action={<button type="button" className="button subtle" onClick={retry}>{t('Reintentar')}</button>} /></td></tr>
             : rows.length ? rows.map((platform) => <tr key={platform.object_id}>
-              <td><button type="button" className="pam-platform-name" title={`Buscar Safes con ${platform.display_name}`} onClick={() => onNavigate('safes', platform.display_name)}><PlatformIdentity platform={platform} /></button></td>
+              <td><button type="button" className="pam-platform-name" title={t('Buscar Safes con {display_name}', { display_name: platform.display_name })} onClick={() => onNavigate('safes', platform.display_name)}><PlatformIdentity platform={platform} /></button></td>
               <td><span className="pam-platform-type" title={platformTypeLabel(platform.system_type).raw ?? undefined}>{platformTypeLabel(platform.system_type).label}</span></td>
               <td>{platform.allowed_safes_pattern ? <code className="pam-platform-pattern" title={platform.allowed_safes_pattern}>{platform.allowed_safes_pattern}</code> : <span className="muted">{t('Sin patrón')}</span>}</td>
               <td><PlatformMetric value={platform.safe_count} max={maxSafes} /></td><td><PlatformMetric value={platform.account_count} max={maxAccounts} /></td>
               <td>{platform.psms.length
-                ? <button type="button" className="pam-platform-related" title={`Ver conectores PSM de ${platform.display_name}`} onClick={() => onOpenConnectors(platform.display_name)}><Monitor size={13} aria-hidden />{formatNumber(platform.psms.length)} {platform.psms.length === 1 ? 'conector' : 'conectores'}</button>
+                ? <button type="button" className="pam-platform-related" title={t('Ver conectores PSM de {display_name}', { display_name: platform.display_name })} onClick={() => onOpenConnectors(platform.display_name)}><Monitor size={13} aria-hidden />{formatNumber(platform.psms.length)} {platform.psms.length === 1 ? 'conector' : 'conectores'}</button>
                 : <span className="pam-platform-no-psm">{t('Sin conector')}</span>}</td>
             </tr>) : <tr><td colSpan={6}><StateBlock variant="empty" title={search ? t('Sin plataformas activas para esta búsqueda') : t('Todavía no hay plataformas PAM activas sincronizadas')} action={search ? <button type="button" className="button subtle" onClick={() => setSearch('')}>{t('Limpiar búsqueda')}</button> : undefined} /></td></tr>}
       </tbody></table></div>
@@ -178,21 +178,21 @@ function PsmConnectorTypesSection({ refreshKey, authChecked, authenticated, onUn
   const { rows, total, loading, error, loadMore, pageSize } = useSimpleCatalogList({
     refreshKey, authChecked, authenticated, onUnauthorized, onError,
     resourceKey: 'psm-connector-types', fetcher: fetchPsmConnectorTypes,
-    errorFallback: 'No se pudieron cargar los tipos de conector PSM',
+    errorFallback: t('No se pudieron cargar los tipos de conector PSM'),
     pageSize: 200,
   });
 
   if (loading || error || !rows.length) return null;
   return <section className="pam-platform-catalog-section" aria-label={t('Tipos de conector de sesión PSM')}>
     <div className="pam-platforms-heading">
-      <div><h2>{t('Tipos de conector de sesión')}</h2><p>Catálogo técnico de conectores PSM (ej. RDP, SSH). No son servidores PSM.</p></div>
+      <div><h2>{t('Tipos de conector de sesión')}</h2><p>{t('Catálogo técnico de conectores PSM (ej. RDP, SSH). No son servidores PSM.')}</p></div>
       <span className="database-toolbar-count">{formatNumber(total)} tipos</span>
     </div>
     <div className="pam-platform-psms" style={{ padding: '0 16px 14px' }}>
       {rows.map((connector) => <span key={connector.object_id} title={connector.source_id}><Monitor size={13} aria-hidden />{connector.display_name}</span>)}
     </div>
     {rows.length < total && <div className="pam-platform-psms" style={{ padding: '0 16px 14px' }}>
-      <button type="button" className="button subtle" onClick={loadMore}>Cargar {formatNumber(Math.min(pageSize, total - rows.length))} más</button>
+      <button type="button" className="button subtle" onClick={loadMore}>{t('Cargar {rows} más', { rows: formatNumber(Math.min(pageSize, total - rows.length)) })}</button>
     </div>}
   </section>;
 }
@@ -209,7 +209,7 @@ export function PamConnectorsWorkspace({
   } = useSimpleCatalogList<PamConnectorRow>({
     refreshKey, authChecked, authenticated, onUnauthorized, onError, initialQuery,
     resourceKey: 'pam-connectors', fetcher: fetchPamConnectors,
-    errorFallback: 'No se pudieron cargar los conectores PSM',
+    errorFallback: t('No se pudieron cargar los conectores PSM'),
   });
   const {
     search: siaSearch, setSearch: setSiaSearch, rows: siaRows, total: siaTotal, loading: siaLoading,
@@ -217,7 +217,7 @@ export function PamConnectorsWorkspace({
   } = useSimpleCatalogList<SiaConnectorRow>({
     refreshKey, authChecked, authenticated, onUnauthorized, onError, initialQuery,
     resourceKey: 'sia-connectors', fetcher: fetchSiaConnectors,
-    errorFallback: 'No se pudieron cargar los conectores SIA',
+    errorFallback: t('No se pudieron cargar los conectores SIA'),
   });
 
   const search = section === 'psm' ? psmSearch : siaSearch;
@@ -255,8 +255,8 @@ export function PamConnectorsWorkspace({
         {siaLoading && siaRows.length === 0 ? <tr><td colSpan={5}><StateBlock variant="loading" title={t('Cargando conectores SIA…')} /></td></tr>
           : siaError ? <tr><td colSpan={5}><StateBlock variant="error" title={t('No se pudieron cargar los conectores SIA')} hint={siaError} action={<button type="button" className="button subtle" onClick={retrySia}>{t('Reintentar')}</button>} /></td></tr>
             : siaRows.length ? siaRows.map((connector) => <tr key={connector.object_id}>
-              <td><span className="pam-platform-name"><Cable size={15} aria-hidden /><span><strong title={connector.display_name}>{connector.display_name}</strong><small>{connector.attributes.os || 'Sin SO'}</small></span></span></td>
-              <td><span className={connector.attributes.status === 'connected' ? 'status-pill status-active' : 'status-pill status-warning'}>{connector.attributes.status || 'Sin estado'}</span>{connector.attributes.is_latest_version ? null : <small> {t('· actualización disponible')}</small>}</td>
+              <td><span className="pam-platform-name"><Cable size={15} aria-hidden /><span><strong title={connector.display_name}>{connector.display_name}</strong><small>{connector.attributes.os || t('Sin SO')}</small></span></span></td>
+              <td><span className={connector.attributes.status === 'connected' ? 'status-pill status-active' : 'status-pill status-warning'}>{connector.attributes.status || t('Sin estado')}</span>{connector.attributes.is_latest_version ? null : <small> {t('· actualización disponible')}</small>}</td>
               <td className="pam-connector-version">{connector.attributes.version || <span className="muted">—</span>}</td>
               <td>{connector.attributes.region || <span className="muted">—</span>}</td>
               <td>{connector.attributes.active_sessions_count ?? <span className="muted">—</span>}</td>
@@ -278,7 +278,7 @@ function ConnectorPlatforms({ platforms, name, onOpen }: { platforms: { object_i
   const hidden = platforms.length - CONNECTOR_PLATFORM_PREVIEW;
   const visible = expanded || hidden <= 0 ? platforms : platforms.slice(0, CONNECTOR_PLATFORM_PREVIEW);
   return <div className="pam-platform-psms">
-    {visible.map((platform) => <button key={platform.object_id} type="button" title={`Ver plataforma ${platform.display_name}`} onClick={() => onOpen(platform.display_name)}><Server size={13} aria-hidden /><span>{platform.display_name}</span></button>)}
-    {hidden > 0 ? <button type="button" className="pam-platform-psms-more" aria-expanded={expanded} aria-label={expanded ? `Mostrar menos plataformas de ${name}` : `Mostrar ${hidden} plataformas más de ${name}`} onClick={() => setExpanded(!expanded)}>{expanded ? 'Menos' : `+${hidden} más`}</button> : null}
+    {visible.map((platform) => <button key={platform.object_id} type="button" title={t('Ver plataforma {display_name}', { display_name: platform.display_name })} onClick={() => onOpen(platform.display_name)}><Server size={13} aria-hidden /><span>{platform.display_name}</span></button>)}
+    {hidden > 0 ? <button type="button" className="pam-platform-psms-more" aria-expanded={expanded} aria-label={expanded ? t('Mostrar menos plataformas de {name}', { name: name }) : t('Mostrar {hidden} plataformas más de {name}', { hidden: hidden, name: name })} onClick={() => setExpanded(!expanded)}>{expanded ? 'Menos' : t('+{hidden} más', { hidden: hidden })}</button> : null}
   </div>;
 }

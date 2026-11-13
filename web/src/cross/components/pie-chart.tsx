@@ -48,7 +48,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
 
   if (!visibleTotal) {
     if (!populationOptIn) return <div className="pie-chart-empty"><p className="empty">{t('Sin datos')}</p></div>;
-    return <div className="pie-chart-empty"><p className="empty">{population === 0 ? 'Sin población: porcentaje no calculable' : population === null ? t('Población no informada') : t('Sin datos')}</p></div>;
+    return <div className="pie-chart-empty"><p className="empty">{population === 0 ? t('Sin población: porcentaje no calculable') : population === null ? t('Población no informada') : t('Sin datos')}</p></div>;
   }
 
   const center = size / 2;
@@ -88,7 +88,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
   };
 
   return <>
-    {inconsistentPopulation ? <p className="notice warning" role="status">Población inconsistente: total {formatNumber(population)} menor que la suma visible {formatNumber(visibleTotal)}. Porcentajes no calculables.</p> : null}
+    {inconsistentPopulation ? <p className="notice warning" role="status">{t('Población inconsistente: total {population} menor que la suma visible {visibleTotal}. Porcentajes no calculables.', { population: formatNumber(population), visibleTotal: formatNumber(visibleTotal) })}</p> : null}
     <div className="pie-chart">
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={t('Distribución')}>
       <circle cx={center} cy={center} r={outer - thickness / 2} fill="none" stroke="var(--border-soft)" strokeWidth={thickness} />
@@ -104,7 +104,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
         onMouseLeave={() => { setActiveKey(null); setTooltip(null); }}
       />)}
       <text x="50%" y="48%" textAnchor="middle" className="pie-chart-total">{inconsistentPopulation || populationOptIn && total === null ? '—' : formatNumber(total ?? 0)}</text>
-      <text x="50%" y="64%" textAnchor="middle" className="pie-chart-total-label">{inconsistentPopulation ? 'población inconsistente' : populationOptIn ? centerLabel ?? t('población') : 'total'}</text>
+      <text x="50%" y="64%" textAnchor="middle" className="pie-chart-total-label">{inconsistentPopulation ? t('población inconsistente') : populationOptIn ? centerLabel ?? t('población') : 'total'}</text>
     </svg>
     {activeBucket && tooltip ? <div className="pie-chart-tooltip" role="tooltip" style={{ left: tooltip.x + 12, top: tooltip.y + 12 }}>
       <strong>{labelOf(activeBucket)}</strong> · {formatNumber(activeBucket.count)} · {shareOf(activeBucket)}
@@ -117,7 +117,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
           type="button"
           className="pie-chart-legend-label"
           disabled={Boolean(onBucketSelect) && bucket.key === 'Otros' && !bucket.filter_value}
-          title={onBucketSelect ? `Filtrar por ${labelOf(bucket)}` : labelOf(bucket)}
+          title={onBucketSelect ? t('Filtrar por {bucket}', { bucket: labelOf(bucket) }) : labelOf(bucket)}
           aria-expanded={onBucketSelect ? undefined : expandedKey === bucket.key}
           onClick={() => onBucketSelect ? onBucketSelect(bucket) : setExpandedKey((current) => (current === bucket.key ? null : bucket.key))}
         >{labelOf(bucket)}</button>
@@ -125,7 +125,7 @@ export function PieChart({ buckets, size = 128, thickness = 22, onBucketSelect, 
         <span className="pie-chart-legend-pct">{shareOf(bucket)}</span>
       </li>)}
     </ul>
-    {hidden ? <button type="button" className="pie-chart-more" onClick={() => setShowAll(true)}>Ver todas ({safeBuckets.length})</button> : null}
+    {hidden ? <button type="button" className="pie-chart-more" onClick={() => setShowAll(true)}>{t('Ver todas ({safeBuckets})', { safeBuckets: safeBuckets.length })}</button> : null}
     </div>}
     </div>
     {showAll ? <PieChartDialog title={title} onClose={() => setShowAll(false)}>
@@ -138,9 +138,9 @@ function PieChartDialog({ title, onClose, children }: { title?: string; onClose:
   const dialogRef = useDialogFocusTrap<HTMLElement>({ onClose });
   return createPortal(
     <div className="catalog-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section ref={dialogRef} className="catalog-modal pie-chart-dialog" role="dialog" aria-modal="true" aria-label={title ?? 'Distribución completa'} tabIndex={-1}>
+      <section ref={dialogRef} className="catalog-modal pie-chart-dialog" role="dialog" aria-modal="true" aria-label={title ?? t('Distribución completa')} tabIndex={-1}>
         <div className="catalog-modal-header">
-          <h2>{title ?? 'Distribución completa'}</h2>
+          <h2>{title ?? t('Distribución completa')}</h2>
           <button className="icon-button" type="button" aria-label={t('Cerrar')} title={t('Cerrar')} onClick={onClose}><X size={16} /></button>
         </div>
         {children}

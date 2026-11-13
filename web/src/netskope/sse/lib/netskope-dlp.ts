@@ -4,6 +4,7 @@
    missing data as zero. */
 
 import type { NetskopeDlpQuery, NetskopeDlpStatus } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 export const NETSKOPE_DLP_WINDOW_DAYS = 30;
 /** Recent incidents shown when a policy row is opened. */
@@ -19,7 +20,7 @@ export type NetskopeDlpTrend = { direction: 'up' | 'down' | 'flat' | 'new'; labe
 
 /** Last 7 days against the 7 before: never a percentage over a zero base. */
 export function netskopeDlpTrend(last7: number, previous7: number): NetskopeDlpTrend {
-  if (previous7 === 0) return last7 === 0 ? { direction: 'flat', label: 'Sin actividad' } : { direction: 'new', label: 'Nueva' };
+  if (previous7 === 0) return last7 === 0 ? { direction: 'flat', label: t('Sin actividad') } : { direction: 'new', label: 'Nueva' };
   if (last7 === previous7) return { direction: 'flat', label: 'Igual' };
   const percent = Math.round((Math.abs(last7 - previous7) / previous7) * 100);
   return last7 > previous7 ? { direction: 'up', label: `+${percent}%` } : { direction: 'down', label: `−${percent}%` };
@@ -38,21 +39,21 @@ export function netskopeDlpFreshness(
     return {
       tone: 'off',
       label: 'Captura no configurada',
-      detail: 'El contrato de incidentes DLP no está habilitado en este ambiente: no hay alertas que mostrar todavía.',
+      detail: t('El contrato de incidentes DLP no está habilitado en este ambiente: no hay alertas que mostrar todavía.'),
     };
   }
   if (!summary.captured_at) {
     return {
       tone: 'attention',
-      label: 'Sin captura todavía',
-      detail: 'La próxima sincronización de Netskope capturará las alertas de la ventana; no se presenta como cero.',
+      label: t('Sin captura todavía'),
+      detail: t('La próxima sincronización de Netskope capturará las alertas de la ventana; no se presenta como cero.'),
     };
   }
   if ((summary.partial ?? status?.partial) === true) {
     return {
       tone: 'attention',
       label: 'Captura parcial',
-      detail: 'La última captura no alcanzó el final del stream: los conteos pueden estar incompletos.',
+      detail: t('La última captura no alcanzó el final del stream: los conteos pueden estar incompletos.'),
     };
   }
   /* FE-AUD-004: completeness is not freshness. A complete capture older than the 24 h rule the inventory uses
@@ -62,12 +63,12 @@ export function netskopeDlpFreshness(
     return {
       tone: 'attention',
       label: 'Captura completa',
-      detail: 'Alcanzó el final del stream, pero tiene más de 24 horas: puede no reflejar alertas recientes.',
+      detail: t('Alcanzó el final del stream, pero tiene más de 24 horas: puede no reflejar alertas recientes.'),
     };
   }
   return {
     tone: 'ok',
     label: 'Captura completa',
-    detail: 'La última captura alcanzó el final del stream para esta ventana.',
+    detail: t('La última captura alcanzó el final del stream para esta ventana.'),
   };
 }

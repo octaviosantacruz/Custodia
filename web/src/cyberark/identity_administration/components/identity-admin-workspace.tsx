@@ -21,6 +21,7 @@ import { IdentityMatchBar, RoleMatchChips, RoleMatchDetails } from './identity-m
 import { useIdentityRoleMatches } from '../hooks/use-identity-role-matches';
 import { buildRoleMatchIndex } from '../lib/identity-role-matches';
 import type { WorkspaceView } from '../../../cross/lib/workspaces';
+import { t } from '../../../cross/i18n/index.ts';
 
 
 type IdentityAdminWorkspaceProps = {
@@ -41,16 +42,16 @@ function RoleKindChip({ kind, active, locked, onToggle }: { kind: IdentityRoleKi
   const label = IDENTITY_ROLE_KIND_LABELS[kind];
   const badge = <StatusBadge tone={kind === 'okta_group' ? 'identity' : 'info'}>{label}</StatusBadge>;
   if (locked) return badge;
-  return <button type="button" className={'identity-kind-chip' + (active ? ' active' : '')} aria-pressed={active} title={active ? `Quitar el filtro ${label}` : `Mostrar solo: ${label}`} onClick={(event) => { event.stopPropagation(); onToggle(active ? '' : kind); }}>{badge}</button>;
+  return <button type="button" className={'identity-kind-chip' + (active ? ' active' : '')} aria-pressed={active} title={active ? t('Quitar el filtro {value}', { value: label }) : t('Mostrar solo: {value}', { value: label })} onClick={(event) => { event.stopPropagation(); onToggle(active ? '' : kind); }}>{badge}</button>;
 }
 
 /** Only the membership evidence the sync delivered: complete, partial or not reported. */
 function MembershipChip({ attributes }: { attributes: IdentityRoleRow['attributes'] }) {
-  if (attributes.membership_status === 'not_reported') return <StatusBadge tone="warning">No reportada</StatusBadge>;
+  if (attributes.membership_status === 'not_reported') return <StatusBadge tone="warning">{t('No reportada')}</StatusBadge>;
   const unresolved = attributes.unresolved_member_count ?? 0;
-  if (unresolved > 0) return <span title="Miembros que la API entregó sin poder resolverlos a una cuenta"><StatusBadge tone="warning">{formatNumber(unresolved)} sin resolver</StatusBadge></span>;
+  if (unresolved > 0) return <span title={t('Miembros que la API entregó sin poder resolverlos a una cuenta')}><StatusBadge tone="warning">{t('{unresolved} sin resolver', { unresolved: formatNumber(unresolved) })}</StatusBadge></span>;
   if (attributes.membership_status === 'complete') return <StatusBadge tone="success">Completa</StatusBadge>;
-  return <span className="muted">Sin dato</span>;
+  return <span className="muted">{t('Sin dato')}</span>;
 }
 
 export function IdentityAdminWorkspace({ authChecked, authenticated, onUnauthorized, onError, onNavigate, initialTab = 'users', initialQuery = '', roleKind = '', embedded = false, canReadIdentityCatalogs = false }: IdentityAdminWorkspaceProps) {
@@ -76,14 +77,14 @@ export function IdentityAdminWorkspace({ authChecked, authenticated, onUnauthori
   const rolesCols = 4;
 
   const stateRow = (cols: number) => {
-    if (loading) return <tr><td colSpan={cols}><StateBlock variant="loading" title="Cargando…" /></td></tr>;
-    if (loadError) return <tr><td colSpan={cols}><StateBlock variant="error" title="No se pudo cargar Identity Administration" hint={loadError} action={<button type="button" className="button subtle" onClick={() => void reload()}>Reintentar</button>} /></td></tr>;
+    if (loading) return <tr><td colSpan={cols}><StateBlock variant="loading" title={t('Cargando…')} /></td></tr>;
+    if (loadError) return <tr><td colSpan={cols}><StateBlock variant="error" title={t('No se pudo cargar Identity Administration')} hint={loadError} action={<button type="button" className="button subtle" onClick={() => void reload()}>Reintentar</button>} /></td></tr>;
     return null;
   };
 
   const emptyRow = (cols: number, label: string) => <tr><td colSpan={cols}><StateBlock
     variant={hasFilters ? 'no-results' : 'empty'}
-    title={hasFilters ? 'Sin resultados para esta búsqueda' : label}
+    title={hasFilters ? t('Sin resultados para esta búsqueda') : label}
     action={hasFilters ? <button type="button" className="button subtle" onClick={() => { setSearch(''); setActiveFilter(''); setStandardSeat(''); setKindFilter(''); }}>Limpiar filtros</button> : undefined}
   /></td></tr>;
 
@@ -94,8 +95,8 @@ export function IdentityAdminWorkspace({ authChecked, authenticated, onUnauthori
       </div>
     </section>}
     <section className={`list-panel database-surface${tab === 'roles' ? ' identity-role-list' : ''}`}>
-      {!embedded && <div className="table-view-toggle" role="tablist" aria-label="Vista de Identity Administration" onKeyDown={handleTablistKeyDown}>
-        <button type="button" role="tab" aria-selected={tab === 'users'} tabIndex={tab === 'users' ? 0 : -1} className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>Usuarios</button>
+      {!embedded && <div className="table-view-toggle" role="tablist" aria-label={t('Vista de Identity Administration')} onKeyDown={handleTablistKeyDown}>
+        <button type="button" role="tab" aria-selected={tab === 'users'} tabIndex={tab === 'users' ? 0 : -1} className={tab === 'users' ? 'active' : ''} onClick={() => setTab('users')}>{t('Usuarios')}</button>
         <button type="button" role="tab" aria-selected={tab === 'roles'} tabIndex={tab === 'roles' ? 0 : -1} className={tab === 'roles' ? 'active' : ''} onClick={() => setTab('roles')}>Roles</button>
       </div>}
 
@@ -111,8 +112,8 @@ export function IdentityAdminWorkspace({ authChecked, authenticated, onUnauthori
           <Search size={16} />
           <input
             type="search"
-            aria-label={tab === 'users' ? 'Buscar usuarios de Identity Administration' : 'Buscar roles y grupos'}
-            placeholder={tab === 'users' ? 'Buscar por nombre, usuario o email' : 'Buscar por nombre de rol o grupo'}
+            aria-label={tab === 'users' ? t('Buscar usuarios de Identity Administration') : t('Buscar roles y grupos')}
+            placeholder={tab === 'users' ? t('Buscar por nombre, usuario o email') : t('Buscar por nombre de rol o grupo')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
@@ -120,63 +121,63 @@ export function IdentityAdminWorkspace({ authChecked, authenticated, onUnauthori
         {tab === 'users' && <CompactSelect
           className="inline-select"
           value={activeFilter}
-          ariaLabel="Filtrar usuarios por estado"
-          options={[{ value: '', label: 'Todos los estados' }, { value: 'active', label: 'Activos' }, { value: 'inactive', label: 'Inactivos' }]}
+          ariaLabel={t('Filtrar usuarios por estado')}
+          options={[{ value: '', label: t('Todos los estados') }, { value: 'active', label: t('Activos') }, { value: 'inactive', label: 'Inactivos' }]}
           onChange={(value) => setActiveFilter(value as 'active' | 'inactive' | '')}
         />}
         {tab === 'roles' && !roleKind && <CompactSelect
           className="inline-select"
           value={kindFilter}
-          ariaLabel="Filtrar por tipo de rol o grupo"
-          options={[{ value: '', label: 'Todos los tipos' }, { value: 'role', label: 'Roles de CyberArk' }, { value: 'okta_group', label: 'Grupos de Okta' }]}
+          ariaLabel={t('Filtrar por tipo de rol o grupo')}
+          options={[{ value: '', label: t('Todos los tipos') }, { value: 'role', label: t('Roles de CyberArk') }, { value: 'okta_group', label: t('Grupos de Okta') }]}
           onChange={(value) => setKindFilter(value as '' | 'role' | 'okta_group')}
         />}
-        {tab === 'users' && <CompactSelect className="inline-select" value={standardSeat} ariaLabel="Filtrar usuarios por consumo de licencia Standard" options={[{ value: '', label: 'Todas las licencias' }, { value: 'reconciled', label: 'Consume licencia Standard' }, { value: 'unreconciled', label: 'Sin licencia Standard' }]} onChange={(value) => setStandardSeat(value as '' | 'reconciled' | 'unreconciled')} />}
+        {tab === 'users' && <CompactSelect className="inline-select" value={standardSeat} ariaLabel={t('Filtrar usuarios por consumo de licencia Standard')} options={[{ value: '', label: t('Todas las licencias') }, { value: 'reconciled', label: 'Consume licencia Standard' }, { value: 'unreconciled', label: t('Sin licencia Standard') }]} onChange={(value) => setStandardSeat(value as '' | 'reconciled' | 'unreconciled')} />}
       </div>
 
       {tab === 'users'
-        ? <div className="compact-table-wrap"><table className="compact-table"><thead><tr><th><span className="sr-only">Expandir</span></th><th>Usuario</th><th>Email</th><th>Estado</th><th>Tipo</th><th>Roles</th><th>Último acceso</th><th>Federación</th><th>Consume licencia</th></tr></thead><tbody>
+        ? <div className="compact-table-wrap"><table className="compact-table"><thead><tr><th><span className="sr-only">Expandir</span></th><th>{t('Usuario')}</th><th>Email</th><th>{t('Estado')}</th><th>{t('Tipo')}</th><th>Roles</th><th>{t('Último acceso')}</th><th>{t('Federación')}</th><th>Consume licencia</th></tr></thead><tbody>
           {stateRow(usersCols) || (users.length ? users.map((user) => {
             const expanded = expandedUsers.has(user.object_id);
             return <Fragment key={user.object_id}>
               <tr className={expanded ? 'selected' : ''} onClick={() => void toggleUserRoles(user.object_id)} style={{ cursor: 'pointer' }}>
-                <td><button type="button" className="row-expand-button" aria-expanded={expanded} aria-controls={`identity-user-roles-${user.object_id}`} aria-label={`${expanded ? 'Ocultar' : 'Ver'} roles de ${user.display_name}`} title={`${expanded ? 'Ocultar' : 'Ver'} roles`} onClick={(event) => { event.stopPropagation(); void toggleUserRoles(user.object_id); }}>{expanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button></td>
+                <td><button type="button" className="row-expand-button" aria-expanded={expanded} aria-controls={`identity-user-roles-${user.object_id}`} aria-label={t('{Ver} roles de {display_name}', { Ver: expanded ? t('Ocultar') : t('Ver'), display_name: user.display_name })} title={expanded ? t('Ocultar roles') : t('Ver roles')} onClick={(event) => { event.stopPropagation(); void toggleUserRoles(user.object_id); }}>{expanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button></td>
                 <td><div className="identity-user-cell"><IdentityChip name={user.display_name} kind={user.attributes.service_user ? 'system' : 'user'} subtitle={user.attributes.user_name === user.attributes.email ? undefined : user.attributes.user_name} onSelect={() => drawer.open({ kind: 'user', objectId: user.object_id, name: user.display_name })} /></div></td>
-                <td>{user.attributes.email || <span className="muted">Sin dato</span>}</td>
-                <td><StatusBadge tone={user.attributes.active ? 'success' : 'neutral'}>{user.attributes.active === true ? 'Activo' : user.attributes.active === false ? 'Inactivo' : 'Sin dato'}</StatusBadge></td>
-                <td>{user.attributes.service_user ? 'Cuenta técnica' : 'Persona'}</td>
+                <td>{user.attributes.email || <span className="muted">{t('Sin dato')}</span>}</td>
+                <td><StatusBadge tone={user.attributes.active ? 'success' : 'neutral'}>{user.attributes.active === true ? t('Activo') : user.attributes.active === false ? t('Inactivo') : t('Sin dato')}</StatusBadge></td>
+                <td>{user.attributes.service_user ? t('Cuenta técnica') : 'Persona'}</td>
                 <td><span className="metric-num">{formatNumber(user.role_count)}</span></td>
-                <td>{user.attributes.last_login_date ? <DateTime value={user.attributes.last_login_date} /> : <span className="muted">Sin dato</span>}</td>
+                <td>{user.attributes.last_login_date ? <DateTime value={user.attributes.last_login_date} /> : <span className="muted">{t('Sin dato')}</span>}</td>
                 <td>
                   {/* IDENTITY_SIA_CONSOLIDATION_PLAN_2026-09-12.md §3.1/§7: a
                       business rule derived from the email domain, not
                       evidence CyberArk's API delivered -- StatusBadge here
                       is a compact label only, never phrased as "belongs to". */}
                   {user.federation_resolution
-                    ? <span title="Federación esperada por dominio de correo (asociación derivada, no entregada por la API)"><StatusBadge tone={federationBadgeTone(user.federation_resolution)}>{federationBadgeLabel(user.federation_resolution)}</StatusBadge></span>
-                    : <span className="muted">Sin dato</span>}
+                    ? <span title={t('Federación esperada por dominio de correo (asociación derivada, no entregada por la API)')}><StatusBadge tone={federationBadgeTone(user.federation_resolution)}>{federationBadgeLabel(user.federation_resolution)}</StatusBadge></span>
+                    : <span className="muted">{t('Sin dato')}</span>}
                 </td>
                 <td>{user.standard_seat_reconciled ? <StandardSeatBadge reconciled context="identity" /> : null}</td>
               </tr>
               {expanded && <tr id={`identity-user-roles-${user.object_id}`}><td /><td colSpan={8}>
-                {expandLoading.has(user.object_id) ? <span className="muted">Cargando roles…</span> : rolesError.has(user.object_id) ? <StateBlock compact variant="error" title="No se pudieron cargar los roles" action={<button type="button" className="button subtle" onClick={(event) => { event.stopPropagation(); retryUserRoles(user.object_id); }}>Reintentar</button>} /> : (rolesByUser[user.object_id]?.length
-                  ? <div className="identity-expand-list">{rolesByUser[user.object_id].map((role) => <IdentityChip key={role.object_id} name={role.display_name} kind={role.display_name.toLowerCase().startsWith('sg_cyberark') ? 'group' : 'role'} subtitle={role.display_name.toLowerCase().startsWith('sg_cyberark') ? 'Grupo de Okta' : 'Rol de CyberArk'} onSelect={() => drawer.open({ kind: 'role', objectId: role.object_id, name: role.display_name })} />)}</div>
-                  : <span className="muted">Sin roles asignados</span>)}
+                {expandLoading.has(user.object_id) ? <span className="muted">{t('Cargando roles…')}</span> : rolesError.has(user.object_id) ? <StateBlock compact variant="error" title={t('No se pudieron cargar los roles')} action={<button type="button" className="button subtle" onClick={(event) => { event.stopPropagation(); retryUserRoles(user.object_id); }}>Reintentar</button>} /> : (rolesByUser[user.object_id]?.length
+                  ? <div className="identity-expand-list">{rolesByUser[user.object_id].map((role) => <IdentityChip key={role.object_id} name={role.display_name} kind={role.display_name.toLowerCase().startsWith('sg_cyberark') ? 'group' : 'role'} subtitle={role.display_name.toLowerCase().startsWith('sg_cyberark') ? t('Grupo de Okta') : t('Rol de CyberArk')} onSelect={() => drawer.open({ kind: 'role', objectId: role.object_id, name: role.display_name })} />)}</div>
+                  : <span className="muted">{t('Sin roles asignados')}</span>)}
               </td></tr>}
             </Fragment>;
-          }) : emptyRow(usersCols, 'Todavía no hay usuarios sincronizados'))}
+          }) : emptyRow(usersCols, t('Todavía no hay usuarios sincronizados')))}
         </tbody></table></div>
-        : <div className="compact-table-wrap"><table className="compact-table"><thead><tr><th><span className="sr-only">Expandir</span></th><SortableHeader label="Rol o grupo" sortKey="name" activeKey={roleSort.key} direction={roleSort.direction} onSort={toggleRoleSort} /><SortableHeader label="Miembros directos" sortKey="members" activeKey={roleSort.key} direction={roleSort.direction} onSort={toggleRoleSort} className="identity-role-numeric" /><th>Membresía</th><SortableHeader label="Última modificación" sortKey="modified" activeKey={roleSort.key} direction={roleSort.direction} onSort={toggleRoleSort} /></tr></thead><tbody>
+        : <div className="compact-table-wrap"><table className="compact-table"><thead><tr><th><span className="sr-only">Expandir</span></th><SortableHeader label={t('Rol o grupo')} sortKey="name" activeKey={roleSort.key} direction={roleSort.direction} onSort={toggleRoleSort} /><SortableHeader label="Miembros directos" sortKey="members" activeKey={roleSort.key} direction={roleSort.direction} onSort={toggleRoleSort} className="identity-role-numeric" /><th>{t('Membresía')}</th><SortableHeader label={t('Última modificación')} sortKey="modified" activeKey={roleSort.key} direction={roleSort.direction} onSort={toggleRoleSort} /></tr></thead><tbody>
           {stateRow(rolesCols) || (roles.length ? roles.map((role) => {
             const expanded = expandedRoles.has(role.object_id);
             return <Fragment key={role.object_id}>
               <tr className={expanded ? 'selected' : ''} onClick={() => void toggleRoleMembers(role.object_id)} style={{ cursor: 'pointer' }}>
-                <td><button type="button" className="row-expand-button" aria-expanded={expanded} aria-controls={`identity-role-members-${role.object_id}`} aria-label={`${expanded ? 'Ocultar' : 'Ver'} miembros de ${role.display_name}`} title={`${expanded ? 'Ocultar' : 'Ver'} miembros`} onClick={(event) => { event.stopPropagation(); void toggleRoleMembers(role.object_id); }}>{expanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button></td>
+                <td><button type="button" className="row-expand-button" aria-expanded={expanded} aria-controls={`identity-role-members-${role.object_id}`} aria-label={t('{Ver} miembros de {display_name}', { Ver: expanded ? t('Ocultar') : t('Ver'), display_name: role.display_name })} title={expanded ? t('Ocultar miembros') : t('Ver miembros')} onClick={(event) => { event.stopPropagation(); void toggleRoleMembers(role.object_id); }}>{expanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button></td>
                 <td><div className="identity-role-name">
                   <IdentityChip name={role.display_name} kind={identityRoleKind(role.display_name) === 'okta_group' ? 'group' : 'role'} onSelect={() => drawer.open({ kind: 'role', objectId: role.object_id, name: role.display_name })} />
                   <RoleKindChip kind={identityRoleKind(role.display_name)} active={(roleKind || kindFilter) === identityRoleKind(role.display_name)} locked={Boolean(roleKind)} onToggle={(next) => setKindFilter(next)} />
                 </div></td>
-                <td className="identity-role-numeric"><span className="metric-num">{role.attributes.direct_member_count === undefined ? 'Pendiente de sincronización' : formatNumber(role.attributes.direct_member_count)}</span></td>
+                <td className="identity-role-numeric"><span className="metric-num">{role.attributes.direct_member_count === undefined ? t('Pendiente de sincronización') : formatNumber(role.attributes.direct_member_count)}</span></td>
                 <td><MembershipChip attributes={role.attributes} /><RoleMatchChips info={matchIndex?.bySourceId.get(role.source_id)} /></td>
                 <td><DateTime value={role.attributes.last_modified} /></td>
               </tr>
@@ -185,7 +186,7 @@ export function IdentityAdminWorkspace({ authChecked, authenticated, onUnauthori
                 <IdentityMembershipPanel objectId={role.object_id} />
               </td></tr>}
             </Fragment>;
-          }) : emptyRow(rolesCols, 'Todavía no hay roles o grupos sincronizados'))}
+          }) : emptyRow(rolesCols, t('Todavía no hay roles o grupos sincronizados')))}
         </tbody></table></div>}
 
       <TablePagination page={page} pageSize={50} total={total} onPageChange={setPage} />

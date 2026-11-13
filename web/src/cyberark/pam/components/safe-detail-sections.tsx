@@ -13,7 +13,7 @@ function accountTypeTone(key: string): string {
   return 'other';
 }
 
-function Value({ value, fallback = 'Sin dato' }: { value: string | number | null | undefined; fallback?: string }) {
+function Value({ value, fallback = t('Sin dato') }: { value: string | number | null | undefined; fallback?: string }) {
   if (value === null || value === undefined || value === '' || value === '\\') {
     return <dd className="muted">{fallback}</dd>;
   }
@@ -27,11 +27,11 @@ function safeCpmValue(value: string | null): string | null {
 
 export function SafeSummary({ safe }: { safe: SafeDetail }) {
   const accountTypes = Object.entries(safe.account_type_counts || {});
-  const olacLabel = safe.olac_enabled === true ? 'Activo' : safe.olac_enabled === false ? t('Desactivado') : t('Sin dato');
+  const olacLabel = safe.olac_enabled === true ? t('Activo') : safe.olac_enabled === false ? t('Desactivado') : t('Sin dato');
   const retentionLabel = [
     safe.number_of_versions_retention !== null && safe.number_of_versions_retention !== undefined ? `${safe.number_of_versions_retention} versiones` : null,
-    safe.number_of_days_retention !== null && safe.number_of_days_retention !== undefined ? `${safe.number_of_days_retention} días` : null,
-  ].filter(Boolean).join(' · ') || 'Sin límites configurados';
+    safe.number_of_days_retention !== null && safe.number_of_days_retention !== undefined ? t('{number_of_days_retention} días', { number_of_days_retention: safe.number_of_days_retention }) : null,
+  ].filter(Boolean).join(' · ') || t('Sin límites configurados');
   return <>
     <section className="detail-section">
       <h3>{t('Referencia técnica')}</h3>
@@ -60,8 +60,8 @@ export function SafeAccountList({ accounts, total }: { accounts: Account[]; tota
   return <section className="detail-section accounts-section">
     <div className="section-heading"><h3>{t('Cuentas actuales')} <span>{formatNumber(total ?? accounts.length)}</span></h3><p className="detail-summary-copy">{t('Inventario sin credenciales ni secretos.')}</p></div>
     {accounts.length ? <div className="detail-account-list">{accounts.map((account) => <article className="detail-account-row" key={account.account_id}>
-      <div><strong>{account.account_name}</strong><span>{account.user_name || 'Sin usuario'} · {account.address || 'Sin dirección'}</span></div>
-      <span className="account-platform">{account.platform_name || account.platform_id || 'Sin plataforma'}</span>
+      <div><strong>{account.account_name}</strong><span>{account.user_name || t('Sin usuario')} · {account.address || t('Sin dirección')}</span></div>
+      <span className="account-platform">{account.platform_name || account.platform_id || t('Sin plataforma')}</span>
     </article>)}</div> : <StateBlock variant="empty" title={t('Sin cuentas activas registradas')} />}
   </section>;
 }

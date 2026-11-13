@@ -60,7 +60,7 @@ function WorkspaceLink({ view, active, onSelect, showProduct = false }: { view: 
     className={'workspace-domain-link' + (active ? ' active' : '')}
     aria-current={active ? 'page' : undefined}
     aria-label={showProduct ? `${WORKSPACE_TOOL_LABELS[view]} · ${meta.label} · ${meta.detail}` : undefined}
-    title={`Abrir ${meta.label}: ${meta.detail}`}
+    title={t('Abrir {meta}: {detail}', { meta: meta.label, detail: meta.detail })}
     onClick={navigateInApp}
   >
     {showProduct && <ProductMark view={view} compact />}
@@ -138,7 +138,7 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
       await onPreferencesChange({ visible_workspaces, hidden_workspaces });
       closeEditing();
     } catch (error) {
-      setSaveError(error instanceof Error ? error.message : 'No se pudieron guardar los accesos rápidos');
+      setSaveError(error instanceof Error ? error.message : t('No se pudieron guardar los accesos rápidos'));
     } finally {
       setSaving(false);
     }
@@ -156,7 +156,7 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
           <div><strong id="workspace-editor-title">{t('Accesos rápidos')}</strong><span>{t('Personalizá accesos de todas las herramientas.')}</span></div>
           <button className="workspace-editor-close" type="button" aria-label={t('Cancelar edición')} onClick={closeEditing} disabled={saving}><X size={16} /></button>
         </div>
-        <div className="workspace-editor-limit"><span>{draft.length} seleccionados</span><small>Hasta {limit}</small></div>
+        <div className="workspace-editor-limit"><span>{t('{count} seleccionados', { count: draft.length })}</span><small>{t('Hasta {limit}', { limit })}</small></div>
         <div className="workspace-editor-options">
           {allAvailable.map((view) => {
             const selected = draft.includes(view);
@@ -180,17 +180,17 @@ export function WorkspaceSwitcher({ isHome = false, workspaceView, permissions, 
         <div className="workspace-menu-header">
           {crossTool
             ? <div><strong>{t('Accesos rápidos')}</strong><span>{t('Tus vistas de cualquier herramienta.')}</span></div>
-            : <div><strong>Vistas de {activeProduct.label}</strong><span>{t('Para cambiar de herramienta, usá el selector anterior.')}</span></div>}
+            : <div><strong>{t('Vistas de {label}', { label: activeProduct.label })}</strong><span>{t('Para cambiar de herramienta, usá el selector anterior.')}</span></div>}
         </div>
         {quickAccess.length ? <>
           <p className="workspace-menu-section-label">{t('Vistas rápidas')}</p>
           <div className="workspace-domain-nav" data-section="quick-access">
             {quickAccess.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} showProduct={crossTool} />)}
           </div>
-        </> : <button className="workspace-quick-empty-action" type="button" onClick={beginEditing}><Settings2 size={14} /><span><strong>{t('Fijar vistas rápidas')}</strong><small>Guardá tus accesos frecuentes{crossTool ? ' de cualquier herramienta' : ` de ${activeProduct.label}`}.</small></span></button>}
+        </> : <button className="workspace-quick-empty-action" type="button" onClick={beginEditing}><Settings2 size={14} /><span><strong>{t('Fijar vistas rápidas')}</strong><small>{t('Guardá tus accesos frecuentes{label}.', { label: crossTool ? t(' de cualquier herramienta') : t(' de {activeProduct}', { activeProduct: activeProduct.label }) })}</small></span></button>}
         {recent.length ? <><p className="workspace-menu-section-label">{t('Recientes')}</p><div className="workspace-domain-nav" data-section="recent">{recent.map((view) => <WorkspaceLink key={view} view={view} onSelect={pickWorkspace} showProduct={crossTool} />)}</div></> : null}
         {crossTool ? null : <>
-          <p className="workspace-menu-section-label">Todas las vistas de {activeProduct.label}</p>
+          <p className="workspace-menu-section-label">{t('Todas las vistas de {label}', { label: activeProduct.label })}</p>
           <div className="workspace-domain-nav" data-section="tool-workspaces">
             {available.map((view) => <WorkspaceLink key={view} view={view} active={!isHome && view === workspaceView} onSelect={pickWorkspace} />)}
           </div>

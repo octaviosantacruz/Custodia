@@ -1,7 +1,7 @@
 /* Spanish presentation of observed CyberArk catalog literals. Unknown values
    remain verbatim; source payloads and technical references are unchanged. */
-const STATUS_LABELS: Record<string, string> = { open: 'Abierto' };
-const SEVERITY_LABELS: Record<string, string> = { critical: 'Crítica', high: 'Alta', medium: 'Media', low: 'Baja' };
+const STATUS_LABELS: Record<string, string> = { open: t('Abierto') };
+const SEVERITY_LABELS: Record<string, string> = { critical: t('Crítica'), high: t('Alta'), medium: t('Media'), low: t('Baja') };
 
 function labelFor(labels: Record<string, string>, value: string | null, emptyLabel: string): { label: string; known: boolean } {
   const literal = value || '';
@@ -11,11 +11,11 @@ function labelFor(labels: Record<string, string>, value: string | null, emptyLab
 }
 
 export function cyberarkStatusLabel(status: string | null): { label: string; known: boolean } {
-  return labelFor(STATUS_LABELS, status, 'Sin dato');
+  return labelFor(STATUS_LABELS, status, t('Sin dato'));
 }
 
 export function cyberarkSeverityLabel(severity: string | null): { label: string; known: boolean } {
-  return labelFor(SEVERITY_LABELS, severity, 'Sin dato');
+  return labelFor(SEVERITY_LABELS, severity, t('Sin dato'));
 }
 
 export function cyberarkStatusTone(status: string | null): 'danger' | 'neutral' {
@@ -66,5 +66,7 @@ export function cyberarkRiskDescription(description: string | null): string | nu
 }
 
 export function cyberarkEntityLabel(entity: string | null): string {
-  return labelFor({ user: 'Usuario', webapp: 'Aplicación web' }, entity, 'Sin dato').label;
+  return labelFor({ user: 'Usuario', webapp: t('Aplicación web') }, entity, t('Sin dato')).label;
 }
+
+import { t } from '../../../cross/i18n/index.ts';

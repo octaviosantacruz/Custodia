@@ -4,6 +4,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { fetchFindings, refreshFindings, updateFinding } from '../lib/findings-api';
 import type { Finding, FindingSeverity, FindingStatus } from '../types/findings';
 import { usePamRefreshKey } from '../../shared/refresh-context';
+import { t } from '../../../cross/i18n/index.ts';
 
 export function useFindings({ authChecked, authenticated, includeInternal, onUnauthorized, onError, onNotice }: {
   authChecked: boolean;
@@ -30,7 +31,7 @@ export function useFindings({ authChecked, authenticated, includeInternal, onUna
 
   useEffect(() => {
     if (query.error instanceof ApiError && query.error.status === 401) { onUnauthorized(); return; }
-    onError(query.error ? (query.error instanceof Error ? query.error.message : 'No se pudieron cargar los hallazgos') : '');
+    onError(query.error ? (query.error instanceof Error ? query.error.message : t('No se pudieron cargar los hallazgos')) : '');
   }, [query.error, onError, onUnauthorized]);
 
   const setFilter = <T,>(setter: (value: T) => void, value: T) => { setter(value); setPage(0); };
@@ -43,11 +44,11 @@ export function useFindings({ authChecked, authenticated, includeInternal, onUna
         exception_reason: nextStatus === 'excepted' ? exceptionReason || null : null,
         exception_until: nextStatus === 'excepted' ? exceptionUntil || null : null,
       });
-      onNotice('Estado del hallazgo actualizado');
+      onNotice(t('Estado del hallazgo actualizado'));
       await queryClient.invalidateQueries({ queryKey: ['pam', 'findings'] });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudo actualizar el hallazgo');
+      else onError(error instanceof Error ? error.message : t('No se pudo actualizar el hallazgo'));
       throw error;
     } finally {
       setBusy(false);
@@ -62,7 +63,7 @@ export function useFindings({ authChecked, authenticated, includeInternal, onUna
       await queryClient.invalidateQueries({ queryKey: ['pam', 'findings'] });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudieron actualizar los hallazgos');
+      else onError(error instanceof Error ? error.message : t('No se pudieron actualizar los hallazgos'));
     } finally {
       setBusy(false);
     }
@@ -76,7 +77,7 @@ export function useFindings({ authChecked, authenticated, includeInternal, onUna
     rows: query.data?.rows ?? [],
     total: query.data?.total ?? 0,
     loading: query.isLoading || query.isFetching,
-    loadError: query.error instanceof Error ? query.error.message : query.error ? 'No se pudieron cargar los hallazgos' : '',
+    loadError: query.error instanceof Error ? query.error.message : query.error ? t('No se pudieron cargar los hallazgos') : '',
     busy,
     reload: async () => { await query.refetch(); },
     refresh,

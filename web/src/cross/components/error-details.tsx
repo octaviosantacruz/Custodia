@@ -5,18 +5,18 @@ import { useDialogFocusTrap } from '../hooks/use-dialog-focus-trap';
 import { t } from '../i18n/index.ts';
 
 function suggestedAction({ status }: ErrorDetails): string {
-  if (!status) return 'Revisá la conexión y volvé a intentar.';
-  if (status === 401) return 'Tu sesión venció: volvé a iniciar sesión.';
-  if (status === 403) return 'Tu rol no tiene permiso para ver esto; pedí acceso a un administrador.';
-  if (status === 404) return 'La fuente no está configurada o el recurso ya no existe.';
-  if (status === 429) return 'Demasiadas solicitudes: esperá unos segundos y reintentá.';
-  if (status >= 500) return 'Es un error del servidor: reintentá y, si persiste, reportá la referencia.';
-  return 'Reintentá; si persiste, reportá la referencia.';
+  if (!status) return t('Revisá la conexión y volvé a intentar.');
+  if (status === 401) return t('Tu sesión venció: volvé a iniciar sesión.');
+  if (status === 403) return t('Tu rol no tiene permiso para ver esto; pedí acceso a un administrador.');
+  if (status === 404) return t('La fuente no está configurada o el recurso ya no existe.');
+  if (status === 429) return t('Demasiadas solicitudes: esperá unos segundos y reintentá.');
+  if (status >= 500) return t('Es un error del servidor: reintentá y, si persiste, reportá la referencia.');
+  return t('Reintentá; si persiste, reportá la referencia.');
 }
 
 /** Opens the technical detail behind a failed request without exposing it in
  * the inline state block: endpoint, status, request id and suggested action. */
-export function ErrorDetailsButton({ details, label = 'Ver detalle técnico' }: { details: ErrorDetails; label?: string }) {
+export function ErrorDetailsButton({ details, label = t('Ver detalle técnico') }: { details: ErrorDetails; label?: string }) {
   const [open, setOpen] = useState(false);
   const dialogRef = useDialogFocusTrap<HTMLElement>({ onClose: () => setOpen(false) });
 
@@ -30,7 +30,7 @@ export function ErrorDetailsButton({ details, label = 'Ver detalle técnico' }: 
         </div>
         <h2 id="error-details-title">{t('Detalle del error')}</h2>
         <dl className="error-details-list">
-          <div><dt>{t('Tipo')}</dt><dd>{details.status ? `HTTP ${details.status}` : 'Error de red o del cliente'}</dd></div>
+          <div><dt>{t('Tipo')}</dt><dd>{details.status ? `HTTP ${details.status}` : t('Error de red o del cliente')}</dd></div>
           <div><dt>{t('Endpoint')}</dt><dd>{details.path || 'No disponible'}</dd></div>
           <div><dt>{t('Referencia')}</dt><dd>{details.requestId || 'No disponible'}</dd></div>
           <div><dt>{t('Mensaje')}</dt><dd>{details.message}</dd></div>

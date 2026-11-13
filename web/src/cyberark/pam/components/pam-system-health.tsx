@@ -20,8 +20,8 @@ type PamSystemHealthProps = {
 
 const COMPONENT_LABELS: Record<string, string> = {
   'Managed Accounts': 'Cuentas administradas',
-  'Concurrent Sessions': 'Sesiones simultáneas',
-  'Active Users': 'Usuarios activos',
+  'Concurrent Sessions': t('Sesiones simultáneas'),
+  'Active Users': t('Usuarios activos'),
 };
 
 export function PamSystemHealthWorkspace({ authChecked, authenticated, onUnauthorized, onError }: PamSystemHealthProps) {
@@ -41,7 +41,7 @@ export function PamSystemHealthWorkspace({ authChecked, authenticated, onUnautho
       } catch (failure) {
         if (controller.signal.aborted) return;
         if (failure instanceof ApiError && failure.status === 401) onUnauthorized();
-        else setError(failure instanceof Error ? failure.message : 'No se pudo cargar la salud de componentes PAM');
+        else setError(failure instanceof Error ? failure.message : t('No se pudo cargar la salud de componentes PAM'));
       } finally { if (!controller.signal.aborted) setLoading(false); }
     };
     void load();
@@ -59,10 +59,10 @@ export function PamSystemHealthWorkspace({ authChecked, authenticated, onUnautho
           : rows.length ? rows.map((component) => {
             const allConnected = component.total_count > 0 && component.connected_count === component.total_count;
             return <article className={`pam-health-item${allConnected ? ' is-healthy' : ' is-attention'}`} key={component.object_id}>
-              <div className="pam-health-component"><Activity size={16} aria-hidden /><div><strong>{COMPONENT_LABELS[component.display_name] || component.display_name}</strong><span>{component.description || 'Sin descripción'}</span></div></div>
+              <div className="pam-health-component"><Activity size={16} aria-hidden /><div><strong>{COMPONENT_LABELS[component.display_name] || component.display_name}</strong><span>{component.description || t('Sin descripción')}</span></div></div>
               <div className="pam-health-fact"><span>{t('Conectividad')}</span>{allConnected ? <strong className="status-pill status-active"><CheckCircle2 size={12} aria-hidden /> {formatNumber(component.connected_count)} de {formatNumber(component.total_count)} conectados</strong> : <strong className="status-pill status-warning"><XCircle size={12} aria-hidden /> {formatNumber(component.connected_count)} de {formatNumber(component.total_count)} conectados</strong>}</div>
               <div className="pam-health-fact"><span>{t('Versiones')}</span><strong>{versionListLabel(component.instance_versions)}</strong></div>
-              <div className="pam-health-fact"><span>{t('Última observación')}</span><strong><DateTime value={epochSecondsToIso(component.latest_logon_at)} missing="Sin observación registrada" /></strong></div>
+              <div className="pam-health-fact"><span>{t('Última observación')}</span><strong><DateTime value={epochSecondsToIso(component.latest_logon_at)} missing={t('Sin observación registrada')} /></strong></div>
             </article>;
           }) : <StateBlock variant="empty" title={t('Todavía no hay componentes PAM sincronizados')} />}
     </div>

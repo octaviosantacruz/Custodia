@@ -32,7 +32,7 @@ export function syncSourceLabel(source: SyncSource | null | undefined, sourceFil
   const hint = `${source || ''} ${sourceFile || ''}`.toLocaleLowerCase('es');
   const hinted = HINTED_SYNCS.find((sync) => sync.sourceHints?.some((word) => hint.includes(word)));
   if (hinted) return hinted.meta.label;
-  return source || 'Sincronización';
+  return source || t('Sincronización');
 }
 
 /** Tool-level identity used by operator-facing synchronization summaries.
@@ -49,7 +49,7 @@ export function syncToolForSource(source: SyncSource | null | undefined): SyncSo
 export function syncToolLabel(tool: SyncSource | null | undefined): string {
   const meta = TOOL_META[tool || ''];
   if (meta) return meta.label;
-  return tool || 'Sincronización';
+  return tool || t('Sincronización');
 }
 
 /** Tool-level logo and fallback mark. Feature metadata remains separate for
@@ -291,7 +291,7 @@ export type NoticePresentation = {
 export function presentNotice(notice: string, workspaceSource: SyncSource | null = null): NoticePresentation {
   const source = syncSourceFromNotice(notice) ?? workspaceSource;
   const sourceLabel = source ? syncToolLabel(syncToolForSource(source)) : null;
-  const eyebrow = sourceLabel ? `${sourceLabel} · ACTUALIZACIÓN` : 'CUSTODIA · ACTUALIZACIÓN';
+  const eyebrow = sourceLabel ? t('{sourceLabel} · ACTUALIZACIÓN', { sourceLabel: sourceLabel }) : t('CUSTODIA · ACTUALIZACIÓN');
   const automatic = /sincronización automática|sincronizó automáticamente|sincronizó parcialmente/i.test(notice);
   if (!automatic) return { source, eyebrow, title: notice };
 
@@ -333,13 +333,13 @@ export function automaticSyncNotice(run: CompletedSync): string {
   const objects = run.received_object_count ?? run.received_safe_count;
   if (run.status === 'partial') {
     const landed = typeof objects === 'number' ? ` Llegaron ${objects.toLocaleString(localeTag())} ${objects === 1 ? 'objeto' : 'objetos'}.` : '';
-    return `${source} sincronizó parcialmente: parte del inventario no se actualizó.${landed} Tu vista actual se conserva; revisá Actividad.`;
+    return t('{source} sincronizó parcialmente: parte del inventario no se actualizó.{landed} Tu vista actual se conserva; revisá Actividad.', { source: source, landed: landed });
   }
   if (run.status !== 'completed' || (run.error_count || 0) > 0) {
-    return `${source} terminó una sincronización automática con errores. Tu vista actual se conserva; revisá Actividad para el detalle.`;
+    return t('{source} terminó una sincronización automática con errores. Tu vista actual se conserva; revisá Actividad para el detalle.', { source: source });
   }
-  if (typeof objects !== 'number') return `${source} terminó una sincronización automática. Tu vista actual se conserva.`;
-  return `${source} sincronizó automáticamente ${objects.toLocaleString(localeTag())} ${objects === 1 ? 'objeto' : 'objetos'}. Tu vista actual se conserva.`;
+  if (typeof objects !== 'number') return t('{source} terminó una sincronización automática. Tu vista actual se conserva.', { source: source });
+  return t('{source} sincronizó automáticamente {localeTag} {objetos}. Tu vista actual se conserva.', { source: source, localeTag: objects.toLocaleString(localeTag()), objetos: objects === 1 ? 'objeto' : 'objetos' });
 }
 
 /** Collapse the several source runs that make up one scheduled CyberArk pass
@@ -354,8 +354,8 @@ export function automaticSyncBatchNotice(runs: readonly CompletedSync[]): string
   }
   const labels = [...new Set(runs.map((run) => syncToolLabel(syncToolForSource(run.source_system))))];
   const failed = runs.some((run) => (run.status !== 'completed' && run.status !== 'partial') || (run.error_count || 0) > 0);
-  if (failed) return `Custodia terminó una sincronización automática con errores. ${labels.join(', ')}; revisá Actividad para el detalle.`;
-  if (runs.some((run) => run.status === 'partial')) return `Custodia sincronizó parcialmente: ${labels.join(', ')}. Tu vista actual se conserva; revisá Actividad.`;
-  if (labels.length === 1) return `${labels[0]} sincronizó automáticamente. Tu vista actual se conserva.`;
-  return `Custodia terminó una sincronización automática. Herramientas actualizadas: ${labels.join(', ')}. Tu vista actual se conserva.`;
+  if (failed) return t('Custodia terminó una sincronización automática con errores. {labels}; revisá Actividad para el detalle.', { labels: labels.join(', ') });
+  if (runs.some((run) => run.status === 'partial')) return t('Custodia sincronizó parcialmente: {labels}. Tu vista actual se conserva; revisá Actividad.', { labels: labels.join(', ') });
+  if (labels.length === 1) return t('{labels} sincronizó automáticamente. Tu vista actual se conserva.', { labels: labels[0] });
+  return t('Custodia terminó una sincronización automática. Herramientas actualizadas: {labels}. Tu vista actual se conserva.', { labels: labels.join(', ') });
 }

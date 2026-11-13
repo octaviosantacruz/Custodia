@@ -1,11 +1,12 @@
 import type { WorkStatus } from '../types/connection';
+import { t } from '../i18n/index.ts';
 
 export const WORK_STATUSES: { value: WorkStatus; label: string; tone: 'neutral' | 'info' | 'success' | 'danger' | 'warning' }[] = [
-  { value: 'pending', label: 'Pendiente', tone: 'neutral' },
+  { value: 'pending', label: t('Pendiente'), tone: 'neutral' },
   { value: 'in_progress', label: 'En curso', tone: 'warning' },
   { value: 'onboarded', label: 'Incorporado', tone: 'success' },
   { value: 'blocked', label: 'Bloqueado', tone: 'danger' },
-  { value: 'not_applicable', label: 'No aplica', tone: 'neutral' },
+  { value: 'not_applicable', label: t('No aplica'), tone: 'neutral' },
 ];
 
 const BY_VALUE = Object.fromEntries(WORK_STATUSES.map((item) => [item.value, item]));
@@ -29,15 +30,15 @@ export function parseWorkStatus(text: string): WorkStatus | null {
 
 const FIELD_LABELS: Record<string, string> = {
   instance_name: 'Instancia', environment: 'Ambiente', private_ip: 'IP', port: 'Puerto', ca_sia: 'Platform', ca_dba: 'DBA',
-  zsp_implemented: 'ZSP', access_available: 'Acceso', description: 'Descripción', lifecycle_status: 'Estado',
+  zsp_implemented: 'ZSP', access_available: 'Acceso', description: t('Descripción'), lifecycle_status: 'Estado',
   work_status: 'Trabajo', responsible: 'Responsable', note: 'Nota',
 };
 
 function show(field: string, value: unknown): string {
-  if (value === null || value === undefined || value === '') return 'vacío';
-  if (typeof value === 'boolean') return value ? 'Sí' : 'No';
+  if (value === null || value === undefined || value === '') return t('vacío');
+  if (typeof value === 'boolean') return value ? t('Sí') : 'No';
   if (field === 'work_status') return workLabel(value as WorkStatus);
-  if (field === 'lifecycle_status') return value === 'retired' ? 'Retirado' : 'Activo';
+  if (field === 'lifecycle_status') return value === 'retired' ? t('Retirado') : t('Activo');
   return String(value);
 }
 

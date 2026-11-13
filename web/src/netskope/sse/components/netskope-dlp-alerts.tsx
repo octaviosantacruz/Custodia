@@ -36,7 +36,7 @@ function PolicyIncidents({ policy, refreshKey }: { policy: string; refreshKey?: 
     action={<button type="button" className="button subtle" onClick={incidents.retry}>{t('Reintentar')}</button>} />;
   if (!incidents.rows.length) return <StateBlock variant="empty" compact title={t('Sin incidentes en la ventana')} />;
   return <div className="netskope-dlp-incidents">
-    <table className="compact-table" aria-label={`Incidentes recientes de ${policy}`}>
+    <table className="compact-table" aria-label={t('Incidentes recientes de {policy}', { policy: policy })}>
       <thead><tr><th>{t('Incidente')}</th><th>{t('Fecha')}</th><th>{t('Estado')}</th><th>{t('Severidad')}</th><th>{t('Acción')}</th></tr></thead>
       <tbody>
         {incidents.rows.map((row) => <tr key={row.incident_id}>
@@ -48,7 +48,7 @@ function PolicyIncidents({ policy, refreshKey }: { policy: string; refreshKey?: 
         </tr>)}
       </tbody>
     </table>
-    {incidents.total > incidents.rows.length ? <p className="database-caption">Los {NETSKOPE_DLP_DRILL_SIZE} más recientes de {formatNumber(incidents.total)}.</p> : null}
+    {incidents.total > incidents.rows.length ? <p className="database-caption">{t('Los {NETSKOPE_DLP_DRILL_SIZE} más recientes de {total}.', { NETSKOPE_DLP_DRILL_SIZE: NETSKOPE_DLP_DRILL_SIZE, total: formatNumber(incidents.total) })}</p> : null}
   </div>;
 }
 
@@ -63,7 +63,7 @@ function PolicyRow({ row, open, onToggle, refreshKey }: { row: NetskopeDlpPolicy
         </button>
       </td>
       <td className="netskope-dlp-number">{formatNumber(row.alert_count)}</td>
-      <td><span className={`netskope-dlp-trend ${trend.direction}`} title={`Últimos 7 días: ${formatNumber(row.last_7d)} · 7 días anteriores: ${formatNumber(row.previous_7d)}`}>
+      <td><span className={`netskope-dlp-trend ${trend.direction}`} title={t('Últimos 7 días: {last_7d} · 7 días anteriores: {previous_7d}', { last_7d: formatNumber(row.last_7d), previous_7d: formatNumber(row.previous_7d) })}>
         <strong>{formatNumber(row.last_7d)}</strong> <small>{trend.label}</small>
       </span></td>
       <td><Mix buckets={row.by_severity} label={t('Severidad')} /></td>
@@ -81,7 +81,7 @@ export function NetskopeDlpWorkspace({ refreshKey, authChecked, authenticated, o
   const data = dlp.policies;
 
   if (dlp.loading && !data) {
-    return <section className="netskope-dlp"><StateBlock variant="loading" title={t('Cargando políticas DLP…')} hint={`Alertas de los últimos ${NETSKOPE_DLP_WINDOW_DAYS} días agrupadas por política.`} /></section>;
+    return <section className="netskope-dlp"><StateBlock variant="loading" title={t('Cargando políticas DLP…')} hint={t('Alertas de los últimos {NETSKOPE_DLP_WINDOW_DAYS} días agrupadas por política.', { NETSKOPE_DLP_WINDOW_DAYS: NETSKOPE_DLP_WINDOW_DAYS })} /></section>;
   }
   if (!data) {
     return <section className="netskope-dlp"><StateBlock
@@ -99,7 +99,7 @@ export function NetskopeDlpWorkspace({ refreshKey, authChecked, authenticated, o
       <div>
         <p className="eyebrow">{t('ALERTAS DLP')}</p>
         <h2>{t('Políticas que disparan alertas')}</h2>
-        <span className="database-caption">Últimos {data.window_days} días · {formatNumber(data.total_policies)} {data.total_policies === 1 ? t('política') : t('políticas')} · {formatNumber(total)} alertas <HelpHint label={t('Qué muestra')}><p>Cada fila es el nombre de política que Netskope registra en el incidente. Qué cubre cada política (a quién aplica, qué destino, qué acción) llegará cuando Netskope habilite la lectura de sus reglas.</p></HelpHint></span>
+        <span className="database-caption">{t('Últimos {window_days} días · {total_policies} {políticas} · {total} alertas', { window_days: data.window_days, total_policies: formatNumber(data.total_policies), políticas: data.total_policies === 1 ? t('política') : t('políticas'), total: formatNumber(total) })} <HelpHint label={t('Qué muestra')}><p>{t('Cada fila es el nombre de política que Netskope registra en el incidente. Qué cubre cada política (a quién aplica, qué destino, qué acción) llegará cuando Netskope habilite la lectura de sus reglas.')}</p></HelpHint></span>
       </div>
       {onNotice ? <button type="button" className="button subtle" disabled={dlp.refreshing} onClick={() => void dlp.reload()}>{dlp.refreshing ? t('Actualizando…') : t('Actualizar')}</button> : null}
     </header>
@@ -113,12 +113,12 @@ export function NetskopeDlpWorkspace({ refreshKey, authChecked, authenticated, o
       <section className="list-panel database-surface" aria-labelledby="netskope-dlp-policies-title">
         <div className="netskope-dlp-table-heading">
           <div className="section-title"><h3 id="netskope-dlp-policies-title">{t('Políticas')}</h3></div>
-          <span className="database-toolbar-count">{data.captured_at ? <>{t('Capturado')} <DateTime value={data.captured_at} /></> : 'Sin captura'}</span>
+          <span className="database-toolbar-count">{data.captured_at ? <>{t('Capturado')} <DateTime value={data.captured_at} /></> : t('Sin captura')}</span>
         </div>
         <div className="compact-table-wrap"><table className="compact-table netskope-dlp-table">
-          <thead><tr><th>{t('Política')}</th><th>Alertas · {data.window_days} días</th><th>{t('Últimos 7 días')}</th><th>{t('Severidad')}</th><th>{t('Acción')}</th><th>{t('Última')}</th></tr></thead>
+          <thead><tr><th>{t('Política')}</th><th>{t('Alertas · {window_days} días', { window_days: data.window_days })}</th><th>{t('Últimos 7 días')}</th><th>{t('Severidad')}</th><th>{t('Acción')}</th><th>{t('Última')}</th></tr></thead>
           <tbody>
-            {!data.policies.length && <tr><td colSpan={6}><StateBlock variant="empty" title={`Sin alertas con política en los últimos ${NETSKOPE_DLP_WINDOW_DAYS} días`} hint="La captura está configurada y sin alertas en la ventana." /></td></tr>}
+            {!data.policies.length && <tr><td colSpan={6}><StateBlock variant="empty" title={t('Sin alertas con política en los últimos {NETSKOPE_DLP_WINDOW_DAYS} días', { NETSKOPE_DLP_WINDOW_DAYS: NETSKOPE_DLP_WINDOW_DAYS })} hint="La captura está configurada y sin alertas en la ventana." /></td></tr>}
             {data.policies.map((row) => <PolicyRow
               key={row.policy}
               row={row}
@@ -128,7 +128,7 @@ export function NetskopeDlpWorkspace({ refreshKey, authChecked, authenticated, o
             />)}
           </tbody>
         </table></div>
-        {data.unnamed_alerts ? <p className="database-caption netskope-dlp-unnamed">{formatNumber(data.unnamed_alerts)} {data.unnamed_alerts === 1 ? t('alerta sin nombre de política no aparece') : t('alertas sin nombre de política no aparecen')} en la tabla.</p> : null}
+        {data.unnamed_alerts ? <p className="database-caption netskope-dlp-unnamed">{t('{unnamed_alerts} {aparecen} en la tabla.', { unnamed_alerts: formatNumber(data.unnamed_alerts), aparecen: data.unnamed_alerts === 1 ? t('alerta sin nombre de política no aparece') : t('alertas sin nombre de política no aparecen') })}</p> : null}
       </section>
       <p className="database-caption netskope-boundary-note"><FileLock2 size={14} aria-hidden="true" /> {t('Custodia no guarda archivo, contenido, hash, URL, IP ni el usuario del evento.')}</p>
     </>}

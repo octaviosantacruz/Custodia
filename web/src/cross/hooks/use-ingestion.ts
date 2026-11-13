@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { syncSourcesForScope, syncToolLabel, syncToolsForSources } from '../lib/sync-source';
 import type { IngestionRun } from '../types/ingestion';
+import { t } from '../i18n/index.ts';
 
 export type SyncToast = {
   tone: 'running' | 'success' | 'error';
@@ -41,9 +42,9 @@ function ingestionErrorMessage(run: IngestionRun): string {
   const first = details.find((item) => item.error);
   if (first?.error) {
     const scope = first.safeName && first.safeName !== '<run>' ? ' (' + first.safeName + ')' : '';
-    return sourceLabel(run) + ' terminó en estado ' + run.status + scope + ': ' + first.error;
+    return sourceLabel(run) + t(' terminó en estado ') + run.status + scope + ': ' + first.error;
   }
-  return sourceLabel(run) + ' terminó en estado ' + run.status;
+  return sourceLabel(run) + t(' terminó en estado ') + run.status;
 }
 
 /** A run that ended "partial" finished and wrote data (a bounded capture or an
@@ -133,10 +134,10 @@ export function useIngestion({ loadDashboard, onError, onCompleted }: UseIngesti
     setIngestionBusy(true);
     setSyncToast({
       tone: 'running',
-      title: 'Sincronización en progreso',
+      title: t('Sincronización en progreso'),
       detail: scope === 'cyberark'
-        ? 'Actualizando CyberArk en corridas independientes.'
-        : 'Actualizando las herramientas configuradas en corridas independientes.',
+        ? t('Actualizando CyberArk en corridas independientes.')
+        : t('Actualizando las herramientas configuradas en corridas independientes.'),
       sources: syncSourcesForScope(scope),
     });
     setSyncStartedAt(Date.now());
@@ -158,19 +159,19 @@ export function useIngestion({ loadDashboard, onError, onCompleted }: UseIngesti
       const completedTools = tools.map(syncToolLabel);
       setSyncToast({
         tone: 'success',
-        title: 'Sincronización completada',
+        title: t('Sincronización completada'),
         detail: completedTools.length
-          ? `${completedTools.join(' y ')} ${completedTools.length === 1 ? 'actualizado' : 'actualizados'}.${warningSuffix(runs)}`
-          : `Sincronización completada.${warningSuffix(runs)}`,
+          ? `${completedTools.join(t(' y '))} ${completedTools.length === 1 ? 'actualizado' : 'actualizados'}.${warningSuffix(runs)}`
+          : t('Sincronización completada.{runs}', { runs: warningSuffix(runs) }),
         sources: tools,
       });
       await refreshAfterCompletion();
       const domains = new Set(REGISTERED_SYNCS.filter((sync) => sources.includes(sync.source)).map((sync) => sync.domain));
       for (const domain of domains) if (domain !== 'pam') onCompleted(domain);
     } catch (ingestionError) {
-      const message = ingestionError instanceof Error ? ingestionError.message : 'No se pudo aplicar la sincronización';
+      const message = ingestionError instanceof Error ? ingestionError.message : t('No se pudo aplicar la sincronización');
       onError(message);
-      setSyncToast({ tone: 'error', title: 'Sincronización interrumpida', detail: message, sources: [] });
+      setSyncToast({ tone: 'error', title: t('Sincronización interrumpida'), detail: message, sources: [] });
     } finally {
       setSyncBusy(false);
       setIngestionBusy(false);

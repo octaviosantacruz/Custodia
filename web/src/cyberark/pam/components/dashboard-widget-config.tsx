@@ -71,7 +71,7 @@ export function DashboardWidgetPreview({ widget, includeInternal = true }: { wid
         setError('');
       } catch (caught) {
         if (controller.signal.aborted) return;
-        setError(caught instanceof ApiError ? caught.message : 'No se pudo previsualizar');
+        setError(caught instanceof ApiError ? caught.message : t('No se pudo previsualizar'));
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -125,7 +125,7 @@ function WidgetCardShell({ index, title, onRemove, children }: { index: number; 
   return <article className="dashboard-widget-card">
     <div className="dashboard-widget-editor-heading">
       <span>Métrica {index + 1}{title.trim() ? ` · ${title.trim()}` : ''}</span>
-      {onRemove ? <button type="button" className="icon-button" aria-label={`Quitar métrica ${index + 1}`} title={`Quitar métrica ${index + 1}`} onClick={onRemove}><Trash2 size={14} /></button> : null}
+      {onRemove ? <button type="button" className="icon-button" aria-label={t('Quitar métrica {index}', { index: index + 1 })} title={t('Quitar métrica {index}', { index: index + 1 })} onClick={onRemove}><Trash2 size={14} /></button> : null}
     </div>
     {children}
   </article>;
@@ -136,7 +136,7 @@ export function WidgetBasicsCard({ widget, index, onChange, onRemove }: { widget
     <label className="dashboard-widget-name">{t('Nombre')}<input value={widget.title} maxLength={100} onChange={(event) => onChange({ ...widget, title: event.target.value })} placeholder={t('Ej. Safes por unidad')} /></label>
     <div className="dashboard-widget-sentence">
       <span>{t('Medir')}</span>
-      <CompactSelect value={widget.measure} ariaLabel={`Qué medir en ${widget.title}`} options={MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as DashboardWidget['measure'], value_format: DASHBOARD_PERCENTAGE_MEASURES.has(value as DashboardWidget['measure']) ? 'percentage' : 'count', baseline_value: null })} />
+      <CompactSelect value={widget.measure} ariaLabel={t('Qué medir en {title}', { title: widget.title })} options={MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as DashboardWidget['measure'], value_format: DASHBOARD_PERCENTAGE_MEASURES.has(value as DashboardWidget['measure']) ? 'percentage' : 'count', baseline_value: null })} />
     </div>
   </WidgetCardShell>;
 }
@@ -156,16 +156,16 @@ export function WidgetDisplayCard({ widget, index, onChange }: { widget: Dashboa
     position: kind === 'count' ? null : widget.position,
   });
   return <WidgetCardShell index={index} title={widget.title}>
-    <div className="dashboard-widget-core"><label>{t('Tipo')}<CompactSelect value={widget.kind} ariaLabel={`Tipo de ${widget.title}`} options={KIND_OPTIONS} onChange={setKind} /></label>{widget.kind === 'chart' && !(widget.chart && DASHBOARD_ADVANCED_CHART_DIMENSIONS.has(widget.chart.group_by)) ? <label>{t('Medida')}<CompactSelect value={widget.measure} ariaLabel={`Medida del gráfico de ${widget.title}`} options={CHART_MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as 'safes' | 'accounts', value_format: 'count' })} /></label> : null}</div>
+    <div className="dashboard-widget-core"><label>{t('Tipo')}<CompactSelect value={widget.kind} ariaLabel={t('Tipo de {title}', { title: widget.title })} options={KIND_OPTIONS} onChange={setKind} /></label>{widget.kind === 'chart' && !(widget.chart && DASHBOARD_ADVANCED_CHART_DIMENSIONS.has(widget.chart.group_by)) ? <label>{t('Medida')}<CompactSelect value={widget.measure} ariaLabel={t('Medida del gráfico de {title}', { title: widget.title })} options={CHART_MEASURE_OPTIONS} onChange={(value) => onChange({ ...widget, measure: value as 'safes' | 'accounts', value_format: 'count' })} /></label> : null}</div>
     {widget.kind === 'chart' ? <div className="dashboard-widget-chart-options">
-      {widget.chart && ADVANCED_STYLE_DIMENSION[widget.chart.style as keyof typeof ADVANCED_STYLE_DIMENSION] ? <label>{t('Mostrar como')}<CompactSelect value={widget.chart.style} ariaLabel={`Gráfico de ${widget.title}`} options={STYLE_OPTIONS} onChange={(value) => onChange(withChartStyle(widget, value as NonNullable<DashboardWidget['chart']>['style']))} /></label> : null}
+      {widget.chart && ADVANCED_STYLE_DIMENSION[widget.chart.style as keyof typeof ADVANCED_STYLE_DIMENSION] ? <label>{t('Mostrar como')}<CompactSelect value={widget.chart.style} ariaLabel={t('Gráfico de {title}', { title: widget.title })} options={STYLE_OPTIONS} onChange={(value) => onChange(withChartStyle(widget, value as NonNullable<DashboardWidget['chart']>['style']))} /></label> : null}
       {widget.chart && !ADVANCED_STYLE_DIMENSION[widget.chart.style as keyof typeof ADVANCED_STYLE_DIMENSION]
-        ? <label>{t('Agrupar por')}<CompactSelect value={widget.chart.group_by} ariaLabel={`Agrupar gráfico de ${widget.title}`} options={DIMENSION_OPTIONS} onChange={(value) => onChange({ ...widget, chart: { style: widget.chart?.style ?? 'pie', group_by: value as DashboardChartDimension } })} /></label>
+        ? <label>{t('Agrupar por')}<CompactSelect value={widget.chart.group_by} ariaLabel={t('Agrupar gráfico de {title}', { title: widget.title })} options={DIMENSION_OPTIONS} onChange={(value) => onChange({ ...widget, chart: { style: widget.chart?.style ?? 'pie', group_by: value as DashboardChartDimension } })} /></label>
         : <div className="dashboard-chart-cross-note"><strong>{t('Cruce preconfigurado')}</strong><small>{widget.chart ? DASHBOARD_DIMENSION_LABELS[widget.chart.group_by] : ''}</small></div>}
     </div> : null}
     {widget.kind === 'goal' ? <div className="dashboard-widget-goal">
       <label>{t('Meta')}<input type="number" aria-label={t('Meta')} min="0" max="10000000" value={widget.target_value === null ? '' : widget.target_value} onChange={(event) => { const raw = event.target.value; onChange({ ...widget, target_value: raw === '' ? null : Number(raw), baseline_value: null }); }} aria-invalid={widget.target_value === null} />{widget.target_value === null ? <small className="dashboard-field-error">{t('Definí una meta para continuar.')}</small> : null}</label>
-      <label>{t('Objetivo')}<CompactSelect value={widget.target_direction || 'at_most'} ariaLabel={`Dirección de la meta ${widget.title}`} options={[{ value: 'at_most', label: t('Llegar como máximo a') }, { value: 'at_least', label: t('Llegar como mínimo a') }]} onChange={(value) => onChange({ ...widget, target_direction: value as 'at_most' | 'at_least', baseline_value: null })} /></label>
+      <label>{t('Objetivo')}<CompactSelect value={widget.target_direction || 'at_most'} ariaLabel={t('Dirección de la meta {title}', { title: widget.title })} options={[{ value: 'at_most', label: t('Llegar como máximo a') }, { value: 'at_least', label: t('Llegar como mínimo a') }]} onChange={(value) => onChange({ ...widget, target_direction: value as 'at_most' | 'at_least', baseline_value: null })} /></label>
       <label>{t('Período')}<input value={widget.period_label || ''} maxLength={40} onChange={(event) => onChange({ ...widget, period_label: event.target.value })} placeholder={t('Ej. Q4 2026')} /></label>
     </div> : null}
   </WidgetCardShell>;

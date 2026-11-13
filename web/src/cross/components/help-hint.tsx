@@ -12,9 +12,11 @@ export function HelpHint({ label, children }: Props) {
   const { open, setOpen, ref } = usePopover<HTMLSpanElement>();
   const id = useId();
   return <span className="help-hint" ref={ref}>
-    <button type="button" className={`help-hint-button${open ? ' is-open' : ''}`} aria-label={`Ayuda: ${label}`} aria-expanded={open} aria-controls={open ? id : undefined} title={`Ayuda: ${label}`} onClick={() => setOpen((current) => !current)}>
+    <button type="button" className={`help-hint-button${open ? ' is-open' : ''}`} aria-label={t('Ayuda: {value}', { value: label })} aria-expanded={open} aria-controls={open ? id : undefined} title={t('Ayuda: {value}', { value: label })} onClick={() => setOpen((current) => !current)}>
       <CircleHelp size={14} aria-hidden="true" />
     </button>
     {open ? <div className="help-hint-popover" id={id} role="note">{children}</div> : null}
   </span>;
 }
+
+import { t } from '../i18n/index.ts';

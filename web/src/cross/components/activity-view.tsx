@@ -38,22 +38,22 @@ const ENTITY_FILTER_OPTIONS = [
 ];
 
 const actionLabels: Record<string, string> = {
-  create: 'Creó',
-  update: 'Actualizó',
-  role_change: 'Cambió rol',
-  delete: 'Eliminó',
-  export: 'Exportó',
-  sync_queued: 'Encoló sync',
-  sync_start: 'Inició sync',
-  sync_complete: 'Finalizó sync',
-  oidc_groups_observed: 'Actualizó grupos de Okta',
-  sync_requeued: 'Reencoló sync',
+  create: t('Creó'),
+  update: t('Actualizó'),
+  role_change: t('Cambió rol'),
+  delete: t('Eliminó'),
+  export: t('Exportó'),
+  sync_queued: t('Encoló sync'),
+  sync_start: t('Inició sync'),
+  sync_complete: t('Finalizó sync'),
+  oidc_groups_observed: t('Actualizó grupos de Okta'),
+  sync_requeued: t('Reencoló sync'),
 };
 
 function actionLabel(action: string) { return actionLabels[action] || action; }
 function entityLabel(entity: string) {
-  if (entity === 'workspace_preferences') return 'Preferencias de workspace';
-  if (entity === 'ingestion_run') return 'Sincronización';
+  if (entity === 'workspace_preferences') return t('Preferencias de workspace');
+  if (entity === 'ingestion_run') return t('Sincronización');
   return entity.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 function isSystemActor(name: string) { return /sistema|system|automat|servicio/i.test(name); }
@@ -96,8 +96,8 @@ function ActivityDetail({ row }: { row: ActivityEntry }) {
     </div>;
   }
   return <div className="activity-detail activity-detail-json">
-    <div><strong>{t('Antes')}</strong><code>{row.before_data ? JSON.stringify(row.before_data, null, 2) : 'Sin valor anterior'}</code></div>
-    <div><strong>{t('Después')}</strong><code>{row.after_data ? JSON.stringify(row.after_data, null, 2) : 'Sin valor posterior'}</code></div>
+    <div><strong>{t('Antes')}</strong><code>{row.before_data ? JSON.stringify(row.before_data, null, 2) : t('Sin valor anterior')}</code></div>
+    <div><strong>{t('Después')}</strong><code>{row.after_data ? JSON.stringify(row.after_data, null, 2) : t('Sin valor posterior')}</code></div>
   </div>;
 }
 
@@ -136,7 +136,7 @@ export function ActivityView({ canExport = false, onUnauthorized }: { canExport?
         if (error instanceof ApiError && error.status === 401) { onUnauthorized?.(); return; }
         setRows([]);
         setTotal(0);
-        setLoadError(error instanceof Error ? error.message : 'No se pudo cargar la actividad');
+        setLoadError(error instanceof Error ? error.message : t('No se pudo cargar la actividad'));
       }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- onUnauthorized is only called on a 401; its identity must not refetch the page
@@ -150,7 +150,7 @@ export function ActivityView({ canExport = false, onUnauthorized }: { canExport?
       setExportMessage({ tone: 'ok', text: hasFilters ? t('CSV descargado con los filtros activos') : t('CSV descargado') });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) { onUnauthorized?.(); return; }
-      setExportMessage({ tone: 'error', text: error instanceof Error ? error.message : 'No se pudo exportar la actividad' });
+      setExportMessage({ tone: 'error', text: error instanceof Error ? error.message : t('No se pudo exportar la actividad') });
     } finally { setExporting(false); }
   };
 
@@ -165,7 +165,7 @@ export function ActivityView({ canExport = false, onUnauthorized }: { canExport?
        {canExport && <button type="button" className="button subtle" disabled={exporting || loading || total === 0} onClick={() => void exportCsv()}><Download size={15} aria-hidden="true" />{exporting ? t('Exportando…') : t('Exportar CSV')}</button>}
     </div>
      {exportMessage && <p className="muted" role={exportMessage.tone === 'error' ? 'alert' : 'status'}>{exportMessage.text}</p>}
-     <div className="activity-meta"><span><History size={14} /> {t('Registro de cambios administrativos')}</span><strong>{formatNumber(total)} eventos</strong><HelpHint label={t('Acerca del registro')}><p>La tabla muestra la bitácora administrativa recibida, con búsqueda, filtros y paginación. El histograma cuenta sólo las filas de la página actual (UTC), no el total histórico por día.</p></HelpHint></div>
+     <div className="activity-meta"><span><History size={14} /> {t('Registro de cambios administrativos')}</span><strong>{formatNumber(total)} eventos</strong><HelpHint label={t('Acerca del registro')}><p>{t('La tabla muestra la bitácora administrativa recibida, con búsqueda, filtros y paginación. El histograma cuenta sólo las filas de la página actual (UTC), no el total histórico por día.')}</p></HelpHint></div>
      <PageVolumeHistogram timestamps={activityTimes} state={loadError ? 'error' : loading || !requestReady ? 'loading' : 'ready'} title={t('Volumen de esta página')} help="Agrupa por día UTC las filas de la página actualmente cargada. Los filtros y la paginación aplican; no representa el total diario del historial." />
     <div className="activity-table-wrap"><table className="activity-table"><thead><tr><th>{t('Fecha')}</th><th>{t('Actor')}</th><th>{t('Acción')}</th><th>{t('Objeto')}</th><th>{t('Resultado')}</th></tr></thead><tbody>
       {loading
@@ -175,7 +175,7 @@ export function ActivityView({ canExport = false, onUnauthorized }: { canExport?
           : rows.length
             ? rows.map((row) => <Fragment key={row.audit_id}>
                 <tr className={expanded === row.audit_id ? 'expanded' : ''} onClick={() => setExpanded((current) => current === row.audit_id ? null : row.audit_id)}>
-                  <td><span className="row-expand-cell"><button type="button" className="row-expand-button" aria-expanded={expanded === row.audit_id} aria-controls={`activity-detail-${row.audit_id}`} aria-label={`${expanded === row.audit_id ? t('Ocultar') : t('Ver')} detalle de ${entityLabel(row.entity_type)}`} title={`${expanded === row.audit_id ? t('Ocultar') : t('Ver')} detalle`} onClick={(event) => { event.stopPropagation(); setExpanded((current) => current === row.audit_id ? null : row.audit_id); }}>{expanded === row.audit_id ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button><span className="cell-stack"><time className="cell-lead" dateTime={row.created_at} title={dateTimeHint(row.created_at)}>{formatDate(row.created_at)}</time></span></span></td>
+                  <td><span className="row-expand-cell"><button type="button" className="row-expand-button" aria-expanded={expanded === row.audit_id} aria-controls={`activity-detail-${row.audit_id}`} aria-label={t('{Ver} detalle de {entity_type}', { Ver: expanded === row.audit_id ? t('Ocultar') : t('Ver'), entity_type: entityLabel(row.entity_type) })} title={`${expanded === row.audit_id ? t('Ocultar') : t('Ver')} detalle`} onClick={(event) => { event.stopPropagation(); setExpanded((current) => current === row.audit_id ? null : row.audit_id); }}>{expanded === row.audit_id ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}</button><span className="cell-stack"><time className="cell-lead" dateTime={row.created_at} title={dateTimeHint(row.created_at)}>{formatDate(row.created_at)}</time></span></span></td>
                   <td><IdentityChip name={row.actor_name} kind={isSystemActor(row.actor_name) ? 'system' : 'user'} subtitle={row.actor_id === row.actor_name ? undefined : row.actor_id} /></td>
                   <td><ActionTag action={row.action} label={actionLabel(row.action)} /></td>
                   <td><span className="cell-stack"><span className="cell-lead">{entityLabel(row.entity_type)}</span><span className="cell-sub">{entitySubtitle(row)}</span></span></td>
@@ -183,7 +183,7 @@ export function ActivityView({ canExport = false, onUnauthorized }: { canExport?
                 </tr>
                 {expanded === row.audit_id && <tr className="activity-detail-row" id={`activity-detail-${row.audit_id}`}><td colSpan={colSpan}><ActivityDetail row={row} /></td></tr>}
               </Fragment>)
-            : <tr><td colSpan={colSpan}><StateBlock variant={hasFilters ? 'no-results' : 'empty'} title={hasFilters ? t('Sin actividad para estos filtros') : t('Sin actividad registrada')} hint={hasFilters ? 'Ajustá la búsqueda, la acción o el objeto.' : undefined} action={hasFilters ? <button type="button" className="button subtle" onClick={() => { setQ(''); setAction(''); setEntityType(''); setPage(0); }}>{t('Limpiar filtros')}</button> : undefined} /></td></tr>}
+            : <tr><td colSpan={colSpan}><StateBlock variant={hasFilters ? 'no-results' : 'empty'} title={hasFilters ? t('Sin actividad para estos filtros') : t('Sin actividad registrada')} hint={hasFilters ? t('Ajustá la búsqueda, la acción o el objeto.') : undefined} action={hasFilters ? <button type="button" className="button subtle" onClick={() => { setQ(''); setAction(''); setEntityType(''); setPage(0); }}>{t('Limpiar filtros')}</button> : undefined} /></td></tr>}
     </tbody></table></div>
     <TablePagination page={page} pageSize={pageSize} total={total} onPageChange={(nextPage) => {
       if (nextPage === page) return;

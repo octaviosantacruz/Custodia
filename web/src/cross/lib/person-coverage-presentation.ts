@@ -1,14 +1,15 @@
 import type { PersonClientCoverageDetail, PersonCoverageSourceRun, PersonToolSummary } from './chains-api';
+import { t } from '../i18n/index.ts';
 
 /** Registration matching and current client coverage are independent evidence. */
 export function personConnectionLink(identity: PersonToolSummary | undefined, netskope: PersonToolSummary | undefined) {
   if (identity?.status === 'ambiguous' || netskope?.status === 'ambiguous') {
-    return { style: 'ambiguous' as const, label: 'Vínculo ambiguo', explanation: 'Hay varios candidatos. No se confirma una relación entre los registros.' };
+    return { style: 'ambiguous' as const, label: t('Vínculo ambiguo'), explanation: t('Hay varios candidatos. No se confirma una relación entre los registros.') };
   }
   if (identity?.status === 'matched' && netskope?.status === 'matched') {
-    return { style: 'linked' as const, label: 'Vinculados por correo', explanation: 'Esta persona tiene registros vinculados por correo exacto, uno a uno, en Identity Administration y Netskope.' };
+    return { style: 'linked' as const, label: t('Vinculados por correo'), explanation: t('Esta persona tiene registros vinculados por correo exacto, uno a uno, en Identity Administration y Netskope.') };
   }
-  return { style: 'none' as const, label: 'Sin contraparte confirmada', explanation: 'No hay un vínculo confirmado entre un registro Identity y un usuario Netskope para esta persona.' };
+  return { style: 'none' as const, label: t('Sin contraparte confirmada'), explanation: t('No hay un vínculo confirmado entre un registro Identity y un usuario Netskope para esta persona.') };
 }
 
 const COVERAGE_SOURCES = [
@@ -26,8 +27,8 @@ function freshnessProblems(sources: Record<string, PersonCoverageSourceRun>): st
     }
     if (source.freshness === 'fresh') continue;
     if (source.freshness === 'stale') problems.push(`${label} desactualizada`);
-    else if (source.freshness === 'incomplete') problems.push(`${label} con última corrida incompleta`);
-    else problems.push(`${label} sin corrida completa vigente`);
+    else if (source.freshness === 'incomplete') problems.push(t('{value} con última corrida incompleta', { value: label }));
+    else problems.push(t('{value} sin corrida completa vigente', { value: label }));
   }
   return problems;
 }
@@ -44,13 +45,13 @@ export function personCoverageDetailReason(detail: PersonClientCoverageDetail): 
   const sourceReason = unavailableSourcesReason(detail.sources);
   if (sourceReason) return sourceReason;
   if (detail.devices_ambiguous > 0 || detail.identity_records > 1 || detail.netskope_users > 1) {
-    return 'No se puede determinar: la evidencia individual tiene candidatos o dispositivos ambiguos.';
+    return t('No se puede determinar: la evidencia individual tiene candidatos o dispositivos ambiguos.');
   }
   if (detail.identity_records === 0) {
-    return 'No se puede determinar: no hay un registro elegible de Identity para esta persona.';
+    return t('No se puede determinar: no hay un registro elegible de Identity para esta persona.');
   }
   if (detail.identity_records > 0 && detail.netskope_users === 0) {
-    return 'No se puede determinar: no hay una contraparte Netskope observada para esta persona.';
+    return t('No se puede determinar: no hay una contraparte Netskope observada para esta persona.');
   }
-  return 'No se puede determinar: la evidencia individual es insuficiente para clasificar la cobertura.';
+  return t('No se puede determinar: la evidencia individual es insuficiente para clasificar la cobertura.');
 }

@@ -125,7 +125,7 @@ export function siaAccessDetail(sia: PersonToolSummary | undefined): string {
 export function personToolHeadline(source: PersonSource, tool: PersonToolSummary | undefined): string {
   if (!tool || tool.status === 'unmatched') return t('Sin registro');
   if (tool.status === 'ambiguous') return t('Vínculo ambiguo');
-  if (source === 'sia') return plural(tool.policy_count ?? 0, 'política', 'políticas');
+  if (source === 'sia') return plural(tool.policy_count ?? 0, t('política'), t('políticas'));
   if (source === 'netskope') return plural(tool.device_count ?? 0, 'dispositivo', 'dispositivos');
   if (source === 'identity') return plural(tool.role_count ?? 0, 'rol', 'roles');
   if (tool.totals) return plural(tool.totals.safes, 'Safe', 'Safes');
@@ -161,7 +161,7 @@ export function personToolFacts(source: PersonSource, tool: PersonToolSummary | 
   if (source === 'identity') {
     const facts: PersonFact[] = [
       { label: t('Roles'), value: formatNumber(tool.role_count ?? 0) },
-      { label: t('Federación'), value: tool.federation?.display_name ?? 'Sin federación' },
+      { label: t('Federación'), value: tool.federation?.display_name ?? t('Sin federación') },
     ];
     if (tool.user?.last_login_date) facts.push({ label: t('Último acceso'), value: tool.user.last_login_date });
     return facts;
@@ -202,7 +202,7 @@ export const PERSON_PLATFORM_LABELS: Record<PersonNodeId, string> = { pam: t('Cy
 function cyberArkCount(safes: number, policies: number): string | null {
   const parts: string[] = [];
   if (safes > 0) parts.push(plural(safes, 'Safe', 'Safes'));
-  if (policies > 0) parts.push(plural(policies, 'política SIA', 'políticas SIA'));
+  if (policies > 0) parts.push(plural(policies, t('política SIA'), t('políticas SIA')));
   return parts.length ? parts.join(' · ') : null;
 }
 
@@ -228,8 +228,8 @@ export function personPlatformAnswer(source: PersonNodeId, tool: PersonToolSumma
   }
   const recent = tool.device_count ?? 0;
   const stale = tool.stale_device_count ?? 0;
-  if (recent > 0) return { answer: 'yes', label: t('Cliente activo'), count: plural(recent, 'equipo reciente', 'equipos recientes'), tone: 'success' };
-  if (stale > 0) return { answer: 'no', label: t('Cliente sin actividad reciente'), count: plural(stale, 'equipo', 'equipos'), tone: 'warning' };
+  if (recent > 0) return { answer: 'yes', label: t('Cliente activo'), count: plural(recent, t('equipo reciente'), t('equipos recientes')), tone: 'success' };
+  if (stale > 0) return { answer: 'no', label: t('Cliente sin actividad reciente'), count: plural(stale, 'equipo', t('equipos')), tone: 'warning' };
   return { answer: 'no', label: t('Sin equipos'), count: null, tone: 'neutral' };
 }
 

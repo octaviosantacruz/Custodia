@@ -3,6 +3,7 @@ import { api } from '../../../cross/lib/api';
 import { nextActionOptions } from '../../../cross/lib/format';
 import type { SafeTableProps } from '../components/safe-table';
 import type { Account, AccountPlatformStatus, Analytics, Catalogs, ClassificationStatus, SafeClassificationCounts, SafeHealthFilter, SafeRow, WorkflowStatus } from '../types/safe';
+import { t } from '../../../cross/i18n/index.ts';
 
 type UseSafeTableConfigOptions = {
   safes: SafeRow[];
@@ -116,7 +117,7 @@ export function useSafeTableConfig(options: UseSafeTableConfigOptions): SafeTabl
           body: JSON.stringify({ inventory_account_type: value }),
         });
       } catch (error) {
-        onError(error instanceof Error ? error.message : 'No se pudo clasificar la cuenta');
+        onError(error instanceof Error ? error.message : t('No se pudo clasificar la cuenta'));
         return null;
       }
     },
@@ -127,9 +128,9 @@ export function useSafeTableConfig(options: UseSafeTableConfigOptions): SafeTabl
           body: JSON.stringify({ account_type_classification: value }),
         });
         setSafes((current) => current.map((item) => item.safe_number === safe.safe_number ? { ...item, account_type_classification: value } : item));
-        onNotice?.('Tipo de cuenta actualizado');
+        onNotice?.(t('Tipo de cuenta actualizado'));
       } catch (error) {
-        onError(error instanceof Error ? error.message : 'No se pudo actualizar el tipo de Safe');
+        onError(error instanceof Error ? error.message : t('No se pudo actualizar el tipo de Safe'));
       }
     },
     onBulkClassificationSave: async (rows, changes) => {
@@ -149,8 +150,8 @@ export function useSafeTableConfig(options: UseSafeTableConfigOptions): SafeTabl
           failed.push(row.safe_number);
         }
       }
-      if (!failed.length) onNotice?.(`Clasificación aplicada a ${rows.length} ${rows.length === 1 ? 'Safe' : 'Safes'}.`);
-      else onError(`Se aplicó a ${rows.length - failed.length} de ${rows.length} Safes.`);
+      if (!failed.length) onNotice?.(t('Clasificación aplicada a {rows} {Safes}.', { rows: rows.length, Safes: rows.length === 1 ? 'Safe' : 'Safes' }));
+      else onError(t('Se aplicó a {failed} de {rows} Safes.', { failed: rows.length - failed.length, rows: rows.length }));
       return failed;
     },
   }), [

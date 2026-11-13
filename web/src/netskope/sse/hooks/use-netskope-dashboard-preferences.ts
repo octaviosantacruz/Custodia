@@ -4,6 +4,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { fetchNetskopeDashboardPreferences, saveNetskopeDashboardPreferences } from '../lib/netskope-api';
 import { DEFAULT_NETSKOPE_WIDGETS, netskopeChartWidgetIds, netskopeDataWidgetIds, normalizeNetskopeWidgets } from '../lib/netskope-dashboard';
 import type { NetskopeWidgetInstance } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 type Options = {
   authChecked: boolean;
@@ -27,7 +28,7 @@ export function useNetskopeDashboardPreferences({ authChecked, authenticated, on
   useEffect(() => {
     if (!query.error) return;
     if (query.error instanceof ApiError && query.error.status === 401) onUnauthorized();
-    else onError(query.error instanceof Error ? query.error.message : 'No se pudo cargar tu vista de Netskope');
+    else onError(query.error instanceof Error ? query.error.message : t('No se pudo cargar tu vista de Netskope'));
   }, [onError, onUnauthorized, query.error]);
   const saveMutation = useMutation({ mutationFn: (widgets: NetskopeWidgetInstance[]) => saveNetskopeDashboardPreferences(widgets) });
   const save = async (nextWidgets: NetskopeWidgetInstance[]) => {
@@ -36,11 +37,11 @@ export function useNetskopeDashboardPreferences({ authChecked, authenticated, on
       const response = await saveMutation.mutateAsync(nextWidgets);
       queryClient.setQueryData(queryKey, response);
       if (previous) setUndoWidgets(previous);
-      onNotice(`Tu vista de Netskope quedó actualizada (${nextWidgets.length} ${nextWidgets.length === 1 ? 'bloque' : 'bloques'})`);
+      onNotice(t('Tu vista de Netskope quedó actualizada ({nextWidgets} {bloques})', { nextWidgets: nextWidgets.length, bloques: nextWidgets.length === 1 ? 'bloque' : 'bloques' }));
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudo guardar tu vista de Netskope');
+      else onError(error instanceof Error ? error.message : t('No se pudo guardar tu vista de Netskope'));
       return false;
     }
   };
@@ -54,7 +55,7 @@ export function useNetskopeDashboardPreferences({ authChecked, authenticated, on
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) onUnauthorized();
-      else onError(error instanceof Error ? error.message : 'No se pudo restaurar tu vista anterior');
+      else onError(error instanceof Error ? error.message : t('No se pudo restaurar tu vista anterior'));
       return false;
     }
   };

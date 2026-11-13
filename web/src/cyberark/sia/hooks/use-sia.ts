@@ -4,6 +4,7 @@ import { ApiError } from '../../../cross/lib/api';
 import { fetchSiaPolicies } from '../lib/sia-api';
 import { useDebouncedValue } from '../../../cross/hooks/use-debounced-value';
 import { usePamRefreshKey } from '../../shared/refresh-context';
+import { t } from '../../../cross/i18n/index.ts';
 
 type UseSiaOptions = {
   authChecked: boolean;
@@ -30,7 +31,7 @@ export function useSia({ authChecked, authenticated, onUnauthorized, onError, in
 
   useEffect(() => {
     if (query.error instanceof ApiError && query.error.status === 401) { onUnauthorized(); return; }
-    onError(query.error ? (query.error instanceof Error ? query.error.message : 'No se pudieron cargar las políticas de SIA') : '');
+    onError(query.error ? (query.error instanceof Error ? query.error.message : t('No se pudieron cargar las políticas de SIA')) : '');
   }, [query.error, onError, onUnauthorized]);
 
   useEffect(() => { setSearchState(initialQuery); setPageState(0); }, [initialQuery]);
@@ -43,7 +44,7 @@ export function useSia({ authChecked, authenticated, onUnauthorized, onError, in
     loading: query.isLoading || query.isFetching,
     policies: query.data?.rows ?? [],
     total: query.data?.total ?? 0,
-    loadError: query.error instanceof Error ? query.error.message : query.error ? 'No se pudieron cargar las políticas de SIA' : '',
+    loadError: query.error instanceof Error ? query.error.message : query.error ? t('No se pudieron cargar las políticas de SIA') : '',
     reload: async () => { await query.refetch(); },
   };
 }

@@ -52,7 +52,7 @@ export const registration = {
       category: { id: 'identity_sia', order: 3 },
       recentWorkspace: 'sia',
       refreshSources: ['sia'],
-      command: { tool: 'sia', platform: 'cyberark', aliases: ['cuentas bd', 'strong accounts', 'base de datos'], priority: 36 },
+      command: { tool: 'sia', platform: 'cyberark', aliases: [t('cuentas bd'), 'strong accounts', t('base de datos')], priority: 36 },
     },
   ],
   domains: [],

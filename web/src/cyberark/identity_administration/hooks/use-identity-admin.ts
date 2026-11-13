@@ -6,6 +6,7 @@ import { useDebouncedValue } from '../../../cross/hooks/use-debounced-value';
 import { EMPTY_IDENTITY_USERS_CRITERIA, identityUsersCriteriaFromSearch, identityUsersQueryString } from '../lib/identity-users-url';
 import type { IdentityRoleRef } from '../types/identity';
 import { usePamRefreshKey } from '../../shared/refresh-context';
+import { t } from '../../../cross/i18n/index.ts';
 
 type UseIdentityAdminOptions = {
   authChecked: boolean;
@@ -67,7 +68,7 @@ export function useIdentityAdmin({ authChecked, authenticated, onUnauthorized, o
 
   useEffect(() => {
     if (activeQuery.error instanceof ApiError && activeQuery.error.status === 401) { onUnauthorized(); return; }
-    onError(activeQuery.error ? (activeQuery.error instanceof Error ? activeQuery.error.message : 'No se pudo cargar Identity Administration') : '');
+    onError(activeQuery.error ? (activeQuery.error instanceof Error ? activeQuery.error.message : t('No se pudo cargar Identity Administration')) : '');
   }, [activeQuery.error, onError, onUnauthorized]);
 
   const seededQuery = useRef(initialQuery);

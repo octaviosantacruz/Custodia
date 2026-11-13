@@ -7,5 +7,5 @@ export function primaryRoleLabel(authStatus: AuthStatus): string {
   if (roleCode === 'admin') return t('Administrador de plataforma');
   if (roleCode === 'operator') return t('Operador de plataforma');
   if (roleCode === 'reader') return t('Lector de plataforma');
-  return roleCode || 'Sin rol asignado';
+  return roleCode || t('Sin rol asignado');
 }

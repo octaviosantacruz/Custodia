@@ -1,20 +1,20 @@
 import type { CoverageBlock, CoveragePoint } from '../types/connection';
 import type { StackedSegment } from './stacked-bar';
-import { localeTag } from '../i18n/index.ts';
+import { localeTag, t } from '../i18n/index.ts';
 
 /** "X de N": the share is never shown without its denominator. */
 export function xOfN(count: number, total: number): string {
-  return `${count.toLocaleString(localeTag())} de ${total.toLocaleString(localeTag())}`;
+  return t('{localeTag} de {localeTag2}', { localeTag: count.toLocaleString(localeTag()), localeTag2: total.toLocaleString(localeTag()) });
 }
 
 /** The readings of one capability as the parts of N, from the best to the worst. */
 export function capabilitySegments(readings: CoverageBlock['platform']): StackedSegment[] {
   return [
     { key: 'match', label: 'Coincide', count: readings.match, tone: 'good' },
-    { key: 'undeclared', label: 'No declarado', count: readings.undeclared, tone: 'warn' },
-    { key: 'missing', label: 'Falta en SIA', count: readings.missing, tone: 'bad' },
-    { key: 'unclassified', label: 'Sin clasificar', count: readings.unclassified, tone: 'info' },
-    { key: 'unknown', label: 'Sin dato', count: readings.unknown, tone: 'muted' },
+    { key: 'undeclared', label: t('No declarado'), count: readings.undeclared, tone: 'warn' },
+    { key: 'missing', label: t('Falta en SIA'), count: readings.missing, tone: 'bad' },
+    { key: 'unclassified', label: t('Sin clasificar'), count: readings.unclassified, tone: 'info' },
+    { key: 'unknown', label: t('Sin dato'), count: readings.unknown, tone: 'muted' },
   ];
 }
 
@@ -22,14 +22,14 @@ export function workSegments(work: CoverageBlock['work']): StackedSegment[] {
   return [
     { key: 'onboarded', label: 'Incorporado', count: work.onboarded, tone: 'good' },
     { key: 'in_progress', label: 'En curso', count: work.in_progress, tone: 'info' },
-    { key: 'pending', label: 'Pendiente', count: work.pending, tone: 'muted' },
+    { key: 'pending', label: t('Pendiente'), count: work.pending, tone: 'muted' },
     { key: 'blocked', label: 'Bloqueado', count: work.blocked, tone: 'bad' },
-    { key: 'not_applicable', label: 'No aplica', count: work.not_applicable, tone: 'muted' },
+    { key: 'not_applicable', label: t('No aplica'), count: work.not_applicable, tone: 'muted' },
   ];
 }
 
 export const TREND_SERIES = [
-  { key: 'n', label: 'Destinos', value: (block: CoverageBlock) => block.n },
+  { key: 'n', label: t('Destinos'), value: (block: CoverageBlock) => block.n },
   { key: 'platform', label: 'Platform coincide', value: (block: CoverageBlock) => block.platform.match },
   { key: 'dba', label: 'DBA coincide', value: (block: CoverageBlock) => block.dba.match },
   { key: 'onboarded', label: 'Incorporados', value: (block: CoverageBlock) => block.work.onboarded },

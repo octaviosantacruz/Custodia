@@ -31,9 +31,9 @@ export function AdvancedChart({ title, style, data, onSelect }: Props) {
   const hasAnimated = useRef(false);
   const hasData = Boolean(data?.series?.some((series) => series.values.length) || data?.points?.length || data?.cells?.length);
   const description = useMemo(() => {
-    if (style === 'scatter') return `${title}. Eje X: cuentas; eje Y: miembros.`;
-    if (style === 'heatmap') return `${title}. Intensidad por las dos dimensiones del cruce.`;
-    return `${title}. ${data?.series?.map((series) => series.label).join(' y ') || 'Serie temporal'}.`;
+    if (style === 'scatter') return t('{title}. Eje X: cuentas; eje Y: miembros.', { title: title });
+    if (style === 'heatmap') return t('{title}. Intensidad por las dos dimensiones del cruce.', { title: title });
+    return `${title}. ${data?.series?.map((series) => series.label).join(t(' y ')) || 'Serie temporal'}.`;
   }, [data?.series, style, title]);
 
   useEffect(() => {
@@ -99,7 +99,7 @@ export function AdvancedChart({ title, style, data, onSelect }: Props) {
         <thead><tr>{table.columns.map((column) => <th key={column} scope="col">{column}</th>)}{onSelect ? <th scope="col"><span className="sr-only">{t('Abrir')}</span></th> : null}</tr></thead>
         <tbody>{table.rows.map((row, index) => <tr key={index}>
           {row.cells.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}
-          {onSelect ? <td>{row.filterValue ? <button type="button" className="button subtle" aria-label={`Abrir ${row.cells[0]}`} onClick={() => onSelect(row.filterValue as string)}>{t('Abrir')}</button> : null}</td> : null}
+          {onSelect ? <td>{row.filterValue ? <button type="button" className="button subtle" aria-label={t('Abrir {cells}', { cells: row.cells[0] })} onClick={() => onSelect(row.filterValue as string)}>{t('Abrir')}</button> : null}</td> : null}
         </tr>)}</tbody>
       </table></div>
     </details>

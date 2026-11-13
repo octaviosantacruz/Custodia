@@ -1,7 +1,8 @@
 import type { AccessDomain, AccessPermission, AccessRole } from './access-control-api';
+import { t } from '../i18n/index.ts';
 
 export type AccessTool = { id: string; name: string; dark?: string; light?: string };
-const hub: AccessTool = { id: 'hub', name: 'Custodia y perfiles transversales' };
+const hub: AccessTool = { id: 'hub', name: t('Custodia y perfiles transversales') };
 const cyberark: AccessTool = { id: 'cyberark', name: 'CyberArk', dark: '/cyberark-logo-white.png', light: '/cyberark-logo-dark.png' };
 const netskope: AccessTool = { id: 'netskope', name: 'Netskope', dark: '/netskope-full-white.png', light: '/netskope-full-black.png' };
 const bigid: AccessTool = { id: 'bigid', name: 'BigID', dark: '/bigid-full-white.png', light: '/bigid-full-black.png' };
@@ -10,7 +11,7 @@ const bigid: AccessTool = { id: 'bigid', name: 'BigID', dark: '/bigid-full-white
 // compartment automatically; this registry only supplies known brand metadata.
 const brands: Record<string, AccessTool> = { platform: hub, pam: cyberark, identity: cyberark, sia: cyberark, dlp: netskope, dspm: bigid };
 export function accessTool(domainCode: string, domains: AccessDomain[]): AccessTool {
-  return brands[domainCode] || { id: domainCode, name: domains.find((domain) => domain.domain_code === domainCode)?.display_name || 'Sin catalogar' };
+  return brands[domainCode] || { id: domainCode, name: domains.find((domain) => domain.domain_code === domainCode)?.display_name || t('Sin catalogar') };
 }
 
 export function groupAccessRoles(roles: AccessRole[], domains: AccessDomain[], permissions: AccessPermission[]) {

@@ -24,12 +24,12 @@ function statusTone(status: string): 'success' | 'warning' | 'danger' | 'info' {
 function heartbeatLabel(group: ReturnType<typeof groupSyncRunsByToolCycle<IngestionRun>>[number]): string {
   if (group.status === 'queued') return 'Esperando worker';
   if (group.status === 'completed') return 'Finalizada';
-  if (group.status === 'failed') return 'Terminó con errores';
-  if (group.status === 'partial') return 'Terminó con avisos';
-  if (group.status !== 'running') return 'Última actualización';
-  if (!group.heartbeat_at) return 'Sin señal del worker';
+  if (group.status === 'failed') return t('Terminó con errores');
+  if (group.status === 'partial') return t('Terminó con avisos');
+  if (group.status !== 'running') return t('Última actualización');
+  if (!group.heartbeat_at) return t('Sin señal del worker');
   const age = Date.now() - new Date(group.heartbeat_at).getTime();
-  return age > 90_000 ? `Sin novedades ${relativeTime(group.heartbeat_at).toLowerCase()}` : `Última señal ${relativeTime(group.heartbeat_at).toLowerCase()}`;
+  return age > 90_000 ? t('Sin novedades {heartbeat_at}', { heartbeat_at: relativeTime(group.heartbeat_at).toLowerCase() }) : t('Última señal {heartbeat_at}', { heartbeat_at: relativeTime(group.heartbeat_at).toLowerCase() });
 }
 
 function runDescription(group: ReturnType<typeof groupSyncRunsByToolCycle<IngestionRun>>[number]): string {
@@ -80,7 +80,7 @@ function RunStages({ runId, label, status, source }: { runId: string; label: str
   }, [source, status]);
   if (!stages.length) return null;
   return <div className="sync-run-table-wrap">
-    <table className="sync-run-component-table sync-run-stage-table" aria-label={`Capas de ${label}`}>
+    <table className="sync-run-component-table sync-run-stage-table" aria-label={t('Capas de {value}', { value: label })}>
       <colgroup><col /><col /><col /><col /><col /><col /></colgroup>
       <thead><tr>
         <th scope="col">{t('Capa')}</th><th scope="col">{t('Tipo')}</th><th scope="col">{t('Estado')}</th><th scope="col" className="sync-run-objects">{t('Filas')}</th><th scope="col">{t('Detalle')}</th><th scope="col">{t('Historial reciente')}</th>
@@ -108,7 +108,7 @@ function RunComponentDetails({ group }: { group: ReturnType<typeof groupSyncRuns
   return <details className="sync-run-components" onToggle={(event) => setOpen(event.currentTarget.open)}>
     <summary>{t('Detalle por componente')}</summary>
     <div className="sync-run-table-wrap">
-      <table className="sync-run-component-table" aria-label={`Componentes de ${syncToolLabel(group.tool)}`}>
+      <table className="sync-run-component-table" aria-label={t('Componentes de {tool}', { tool: syncToolLabel(group.tool) })}>
         <colgroup><col /><col /><col /><col /><col /></colgroup>
         <thead><tr>
           <th scope="col">{t('Componente')}</th><th scope="col">{t('Estado')}</th><th scope="col" className="sync-run-objects">{t('Objetos')}</th><th scope="col">{t('Etapa')}</th><th scope="col">{t('Última actualización')}</th>
@@ -127,7 +127,7 @@ function RunComponentDetails({ group }: { group: ReturnType<typeof groupSyncRuns
             <td className="sync-run-stage">{stage}{run.error_count ? <small>{formatNumber(run.error_count)} {run.error_count === 1 ? t('error registrado') : t('errores registrados')}</small> : null}</td>
             <td className={stale ? 'sync-run-update is-stale' : 'sync-run-update'}>
               {component.status === 'running'
-                ? <span>{run.heartbeat_at ? `Última señal ${relativeTime(run.heartbeat_at).toLowerCase()}` : 'Sin señal del worker'}</span>
+                ? <span>{run.heartbeat_at ? t('Última señal {heartbeat_at}', { heartbeat_at: relativeTime(run.heartbeat_at).toLowerCase() }) : t('Sin señal del worker')}</span>
                 : <time dateTime={updatedAt || undefined} title={dateTimeHint(updatedAt)}>{formatDate(updatedAt || null)}</time>}
             </td>
           </tr>;
@@ -157,7 +157,7 @@ export function SyncRunsView({ onUnauthorized }: { onUnauthorized?: () => void }
         if (!cancelled) { setRuns(nextRuns); setError(''); setLoading(false); }
       } catch (caught) {
         if (caught instanceof ApiError && caught.status === 401) { if (!cancelled) onUnauthorized?.(); return; }
-        if (!cancelled) { setError(caught instanceof Error ? caught.message : 'No se pudieron cargar las sincronizaciones'); setLoading(false); }
+        if (!cancelled) { setError(caught instanceof Error ? caught.message : t('No se pudieron cargar las sincronizaciones')); setLoading(false); }
       }
     };
     void load();
@@ -167,7 +167,7 @@ export function SyncRunsView({ onUnauthorized }: { onUnauthorized?: () => void }
   }, [hasActiveRuns, reloadKey]);
 
   return <section className="activity-panel sync-runs-panel">
-    <div className="activity-meta"><span><Activity size={14} /> {t('Estado operativo de la cola')}</span><strong>{formatNumber(groups.length)} ciclos recientes</strong></div>
+    <div className="activity-meta"><span><Activity size={14} /> {t('Estado operativo de la cola')}</span><strong>{t('{groups} ciclos recientes', { groups: formatNumber(groups.length) })}</strong></div>
     <p className="operational-errors-note">{t('Cada ciclo agrupa las corridas de una plataforma. Abrí el detalle para ver el estado y la etapa de cada componente.')}</p>
     {!loading && !error ? <SyncRunsTimeline rows={buildSyncTimeline(groups)} /> : null}
     <div className="sync-runs-list">

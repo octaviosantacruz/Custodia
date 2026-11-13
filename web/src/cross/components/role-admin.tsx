@@ -38,7 +38,7 @@ export function RoleAdmin(props: Props) {
       const result = { roles: roles.rows, permissions: permissions.rows, domains: [...domains.rows].sort((a, b) => a.sort_order - b.sort_order) };
       setCatalog(result);
       return result;
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'No se pudo cargar el catálogo'); return null; }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t('No se pudo cargar el catálogo')); return null; }
     finally { setLoading(false); }
   };
   useEffect(() => { void load(); }, []);
@@ -60,7 +60,7 @@ export function RoleAdmin(props: Props) {
   };
   const refreshRoles = async () => {
     try { const { rows: roles } = await listAccessRoles(); setCatalog((current) => ({ ...current, roles })); }
-    catch (reason) { props.onError(reason instanceof Error ? reason.message : 'No se pudieron actualizar las asignaciones'); }
+    catch (reason) { props.onError(reason instanceof Error ? reason.message : t('No se pudieron actualizar las asignaciones')); }
   };
   const save = async (draft: RoleAccessDraft) => {
     setSaving(true);
@@ -73,7 +73,7 @@ export function RoleAdmin(props: Props) {
           ? await createCompositeAccessRole({ ...base, role_code: code, level_refs: draft.level_refs })
           : await updateCompositeAccessRole(code, { ...base, level_refs: draft.level_refs });
         code = result.role_code;
-        if (result.warning) warning = ` La combinación coincide con ${result.warning.matching_role_name}.`;
+        if (result.warning) warning = t(' La combinación coincide con {matching_role_name}.', { matching_role_name: result.warning.matching_role_name });
       } else {
         const payload = { ...base, domain_code: draft.domain_code, permission_codes: draft.permission_codes };
         if (editor?.creating) await createAccessRole({ ...payload, role_code: code });
@@ -84,7 +84,7 @@ export function RoleAdmin(props: Props) {
       setEditor(null); setQuery(''); setFilter('all');
       await load();
       return true;
-    } catch (reason) { props.onError(reason instanceof Error ? reason.message : 'No se pudo guardar el rol'); return false; }
+    } catch (reason) { props.onError(reason instanceof Error ? reason.message : t('No se pudo guardar el rol')); return false; }
     finally { setSaving(false); }
   };
   const savePermission = async (event: FormEvent) => {
@@ -94,7 +94,7 @@ export function RoleAdmin(props: Props) {
       await createAccessPermission({ ...draft, permission_code: `${draft.resource_code}:${draft.action_code}` });
       setPermissionOpen(false); setPermissionDraft({ domain_code: '', resource_code: '', action_code: '', description: '' });
       props.onNotice(t('Permiso personalizado creado')); await load();
-    } catch (reason) { props.onError(reason instanceof Error ? reason.message : 'No se pudo crear el permiso'); }
+    } catch (reason) { props.onError(reason instanceof Error ? reason.message : t('No se pudo crear el permiso')); }
     finally { setSaving(false); }
   };
 
@@ -108,20 +108,20 @@ export function RoleAdmin(props: Props) {
       onCopy={() => setEditor({ ...editor, creating: true, copy: true })}
     /> : <>
       <header className="role-map-header"><div><h2>{t('Roles y permisos')}</h2><p>{t('Compará qué habilita cada rol en Custodia.')}</p></div>{canManage && <button ref={newRoleRef} className="button primary" type="button" onClick={() => open(null)}><Plus size={15} /> {t('Nuevo rol')}</button>}</header>
-      <div className="role-map-toolbar"><label className="search-box"><Search size={16} /><span className="sr-only">{t('Buscar roles')}</span><input type="search" placeholder={t('Buscar por rol o capacidad')} value={query} onChange={(event) => setQuery(event.target.value)} /></label><CompactSelect ariaLabel={t('Filtrar roles')} value={filter} options={[{ value: 'active', label: t('Roles activos') }, { value: 'custom', label: t('Personalizados') }, { value: 'system', label: t('Del sistema') }, { value: 'planned', label: t('Preparados') }, { value: 'all', label: t('Todos los roles') }]} onChange={setFilter} /><span className="role-result-count" role="status">{rows.length} de {catalog.roles.length} roles</span></div>
+      <div className="role-map-toolbar"><label className="search-box"><Search size={16} /><span className="sr-only">{t('Buscar roles')}</span><input type="search" placeholder={t('Buscar por rol o capacidad')} value={query} onChange={(event) => setQuery(event.target.value)} /></label><CompactSelect ariaLabel={t('Filtrar roles')} value={filter} options={[{ value: 'active', label: t('Roles activos') }, { value: 'custom', label: t('Personalizados') }, { value: 'system', label: t('Del sistema') }, { value: 'planned', label: t('Preparados') }, { value: 'all', label: t('Todos los roles') }]} onChange={setFilter} /><span className="role-result-count" role="status">{t('{rows} de {roles} roles', { rows: rows.length, roles: catalog.roles.length })}</span></div>
       <div className="role-compartments" role="region" aria-label={t('Mapa de accesos por rol')}>{roleGroups.map(({ tool, roles: toolRoles, areas }) => {
         const hasUnknown = toolRoles.some((role) => role.permission_codes.some((code) => !byCode.has(code)));
-        return <details className="role-tool-compartment" open key={tool.id}><summary><AccessToolMark tool={tool} /><span><strong>{tool.name}</strong><small>{toolRoles.length} {toolRoles.length === 1 ? 'rol' : 'roles'}</small></span><ChevronDown size={15} /></summary><div className="role-map-scroll"><table className="role-map" aria-label={`${tool.name}: roles y permisos`}><thead><tr><th scope="col">{t('Rol')}</th>{areas.map((area) => <th scope="col" key={area.domain_code}>{area.display_name}{area.lifecycle_status === 'planned' && <small>{t('Preparado')}</small>}</th>)}{hasUnknown && <th scope="col">{t('Sin catalogar')}</th>}{canReadPeople && <th scope="col">{t('Asignaciones')}</th>}<th scope="col"><span className="sr-only">{t('Detalle')}</span></th></tr></thead><tbody>
+        return <details className="role-tool-compartment" open key={tool.id}><summary><AccessToolMark tool={tool} /><span><strong>{tool.name}</strong><small>{toolRoles.length} {toolRoles.length === 1 ? 'rol' : 'roles'}</small></span><ChevronDown size={15} /></summary><div className="role-map-scroll"><table className="role-map" aria-label={t('{name}: roles y permisos', { name: tool.name })}><thead><tr><th scope="col">{t('Rol')}</th>{areas.map((area) => <th scope="col" key={area.domain_code}>{area.display_name}{area.lifecycle_status === 'planned' && <small>{t('Preparado')}</small>}</th>)}{hasUnknown && <th scope="col">{t('Sin catalogar')}</th>}{canReadPeople && <th scope="col">{t('Asignaciones')}</th>}<th scope="col"><span className="sr-only">{t('Detalle')}</span></th></tr></thead><tbody>
         {toolRoles.map((role) => <tr key={role.role_code}><th scope="row"><button className="role-name-button" type="button" onClick={() => open(role)}><AccessToolMark tool={tool} /><span><strong>{role.display_name}</strong><small>{role.system_managed ? 'Sistema' : role.role_kind === 'composite' ? t('Niveles vinculados') : t('Personalizado')}{role.lifecycle_status === 'planned' ? t(' · Preparado') : ''}</small></span></button></th>
           {areas.map((area) => {
             const codes = role.permission_codes.filter((code) => byCode.get(code)?.domain_code === area.domain_code);
             const capabilities = codes.filter(isVisibleCapability);
             const linked = role.level_refs.find((ref) => ref.domain_code === area.domain_code);
-            return <td key={area.domain_code}>{codes.length || linked ? <button className="role-area-access" type="button" aria-label={`Ver ${area.display_name} de ${role.display_name}`} onClick={() => open(role, area.domain_code)} title={codes.map((code) => capabilityLabel(code, byCode.get(code))).join('\n')}><span>{capabilities.length ? `${capabilities.length} ${capabilities.length === 1 ? 'capacidad' : 'capacidades'}` : codes.some((code) => code.startsWith('domain:')) ? 'Sólo navegación' : linked ? t('Nivel vinculado') : t('Permisos heredados')}</span><small>{linked ? area.levels.find((level) => level.level_code === linked.level_code)?.display_name || linked.level_code : capabilities.some((code) => !(byCode.get(code)?.action_code || '').endsWith('read')) ? t('Incluye acciones') : t('Consulta')}</small></button> : <span className="role-no-access" aria-label={t('Sin acceso')}>—</span>}</td>;
+            return <td key={area.domain_code}>{codes.length || linked ? <button className="role-area-access" type="button" aria-label={t('Ver {display_name} de {display_name2}', { display_name: area.display_name, display_name2: role.display_name })} onClick={() => open(role, area.domain_code)} title={codes.map((code) => capabilityLabel(code, byCode.get(code))).join('\n')}><span>{capabilities.length ? `${capabilities.length} ${capabilities.length === 1 ? 'capacidad' : 'capacidades'}` : codes.some((code) => code.startsWith('domain:')) ? t('Sólo navegación') : linked ? t('Nivel vinculado') : t('Permisos heredados')}</span><small>{linked ? area.levels.find((level) => level.level_code === linked.level_code)?.display_name || linked.level_code : capabilities.some((code) => !(byCode.get(code)?.action_code || '').endsWith('read')) ? t('Incluye acciones') : t('Consulta')}</small></button> : <span className="role-no-access" aria-label={t('Sin acceso')}>—</span>}</td>;
           })}
           {hasUnknown && <td>{role.permission_codes.filter((code) => !byCode.has(code)).length || '—'}</td>}
           {canReadPeople && <td><RoleMembers roleCode={role.role_code} roleName={role.display_name} count={role.user_count} canAssign={has('access:role_assignments_manage')} canGrant={has('access:role_assignments_manage') && role.lifecycle_status === 'active'} currentActorId={props.currentActorId} onChanged={() => void refreshRoles()} onNotice={props.onNotice} onError={props.onError} /></td>}
-          <td><button className="icon-button" type="button" aria-label={`Abrir ${role.display_name}`} onClick={() => open(role)}><ArrowUpRight size={16} /></button></td>
+          <td><button className="icon-button" type="button" aria-label={t('Abrir {display_name}', { display_name: role.display_name })} onClick={() => open(role)}><ArrowUpRight size={16} /></button></td>
         </tr>)}
       </tbody></table></div></details>;
       })}{!roleGroups.length && <StateBlock compact variant="empty" title={t('Sin roles para estos filtros')} hint="Probá otro nombre o cambiá el filtro." />}</div>

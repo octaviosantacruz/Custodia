@@ -29,7 +29,7 @@ export const registration = {
       runtime: 'cyberark',
       category: { id: 'posture', order: 0 },
       refreshSources: ['cyberark'],
-      command: { tool: 'pam', platform: 'cyberark', aliases: ['postura', 'hallazgos', 'findings', 'riesgo', 'limpieza', 'depuración'], priority: 16 },
+      command: { tool: 'pam', platform: 'cyberark', aliases: ['postura', 'hallazgos', 'findings', 'riesgo', 'limpieza', t('depuración')], priority: 16 },
     },
     {
       id: 'graph', path: '/pam/graph', legacyPaths: ['/pam/identity/chain'], domain: 'pam',
@@ -67,7 +67,7 @@ export const registration = {
       runtime: 'cyberark',
       category: { id: 'technical_catalogs', order: 0 },
       refreshSources: ['cyberark'],
-      command: { tool: 'pam', platform: 'cyberark', aliases: ['plataformas', 'cuentas'], priority: 30 },
+      command: { tool: 'pam', platform: 'cyberark', aliases: ['plataformas', t('cuentas')], priority: 30 },
     },
     {
       /* UX-AUD-013(c): canonical path is the Safes hub tab (Infraestructura
@@ -106,7 +106,7 @@ export const registration = {
       order: 7,
       runtime: 'cyberark',
       category: { id: 'technical_catalogs', order: 3 },
-      command: { tool: 'pam', platform: 'cyberark', aliases: ['limpieza', 'depuración', 'grupos vacíos', 'psm huérfanos'], priority: 41 },
+      command: { tool: 'pam', platform: 'cyberark', aliases: ['limpieza', t('depuración'), t('grupos vacíos'), t('psm huérfanos')], priority: 41 },
     },
     {
       id: 'roles', path: '/pam/roles', domain: 'pam',

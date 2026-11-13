@@ -47,6 +47,6 @@ function SyncStatusIcon({ state }: { state: SyncToastState }) {
 export function SyncToast({ state, leaving = false, elapsedSeconds, formatElapsed, onOpenActivity }: SyncToastProps) {
   return <div className={'sync-toast ' + state.tone + (leaving ? ' is-leaving' : '')} role="status" aria-live="polite" aria-atomic="true">
     <SyncStatusIcon state={state} />
-    <div className="sync-toast-copy"><SourceSummary sources={state.sources} /><strong>{state.title}</strong><span>{state.detail}{state.tone === 'running' && ` Activa hace ${formatElapsed(elapsedSeconds)}. Podés seguir navegando.`}</span>{onOpenActivity && <button type="button" className="sync-toast-link" onClick={onOpenActivity}>{t('Ver sincronizaciones')}</button>}</div>
+    <div className="sync-toast-copy"><SourceSummary sources={state.sources} /><strong>{state.title}</strong><span>{state.detail}{state.tone === 'running' && t(' Activa hace {elapsedSeconds}. Podés seguir navegando.', { elapsedSeconds: formatElapsed(elapsedSeconds) })}</span>{onOpenActivity && <button type="button" className="sync-toast-link" onClick={onOpenActivity}>{t('Ver sincronizaciones')}</button>}</div>
   </div>;
 }

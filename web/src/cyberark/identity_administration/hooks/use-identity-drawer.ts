@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   fetchIdentityLayerFreshness, fetchIdentityRoleDetail, fetchIdentityUserDetail, fetchIdentityUserPamChain,
 } from '../lib/identity-admin-api';
+import { t } from '../../../cross/i18n/index.ts';
 
 export type IdentityTarget = { kind: 'user' | 'role'; objectId: number; name: string };
 
@@ -50,7 +51,7 @@ export function useIdentityDrawer() {
     pamChain: pamChainQuery.data ?? null,
     pamChainLoading: pamChainQuery.isLoading || pamChainQuery.isFetching,
     loading: activeQuery.isLoading || activeQuery.isFetching,
-    error: activeQuery.error instanceof Error ? activeQuery.error.message : activeQuery.error ? 'No se pudo cargar el detalle de identidad' : '',
+    error: activeQuery.error instanceof Error ? activeQuery.error.message : activeQuery.error ? t('No se pudo cargar el detalle de identidad') : '',
     open,
     close,
     reload: async () => { await activeQuery.refetch(); },

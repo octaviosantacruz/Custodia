@@ -2,6 +2,7 @@ import { EMPTY_NETSKOPE_DEVICE_QUERY } from './netskope-device-filters.ts';
 import { formatNumber } from '../../../cross/lib/format.ts';
 import { isChartMode, type ChartMode } from '../../../cross/lib/chart-mode.ts';
 import type { NetskopeAaChartSummary, NetskopeAccountStatus, NetskopeAlertWindow, NetskopeChartWidgetId, NetskopeDataWidgetId, NetskopeDeviceFilterKey, NetskopeDeviceQuery, NetskopeEventAge, NetskopeMetricBucket, NetskopeUserActivityDays, NetskopeUsersDeviceCountFilter, NetskopeWidgetFilterKey, NetskopeWidgetFilters, NetskopeWidgetInstance, NetskopeWidgetSize } from '../types/netskope';
+import { t } from '../../../cross/i18n/index.ts';
 
 /* Count-only DLP aggregate widgets have no destination: Custodia does not store
    or investigate individual incidents/events, so their drill is null and the
@@ -25,7 +26,7 @@ const OBSERVED_USER_STATUSES = ['matched', 'ambiguous', 'unmatched'] as const;
 export type NetskopeAlertDimension = 'by_alert_type' | 'by_severity' | 'by_action';
 
 export function netskopeAlertTotalLabel(total: number | null): string {
-  return total === null ? 'Sin dato' : formatNumber(total);
+  return total === null ? t('Sin dato') : formatNumber(total);
 }
 
 export function netskopeAlertAvailabilityLabel(
@@ -38,10 +39,10 @@ export function netskopeAlertAvailabilityLabel(
 
 const UNKNOWN_ALERT_BUCKETS = new Set(['', 'unknown', 'sin dato', 'n/a', 'na', 'none', 'null', 'not available']);
 const SEVERITY_LABELS: Record<string, string> = {
-  critical: 'Crítica', critica: 'Crítica', crítica: 'Crítica',
-  high: 'Alta', alta: 'Alta',
-  medium: 'Media', media: 'Media',
-  low: 'Baja', baja: 'Baja',
+  critical: t('Crítica'), critica: t('Crítica'), crítica: t('Crítica'),
+  high: t('Alta'), alta: t('Alta'),
+  medium: t('Media'), media: t('Media'),
+  low: t('Baja'), baja: t('Baja'),
   informational: 'Informativa', informative: 'Informativa', info: 'Informativa', informativa: 'Informativa',
 };
 const SEVERITY_ORDER = ['Crítica', 'Alta', 'Media', 'Baja', 'Informativa', 'Sin dato'];
@@ -58,7 +59,7 @@ export function normalizeNetskopeAlertBuckets(
     const raw = bucket.key.trim().replace(/\s+/g, ' ');
     const normalized = raw.toLocaleLowerCase('es');
     const label = UNKNOWN_ALERT_BUCKETS.has(normalized)
-      ? 'Sin dato'
+      ? t('Sin dato')
       : dimension === 'by_severity'
         ? (SEVERITY_LABELS[normalized] ?? raw)
         : raw;
@@ -129,14 +130,14 @@ export function netskopeCardShare(id: NetskopeDataWidgetId, metrics: ShareMetric
   let part: number | null | undefined;
   let total: number | null | undefined;
   let label = '';
-  if (id === 'devices_observed_user_matched') [part, total, label] = [metrics.devices_observed_user_matched, metrics.devices_total, 'de los dispositivos con evento en 7 días'];
-  else if (id === 'devices_observed_user_unmatched') [part, total, label] = [metrics.devices_observed_user_unmatched, metrics.devices_total, 'de los dispositivos con evento en 7 días'];
-  else if (id === 'users_without_observed_devices') [part, total, label] = [metrics.users_without_observed_devices, metrics.users_total, 'de las identidades en inventario'];
-  else if (id === 'fleet_signal_24h') [part, total, label] = [metrics.fleet_signal_24h, metrics.fleet_devices, 'de los equipos con evento en 7 días'];
-  else if (id === 'fleet_client_current') [part, total, label] = [metrics.fleet_client_current, metrics.fleet_client_evaluated, 'de los equipos con versión reconocida'];
-  else if (id === 'fleet_os_supported') [part, total, label] = [metrics.fleet_os_supported, metrics.fleet_os_evaluated, 'de los equipos con mínimo de SO definido'];
-  else if (id === 'fleet_on_prem') [part, total, label] = [metrics.fleet_on_prem, metrics.fleet_location_reported, 'de los equipos que Netskope clasificó'];
-  else if (id === 'devices_duplicate_hostnames') [part, total, label] = [metrics.devices_duplicate_hostnames, metrics.devices_total, 'de los equipos con evento en 7 días'];
+  if (id === 'devices_observed_user_matched') [part, total, label] = [metrics.devices_observed_user_matched, metrics.devices_total, t('de los dispositivos con evento en 7 días')];
+  else if (id === 'devices_observed_user_unmatched') [part, total, label] = [metrics.devices_observed_user_unmatched, metrics.devices_total, t('de los dispositivos con evento en 7 días')];
+  else if (id === 'users_without_observed_devices') [part, total, label] = [metrics.users_without_observed_devices, metrics.users_total, t('de las identidades en inventario')];
+  else if (id === 'fleet_signal_24h') [part, total, label] = [metrics.fleet_signal_24h, metrics.fleet_devices, t('de los equipos con evento en 7 días')];
+  else if (id === 'fleet_client_current') [part, total, label] = [metrics.fleet_client_current, metrics.fleet_client_evaluated, t('de los equipos con versión reconocida')];
+  else if (id === 'fleet_os_supported') [part, total, label] = [metrics.fleet_os_supported, metrics.fleet_os_evaluated, t('de los equipos con mínimo de SO definido')];
+  else if (id === 'fleet_on_prem') [part, total, label] = [metrics.fleet_on_prem, metrics.fleet_location_reported, t('de los equipos que Netskope clasificó')];
+  else if (id === 'devices_duplicate_hostnames') [part, total, label] = [metrics.devices_duplicate_hostnames, metrics.devices_total, t('de los equipos con evento en 7 días')];
   if (!isCount(part) || !isCount(total) || total === 0 || part > total) return null;
   return { part, total, share: netskopeShareLabel(part, total), ratio: part / total, label };
 }
@@ -149,7 +150,7 @@ export function netskopeUsersSplit(metrics: { users_total?: number; users_enable
   const unknown = metrics.users_total - metrics.users_enabled - metrics.users_disabled;
   if (unknown < 0) return null;
   // No user has a status yet (the first sync after the change has not run): say so instead of "0 habilitados".
-  if (metrics.users_enabled + metrics.users_disabled === 0) return metrics.users_total > 0 ? 'Estado de cuentas: se lee en el próximo sync' : null;
+  if (metrics.users_enabled + metrics.users_disabled === 0) return metrics.users_total > 0 ? t('Estado de cuentas: se lee en el próximo sync') : null;
   return `${formatNumber(metrics.users_enabled)} habilitados · ${formatNumber(metrics.users_disabled)} deshabilitados${unknown ? ` · ${formatNumber(unknown)} sin dato de cuentas` : ''}`;
 }
 
@@ -159,7 +160,7 @@ export function netskopeUsersReference(metrics: { users_total?: number; users_re
   const isCount = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value) && value >= 0;
   if (!metrics || !isCount(metrics.users_total) || !isCount(metrics.users_reported_total)) return null;
   const difference = metrics.users_total - metrics.users_reported_total;
-  const gap = difference === 0 ? 'sin diferencia' : `${difference > 0 ? '+' : '−'}${formatNumber(Math.abs(difference))}`;
+  const gap = difference === 0 ? t('sin diferencia') : `${difference > 0 ? '+' : '−'}${formatNumber(Math.abs(difference))}`;
   return { reported: metrics.users_reported_total, listed: metrics.users_total, difference, label: `Diferencia frente a Netskope: ${gap}` };
 }
 
@@ -223,39 +224,39 @@ export type NetskopeWidgetDefinition = {
 };
 
 const ALL_NETSKOPE_DATA_WIDGETS: ReadonlyArray<NetskopeWidgetDefinition> = [
-  { id: 'users_total', kind: 'data', title: 'Usuarios en inventario', description: 'Identidades con al menos una cuenta no borrada en Netskope, habilitadas o no; no implica actividad reciente.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ['company'] },
-  { id: 'users_recent_activity', kind: 'data', title: 'Usuarios con actividad reciente', description: 'Identidades con al menos un dispositivo vinculado por coincidencia exacta que reportó un evento en la ventana elegida.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ['company'] },
-  { id: 'devices_total', kind: 'data', title: 'Dispositivos', description: 'Endpoints con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_stale_30d', kind: 'data', title: 'Equipos sin señal hace más de 30 días', description: 'Equipos activos cuyo último evento tiene más de 30 días; candidatos a revisar su asignación, no una baja.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_with_observed_user', kind: 'data', title: 'Con usuario observado', description: 'Endpoints con evento en los últimos 7 días y una referencia textual de usuario.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'users_total', kind: 'data', title: t('Usuarios en inventario'), description: t('Identidades con al menos una cuenta no borrada en Netskope, habilitadas o no; no implica actividad reciente.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ['company'] },
+  { id: 'users_recent_activity', kind: 'data', title: t('Usuarios con actividad reciente'), description: t('Identidades con al menos un dispositivo vinculado por coincidencia exacta que reportó un evento en la ventana elegida.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ['company'] },
+  { id: 'devices_total', kind: 'data', title: 'Dispositivos', description: t('Endpoints con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_stale_30d', kind: 'data', title: t('Equipos sin señal hace más de 30 días'), description: t('Equipos activos cuyo último evento tiene más de 30 días; candidatos a revisar su asignación, no una baja.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_with_observed_user', kind: 'data', title: 'Con usuario observado', description: t('Endpoints con evento en los últimos 7 días y una referencia textual de usuario.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
   /* NSK-XMET-001: cross user-device KPIs over the exact NSK-DEV-001 match. */
-  { id: 'devices_observed_user_matched', kind: 'data', title: 'Con usuario resuelto', description: 'Dispositivos con evento en los últimos 7 días cuyo username coincide exactamente con un único usuario activo (id o email).', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_observed_user_unmatched', kind: 'data', title: 'Sin usuario resuelto', description: 'Dispositivos con evento en los últimos 7 días sin ninguna coincidencia exacta de usuario; no incluye ambigüedades.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'users_without_observed_devices', kind: 'data', title: 'Usuarios sin dispositivos', description: 'Identidades vigentes en el inventario sin ningún dispositivo resuelto por coincidencia exacta.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ['company'] },
-  { id: 'fleet_signal_24h', kind: 'data', title: 'Equipos con señal en 24 h', description: 'Equipos con evento en los últimos 7 días que reportaron en las últimas 24 horas; la diferencia son equipos que se están quedando callados.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'fleet_client_current', kind: 'data', title: 'Cliente al día', description: 'Equipos cuya versión del cliente es la de la línea base de versiones, sobre los de versión reconocida. Sin línea base no se evalúa.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'fleet_os_supported', kind: 'data', title: 'SO en el mínimo exigido', description: 'Equipos cuyo sistema operativo alcanza el mínimo configurado, sobre los de SO con mínimo definido. Sin mínimos no se evalúa.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'fleet_on_prem', kind: 'data', title: 'Equipos en oficina', description: 'Equipos que Netskope detectó en la oficina (On-Premises Detection), sobre los que clasificó como oficina o remoto; sin dato no cuenta como remoto.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'devices_duplicate_hostnames', kind: 'data', title: 'Posibles duplicados por hostname', description: 'Equipos con evento en los últimos 7 días que comparten hostname con otro; suelen ser reasignaciones o reimágenes, no se fusionan ni se dan de baja desde aquí.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'alerts_7d', kind: 'data', title: 'Alertas Netskope agregadas · 7 días', description: 'Conteo agregado de alertas Netskope (todos los tipos) en los últimos 7 días; DLP es una de las dimensiones.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'alerts_30d', kind: 'data', title: 'Alertas Netskope agregadas · 30 días', description: 'Conteo agregado de alertas Netskope (todos los tipos) en los últimos 30 días; DLP es una de las dimensiones.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
-  { id: 'alerts_90d', kind: 'data', title: 'Alertas Netskope agregadas · 90 días', description: 'Conteo agregado de alertas Netskope (todos los tipos) en los últimos 90 días; DLP es una de las dimensiones.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'devices_observed_user_matched', kind: 'data', title: 'Con usuario resuelto', description: t('Dispositivos con evento en los últimos 7 días cuyo username coincide exactamente con un único usuario activo (id o email).'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_observed_user_unmatched', kind: 'data', title: t('Sin usuario resuelto'), description: t('Dispositivos con evento en los últimos 7 días sin ninguna coincidencia exacta de usuario; no incluye ambigüedades.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'users_without_observed_devices', kind: 'data', title: t('Usuarios sin dispositivos'), description: t('Identidades vigentes en el inventario sin ningún dispositivo resuelto por coincidencia exacta.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: ['company'] },
+  { id: 'fleet_signal_24h', kind: 'data', title: t('Equipos con señal en 24 h'), description: t('Equipos con evento en los últimos 7 días que reportaron en las últimas 24 horas; la diferencia son equipos que se están quedando callados.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'fleet_client_current', kind: 'data', title: t('Cliente al día'), description: t('Equipos cuya versión del cliente es la de la línea base de versiones, sobre los de versión reconocida. Sin línea base no se evalúa.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'fleet_os_supported', kind: 'data', title: t('SO en el mínimo exigido'), description: t('Equipos cuyo sistema operativo alcanza el mínimo configurado, sobre los de SO con mínimo definido. Sin mínimos no se evalúa.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'fleet_on_prem', kind: 'data', title: t('Equipos en oficina'), description: t('Equipos que Netskope detectó en la oficina (On-Premises Detection), sobre los que clasificó como oficina o remoto; sin dato no cuenta como remoto.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'devices_duplicate_hostnames', kind: 'data', title: t('Posibles duplicados por hostname'), description: t('Equipos con evento en los últimos 7 días que comparten hostname con otro; suelen ser reasignaciones o reimágenes, no se fusionan ni se dan de baja desde aquí.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'alerts_7d', kind: 'data', title: t('Alertas Netskope agregadas · 7 días'), description: t('Conteo agregado de alertas Netskope (todos los tipos) en los últimos 7 días; DLP es una de las dimensiones.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'alerts_30d', kind: 'data', title: t('Alertas Netskope agregadas · 30 días'), description: t('Conteo agregado de alertas Netskope (todos los tipos) en los últimos 30 días; DLP es una de las dimensiones.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
+  { id: 'alerts_90d', kind: 'data', title: t('Alertas Netskope agregadas · 90 días'), description: t('Conteo agregado de alertas Netskope (todos los tipos) en los últimos 90 días; DLP es una de las dimensiones.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'sm', filterKeys: [] },
 ];
 
 const ALL_NETSKOPE_CHART_WIDGETS: ReadonlyArray<NetskopeWidgetDefinition> = [
-  { id: 'devices_by_os', kind: 'chart', title: 'Dispositivos por sistema operativo', description: 'Distribución del SO entre equipos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_by_client', kind: 'chart', title: 'Dispositivos por cliente', description: 'Distribución de versiones entre equipos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_by_make', kind: 'chart', title: 'Dispositivos por fabricante', description: 'Distribución del fabricante entre equipos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_by_classification', kind: 'chart', title: 'Dispositivos por clasificación', description: 'Distribución de la clasificación entre equipos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_by_user_status', kind: 'chart', title: 'Dispositivos por estado de usuario', description: 'Distribución del estado de usuario entre equipos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'devices_by_company', kind: 'chart', title: 'Dispositivos por empresa', description: 'Distribución por empresa del usuario observado entre equipos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'users_by_company', kind: 'chart', title: 'Usuarios por empresa', description: 'Distribución de identidades por el dominio corporativo del correo.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ['company'] },
+  { id: 'devices_by_os', kind: 'chart', title: t('Dispositivos por sistema operativo'), description: t('Distribución del SO entre equipos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_by_client', kind: 'chart', title: t('Dispositivos por cliente'), description: t('Distribución de versiones entre equipos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_by_make', kind: 'chart', title: t('Dispositivos por fabricante'), description: t('Distribución del fabricante entre equipos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_by_classification', kind: 'chart', title: t('Dispositivos por clasificación'), description: t('Distribución de la clasificación entre equipos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_by_user_status', kind: 'chart', title: t('Dispositivos por estado de usuario'), description: t('Distribución del estado de usuario entre equipos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'devices_by_company', kind: 'chart', title: t('Dispositivos por empresa'), description: t('Distribución por empresa del usuario observado entre equipos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'users_by_company', kind: 'chart', title: t('Usuarios por empresa'), description: t('Distribución de identidades por el dominio corporativo del correo.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ['company'] },
   /* NSK-XMET-001: cross user-device KPIs over the exact NSK-DEV-001 match. */
-  { id: 'devices_by_observed_user_status', kind: 'chart', title: 'Dispositivos por usuario observado', description: 'Estados de la coincidencia exacta (resuelto, ambiguo, sin resolver) entre dispositivos con evento en los últimos 7 días.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'users_by_device_count', kind: 'chart', title: 'Usuarios por cantidad de dispositivos', description: 'Identidades vigentes en el inventario con 0, 1 o 2+ dispositivos resueltos.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ['company'] },
-  { id: 'users_by_recent_device_age', kind: 'chart', title: 'Usuarios por antigüedad de su dispositivo más reciente', description: 'Antigüedad del evento más nuevo del dispositivo resuelto de cada identidad; "Sin dato" es un dispositivo sin timestamp numérico.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ['company'] },
-  { id: 'coverage_risk_devices_by_user', kind: 'chart', title: 'Último evento de desinstalación o deshabilitación por usuario', description: 'Dispositivos con último evento de desinstalación o deshabilitación (Uninstalled, Disconnected By Uninstall, Admin Disabled), agrupados por el usuario resuelto.', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
-  { id: 'alerts_by_severity', kind: 'chart', title: 'Alertas Netskope por severidad', description: 'Agregado AA disponible sólo con definición, período y unidad validados; no persiste resultados localmente.', source: 'netskope', permission: 'netskope:read', dataStatus: 'pending', defaultSize: 'md', filterKeys: [] },
+  { id: 'devices_by_observed_user_status', kind: 'chart', title: t('Dispositivos por usuario observado'), description: t('Estados de la coincidencia exacta (resuelto, ambiguo, sin resolver) entre dispositivos con evento en los últimos 7 días.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'users_by_device_count', kind: 'chart', title: t('Usuarios por cantidad de dispositivos'), description: t('Identidades vigentes en el inventario con 0, 1 o 2+ dispositivos resueltos.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ['company'] },
+  { id: 'users_by_recent_device_age', kind: 'chart', title: t('Usuarios por antigüedad de su dispositivo más reciente'), description: t('Antigüedad del evento más nuevo del dispositivo resuelto de cada identidad; "Sin dato" es un dispositivo sin timestamp numérico.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ['company'] },
+  { id: 'coverage_risk_devices_by_user', kind: 'chart', title: t('Último evento de desinstalación o deshabilitación por usuario'), description: t('Dispositivos con último evento de desinstalación o deshabilitación (Uninstalled, Disconnected By Uninstall, Admin Disabled), agrupados por el usuario resuelto.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: ALL_DEVICE_FILTER_KEYS },
+  { id: 'alerts_by_severity', kind: 'chart', title: t('Alertas Netskope por severidad'), description: t('Agregado AA disponible sólo con definición, período y unidad validados; no persiste resultados localmente.'), source: 'netskope', permission: 'netskope:read', dataStatus: 'pending', defaultSize: 'md', filterKeys: [] },
 ];
 
 /** Widgets no longer offered in the picker or the presets (board
@@ -290,7 +291,7 @@ export function registerNetskopeAaCharts(charts: ReadonlyArray<NetskopeAaChartSu
   for (const chart of charts) {
     NETSKOPE_AA_CHARTS.set(chart.id, {
       id: chart.id, kind: 'chart', title: chart.title,
-      description: `Gráfico de Advanced Analytics · ${chart.unit} · ${chart.period}.`,
+      description: t('Gráfico de Advanced Analytics · {unit} · {period}.', { unit: chart.unit, period: chart.period }),
       source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: [],
       aa: { period: chart.period, unit: chart.unit },
     });
@@ -302,7 +303,7 @@ export function netskopeWidgetDefinition(id: NetskopeDataWidgetId | NetskopeChar
   const known = NETSKOPE_WIDGETS_BY_ID.get(id) ?? NETSKOPE_AA_CHARTS.get(id);
   if (known || !isNetskopeAaChartId(id)) return known;
   // A saved view can load before the chart list: keep the block until the list names it.
-  return { id, kind: 'chart', title: 'Gráfico Advanced Analytics', description: '', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: [], aa: { period: '', unit: '' } };
+  return { id, kind: 'chart', title: t('Gráfico Advanced Analytics'), description: '', source: 'netskope', permission: 'netskope:read', dataStatus: 'confirmed', defaultSize: 'md', filterKeys: [], aa: { period: '', unit: '' } };
 }
 
 export const DEFAULT_NETSKOPE_DATA_WIDGETS: NetskopeDataWidgetId[] = [
@@ -343,7 +344,7 @@ export type NetskopeDashboardPreset = {
 export const NETSKOPE_DASHBOARD_PRESETS: NetskopeDashboardPreset[] = [
   {
     id: 'manager', label: 'Manager',
-    description: 'Tamaño de la flota, equipos sin señal hace más de 30 días y distribución por empresa.',
+    description: t('Tamaño de la flota, equipos sin señal hace más de 30 días y distribución por empresa.'),
     widgets: [
       { id: 'users_recent_activity', size: 'sm' }, { id: 'devices_total', size: 'sm' }, { id: 'devices_stale_30d', size: 'sm' },
       { id: 'devices_by_company', size: 'md' }, { id: 'users_by_company', size: 'md' }, { id: 'devices_by_os', size: 'md' },
@@ -351,15 +352,15 @@ export const NETSKOPE_DASHBOARD_PRESETS: NetskopeDashboardPreset[] = [
   },
   {
     id: 'operations', label: 'Operaciones',
-    description: 'Equipos sin señal y atributos de flota para priorizar el trabajo diario.',
+    description: t('Equipos sin señal y atributos de flota para priorizar el trabajo diario.'),
     widgets: [
       { id: 'devices_total', size: 'sm' }, { id: 'devices_stale_30d', size: 'sm' }, { id: 'devices_observed_user_unmatched', size: 'sm' },
       { id: 'devices_by_classification', size: 'md' }, { id: 'devices_by_os', size: 'md' },
     ],
   },
   {
-    id: 'audit', label: 'Auditoría',
-    description: 'Salud de la flota (señal, cliente y SO) y la clasificación de los equipos.',
+    id: 'audit', label: t('Auditoría'),
+    description: t('Salud de la flota (señal, cliente y SO) y la clasificación de los equipos.'),
     widgets: [
       { id: 'devices_total', size: 'sm' }, { id: 'fleet_client_current', size: 'sm' }, { id: 'fleet_os_supported', size: 'sm' },
       { id: 'devices_by_os', size: 'md' }, { id: 'devices_by_classification', size: 'md' },

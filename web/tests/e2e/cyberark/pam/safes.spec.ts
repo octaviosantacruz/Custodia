@@ -553,10 +553,12 @@ test('an actor without pam:catalogs_read or access:manage never sees the technic
 test('Safes and Servicio tabs pass the axe check', async ({ page }) => {
   await mockAuthenticatedApp(page);
   await page.goto('/pam/safes');
+  await expect(page.locator('.pam-infra-subnav > .workspace-subnav')).toBeVisible();
   const topResults = await new AxeBuilder({ page }).include('.pam-infra-subnav > .workspace-subnav').analyze();
   expect(topResults.violations).toEqual([]);
 
   await page.goto('/pam/connectors');
+  await expect(page.locator('.workspace-subnav-nested')).toBeVisible();
   const nestedResults = await new AxeBuilder({ page }).include('.workspace-subnav-nested').analyze();
   expect(nestedResults.violations).toEqual([]);
 });

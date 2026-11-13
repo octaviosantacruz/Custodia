@@ -31,16 +31,16 @@ export function NetskopeUserAnomalies({ userId, refreshKey = 0, onUnauthorized }
   return <section className="nsk-user-anomalies" aria-label={t('Anomalías del usuario')}>
     <div className="nsk-user-anomalies-head">
       <h3>{t('Anomalías')}</h3>
-      <span className="nsk-user-anomalies-window">{data.window_days} días</span>
+      <span className="nsk-user-anomalies-window">{t('{window_days} días', { window_days: data.window_days })}</span>
       <HelpHint label={t('Anomalías')}><p>Detecciones UEBA de Netskope para este usuario. Netskope entrega hasta 30 días y 1000 filas; no se guardan en Custodia.</p></HelpHint>
     </div>
-    {data.total === 0 ? <p className="nsk-user-anomalies-empty">Sin anomalías en {data.window_days} días.</p> : <>
+    {data.total === 0 ? <p className="nsk-user-anomalies-empty">{t('Sin anomalías en {window_days} días.', { window_days: data.window_days })}</p> : <>
       <ul className="nsk-user-anomalies-counts" aria-label={t('Anomalías por severidad')}>
         {ANOMALY_SEVERITIES.filter((key) => data.by_severity[key] > 0).map((key) => <li key={key}>
           <StatusBadge tone={ANOMALY_SEVERITY_TONES[key]}>{ANOMALY_SEVERITY_LABELS[key]}</StatusBadge> <strong>{formatNumber(data.by_severity[key])}</strong>
         </li>)}
       </ul>
-      {data.truncated ? <p className="nsk-user-anomalies-note" role="status">Se analizan {formatNumber(data.returned)} de {formatNumber(data.total)}.</p> : null}
+      {data.truncated ? <p className="nsk-user-anomalies-note" role="status">{t('Se analizan {returned} de {total}.', { returned: formatNumber(data.returned), total: formatNumber(data.total) })}</p> : null}
       <div className="compact-table-wrap"><table className="compact-table">
         <caption className="sr-only">{t('Anomalías más graves y recientes')}</caption>
         <thead><tr><th scope="col">{t('Severidad')}</th><th scope="col">{t('Escenario')}</th><th scope="col">{t('Regla')}</th><th scope="col">{t('Actividad')}</th><th scope="col">{t('Cuándo')}</th></tr></thead>
