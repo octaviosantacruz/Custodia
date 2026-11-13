@@ -94,6 +94,13 @@ subrayados, filos y resplandores son decoración y nunca van en lima. Si dos
 cosas compiten por la primera mirada, una sobra. Los colores de estado (verde,
 ámbar, rojo) aparecen sólo donde la demo los usa.
 
+**Profundidad con luz, no con más color.** El sitio usa la tinta de la demo
+tal cual; la profundidad sale de una luz fría y suave desde arriba de la
+página, un filo fino bajo la cabecera y la captura del inicio que se funde
+con el fondo. Nada de resplandores en lima, degradados entre colores ni
+ilustraciones detrás del contenido. Si el fondo cambia de color (por ejemplo
+a azul tinta), cambia en la demo y en el sitio a la vez.
+
 | Elemento | Referencia | Se toma | Se deja |
 |---|---|---|---|
 | Maqueta de la página | stripe.com | Una afirmación por sección, con la pantalla real del producto al lado. | Degradados vistosos y muchas llamadas a la acción. |

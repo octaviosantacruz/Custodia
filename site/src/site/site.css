@@ -13,6 +13,9 @@
    y las familias no cambian; sólo los tamaños, y sólo acá. */
 :root { --t-xs: 12.5px; --t-sm: 14.5px; --t-md: 16px; --t-lg: 18px; --t-xl: 21px; }
 html { scroll-behavior: smooth; }
+/* Profundidad con luz, no con más color: una luz fría y suave cae desde
+   arriba de la página. El fondo y sus tonos siguen siendo los de la demo. */
+body { background: radial-gradient(72rem 34rem at 50% -9rem, oklch(0.96 0.02 240 / 0.075), transparent 72%) no-repeat, var(--ink-50); }
 h1, h2, h3 { text-wrap: balance; }
 p { text-wrap: pretty; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -23,6 +26,7 @@ a.button { text-decoration: none; }
 .site-head {
   align-items: center; backdrop-filter: blur(10px); background: oklch(0.13 0.008 255 / 0.82);
   display: flex; gap: var(--s-5); justify-content: space-between; margin: 0 calc(var(--s-5) * -1);
+  border-bottom: 1px solid oklch(0.28 0.012 255 / 0.6);
   padding: var(--s-4) var(--s-5); position: sticky; top: 0; z-index: 5;
 }
 .site-head .wordmark { text-decoration: none; }
@@ -44,10 +48,7 @@ a.button { text-decoration: none; }
 
 /* ---------- Portada: el texto arriba, el producto real debajo ---------- */
 .hero { display: grid; gap: var(--s-7); padding: 72px 0 56px; position: relative; }
-.hero::before {
-  background: radial-gradient(40% 50% at 22% 20%, oklch(0.91 0.19 124 / 0.08), transparent 70%);
-  content: ''; height: 620px; inset: -60px 0 auto 0; pointer-events: none; position: absolute; z-index: -1;
-}
+
 .eyebrow { color: var(--ink-600); font-family: var(--font-data); font-size: var(--t-xs); letter-spacing: .06em; text-transform: uppercase; }
 .hero h1 { font-size: clamp(40px, 6vw, 76px); letter-spacing: -0.038em; line-height: 1.02; margin-top: var(--s-4); max-width: 15ch; }
 .hero h1 em { color: var(--brand); font-style: normal; }
@@ -73,6 +74,8 @@ a.button { text-decoration: none; }
 .shot figcaption { color: var(--ink-700); font-size: var(--t-md); line-height: 1.55; margin-top: var(--s-3); max-width: 70ch; }
 .shot figcaption strong { color: var(--ink-900); }
 .hero-shot { isolation: isolate; position: relative; }
+/* La captura del inicio se apaga hacia abajo y se funde con el fondo. */
+.hero-shot a { -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); mask-image: linear-gradient(to bottom, #000 72%, transparent); }
 .hero-shot::before { background: radial-gradient(closest-side, color-mix(in oklch, var(--ink-900) 7%, transparent), transparent); content: ''; filter: blur(48px); inset: 10% 6% 6%; pointer-events: none; position: absolute; z-index: -1; }
 
 /* ---------- Revelado al hacer scroll ---------- */
