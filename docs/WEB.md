@@ -116,11 +116,17 @@ Reglas que siguen de ahí:
 - **El movimiento tiene presupuesto.** Sólo `transform` y `opacity`, sin
   bucles, y todo quieto con `prefers-reduced-motion`. La página se lee completa
   sin JavaScript: cada paso del recorrido lleva su pantalla.
+- **La lectura no depende de la animación.** Los pasos inactivos conservan
+  el contraste del texto. Con movimiento reducido se muestran todas las capturas
+  en su paso, y los contenidos siguen visibles sin esperar un revelado.
 - **El scroll es del visitante.** El recorrido deja la pantalla fija y la
   cambia según el paso que se está leyendo, pero la página se desplaza normal.
 - **Capturas, no dibujos.** El sitio no recrea la interfaz con diagramas
   propios. `site/scripts/capture-shots.mjs` saca las pantallas de la demo en
   inglés y español; el recorrido las usa a 1000x740 para que su texto se lea.
+- **Capturas en móvil.** La portada acerca el vínculo mediante un recorte CSS
+  de la captura original; cada imagen ofrece abrir su versión completa en otra
+  pestaña. El texto del paso aparece antes de su pantalla.
 - **El sitio se lee, la app se opera.** El sitio sube la escala de texto
   (base de 16 px) sin tocar colores ni familias; la app conserva su densidad.
 
