@@ -41,7 +41,7 @@
           <span>custodia</span>
         </a>
         <nav class="site-nav" aria-label="{{navLabel}}">
-          <a href="#questions" class="hide-sm">{{navUse}}</a>
+          <a href="#use" class="hide-sm">{{navUse}}</a>
           <a href="#how" class="hide-sm">{{navHow}}</a>
           <a href="#status" class="hide-sm">{{navStatus}}</a>
           <a href="https://github.com/octaviosantacruz/Custodia" class="hide-sm">GitHub</a>
@@ -58,218 +58,108 @@
             <p class="hero-lede">{{lede}}</p>
             <div class="hero-actions">
               <a href="{{demo}}/{{demoLang}}" class="button is-primary">{{ctaDemo}} <span aria-hidden="true">→</span></a>
-              <a href="#how" class="button">{{ctaHow}}</a>
+              <a href="#use" class="button">{{ctaHow}}</a>
             </div>
             <p class="hero-note">{{heroNote}}</p>
           </div>
-
-          <figure class="story" aria-labelledby="story-caption">
-            <!-- Cloudflare ofusca correos en el HTML; los de la historia son ficticios y deben verse. -->
-            <!--email_off-->
-            <svg class="story-svg" viewBox="0 0 560 396" aria-hidden="true">
-              <g class="st-tool" data-src="pam">
-                <rect x="16" y="34" width="150" height="60" rx="12" />
-                <image href="/logos/cyberark-logo-white.png" x="30" y="47" width="30" height="34" />
-                <text x="72" y="69">CyberArk</text>
-              </g>
-              <g class="st-tool" data-src="sse">
-                <rect x="16" y="226" width="150" height="60" rx="12" />
-                <image href="/logos/netskope-full-white.png" x="27" y="246" width="38" height="20" />
-                <text x="72" y="261">Netskope</text>
-              </g>
-
-              <g data-src="pam">
-                <path class="st-feed st-r1" d="M166 64 C182 64 180 42 196 42" />
-                <path class="st-feed st-r2" d="M166 64 C182 64 180 92 196 92" />
-                <g class="st-rec st-r1"><rect x="196" y="22" width="186" height="40" rx="7" /><text class="st-id" x="207" y="39">alice.morgan@acme.example</text><text class="st-sub" x="207" y="53">{{s_identity}}</text></g>
-                <g class="st-rec st-r2"><rect x="196" y="72" width="186" height="40" rx="7" /><text class="st-id" x="207" y="89">ACME-DEV-SERVICES</text><text class="st-sub" x="207" y="103">{{s_safe}}</text></g>
-                <path pathLength="1" class="st-join st-j1" d="M382 42 C420 42 410 132 440 140" />
-                <path pathLength="1" class="st-join st-j2" d="M382 92 C412 92 414 142 440 146" />
-                <text class="st-label st-l1" x="392" y="30">{{s_exact}}</text>
-              </g>
-              <g data-src="sse">
-                <path class="st-feed st-r3" d="M166 256 C182 256 180 236 196 236" />
-                <path class="st-feed st-r4 is-absent" d="M166 256 C182 256 180 286 196 286" />
-                <g class="st-rec st-r3"><rect x="196" y="216" width="186" height="40" rx="7" /><text class="st-id" x="207" y="233">alice.morgan@acme.example</text><text class="st-sub" x="207" y="247">{{s_user}}</text></g>
-                <g class="st-rec st-r4 is-absent"><rect x="196" y="266" width="186" height="40" rx="7" /><text class="st-id" x="207" y="283">{{s_noDevice}}</text><text class="st-sub" x="207" y="297">{{s_complete}}</text></g>
-                <path pathLength="1" class="st-join st-j3" d="M382 236 C420 236 412 166 440 156" />
-                <path class="st-join st-j4 is-absent" d="M382 286 C440 286 462 240 468 184" />
-                <text class="st-label st-l2" x="392" y="262">{{s_exact}}</text>
-              </g>
-
-              <g class="st-person">
-                <circle cx="472" cy="150" r="32" />
-                <text class="st-initials" x="472" y="156" text-anchor="middle">AM</text>
-                <text class="st-name" x="472" y="200" text-anchor="middle">Alice Morgan</text>
-              </g>
-
-              <g class="st-rule">
-                <rect class="st-rule-box" x="16" y="320" width="300" height="30" rx="7" />
-                <rect class="st-scan" x="16" y="320" width="300" height="30" rx="7" />
-                <text x="30" y="339">{{s_rule}}</text>
-              </g>
-              <g class="st-verdict" data-verdict="gap">
-                <rect x="330" y="320" width="100" height="30" rx="15" />
-                <path d="M350 328 L357 335 L350 342 L343 335 Z" />
-                <text x="365" y="340">{{s_gap}}</text>
-              </g>
-              <text class="st-finding" x="16" y="380">{{s_finding}}</text>
-            </svg>
-            <!--/email_off-->
-            <ol class="story-steps" aria-hidden="true">
-              <li class="sp1"><span>1</span>{{step1}}</li>
-              <li class="sp2"><span>2</span>{{step2}}</li>
-              <li class="sp3"><span>3</span>{{step3}}</li>
-              <li class="sp4"><span>4</span>{{step4}}</li>
-            </ol>
-            <button class="story-replay" type="button" hidden>{{replay}}</button>
-            <figcaption id="story-caption" class="sr-only">{{storyAlt}}</figcaption>
-          </figure>
+          <!-- Cloudflare ofusca correos en el HTML; los de la demo son ficticios y deben verse. -->
+          <figure class="shot hero-shot"><a href="{{demo}}/chains/person{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/chains/person</span></span><picture><source srcset="/shots/{{lang}}/person.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/person.png?v={{shotVersion}}" alt="{{heroAlt}}" width="1440" height="760" /></picture></a><figcaption>{{heroCaption}}</figcaption></figure>
         </section>
 
         <section class="logos reveal" aria-labelledby="logos-title">
           <h2 id="logos-title" class="label">{{logosTitle}}</h2>
           <ul class="logo-row">
-            <li class="is-live" data-src="pam"><img src="/logos/cyberark-logo-white.png" alt="" width="22" height="25" /><span>CyberArk</span><small>{{live}}</small></li>
-            <li class="is-live" data-src="sse"><img src="/logos/netskope-full-white.png" alt="" width="34" height="18" /><span>Netskope</span><small>{{live}}</small></li>
-            <li class="is-next"><img src="/logos/bigid-full-white.png" alt="" width="24" height="24" /><span>BigID</span><small>{{next}}</small></li>
-            <li class="is-next"><span>CrowdStrike</span><small>{{next}}</small></li>
-            <li class="is-next"><span>Cortex XDR</span><small>{{next}}</small></li>
-            <li class="is-next"><span>Tenable</span><small>{{next}}</small></li>
-            <li class="is-next"><span>{{firewalls}}</span><small>{{next}}</small></li>
+            <li class="is-live"><img src="/logos/cyberark-logo-white.png" alt="" width="22" height="25" /><span>CyberArk</span><small>{{live}}</small></li>
+            <li class="is-live"><img src="/logos/netskope-full-white.png" alt="" width="34" height="18" /><span>Netskope</span><small>{{live}}</small></li>
           </ul>
+          <p class="logos-next">{{planned}}</p>
         </section>
 
-        <section class="section" id="questions" aria-labelledby="questions-title">
-          <p class="section-kicker">{{qKicker}}</p>
-          <h2 id="questions-title">{{qTitle}}</h2>
-          <p class="section-lede">{{qLede}}</p>
-          <div class="questions">
-            <a class="question reveal" href="{{demo}}/chains/person{{demoLang}}" data-verdict="gap">
-              <p class="q">{{q1}}</p>
-              <p class="a">{{a1}}</p>
-              <span class="q-foot"><span class="verdict"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8 11.2 6 6 11.2.8 6z" fill="var(--tone)" /></svg><span>{{v1}}</span></span><span class="go">{{seeDemo}} →</span></span>
-            </a>
-            <a class="question reveal" href="{{demo}}/chains/person{{demoLang}}" data-verdict="partial">
-              <p class="q">{{q2}}</p>
-              <p class="a">{{a2}}</p>
-              <span class="q-foot"><span class="verdict"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.4" fill="none" stroke="var(--tone)" stroke-width="1.4" /><path d="M6 1.6a4.4 4.4 0 0 1 0 8.8z" fill="var(--tone)" /></svg><span>{{v2}}</span></span><span class="go">{{seeDemo}} →</span></span>
-            </a>
-            <a class="question reveal" href="{{demo}}/chains/person{{demoLang}}" data-verdict="unknown">
-              <p class="q">{{q3}}</p>
-              <p class="a">{{a3}}</p>
-              <span class="q-foot"><span class="verdict"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.4" fill="none" stroke="var(--tone)" stroke-width="1.4" stroke-dasharray="2.2 1.6" /></svg><span>{{v3}}</span></span><span class="go">{{seeDemo}} →</span></span>
-            </a>
-            <a class="question reveal" href="{{demo}}/pam/safes{{demoLang}}" data-src="pam">
-              <p class="q">{{q4}}</p>
-              <p class="a">{{a4}}</p>
-              <span class="q-foot"><span class="seal" data-src="pam"><span class="seal-mono" aria-hidden="true">PA</span><span class="seal-text">{{v4}}</span></span><span class="go">{{seeDemo}} →</span></span>
-            </a>
+        <section class="section" id="use" aria-labelledby="use-title">
+          <p class="section-kicker">{{useKicker}}</p>
+          <h2 id="use-title">{{useTitle}}</h2>
+          <p class="section-lede">{{useLede}}</p>
+          <div class="tour" data-tour>
+            <article class="tour-step is-active" id="tour-1">
+              <div class="tour-copy">
+                <p class="tour-tool">{{t1Tool}}</p>
+                <h3>{{t1Title}}</h3>
+                <p>{{t1Text}}</p>
+                <a class="go" href="{{demo}}/chains/person{{demoLang}}">{{seeDemo}} <span aria-hidden="true">→</span></a>
+              </div>
+              <figure class="tour-shot"><a href="{{demo}}/chains/person{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/chains/person</span></span><picture><source srcset="/shots/{{lang}}/people.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/people.png?v={{shotVersion}}" alt="{{t1Alt}}" width="1000" height="740" loading="lazy" /></picture></a></figure>
+            </article>
+            <article class="tour-step" id="tour-2">
+              <div class="tour-copy">
+                <p class="tour-tool"><img src="/logos/cyberark-logo-white.png" alt="" width="18" height="20" />{{t2Tool}}</p>
+                <h3>{{t2Title}}</h3>
+                <p>{{t2Text}}</p>
+                <a class="go" href="{{demo}}/pam{{demoLang}}">{{seeDemo}} <span aria-hidden="true">→</span></a>
+              </div>
+              <figure class="tour-shot"><a href="{{demo}}/pam{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/pam</span></span><picture><source srcset="/shots/{{lang}}/metrics.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/metrics.png?v={{shotVersion}}" alt="{{t2Alt}}" width="1000" height="740" loading="lazy" /></picture></a></figure>
+            </article>
+            <article class="tour-step" id="tour-3">
+              <div class="tour-copy">
+                <p class="tour-tool"><img src="/logos/cyberark-logo-white.png" alt="" width="18" height="20" />{{t3Tool}}</p>
+                <h3>{{t3Title}}</h3>
+                <p>{{t3Text}}</p>
+                <a class="go" href="{{demo}}/pam/safes{{demoLang}}">{{seeDemo}} <span aria-hidden="true">→</span></a>
+              </div>
+              <figure class="tour-shot"><a href="{{demo}}/pam/safes{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/pam/safes</span></span><picture><source srcset="/shots/{{lang}}/safes.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/safes.png?v={{shotVersion}}" alt="{{t3Alt}}" width="1000" height="740" loading="lazy" /></picture></a></figure>
+            </article>
+            <article class="tour-step" id="tour-4">
+              <div class="tour-copy">
+                <p class="tour-tool"><img src="/logos/netskope-full-white.png" alt="" width="30" height="16" />{{t4Tool}}</p>
+                <h3>{{t4Title}}</h3>
+                <p>{{t4Text}}</p>
+                <a class="go" href="{{demo}}/netskope/devices{{demoLang}}">{{seeDemo}} <span aria-hidden="true">→</span></a>
+              </div>
+              <figure class="tour-shot"><a href="{{demo}}/netskope/devices{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/netskope/devices</span></span><picture><source srcset="/shots/{{lang}}/inventory.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/inventory.png?v={{shotVersion}}" alt="{{t4Alt}}" width="1000" height="740" loading="lazy" /></picture></a></figure>
+            </article>
+            <article class="tour-step" id="tour-5">
+              <div class="tour-copy">
+                <p class="tour-tool"><img src="/logos/netskope-full-white.png" alt="" width="30" height="16" />{{t5Tool}}</p>
+                <h3>{{t5Title}}</h3>
+                <p>{{t5Text}}</p>
+                <a class="go" href="{{demo}}/netskope/posture{{demoLang}}">{{seeDemo}} <span aria-hidden="true">→</span></a>
+              </div>
+              <figure class="tour-shot"><a href="{{demo}}/netskope/posture{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/netskope/posture</span></span><picture><source srcset="/shots/{{lang}}/posture.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/posture.png?v={{shotVersion}}" alt="{{t5Alt}}" width="1000" height="740" loading="lazy" /></picture></a></figure>
+            </article>
           </div>
         </section>
 
         <section class="section" id="how" aria-labelledby="how-title">
           <p class="section-kicker">{{howKicker}}</p>
           <h2 id="how-title">{{howTitle}}</h2>
-          <div class="grid-3">
-            <article class="tile step-tile reveal">
-              <div class="mini mini-collect" aria-hidden="true">
-                <span class="seal" data-src="pam"><span class="seal-mono">PA</span><span class="seal-text">CyberArk</span></span>
-                <span class="mc-row mc1">{{m_row0}}</span>
-                <span class="mc-row mc2">{{m_row1}}</span>
-                <span class="mc-row mc3">{{m_row2}}</span>
-              </div>
-              <span class="step">01</span>
-              <h3>{{h1Title}}</h3>
-              <p>{{h1Text}}</p>
-            </article>
-            <article class="tile step-tile reveal">
-              <div class="mini mini-join" aria-hidden="true">
-                <div class="mj-case is-exact">
-                  <span class="mj-chip mj-a" data-src="pam">alice.morgan@</span>
-                  <svg class="mj-link" viewBox="0 0 40 12" preserveAspectRatio="none"><path pathLength="1" d="M0 6h40" /></svg>
-                  <span class="mj-chip mj-b" data-src="sse">alice.morgan@</span>
-                  <span class="mj-tag" data-verdict="covered">{{m_join}}</span>
-                </div>
-                <div class="mj-case is-ambiguous">
-                  <span class="mj-stack">
-                    <span class="mj-chip mj-a" data-src="pam">eve.taylor@ <em>#105</em></span>
-                    <span class="mj-chip mj-a2" data-src="pam">eve.taylor@ <em>#106</em></span>
-                  </span>
-                  <svg class="mj-link" viewBox="0 0 40 28" preserveAspectRatio="none"><path d="M0 6C20 6 20 14 40 14" /><path d="M0 22C20 22 20 14 40 14" /></svg>
-                  <span class="mj-chip mj-b" data-src="sse">eve.taylor@</span>
-                  <span class="mj-tag" data-verdict="unknown">{{m_amb}}</span>
-                </div>
-              </div>
-              <span class="step">02</span>
-              <h3>{{h2Title}}</h3>
-              <p>{{h2Text}}</p>
-            </article>
-            <article class="tile step-tile reveal">
-              <div class="mini mini-conclude" aria-hidden="true">
-                <span class="mr-rule"><span class="data">CONN-001</span><span class="mr-bar"><span></span></span><span class="data">{{m_rule}}</span></span>
-                <span class="verdict mr-verdict" data-verdict="gap"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12"><path d="M6 .8 11.2 6 6 11.2.8 6z" fill="var(--tone)" /></svg><span>{{gap}}</span></span>
-              </div>
-              <span class="step">03</span>
-              <h3>{{h3Title}}</h3>
-              <p>{{h3Text}}</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section" aria-labelledby="inside-title">
-          <p class="section-kicker">{{insideKicker}}</p>
-          <h2 id="inside-title">{{insideTitle}}</h2>
-          <div class="shots">
-            <figure class="shot is-feature reveal"><a href="{{demo}}/chains/person{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/chains/person</span></span><picture><source srcset="/shots/{{lang}}/person.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/person.png?v={{shotVersion}}" alt="{{shotAlt2}}" width="1440" height="760" loading="lazy" /></picture></a><figcaption>{{shot2}}</figcaption></figure>
-            <figure class="shot reveal"><a href="{{demo}}/{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/</span></span><picture><source srcset="/shots/{{lang}}/summary.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/summary.png?v={{shotVersion}}" alt="{{shotAlt1}}" width="1120" height="700" loading="lazy" /></picture></a><figcaption>{{shot1}}</figcaption></figure>
-            <figure class="shot reveal"><a href="{{demo}}/pam/safes{{demoLang}}"><span class="frame-bar" aria-hidden="true"><i></i><i></i><i></i><span class="frame-url">custodia-demo.pages.dev/pam/safes</span></span><picture><source srcset="/shots/{{lang}}/tools.webp?v={{shotVersion}}" type="image/webp" /><img src="/shots/{{lang}}/tools.png?v={{shotVersion}}" alt="{{shotAlt3}}" width="1120" height="700" loading="lazy" /></picture></a><figcaption>{{shot3}}</figcaption></figure>
-          </div>
-          <p class="hint">{{shotsNote}}</p>
-        </section>
-
-        <section class="section" aria-labelledby="system-title">
-          <p class="section-kicker">{{sysKicker}}</p>
-          <h2 id="system-title">{{sysTitle}}</h2>
-          <p class="section-lede">{{sysLede}}</p>
-          <div class="grid-3">
-            <article class="tile reveal">
-              <h3>{{sysSource}}</h3>
-              <ul class="legend-list">
-                <li><span class="seal" data-src="pam"><span class="seal-mono" aria-hidden="true">PA</span><span class="seal-text">CyberArk</span></span></li>
-                <li><span class="seal" data-src="sse"><span class="seal-mono" aria-hidden="true">SE</span><span class="seal-text">Netskope</span></span></li>
-                <li><span class="seal is-planned" data-src="dspm"><span class="seal-mono" aria-hidden="true">DS</span><span class="seal-text">BigID</span></span></li>
-              </ul>
-            </article>
-            <article class="tile reveal">
-              <h3>{{sysVerdict}}</h3>
-              <ul class="legend-list">
-                <li><span class="verdict" data-verdict="covered"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--tone)" /></svg><span>{{covered}}</span></span></li>
-                <li><span class="verdict" data-verdict="partial"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.4" fill="none" stroke="var(--tone)" stroke-width="1.4" /><path d="M6 1.6a4.4 4.4 0 0 1 0 8.8z" fill="var(--tone)" /></svg><span>{{partial}}</span></span></li>
-                <li><span class="verdict" data-verdict="gap"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 .8 11.2 6 6 11.2.8 6z" fill="var(--tone)" /></svg><span>{{gap}}</span></span></li>
-                <li><span class="verdict" data-verdict="unknown"><svg class="verdict-glyph" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.4" fill="none" stroke="var(--tone)" stroke-width="1.4" stroke-dasharray="2.2 1.6" /></svg><span>{{unknown}}</span></span></li>
-              </ul>
-            </article>
-            <article class="tile reveal">
-              <h3>{{sysJoin}}</h3>
-              <ul class="legend-list">
-                <li><svg class="stroke" height="8" aria-hidden="true"><path d="M0 4h32" /></svg> {{j1}}</li>
-                <li><svg class="stroke" height="8" aria-hidden="true"><path d="M0 4h32" stroke-dasharray="7 5" /></svg> {{j2}}</li>
-                <li><svg class="stroke" height="8" aria-hidden="true"><path d="M0 4h32" stroke-dasharray="2 4" /></svg> {{j3}}</li>
-              </ul>
-            </article>
-          </div>
+          <p class="section-lede">{{howLede}}</p>
+          <dl class="links">
+            <div class="reveal"><dt><span class="link-tag is-linked">{{l1}}</span></dt><dd>{{l1Text}}</dd></div>
+            <div class="reveal"><dt><span class="link-tag is-reference">{{l2}}</span></dt><dd>{{l2Text}}</dd></div>
+            <div class="reveal"><dt><span class="link-tag is-ambiguous">{{l3}}</span></dt><dd>{{l3Text}}</dd></div>
+            <div class="reveal"><dt><span class="link-tag is-none">{{l4}}</span></dt><dd>{{l4Text}}</dd></div>
+          </dl>
+          <ul class="principles">
+            <li class="reveal"><h3>{{p1Title}}</h3><p>{{p1Text}}</p></li>
+            <li class="reveal"><h3>{{p2Title}}</h3><p>{{p2Text}}</p></li>
+            <li class="reveal"><h3>{{p3Title}}</h3><p>{{p3Text}}</p></li>
+          </ul>
         </section>
 
         <section class="section" id="status" aria-labelledby="status-title">
           <p class="section-kicker">{{statusKicker}}</p>
           <h2 id="status-title">{{statusTitle}}</h2>
+          <div class="status-grid">
           <ul class="status-list">
             <li class="reveal"><span class="tag is-done">{{st1t}}</span><p><strong>{{st1h}}</strong>{{st1p}}</p></li>
             <li class="reveal"><span class="tag">{{st2t}}</span><p><strong>{{st2h}}</strong>{{st2p}}</p></li>
             <li class="reveal"><span class="tag">{{st3t}}</span><p><strong>{{st3h}}</strong>{{st3p}}</p></li>
             <li class="reveal"><span class="tag">{{st4t}}</span><p><strong>{{st4h}}</strong>{{st4p}}</p></li>
           </ul>
+          <div class="fit">
+            <div class="fit-for reveal"><h3>{{fitFor}}</h3><ul><li>{{fitFor1}}</li><li>{{fitFor2}}</li><li>{{fitFor3}}</li></ul></div>
+            <div class="reveal"><h3>{{fitNot}}</h3><ul><li>{{fitNot1}}</li><li>{{fitNot2}}</li><li>{{fitNot3}}</li></ul></div>
+          </div>
+          </div>
           <p class="hint">{{trademarks}}</p>
         </section>
       </main>

@@ -1,7 +1,6 @@
 // Mejora progresiva del sitio: sin este script todo se ve, sólo sin animar.
 // `is-seen` revela un bloque la primera vez que entra en pantalla. Ninguna
-// animación se repite sola: la historia del inicio corre una vez, queda en su
-// veredicto y ofrece «Repetir»; las minis de los pasos siguen el scroll.
+// animación se repite sola y nada toma el control del scroll.
 const root = document.documentElement;
 const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -14,17 +13,23 @@ if (!still && 'IntersectionObserver' in window) {
       observer.unobserve(entry.target);
     }
   }, { threshold: 0.2 });
-  for (const element of document.querySelectorAll('.reveal, .story')) observer.observe(element);
+  for (const element of document.querySelectorAll('.reveal')) observer.observe(element);
+}
 
-  const story = document.querySelector<HTMLElement>('.story');
-  const replay = story?.querySelector<HTMLButtonElement>('.story-replay');
-  if (story && replay) {
-    replay.hidden = false;
-    // La última pieza en aparecer es el hallazgo: cuando termina, se puede repetir.
-    story.querySelector('.st-finding')?.addEventListener('animationend', () => story.classList.add('is-done'));
-    replay.addEventListener('click', () => {
-      story.classList.remove('is-done');
-      for (const animation of story.getAnimations({ subtree: true })) { animation.cancel(); animation.play(); }
-    });
-  }
+// El recorrido: en pantalla ancha las cinco pantallas comparten un escenario
+// fijo y se muestra la del paso cuyo texto cruza el centro de la pantalla. La
+// página se desplaza normal; sin este script cada paso lleva su pantalla. Con
+// movimiento reducido sigue el scroll igual, sin transiciones.
+const tour = document.querySelector<HTMLElement>('[data-tour]');
+if (tour && 'IntersectionObserver' in window) {
+  const steps = [...tour.querySelectorAll<HTMLElement>('.tour-step')];
+  tour.classList.add('is-scrolly');
+  const stage = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const active = entry.target.closest('.tour-step');
+      for (const step of steps) step.classList.toggle('is-active', step === active);
+    }
+  }, { rootMargin: '-50% 0px -50% 0px' });
+  for (const step of steps) { const copy = step.querySelector('.tour-copy'); if (copy) stage.observe(copy); }
 }
