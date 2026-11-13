@@ -1,6 +1,6 @@
 // Captures the site screenshots from a running demo, in English and Spanish,
 // at 2x so they stay sharp at full width. Sizes must match site/template.html:
-// person 1440x760, summary and tools 1120x700.
+// person 1440x760, summary and tools 1120x700, the tour's screens 1000x740.
 //
 //   cd web && npm run build:demo && npx vite preview --port 4190
 //   node site/scripts/capture-shots.mjs [http://127.0.0.1:4190]
@@ -15,13 +15,22 @@ import { chromium } from '../../web/node_modules/@playwright/test/index.mjs';
 const base = process.argv[2] ?? 'http://127.0.0.1:4190';
 const out = resolve(dirname(fileURLToPath(import.meta.url)), '../public/shots');
 
+// The tour shows the app at 1000x740 so its text stays readable
+// when the capture is scaled down beside the copy.
+const stage = { width: 1000, height: 740 };
+const findPerson = name => async page => {
+  await page.locator('main input[type=search]').first().fill(name);
+  await page.getByRole('option').first().click();
+};
 const shots = [
   { name: 'summary', path: '/', viewport: { width: 1120, height: 700 } },
-  { name: 'person', path: '/chains/person', async before(page) {
-    await page.locator('main input[type=search]').first().fill('alice');
-    await page.getByRole('option').first().click();
-  }, clip: { x: 0, y: 0, width: 1440, height: 760 } },
+  { name: 'person', path: '/chains/person', before: findPerson('alice'), clip: { x: 0, y: 0, width: 1440, height: 760 } },
   { name: 'tools', path: '/pam/safes', viewport: { width: 1120, height: 700 } },
+  { name: 'people', path: '/chains/person', before: findPerson('bob'), viewport: stage },
+  { name: 'metrics', path: '/pam', viewport: stage },
+  { name: 'safes', path: '/pam/safes', viewport: stage },
+  { name: 'inventory', path: '/netskope/devices', viewport: stage },
+  { name: 'posture', path: '/netskope/posture', viewport: stage },
 ];
 
 const browser = await chromium.launch();
