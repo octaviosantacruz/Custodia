@@ -87,7 +87,11 @@ ilustraciones ni maquetas de otro producto.
 **Dos colores tranquilos y uno fuerte.** La tinta fría es el fondo (cerca del
 60 % de una pantalla) y los paneles grafito llevan superficies, filos y texto
 secundario (cerca del 30 %). El lima es el único color fuerte (cerca del 10 %)
-y significa marca, acción, foco y selección. Los colores de estado (verde,
+y va sólo en el detalle que se tiene que ver primero: la marca, las palabras
+clave del titular, la acción siguiente, la selección y el foco. Todo lo demás
+queda tranquilo para que ese detalle resalte: etiquetas de sección, viñetas,
+subrayados, filos y resplandores son decoración y nunca van en lima. Si dos
+cosas compiten por la primera mirada, una sobra. Los colores de estado (verde,
 ámbar, rojo) aparecen sólo donde la demo los usa.
 
 | Elemento | Referencia | Se toma | Se deja |
